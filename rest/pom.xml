@@ -9,5 +9,13 @@
 	<artifactId>bootstrap.rest</artifactId>
 	<packaging>war</packaging>
 	<name>Fream Bootstrap REST</name>
-	
+
+	<dependencies>
+		<dependency>
+			<groupId>pl.fream</groupId>
+			<artifactId>bootstrap.ejb</artifactId>
+			<type>ejb</type>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
 </project>
