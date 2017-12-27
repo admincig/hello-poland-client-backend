@@ -1,0 +1,57 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>pl.fream</groupId>
+		<artifactId>bootstrap</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+	<artifactId>bootstrap.ear</artifactId>
+	<packaging>ear</packaging>
+	<name>Fream Bootstrap EAR</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>pl.fream</groupId>
+			<artifactId>bootstrap.ejb</artifactId>
+			<type>ejb</type>
+		</dependency>
+		<dependency>
+			<groupId>pl.fream</groupId>
+			<artifactId>bootstrap.rest</artifactId>
+			<type>war</type>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<finalName>${project.parent.artifactId}</finalName>
+		<plugins>
+			<!-- EAR plug-in -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-ear-plugin</artifactId>
+				<version>2.10.1</version>
+				<!-- configuring the EAR plug-in -->
+				<configuration>
+					<!-- Tell Maven we are using Java EE -->
+					<version>7</version>
+					<!-- Use Java EE ear libraries as needed. Java EE ear libraries are 
+						in easy way to package any libraries needed in the ear, and automatically 
+						have any modules (EJB-JARs and WARs) use them -->
+					<defaultLibBundleDir>lib</defaultLibBundleDir>
+					<modules>
+						<!-- Default context root of the web app is /ejb-in-ear-web. If a custom 
+							context root is needed, uncomment the following snippet to register our War 
+							as a web module and set the contextRoot property -->
+						<webModule>
+							<groupId>pl.fream</groupId>
+							<artifactId>bootstrap.rest</artifactId>
+							<contextRoot>/api</contextRoot>
+						</webModule>
+					</modules>
+					<fileNameMapping>no-version</fileNameMapping>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
