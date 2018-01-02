@@ -31,7 +31,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-ear-plugin</artifactId>
 				<version>2.10.1</version>
-				<!-- configuring the EAR plug-in -->
 				<configuration>
 					<!-- Tell Maven we are using Java EE -->
 					<version>7</version>
@@ -40,9 +39,6 @@
 						have any modules (EJB-JARs and WARs) use them -->
 					<defaultLibBundleDir>lib</defaultLibBundleDir>
 					<modules>
-						<!-- Default context root of the web app is /ejb-in-ear-web. If a custom 
-							context root is needed, uncomment the following snippet to register our War 
-							as a web module and set the contextRoot property -->
 						<webModule>
 							<groupId>pl.fream</groupId>
 							<artifactId>bootstrap.rest</artifactId>
@@ -54,4 +50,48 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>copy-wildfly-files</id>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-resources-plugin</artifactId>
+						<version>3.0.2</version>
+						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${wildfly.home}</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${project.build.directory}/classes/wildfly</directory>
+											<filtering>false</filtering>
+											<includes>
+												<include>**/*.jar</include>
+											</includes>
+										</resource>
+										<resource>
+											<directory>${project.build.directory}/classes/wildfly</directory>
+											<filtering>true</filtering>
+											<excludes>
+												<exclude>**/*.jar</exclude>
+											</excludes>
+										</resource>
+									</resources>
+									<delimiters>
+										<delimiter>@</delimiter>
+									</delimiters>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

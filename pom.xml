@@ -19,6 +19,7 @@
 		<maven.compiler.target>9</maven.compiler.target>
 		<failOnMissingWebXml>false</failOnMissingWebXml>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<parent.basedir>.</parent.basedir>
 	</properties>
 
 	<dependencyManagement>
@@ -54,4 +55,31 @@
 		</dependency>
 	</dependencies>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>properties-maven-plugin</artifactId>
+				<version>1.0.0</version>
+				<goals />
+				<executions>
+					<execution>
+						<id>read.properties</id>
+						<phase>initialize</phase>
+						<goals>
+							<goal>read-project-properties</goal>
+						</goals>
+						<configuration>
+							<quiet>true</quiet>
+							<files>
+								<file>../etc/config.properties</file>
+								<file>../etc/${user.name}.config.properties</file>
+							</files>
+							<encoding>UTF-8</encoding>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>

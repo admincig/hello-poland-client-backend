@@ -4,14 +4,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
-import javax.jms.JMSDestinationDefinition;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
-
-@JMSDestinationDefinition(name = HelloWorldMDB.QUEUE, interfaceName = "javax.jms.Queue",
-    destinationName = HelloWorldMDB.QUEUE_NAME)
 
 @MessageDriven(name = HelloWorldMDB.QUEUE_NAME, activationConfig = {
     @ActivationConfigProperty(propertyName = "destinationLookup",
@@ -21,7 +17,7 @@ import javax.jms.ObjectMessage;
     @ActivationConfigProperty(propertyName = "maxSession", propertyValue = "1")})
 public class HelloWorldMDB implements MessageListener {
   public static final String QUEUE_NAME = "HelloWorldQueue";
-  public static final String QUEUE = "java:/queue/" + QUEUE_NAME;
+  public static final String QUEUE = "java:/jms/queue/" + QUEUE_NAME;
 
   private Logger log = Logger.getLogger(HelloWorldMDB.class.getName());
 
