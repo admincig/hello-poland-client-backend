@@ -4,7 +4,9 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Inject;
+import javax.jms.DeliveryMode;
 import javax.jms.JMSContext;
+import javax.jms.JMSProducer;
 import javax.jms.Queue;
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -37,7 +39,9 @@ public abstract class ServiceSuperclass {
     if (q == null) {
       return false;
     } else {
-      jms.createProducer().send(q, message);
+      JMSProducer producer = jms.createProducer();
+      producer.setDeliveryMode(DeliveryMode.PERSISTENT);
+      producer.send(q, message);
       return false;
     }
   }
