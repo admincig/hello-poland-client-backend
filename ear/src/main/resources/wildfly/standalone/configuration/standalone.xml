@@ -151,11 +151,11 @@
 		<subsystem xmlns="urn:jboss:domain:core-management:1.0" />
 		<subsystem xmlns="urn:jboss:domain:datasources:5.0">
 			<datasources>
-				<datasource jndi-name="java:jboss/datasources/bootstrap"
-					pool-name="bootstrap" enabled="true" use-java-context="true">
-					<connection-url>jdbc:postgresql://localhost:5432/bootstrap
+				<datasource jndi-name="java:jboss/datasources/@datasource.name@"
+					pool-name="@datasource.name@" enabled="true" use-java-context="true">
+					<connection-url>jdbc:@datasource.driver@://@datasource.database.host@:@datasource.database.port@/@datasource.database.name@
 					</connection-url>
-					<driver>postgresql</driver>
+					<driver>@datasource.driver@</driver>
 					<transaction-isolation>TRANSACTION_READ_COMMITTED</transaction-isolation>
 					<pool>
 						<min-pool-size>5</min-pool-size>
@@ -163,12 +163,12 @@
 						<prefill>true</prefill>
 					</pool>
 					<security>
-						<user-name>bootstrap</user-name>
-						<password>bootstrap</password>
+						<user-name>@datasource.database.user@</user-name>
+						<password>@datasource.database.password@</password>
 					</security>
 					<timeout>
 						<set-tx-query-timeout />
-						<query-timeout>1800</query-timeout><!-- 30 minutes -->
+						<query-timeout>1800</query-timeout>
 						<use-try-lock>60</use-try-lock>
 						<xa-resource-timeout>300</xa-resource-timeout>
 					</timeout>
@@ -179,9 +179,7 @@
 				</datasource>
 				<drivers>
 					<driver name="postgresql" module="org.postgresql">
-						<driver-class>org.postgresql.Driver</driver-class>
-						<xa-datasource-class>org.postgresql.xa.PGXADataSource
-						</xa-datasource-class>
+						<xa-datasource-class>org.postgresql.xa.PGXADataSource</xa-datasource-class>
 					</driver>
 				</drivers>
 			</datasources>
@@ -218,7 +216,7 @@
 				</managed-scheduled-executor-services>
 			</concurrent>
 			<default-bindings context-service="java:jboss/ee/concurrency/context/default"
-				datasource="java:jboss/datasources/bootstrap"
+				datasource="java:jboss/datasources/@datasource.name@"
 				jms-connection-factory="java:jboss/DefaultJMSConnectionFactory"
 				managed-executor-service="java:jboss/ee/concurrency/executor/default"
 				managed-scheduled-executor-service="java:jboss/ee/concurrency/scheduler/default"
@@ -279,7 +277,7 @@
 				</thread-pool>
 			</thread-pools>
 			<iiop enable-by-default="false" use-qualified-name="false" />
-			<default-security-domain value="bootstrap" />
+			<default-security-domain value="@security.domain.name@" />
 			<default-missing-method-permissions-deny-access
 				value="true" />
 			<log-system-exceptions value="true" />
@@ -581,12 +579,12 @@
 						<policy-module code="Delegating" flag="required" />
 					</authorization>
 				</security-domain>
-				<security-domain name="bootstrap" cache-type="default">
+				<security-domain name="@security.domain.name@" cache-type="default">
 					<authentication>
 						<login-module code="pl.fream.bootstrap.security.CustomLoginModule"
 							flag="sufficient">
 							<module-option name="dsJndiName"
-								value="java:jboss/datasources/bootstrap" />
+								value="java:jboss/datasources/@datasource.name@" />
 						</login-module>
 					</authentication>
 				</security-domain>

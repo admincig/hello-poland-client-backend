@@ -46,6 +46,10 @@
 						</webModule>
 					</modules>
 					<fileNameMapping>no-version</fileNameMapping>
+					<jboss>
+						<version>5</version>
+						<security-domain>${security.domain}</security-domain>
+					</jboss>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -83,9 +87,6 @@
 											</excludes>
 										</resource>
 									</resources>
-									<delimiters>
-										<delimiter>@</delimiter>
-									</delimiters>
 								</configuration>
 							</execution>
 						</executions>
@@ -94,4 +95,5 @@
 			</build>
 		</profile>
 	</profiles>
+
 </project>

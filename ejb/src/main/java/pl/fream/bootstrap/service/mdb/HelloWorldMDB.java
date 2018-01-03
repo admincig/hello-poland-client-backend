@@ -2,6 +2,7 @@ package pl.fream.bootstrap.service.mdb;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.security.PermitAll;
 import javax.ejb.ActivationConfigProperty;
 import javax.ejb.MessageDriven;
 import javax.jms.JMSException;
@@ -22,6 +23,7 @@ public class HelloWorldMDB implements MessageListener {
   private Logger log = Logger.getLogger(HelloWorldMDB.class.getName());
 
   @Override
+  @PermitAll
   public void onMessage(Message message) {
     try {
       log.info("received message: " + ((ObjectMessage) message).getObject().toString());
