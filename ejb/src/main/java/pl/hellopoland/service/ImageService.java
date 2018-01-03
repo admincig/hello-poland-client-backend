@@ -46,17 +46,17 @@ public class ImageService extends ServiceSuperclass {
     return image;
   }
 
-  @PermitAll
-  public Image testImage() {
-    return storeImage(getClass().getResourceAsStream("/absolutely_nothing.jpg"), ".jpg");
-  }
-
   private void createEmptyFileOnDisc(String path) {
     File targetFile = new File(path);
     File parent = targetFile.getParentFile();
     if (!parent.exists() && !parent.mkdirs()) {
       throw new IllegalStateException("Couldn't create dir: " + parent);
     }
+  }
+
+  @PermitAll
+  public Image testImage() {
+    return storeImage(getClass().getResourceAsStream("/absolutely_nothing.jpg"), ".jpg");
   }
 
   @PermitAll
