@@ -1,6 +1,9 @@
 package pl.hellopoland.service;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.inject.Inject;
@@ -17,11 +20,20 @@ import javax.persistence.PersistenceContext;
 public abstract class ServiceSuperclass {
 
   private static Context namingContext;
+  protected static Properties properties;
   static {
     try {
       namingContext = new InitialContext();
     } catch (NamingException e) {
       Logger.getAnonymousLogger().log(Level.WARNING, "Failed to get lookup context", e);
+    }
+
+    try {
+      InputStream input = ServiceSuperclass.class.getResourceAsStream("/config.properties");
+      properties = new Properties();
+      properties.load(input);
+    } catch (IOException e) {
+      Logger.getAnonymousLogger().log(Level.WARNING, "Failed to load properties", e);
     }
   }
 

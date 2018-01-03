@@ -79,6 +79,16 @@
 							<encoding>UTF-8</encoding>
 						</configuration>
 					</execution>
+					<execution>
+						<id>write.properties</id>
+						<phase>initialize</phase>
+						<goals>
+							<goal>write-project-properties</goal>
+						</goals>
+						<configuration>
+							<outputFile>${project.build.outputDirectory}/config.properties</outputFile>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>
