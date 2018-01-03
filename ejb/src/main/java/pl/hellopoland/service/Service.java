@@ -1,13 +1,15 @@
-package pl.fream.bootstrap.service;
+package pl.hellopoland.service;
 
 import java.util.UUID;
+
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
-import pl.fream.bootstrap.model.User;
-import pl.fream.bootstrap.model.UserRole;
-import pl.fream.bootstrap.service.mdb.HelloWorldMDB;
+
+import pl.hellopoland.model.User;
+import pl.hellopoland.model.UserRole;
+import pl.hellopoland.service.mdb.HelloWorldMDB;
 
 @LocalBean
 @Stateless

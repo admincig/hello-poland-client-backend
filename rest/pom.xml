@@ -2,18 +2,18 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>pl.fream</groupId>
-		<artifactId>bootstrap</artifactId>
+		<groupId>pl.hellopoland</groupId>
+		<artifactId>hellopoland</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>bootstrap.rest</artifactId>
+	<artifactId>hellopoland.rest</artifactId>
 	<packaging>war</packaging>
-	<name>Fream Bootstrap REST</name>
+	<name>Hello Poland REST</name>
 
 	<dependencies>
 		<dependency>
-			<groupId>pl.fream</groupId>
-			<artifactId>bootstrap.ejb</artifactId>
+			<groupId>pl.hellopoland</groupId>
+			<artifactId>hellopoland.ejb</artifactId>
 			<type>ejb</type>
 			<scope>provided</scope>
 		</dependency>

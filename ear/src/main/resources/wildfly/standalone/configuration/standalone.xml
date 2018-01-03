@@ -581,7 +581,7 @@
 				</security-domain>
 				<security-domain name="@security.domain.name@" cache-type="default">
 					<authentication>
-						<login-module code="pl.fream.bootstrap.security.CustomLoginModule"
+						<login-module code="pl.hellopoland.hellopoland.security.CustomLoginModule"
 							flag="sufficient">
 							<module-option name="dsJndiName"
 								value="java:jboss/datasources/@datasource.name@" />

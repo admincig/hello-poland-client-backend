@@ -1,4 +1,4 @@
-package pl.fream.bootstrap.rest;
+package pl.hellopoland.rest;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -8,7 +8,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
-import pl.fream.bootstrap.service.Service;
+
+import pl.hellopoland.service.Service;
 
 @Path("/")
 @RequestScoped

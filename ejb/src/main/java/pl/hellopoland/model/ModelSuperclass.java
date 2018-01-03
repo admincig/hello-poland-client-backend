@@ -1,4 +1,4 @@
-package pl.fream.bootstrap.model;
+package pl.hellopoland.model;
 
 import java.io.Serializable;
 import javax.persistence.GeneratedValue;

@@ -1,4 +1,4 @@
-package pl.fream.bootstrap.security;
+package pl.hellopoland.security;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -34,7 +34,7 @@ public class CustomLoginModule extends AbstractServerLoginModule {
       Map<String, ?> sharedState, Map<String, ?> options) {
     super.initialize(subject, callbackHandler, sharedState, options);
     try {
-      ds = (DataSource) new InitialContext().lookup("java:jboss/datasources/bootstrap");
+      ds = (DataSource) new InitialContext().lookup("java:jboss/datasources/hellopoland");
     } catch (NamingException e) {
       e.printStackTrace();
     }

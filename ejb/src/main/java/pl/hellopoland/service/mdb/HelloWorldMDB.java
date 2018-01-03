@@ -1,4 +1,4 @@
-package pl.fream.bootstrap.service.mdb;
+package pl.hellopoland.service.mdb;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

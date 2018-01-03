@@ -1,4 +1,4 @@
-package pl.fream.bootstrap.rest;
+package pl.hellopoland.rest;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;

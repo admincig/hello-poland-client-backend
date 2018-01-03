@@ -2,23 +2,23 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>pl.fream</groupId>
-		<artifactId>bootstrap</artifactId>
+		<groupId>pl.hellopoland</groupId>
+		<artifactId>hellopoland</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>bootstrap.ear</artifactId>
+	<artifactId>hellopoland.ear</artifactId>
 	<packaging>ear</packaging>
-	<name>Fream Bootstrap EAR</name>
+	<description>Hello Poland EAR</description>
 
 	<dependencies>
 		<dependency>
-			<groupId>pl.fream</groupId>
-			<artifactId>bootstrap.ejb</artifactId>
+			<groupId>pl.hellopoland</groupId>
+			<artifactId>hellopoland.ejb</artifactId>
 			<type>ejb</type>
 		</dependency>
 		<dependency>
-			<groupId>pl.fream</groupId>
-			<artifactId>bootstrap.rest</artifactId>
+			<groupId>pl.hellopoland</groupId>
+			<artifactId>hellopoland.rest</artifactId>
 			<type>war</type>
 		</dependency>
 	</dependencies>
@@ -40,8 +40,8 @@
 					<defaultLibBundleDir>lib</defaultLibBundleDir>
 					<modules>
 						<webModule>
-							<groupId>pl.fream</groupId>
-							<artifactId>bootstrap.rest</artifactId>
+							<groupId>pl.hellopoland</groupId>
+							<artifactId>hellopoland.rest</artifactId>
 							<contextRoot>/api</contextRoot>
 						</webModule>
 					</modules>

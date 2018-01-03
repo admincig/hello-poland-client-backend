@@ -1,12 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>pl.fream</groupId>
-	<artifactId>bootstrap</artifactId>
+	<groupId>pl.hellopoland</groupId>
+	<artifactId>hellopoland</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<name>Fream Bootstrap</name>
-	<description>Fream backend bootstrap for Wildfly</description>
+	<name>Hello Poland</name>
+	<description>Hello Poland backend project</description>
 
 	<modules>
 		<module>ejb</module>
@@ -20,20 +20,20 @@
 		<failOnMissingWebXml>false</failOnMissingWebXml>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<parent.basedir>.</parent.basedir>
-		<security.domain>bootstrap</security.domain>
+		<security.domain>hellopoland</security.domain>
 	</properties>
 
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>pl.fream</groupId>
-				<artifactId>bootstrap.ejb</artifactId>
+				<groupId>pl.hellopoland</groupId>
+				<artifactId>hellopoland.ejb</artifactId>
 				<version>${project.version}</version>
 				<type>ejb</type>
 			</dependency>
 			<dependency>
-				<groupId>pl.fream</groupId>
-				<artifactId>bootstrap.rest</artifactId>
+				<groupId>pl.hellopoland</groupId>
+				<artifactId>hellopoland.rest</artifactId>
 				<version>${project.version}</version>
 				<type>war</type>
 				<scope>compile</scope>

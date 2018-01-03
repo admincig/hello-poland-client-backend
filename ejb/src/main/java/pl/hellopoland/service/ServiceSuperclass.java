@@ -1,4 +1,4 @@
-package pl.fream.bootstrap.service;
+package pl.hellopoland.service;
 
 import java.io.Serializable;
 import java.util.logging.Level;

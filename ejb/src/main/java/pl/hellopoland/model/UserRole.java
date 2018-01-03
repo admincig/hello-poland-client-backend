@@ -1,4 +1,4 @@
-package pl.fream.bootstrap.model;
+package pl.hellopoland.model;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
