@@ -4,16 +4,14 @@ import java.io.File;
 import java.util.stream.Collectors;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import pl.hellopoland.rest.object.FacilityORO;
-import pl.hellopoland.rest.object.PagedCollection;
+import pl.hellopoland.rest.dto.FacilityORO;
+import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.FacilityService;
 import pl.hellopoland.service.ImageService;
 
@@ -26,9 +24,6 @@ public class RestService {
   ImageService iService;
   @Inject
   FacilityService fService;
-
-  @Context
-  HttpServletRequest req;
 
   @GET
   @Path("/images/{name}")

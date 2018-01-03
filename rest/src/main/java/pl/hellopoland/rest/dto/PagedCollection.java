@@ -1,4 +1,4 @@
-package pl.hellopoland.rest.object;
+package pl.hellopoland.rest.dto;
 
 import java.util.Collection;
 
