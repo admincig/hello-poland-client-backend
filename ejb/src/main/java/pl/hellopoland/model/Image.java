@@ -1,9 +1,12 @@
 package pl.hellopoland.model;
 
 import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = "hash", name = "image_hash_unique"))
 public class Image extends ModelSuperclass {
   private static final long serialVersionUID = -1655719974465476465L;
 

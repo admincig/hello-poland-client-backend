@@ -55,11 +55,6 @@ public class ImageService extends ServiceSuperclass {
   }
 
   @PermitAll
-  public Image testImage() {
-    return storeImage(getClass().getResourceAsStream("/absolutely_nothing.jpg"), ".jpg");
-  }
-
-  @PermitAll
   public File getImage(String name) {
     String path =
         em.createQuery("select path from Image where concat(hash, extension)=:name", String.class)
