@@ -1,9 +1,10 @@
 package pl.hellopoland.service;
 
-import java.util.List;
 import javax.annotation.security.PermitAll;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
+import pl.hellopoland.config.FacilityPagedCollectionConfig;
+import pl.hellopoland.config.PagedEntityCollection;
 import pl.hellopoland.model.Facility;
 
 @LocalBean
@@ -11,8 +12,7 @@ import pl.hellopoland.model.Facility;
 public class FacilityService extends ServiceSuperclass {
 
   @PermitAll
-  public List<Facility> getList() {
-    return em.createQuery("from Facility f left join fetch f.mainImage mi order by f.id asc",
-        Facility.class).getResultList();
+  public PagedEntityCollection<Facility> getList(FacilityPagedCollectionConfig config) {
+    return new PagedEntityCollection<>(getQuery(config).getResultList(), config);
   }
 }

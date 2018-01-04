@@ -1,11 +1,17 @@
 package pl.hellopoland.rest.dto;
 
 import java.util.Collection;
+import pl.hellopoland.config.PagedCollectionConfig;
 
-public class PagedCollection<T> {
-  public Collection<T> items;
+public class PagedCollection {
 
-  public PagedCollection(Collection<T> items) {
+  public PagedCollectionConfig<?> config;
+  public Collection<?> items;
+
+
+  public PagedCollection(Collection<?> items, PagedCollectionConfig<?> config) {
     this.items = items;
+    this.config = config;
   }
+
 }

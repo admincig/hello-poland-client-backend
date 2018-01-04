@@ -5,11 +5,15 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import pl.hellopoland.config.FacilityPagedCollectionConfig;
+import pl.hellopoland.config.PagedEntityCollection;
+import pl.hellopoland.model.Facility;
 import pl.hellopoland.rest.dto.FacilityORO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.FacilityService;
@@ -36,9 +40,17 @@ public class RestService {
 
   @GET
   @Path("/facilities")
-  public PagedCollection<FacilityORO> getList() {
-    return new PagedCollection<>(
-        fService.getList().stream().map(f -> new FacilityORO(f)).collect(Collectors.toList()));
+  public PagedCollection getList() {
+    return search(new FacilityPagedCollectionConfig());
+  }
+
+  @POST
+  @Path("/facilities/search")
+  public PagedCollection search(FacilityPagedCollectionConfig config) {
+    PagedEntityCollection<Facility> plist = fService.getList(config);
+    return new PagedCollection(
+        plist.items.stream().map(f -> new FacilityORO(f)).collect(Collectors.toList()),
+        plist.config);
   }
 
 }
