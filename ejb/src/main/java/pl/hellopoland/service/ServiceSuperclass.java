@@ -96,8 +96,10 @@ public abstract class ServiceSuperclass {
 
   private <E extends ModelSuperclass> String humanReadable(String query,
       Collection<PagedCollectionConfig<E>.Entry> conditions) {
-    for (PagedCollectionConfig<E>.Entry e : conditions) {
-      query = query.replaceAll(":" + e.parameterName, e.value.toString());
+    if (conditions != null) {
+      for (PagedCollectionConfig<E>.Entry e : conditions) {
+        query = query.replaceAll(":" + e.parameterName, e.value.toString());
+      }
     }
     return "Executing select query:\n" + query;
   }
