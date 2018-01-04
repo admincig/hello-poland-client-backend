@@ -1,13 +1,13 @@
 package pl.hellopoland.rest.dto;
 
-import pl.hellopoland.model.Facility;
+import pl.hellopoland.model.Sight;
 
-public class FacilityORO {
+public class SightORO {
   public Long id;
   public String name;
   public String mainImage;
 
-  public FacilityORO(Facility f) {
+  public SightORO(Sight f) {
     this.id = f.getId();
     this.name = f.getName();
     this.mainImage = "/images/" + f.getMainImage().getHash() + f.getMainImage().getExtension();

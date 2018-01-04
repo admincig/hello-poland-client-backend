@@ -1,8 +1,8 @@
 package pl.hellopoland.config;
 
-import pl.hellopoland.model.Facility;
+import pl.hellopoland.model.Sight;
 
-public class FacilityPagedCollectionConfig extends PagedCollectionConfig<Facility> {
+public class SightsPagedCollectionConfig extends PagedCollectionConfig<Sight> {
 
   @Override
   public String joins() {

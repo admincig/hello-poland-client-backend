@@ -11,11 +11,11 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import pl.hellopoland.config.FacilityPagedCollectionConfig;
-import pl.hellopoland.model.Facility;
-import pl.hellopoland.rest.dto.FacilityORO;
+import pl.hellopoland.config.SightsPagedCollectionConfig;
+import pl.hellopoland.model.Sight;
+import pl.hellopoland.rest.dto.SightORO;
 import pl.hellopoland.rest.dto.PagedCollection;
-import pl.hellopoland.service.FacilityService;
+import pl.hellopoland.service.SightService;
 import pl.hellopoland.service.ImageService;
 import pl.hellopoland.util.PagedEntityCollection;
 
@@ -27,7 +27,7 @@ public class RestService {
   @Inject
   ImageService iService;
   @Inject
-  FacilityService fService;
+  SightService fService;
 
   @GET
   @Path("/images/{name}")
@@ -39,17 +39,17 @@ public class RestService {
   }
 
   @GET
-  @Path("/facilities")
+  @Path("/sights")
   public PagedCollection getList() {
-    return search(new FacilityPagedCollectionConfig());
+    return search(new SightsPagedCollectionConfig());
   }
 
   @POST
-  @Path("/facilities/search")
-  public PagedCollection search(FacilityPagedCollectionConfig config) {
-    PagedEntityCollection<Facility> plist = fService.getList(config);
+  @Path("/sights/search")
+  public PagedCollection search(SightsPagedCollectionConfig config) {
+    PagedEntityCollection<Sight> plist = fService.getList(config);
     return new PagedCollection(
-        plist.items.stream().map(f -> new FacilityORO(f)).collect(Collectors.toList()),
+        plist.items.stream().map(f -> new SightORO(f)).collect(Collectors.toList()),
         plist.config);
   }
 

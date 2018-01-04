@@ -4,7 +4,7 @@ import javax.annotation.PostConstruct;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
-import pl.hellopoland.model.Facility;
+import pl.hellopoland.model.Sight;
 import pl.hellopoland.model.Image;
 
 @Startup
@@ -28,17 +28,17 @@ public class DbFiller extends ServiceSuperclass {
     Image hydropolisImage =
         iService.storeImage(getClass().getResourceAsStream("/hydropolis.png"), ".png");
 
-    Facility zoo = new Facility();
+    Sight zoo = new Sight();
     zoo.setName("ZOO Wrocław");
     zoo.setMainImage(zooImage);
     em.persist(zoo);
 
-    Facility kolejkowo = new Facility();
+    Sight kolejkowo = new Sight();
     kolejkowo.setName("Kolejkowo");
     kolejkowo.setMainImage(kolejkowoImage);
     em.persist(kolejkowo);
 
-    Facility hydropolis = new Facility();
+    Sight hydropolis = new Sight();
     hydropolis.setName("Hydropolis");
     hydropolis.setMainImage(hydropolisImage);
     em.persist(hydropolis);

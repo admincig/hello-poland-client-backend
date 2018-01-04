@@ -5,7 +5,7 @@ import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
 @Entity
-public class Facility extends ModelSuperclass {
+public class Sight extends ModelSuperclass {
 	private static final long serialVersionUID = -34796485244638912L;
 
 	@NotNull
