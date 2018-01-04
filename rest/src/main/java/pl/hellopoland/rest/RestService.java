@@ -12,12 +12,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import pl.hellopoland.config.FacilityPagedCollectionConfig;
-import pl.hellopoland.config.PagedEntityCollection;
 import pl.hellopoland.model.Facility;
 import pl.hellopoland.rest.dto.FacilityORO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.FacilityService;
 import pl.hellopoland.service.ImageService;
+import pl.hellopoland.util.PagedEntityCollection;
 
 @Path("/")
 @RequestScoped

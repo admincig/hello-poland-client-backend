@@ -4,8 +4,8 @@ import javax.annotation.security.PermitAll;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import pl.hellopoland.config.FacilityPagedCollectionConfig;
-import pl.hellopoland.config.PagedEntityCollection;
 import pl.hellopoland.model.Facility;
+import pl.hellopoland.util.PagedEntityCollection;
 
 @LocalBean
 @Stateless
