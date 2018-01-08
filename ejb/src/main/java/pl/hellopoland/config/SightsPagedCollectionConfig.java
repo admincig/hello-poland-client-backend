@@ -10,11 +10,11 @@ public class SightsPagedCollectionConfig extends PagedCollectionConfig<Sight> {
   }
 
   public void setSearchQuery(String searchQuery) {
-    addCondition(new Entry("searchQuery", "%" + searchQuery.toLowerCase() + "%",
-        "lower(e.name) like :searchQuery"));
+    addCondition("searchQuery", "%" + searchQuery.toLowerCase() + "%",
+        "lower(e.name) like :searchQuery");
   }
 
   public void setName(String name) {
-    addCondition(new Entry("name", name, "e.name=:name"));
+    addCondition("name", name, "e.name=:name");
   }
 }

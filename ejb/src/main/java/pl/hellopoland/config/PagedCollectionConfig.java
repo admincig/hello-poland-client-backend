@@ -13,11 +13,11 @@ public abstract class PagedCollectionConfig<E extends ModelSuperclass> {
   private String orderColumn = "id";
   private String orderDirection = "asc";
 
-  protected void addCondition(Entry entry) {
+  protected void addCondition(String parameterName, Object value, String query) {
     if (conditions == null) {
       conditions = new LinkedList<>();
     }
-    conditions.add(entry);
+    conditions.add(new Entry(parameterName, value, query));
   }
 
   @SuppressWarnings("unchecked")
