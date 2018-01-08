@@ -4,8 +4,8 @@ import javax.annotation.PostConstruct;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
-import pl.hellopoland.model.Sight;
 import pl.hellopoland.model.Image;
+import pl.hellopoland.model.Sight;
 
 @Startup
 @Singleton
@@ -22,11 +22,11 @@ public class DbFiller extends ServiceSuperclass {
       logger.info("omitting dbfiller because hibernate.hbm2ddl.auto isnt set to create");
       return;
     }
-    Image zooImage = iService.storeImage(getClass().getResourceAsStream("/zoo.png"), ".png");
+    Image zooImage = iService.storeImage(getClass().getResourceAsStream("/zoo.jpg"), ".jpg");
     Image kolejkowoImage =
-        iService.storeImage(getClass().getResourceAsStream("/kolejkowo.png"), ".png");
+        iService.storeImage(getClass().getResourceAsStream("/kolejkowo.jpg"), ".jpg");
     Image hydropolisImage =
-        iService.storeImage(getClass().getResourceAsStream("/hydropolis.png"), ".png");
+        iService.storeImage(getClass().getResourceAsStream("/hydropolis.jpg"), ".jpg");
 
     Sight zoo = new Sight();
     zoo.setName("ZOO Wrocław");
