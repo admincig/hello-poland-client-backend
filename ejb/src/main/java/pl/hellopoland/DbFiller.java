@@ -1,12 +1,15 @@
-package pl.hellopoland.service;
+package pl.hellopoland;
 
+import java.time.LocalTime;
 import javax.annotation.PostConstruct;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
-import pl.hellopoland.model.Image;
-import pl.hellopoland.model.Sight;
-import pl.hellopoland.model.Ticket;
+import pl.hellopoland.image.Image;
+import pl.hellopoland.image.ImageService;
+import pl.hellopoland.sight.OpeningHours;
+import pl.hellopoland.sight.Sight;
+import pl.hellopoland.sight.Ticket;
 
 @Startup
 @Singleton
@@ -23,13 +26,19 @@ public class DbFiller extends ServiceSuperclass {
       logger.info("omitting dbfiller because hibernate.hbm2ddl.auto isnt set to create");
       return;
     }
-    Image zooImage = iService.storeImage(getClass().getResourceAsStream("/zoo.jpg"), ".jpg");
+
+    createKolejkowo();
+    createZoo();
+    createHydropolis();
+
+    logger.info("dbfiller finished");
+  }
+
+
+  private void createKolejkowo() {
     Image kolejkowoImage =
         iService.storeImage(getClass().getResourceAsStream("/kolejkowo.jpg"), ".jpg");
-    Image hydropolisImage =
-        iService.storeImage(getClass().getResourceAsStream("/hydropolis.jpg"), ".jpg");
 
-    // Kolejkowo
     Sight kolejkowo = new Sight();
     kolejkowo.setName("Kolejkowo");
     kolejkowo.setMainImage(kolejkowoImage);
@@ -44,8 +53,21 @@ public class DbFiller extends ServiceSuperclass {
     kolejkowoTicket.setPrice(500);
     kolejkowoTicket.setSight(kolejkowo);
     em.persist(kolejkowoTicket);
+    OpeningHours oh = null;
+    for (int i = 1; i < 8; i++) {
+      oh = new OpeningHours();
+      oh.setDay(i);
+      oh.setOpenTime(LocalTime.of(10, 00));
+      oh.setCloseTime(LocalTime.of(18, 00));
+      oh.setSight(kolejkowo);
+      em.persist(oh);
+    }
+  }
 
-    // ZOO
+
+  private void createZoo() {
+    Image zooImage = iService.storeImage(getClass().getResourceAsStream("/zoo.jpg"), ".jpg");
+
     Sight zoo = new Sight();
     zoo.setName("ZOO Wrocław");
     zoo.setMainImage(zooImage);
@@ -70,8 +92,30 @@ public class DbFiller extends ServiceSuperclass {
     zooTicket.setPrice(2000);
     zooTicket.setSight(zoo);
     em.persist(zooTicket);
+    OpeningHours oh = null;
+    for (int i = 1; i < 5; i++) {
+      oh = new OpeningHours();
+      oh.setDay(i);
+      oh.setOpenTime(LocalTime.of(9, 00));
+      oh.setCloseTime(LocalTime.of(15, 00));
+      oh.setSight(zoo);
+      em.persist(oh);
+    }
+    for (int i = 5; i < 8; i++) {
+      oh = new OpeningHours();
+      oh.setDay(i);
+      oh.setOpenTime(LocalTime.of(9, 00));
+      oh.setCloseTime(LocalTime.of(16, 00));
+      oh.setSight(zoo);
+      em.persist(oh);
+    }
+  }
 
-    // Hydropolis
+
+  private void createHydropolis() {
+    Image hydropolisImage =
+        iService.storeImage(getClass().getResourceAsStream("/hydropolis.jpg"), ".jpg");
+
     Sight hydropolis = new Sight();
     hydropolis.setName("Hydropolis");
     hydropolis.setMainImage(hydropolisImage);
@@ -91,7 +135,22 @@ public class DbFiller extends ServiceSuperclass {
     hydropolisTicket.setPrice(500);
     hydropolisTicket.setSight(hydropolis);
     em.persist(hydropolisTicket);
-
-    logger.info("dbfiller finished");
+    OpeningHours oh = null;
+    for (int i = 1; i < 6; i++) {
+      oh = new OpeningHours();
+      oh.setDay(i);
+      oh.setOpenTime(LocalTime.of(9, 00));
+      oh.setCloseTime(LocalTime.of(18, 00));
+      oh.setSight(hydropolis);
+      em.persist(oh);
+    }
+    for (int i = 6; i < 8; i++) {
+      oh = new OpeningHours();
+      oh.setDay(i);
+      oh.setOpenTime(LocalTime.of(10, 00));
+      oh.setCloseTime(LocalTime.of(20, 00));
+      oh.setSight(hydropolis);
+      em.persist(oh);
+    }
   }
 }

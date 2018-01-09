@@ -2,13 +2,14 @@ package pl.hellopoland.rest.dto;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
-import pl.hellopoland.model.Sight;
+import pl.hellopoland.sight.Sight;
 
 public class SightRO extends SightOnListingRO {
   public String lead;
   public String description;
   public Float score;
   public Collection<TicketRO> tickets;
+  public Collection<OpeningHoursRO> openingHours;
 
   public SightRO(Sight f) {
     super(f);
@@ -16,6 +17,8 @@ public class SightRO extends SightOnListingRO {
     this.description = f.getDescription();
     this.score = f.getScore();
     this.tickets = f.getTickets().stream().map(TicketRO::new).collect(Collectors.toList());
+    this.openingHours =
+        f.getOpeningHours().stream().map(OpeningHoursRO::new).collect(Collectors.toList());
   }
 
 }

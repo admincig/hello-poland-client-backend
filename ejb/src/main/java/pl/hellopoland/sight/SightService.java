@@ -1,10 +1,10 @@
-package pl.hellopoland.service;
+package pl.hellopoland.sight;
 
 import javax.annotation.security.PermitAll;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
+import pl.hellopoland.ServiceSuperclass;
 import pl.hellopoland.config.SightsPagedCollectionConfig;
-import pl.hellopoland.model.Sight;
 import pl.hellopoland.util.PagedEntityCollection;
 
 @LocalBean
@@ -18,7 +18,13 @@ public class SightService extends ServiceSuperclass {
 
   @PermitAll
   public Sight get(Long id) {
-    return em.createQuery("from Sight s join fetch s.tickets t where s.id=:id", Sight.class)
-        .setParameter("id", id).getSingleResult();
+    Sight s =
+        em.createQuery("from Sight s join fetch s.openingHours oh where s.id=:id", Sight.class)
+            .setParameter("id", id).getSingleResult();
+    // fetch collections
+    s.getTickets().size();
+    s.getOpeningHours().size();
+
+    return s;
   }
 }

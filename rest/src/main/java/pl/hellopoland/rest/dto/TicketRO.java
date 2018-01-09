@@ -1,6 +1,6 @@
 package pl.hellopoland.rest.dto;
 
-import pl.hellopoland.model.Ticket;
+import pl.hellopoland.sight.Ticket;
 
 public class TicketRO {
   public Long id;

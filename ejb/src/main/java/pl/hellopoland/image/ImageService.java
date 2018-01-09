@@ -1,4 +1,4 @@
-package pl.hellopoland.service;
+package pl.hellopoland.image;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -9,7 +9,7 @@ import java.util.logging.Level;
 import javax.annotation.security.PermitAll;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
-import pl.hellopoland.model.Image;
+import pl.hellopoland.ServiceSuperclass;
 
 @LocalBean
 @Stateless

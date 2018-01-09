@@ -1,6 +1,6 @@
 package pl.hellopoland.rest.dto;
 
-import pl.hellopoland.model.Sight;
+import pl.hellopoland.sight.Sight;
 
 public class SightOnListingRO {
   public Long id;

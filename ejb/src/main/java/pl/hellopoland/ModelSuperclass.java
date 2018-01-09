@@ -1,4 +1,4 @@
-package pl.hellopoland.model;
+package pl.hellopoland;
 
 import java.io.Serializable;
 import javax.persistence.GeneratedValue;

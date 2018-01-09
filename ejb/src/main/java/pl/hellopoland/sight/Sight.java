@@ -1,4 +1,4 @@
-package pl.hellopoland.model;
+package pl.hellopoland.sight;
 
 import java.util.Collection;
 import javax.persistence.Column;
@@ -6,6 +6,8 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
+import pl.hellopoland.ModelSuperclass;
+import pl.hellopoland.image.Image;
 
 @Entity
 public class Sight extends ModelSuperclass {
@@ -22,6 +24,8 @@ public class Sight extends ModelSuperclass {
   private String description;
   private Integer minPrice;
   private Float score;
+  @OneToMany(mappedBy = "sight")
+  private Collection<OpeningHours> openingHours;
 
   public String getName() {
     return name;
@@ -77,6 +81,14 @@ public class Sight extends ModelSuperclass {
 
   public void setLead(String lead) {
     this.lead = lead;
+  }
+
+  public Collection<OpeningHours> getOpeningHours() {
+    return openingHours;
+  }
+
+  public void setOpeningHours(Collection<OpeningHours> openingHours) {
+    this.openingHours = openingHours;
   }
 
 }

@@ -1,4 +1,4 @@
-package pl.hellopoland.service;
+package pl.hellopoland;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,7 +21,6 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import pl.hellopoland.config.PagedCollectionConfig;
 import pl.hellopoland.config.PagedCollectionConfig.Entry;
-import pl.hellopoland.model.ModelSuperclass;
 
 public abstract class ServiceSuperclass {
 

@@ -12,12 +12,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import pl.hellopoland.config.SightsPagedCollectionConfig;
-import pl.hellopoland.model.Sight;
+import pl.hellopoland.image.ImageService;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.rest.dto.SightOnListingRO;
 import pl.hellopoland.rest.dto.SightRO;
-import pl.hellopoland.service.ImageService;
-import pl.hellopoland.service.SightService;
+import pl.hellopoland.sight.Sight;
+import pl.hellopoland.sight.SightService;
 import pl.hellopoland.util.PagedEntityCollection;
 
 @Path("/")

@@ -3,7 +3,7 @@ package pl.hellopoland.config;
 import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
 import java.util.LinkedList;
-import pl.hellopoland.model.ModelSuperclass;
+import pl.hellopoland.ModelSuperclass;
 
 public abstract class PagedCollectionConfig<E extends ModelSuperclass> {
 

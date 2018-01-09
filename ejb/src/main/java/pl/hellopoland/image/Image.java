@@ -1,9 +1,10 @@
-package pl.hellopoland.model;
+package pl.hellopoland.image;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
+import pl.hellopoland.ModelSuperclass;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = "hash", name = "image_hash_unique"))

@@ -1,6 +1,6 @@
 package pl.hellopoland.config;
 
-import pl.hellopoland.model.Sight;
+import pl.hellopoland.sight.Sight;
 
 public class SightsPagedCollectionConfig extends PagedCollectionConfig<Sight> {
 
