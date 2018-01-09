@@ -18,9 +18,8 @@ public class SightService extends ServiceSuperclass {
 
   @PermitAll
   public Sight get(Long id) {
-    Sight s =
-        em.createQuery("from Sight s join fetch s.openingHours oh where s.id=:id", Sight.class)
-            .setParameter("id", id).getSingleResult();
+    Sight s = em.find(Sight.class, id);
+
     // fetch collections
     s.getTickets().size();
     s.getOpeningHours().size();
