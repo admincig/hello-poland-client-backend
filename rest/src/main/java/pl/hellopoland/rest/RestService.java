@@ -13,10 +13,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import pl.hellopoland.config.SightsPagedCollectionConfig;
 import pl.hellopoland.model.Sight;
-import pl.hellopoland.rest.dto.SightORO;
 import pl.hellopoland.rest.dto.PagedCollection;
-import pl.hellopoland.service.SightService;
+import pl.hellopoland.rest.dto.SightOnListingRO;
+import pl.hellopoland.rest.dto.SightRO;
 import pl.hellopoland.service.ImageService;
+import pl.hellopoland.service.SightService;
 import pl.hellopoland.util.PagedEntityCollection;
 
 @Path("/")
@@ -49,8 +50,14 @@ public class RestService {
   public PagedCollection search(SightsPagedCollectionConfig config) {
     PagedEntityCollection<Sight> plist = fService.getList(config);
     return new PagedCollection(
-        plist.items.stream().map(f -> new SightORO(f)).collect(Collectors.toList()),
+        plist.items.stream().map(f -> new SightOnListingRO(f)).collect(Collectors.toList()),
         plist.config);
+  }
+
+  @GET
+  @Path("/sights/{id}")
+  public SightRO get(@PathParam("id") Long id) {
+    return new SightRO(fService.get(id));
   }
 
 }
