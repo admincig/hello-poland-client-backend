@@ -7,7 +7,7 @@ import pl.hellopoland.sight.Sight;
 public class SightRO extends SightOnListingRO {
   public String lead;
   public String description;
-  public Float score;
+  public String score;
   public Collection<TicketRO> tickets;
   public Collection<OpeningHoursRO> openingHours;
 
@@ -15,7 +15,7 @@ public class SightRO extends SightOnListingRO {
     super(f);
     this.lead = f.getLead();
     this.description = f.getDescription();
-    this.score = f.getScore();
+    this.score = String.format("%.1f", f.getScore());
     this.tickets = f.getTickets().stream().map(TicketRO::new).collect(Collectors.toList());
     this.openingHours =
         f.getOpeningHours().stream().map(OpeningHoursRO::new).collect(Collectors.toList());
