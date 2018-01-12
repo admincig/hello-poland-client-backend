@@ -8,6 +8,7 @@ public class SightRO extends SightOnListingRO {
   public String lead;
   public String description;
   public String score;
+  public LocationRO location;
   public Collection<TicketRO> tickets;
   public Collection<OpeningHoursRO> openingHours;
 
@@ -19,6 +20,9 @@ public class SightRO extends SightOnListingRO {
     this.tickets = f.getTickets().stream().map(TicketRO::new).collect(Collectors.toList());
     this.openingHours =
         f.getOpeningHours().stream().map(OpeningHoursRO::new).collect(Collectors.toList());
+    if (f.getLocation() != null) {
+      this.location = new LocationRO(f.getLocation());
+    }
   }
 
 }

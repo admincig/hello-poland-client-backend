@@ -2,6 +2,7 @@ package pl.hellopoland.sight;
 
 import java.util.Collection;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -24,6 +25,8 @@ public class Sight extends ModelSuperclass {
   private String description;
   private Integer minPrice;
   private Float score;
+  @Embedded
+  private Location location;
   @OneToMany(mappedBy = "sight")
   private Collection<OpeningHours> openingHours;
 
@@ -90,5 +93,15 @@ public class Sight extends ModelSuperclass {
   public void setOpeningHours(Collection<OpeningHours> openingHours) {
     this.openingHours = openingHours;
   }
+
+  public Location getLocation() {
+    return location;
+  }
+
+  public void setLocation(Location location) {
+    this.location = location;
+  }
+
+
 
 }
