@@ -48,6 +48,8 @@ public class DbFiller extends ServiceSuperclass {
     kolejkowo.setLead("Cudowny świat w miniaturze!");
     kolejkowo.setDescription(
         "Największa w Polsce makieta kolejowa, z jeżdżącymi miniaturowymi pociągami i samochodami. Przedstawione tu zostały autentyczne budowle z terenu Śląska i Dolnego Śląska. Makiety przedstawiają miniaturowych mieszkańców (m.in. leśniczych, narciarzy, kupców, pracowników budowlanych, cyrkowców i plażowiczów) w różnych sytuacjach dnia codziennego; przedstawione jest życie na wsi, wyprawy wysokogórskie, akcje ratunkowe. To jedyna makieta w Polsce, na której pływa statek oraz miejscami symulowany jest padający deszcz. W dziewięciominutowym cyklu odwzorowane są zmiany pory dnia, po których następuje noc, zapalają się uliczne latarnie oraz światła w budynkach. Makiety prezentowane są we Wrocławiu oraz w Gliwicach.");
+    kolejkowo.setEmail("biuro@kolejkowo.pl");
+    kolejkowo.setPhone("880008004");
     Location location = new Location();
     location.setStreet("pl. Orląt Lwowskich 20B");
     location.setZipCode("53-605");
@@ -85,6 +87,8 @@ public class DbFiller extends ServiceSuperclass {
     zoo.setLead("Czynne przez cały rok bez wyjątków.");
     zoo.setDescription(
         "Jest najstarszym na obecnych ziemiach polskich ogrodem zoologicznym w Polsce. Powierzchnia ogrodu to 33 hektary. Pod koniec 2015 wrocławskie Zoo prezentowało ponad 10 500 zwierząt (nie wliczając bezkręgowców) z 1132 gatunków (trzecie pod tym względem zoo na świecie). Jest piątym najchętniej odwiedzanym ogrodem zoologicznym w Europie.");
+    zoo.setEmail("pok@zoo.wroc.pl");
+    zoo.setPhone("713483024");
     Location location = new Location();
     location.setStreet("ul. Wróblewskiego 1-5");
     location.setZipCode("51-618");
@@ -141,6 +145,8 @@ public class DbFiller extends ServiceSuperclass {
     hydropolis.setLead("Ukazanie wody z różnych, fascynujących perspektyw.");
     hydropolis.setDescription(
         "Hydropolis to centrum wiedzy na temat wody, w którym w fascynujący sposób pokazane jest jej znaczenie dla człowieka. Wystawa zajmuje cztery tysiące metrów, w dawnych, ponad stuletnich zbiornikach czystej wody. Oryginalna scenografia oraz multimedia (ponad 60 monitorów dotykowych) sprawiają, że w Hydropolis nie można się nudzić, bo angażowane są niemal wszystkie zmysły.");
+    hydropolis.setEmail("biuro@hydropolis.pl");
+    hydropolis.setPhone("713409515");
     Location location = new Location();
     location.setStreet("Na Grobli 19-21");
     location.setZipCode("50-001");

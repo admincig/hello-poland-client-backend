@@ -9,20 +9,24 @@ public class SightRO extends SightOnListingRO {
   public String description;
   public String score;
   public LocationRO location;
+  public String email;
+  public String phone;
   public Collection<TicketRO> tickets;
   public Collection<OpeningHoursRO> openingHours;
 
-  public SightRO(Sight f) {
-    super(f);
-    this.lead = f.getLead();
-    this.description = f.getDescription();
-    this.score = String.format("%.1f", f.getScore());
-    this.tickets = f.getTickets().stream().map(TicketRO::new).collect(Collectors.toList());
+  public SightRO(Sight s) {
+    super(s);
+    this.lead = s.getLead();
+    this.description = s.getDescription();
+    this.score = String.format("%.1f", s.getScore());
+    this.tickets = s.getTickets().stream().map(TicketRO::new).collect(Collectors.toList());
     this.openingHours =
-        f.getOpeningHours().stream().map(OpeningHoursRO::new).collect(Collectors.toList());
-    if (f.getLocation() != null) {
-      this.location = new LocationRO(f.getLocation());
+        s.getOpeningHours().stream().map(OpeningHoursRO::new).collect(Collectors.toList());
+    if (s.getLocation() != null) {
+      this.location = new LocationRO(s.getLocation());
     }
+    this.email = s.getEmail();
+    this.phone = s.getPhone();
   }
 
 }
