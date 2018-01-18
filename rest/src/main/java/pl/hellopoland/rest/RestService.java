@@ -1,6 +1,8 @@
 package pl.hellopoland.rest;
 
 import java.io.File;
+import java.util.Collection;
+import java.util.Date;
 import java.util.stream.Collectors;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -13,12 +15,16 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import pl.hellopoland.config.SightsPagedCollectionConfig;
 import pl.hellopoland.image.ImageService;
+import pl.hellopoland.order.OrderService;
+import pl.hellopoland.rest.dto.OrderIRO;
+import pl.hellopoland.rest.dto.OrderORO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.rest.dto.SightOnListingRO;
 import pl.hellopoland.rest.dto.SightRO;
 import pl.hellopoland.sight.Sight;
 import pl.hellopoland.sight.SightService;
 import pl.hellopoland.util.PagedEntityCollection;
+import pl.hellopoland.util.Triplet;
 
 @Path("/")
 @RequestScoped
@@ -29,6 +35,8 @@ public class RestService {
   ImageService iService;
   @Inject
   SightService fService;
+  @Inject
+  OrderService oService;
 
   @GET
   @Path("/images/{name}")
@@ -58,6 +66,14 @@ public class RestService {
   @Path("/sights/{id}")
   public SightRO get(@PathParam("id") Long id) {
     return new SightRO(fService.get(id));
+  }
+
+  @POST
+  @Path("/orders")
+  public OrderORO create(OrderIRO iro) {
+    Collection<Triplet<Long, Date, Integer>> tickets = iro.entries.stream()
+        .map(e -> new Triplet<>(e.id, e.date, e.quantity)).collect(Collectors.toList());
+    return new OrderORO(oService.create(tickets, iro.details));
   }
 
 }
