@@ -4,11 +4,13 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
+import pl.hellopoland.ConflictingException;
 import pl.hellopoland.ServiceSuperclass;
 import pl.hellopoland.sight.Sight;
 import pl.hellopoland.sight.Ticket;
@@ -20,6 +22,11 @@ public class OrderService extends ServiceSuperclass {
 
   @PermitAll
   public Order create(Collection<Triplet<Long, Date, Integer>> triplets, OrderDetails details) {
+    // DEVELOPER'S PURPOSES ONLY
+    if (new Random().nextDouble() > 0.8) {
+      throw new ConflictingException("Brak wolnych biletów na ten dzień");
+    }
+
 
     Order o = new Order();
     o.generateHash();
