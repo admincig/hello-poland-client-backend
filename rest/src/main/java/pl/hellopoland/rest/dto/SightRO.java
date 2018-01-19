@@ -6,7 +6,6 @@ import pl.hellopoland.sight.Sight;
 
 public class SightRO extends SightOnListingRO {
   public String lead;
-  public String description;
   public String score;
   public LocationRO location;
   public String email;
@@ -17,7 +16,6 @@ public class SightRO extends SightOnListingRO {
   public SightRO(Sight s) {
     super(s);
     this.lead = s.getLead();
-    this.description = s.getDescription();
     this.score = String.format("%.1f", s.getScore());
     this.tickets = s.getTickets().stream().map(TicketRO::new).collect(Collectors.toList());
     this.openingHours =
