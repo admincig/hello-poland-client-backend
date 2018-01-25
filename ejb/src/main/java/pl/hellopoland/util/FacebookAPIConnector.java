@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.logging.Logger;
 import javax.json.Json;
 import javax.json.JsonObject;
 import pl.hellopoland.user.User;
@@ -15,7 +14,6 @@ public class FacebookAPIConnector {
 
   public User getUser(String token) {
     try {
-      Logger.getAnonymousLogger().info(token);
       JsonObject me = me(token);
       User user = new User();
       user.setEmail(me.getString("email"));
