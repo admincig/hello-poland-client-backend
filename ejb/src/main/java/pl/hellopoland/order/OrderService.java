@@ -8,17 +8,26 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
+import javax.ejb.EJBAccessException;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.persistence.NoResultException;
 import pl.hellopoland.ConflictingException;
 import pl.hellopoland.ServiceSuperclass;
 import pl.hellopoland.sight.Sight;
 import pl.hellopoland.sight.Ticket;
+import pl.hellopoland.user.User;
+import pl.hellopoland.user.UserService;
 import pl.hellopoland.util.Triplet;
 
 @LocalBean
 @Stateless
 public class OrderService extends ServiceSuperclass {
+
+  @Inject
+  UserService uService;
 
   @PermitAll
   public Order create(Collection<Triplet<Long, Date, Integer>> triplets, OrderDetails details) {
@@ -27,9 +36,16 @@ public class OrderService extends ServiceSuperclass {
       throw new ConflictingException("Brak wolnych biletów na ten dzień");
     }
 
+    User user = null;
+    try {
+      user = uService.me();
+    } catch (NoResultException | EJBAccessException e) {
+      // anonymous user
+    }
 
     Order o = new Order();
     o.generateHash();
+    o.setUser(user);
     o.setDetails(details);
     em.persist(o);
 
@@ -43,6 +59,7 @@ public class OrderService extends ServiceSuperclass {
     Map<Sight, List<Ticket>> ticketsGroupedBySight =
         tickets.stream().collect(Collectors.groupingBy(Ticket::getSight));
 
+    Random random = new Random();
     for (Map.Entry<Sight, List<Ticket>> entry : ticketsGroupedBySight.entrySet()) {
       OrderSightEntry ose = new OrderSightEntry();
       ose.setOrder(o);
@@ -53,15 +70,28 @@ public class OrderService extends ServiceSuperclass {
         for (Triplet<Long, Date, Integer> triplet : tripletsGroupedByTicketId.get(ticket.getId())) {
           OrderEntry oe = new OrderEntry();
           oe.setTicket(ticket);
+          oe.setName(ticket.getName());
           oe.setDate(triplet.second);
           oe.setQuantity(triplet.third);
           oe.setUnitPrice(ticket.getPrice());
           oe.setSightEntry(ose);
+          for (int i = 0; i < oe.getQuantity(); i++) {
+            oe.addNumber("" + Math.abs(random.nextLong()));
+          }
           em.persist(oe);
         }
       }
     }
     // TODO place order in external API and throw ConflictingException when failed
     return o;
+  }
+
+  @RolesAllowed("user")
+  public List<OrderEntry> getTickets() {
+    List<OrderEntry> entries = em.createQuery(
+        "from OrderEntry oe join fetch oe.sightEntry se join fetch se.order o join fetch se.sight s where o.user=:user order by oe.id desc",
+        OrderEntry.class).setParameter("user", uService.me()).getResultList();
+    entries.forEach(e -> e.getNumbers().size());
+    return entries;
   }
 }

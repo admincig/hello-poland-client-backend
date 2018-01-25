@@ -5,10 +5,12 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import pl.hellopoland.ModelSuperclass;
+import pl.hellopoland.user.User;
 
 @Entity
 @Table(name = "orders")
@@ -21,6 +23,8 @@ public class Order extends ModelSuperclass {
   private String hash;
   @Embedded
   private OrderDetails details;
+  @ManyToOne
+  private User user;
 
   public Collection<OrderSightEntry> getEntries() {
     return entries;
@@ -44,6 +48,14 @@ public class Order extends ModelSuperclass {
 
   public void setDetails(OrderDetails details) {
     this.details = details;
+  }
+
+  public User getUser() {
+    return user;
+  }
+
+  public void setUser(User user) {
+    this.user = user;
   }
 
   public Integer getSum() {

@@ -3,6 +3,7 @@ package pl.hellopoland.rest;
 import java.io.File;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.enterprise.context.RequestScoped;
@@ -23,6 +24,7 @@ import pl.hellopoland.config.SightsPagedCollectionConfig;
 import pl.hellopoland.image.ImageService;
 import pl.hellopoland.order.OrderService;
 import pl.hellopoland.rest.dto.LoginIRO;
+import pl.hellopoland.rest.dto.OrderEntryORO;
 import pl.hellopoland.rest.dto.OrderIRO;
 import pl.hellopoland.rest.dto.OrderORO;
 import pl.hellopoland.rest.dto.PagedCollection;
@@ -91,6 +93,12 @@ public class RestService {
     Collection<Triplet<Long, Date, Integer>> tickets = iro.entries.stream()
         .map(e -> new Triplet<>(e.id, e.date, e.quantity)).collect(Collectors.toList());
     return new OrderORO(oService.create(tickets, iro.details));
+  }
+
+  @GET
+  @Path("/tickets")
+  public List<OrderEntryORO> tickets() {
+    return oService.getTickets().stream().map(OrderEntryORO::new).collect(Collectors.toList());
   }
 
   @GET
