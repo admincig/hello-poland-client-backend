@@ -581,7 +581,12 @@
 				</security-domain>
 				<security-domain name="@security.domain.name@" cache-type="default">
 					<authentication>
-						<login-module code="pl.hellopoland.hellopoland.security.CustomLoginModule"
+						<login-module code="pl.hellopoland.security.CustomLoginModule"
+							flag="sufficient">
+							<module-option name="dsJndiName"
+								value="java:jboss/datasources/@datasource.name@" />
+						</login-module>
+						<login-module code="pl.hellopoland.security.FacebookLoginModule"
 							flag="sufficient">
 							<module-option name="dsJndiName"
 								value="java:jboss/datasources/@datasource.name@" />

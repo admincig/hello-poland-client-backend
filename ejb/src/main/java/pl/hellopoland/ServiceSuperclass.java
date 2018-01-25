@@ -22,7 +22,9 @@ import javax.persistence.TypedQuery;
 import pl.hellopoland.config.PagedCollectionConfig;
 import pl.hellopoland.config.PagedCollectionConfig.Entry;
 
+
 public abstract class ServiceSuperclass {
+
 
   private static Context namingContext;
   protected static Properties properties;
@@ -62,11 +64,11 @@ public abstract class ServiceSuperclass {
     }
   }
 
-  protected Object lookup(String jndiName) {
+  public static Object lookup(String jndiName) {
     try {
       return namingContext.lookup(jndiName);
     } catch (NamingException e) {
-      logger.log(Level.WARNING, "Failed to lookup " + jndiName, e);
+      Logger.getAnonymousLogger().log(Level.WARNING, "Failed to lookup " + jndiName, e);
       return null;
     }
   }
