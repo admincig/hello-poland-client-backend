@@ -28,8 +28,10 @@ import pl.hellopoland.rest.dto.OrderORO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.rest.dto.SightOnListingRO;
 import pl.hellopoland.rest.dto.SightRO;
+import pl.hellopoland.rest.dto.UserORO;
 import pl.hellopoland.sight.Sight;
 import pl.hellopoland.sight.SightService;
+import pl.hellopoland.user.UserService;
 import pl.hellopoland.util.PagedEntityCollection;
 import pl.hellopoland.util.Triplet;
 
@@ -41,12 +43,15 @@ public class RestService {
 
   @Context
   HttpServletRequest req;
+
   @Inject
   ImageService iService;
   @Inject
   SightService fService;
   @Inject
   OrderService oService;
+  @Inject
+  UserService uService;
 
   Logger logger = Logger.getLogger(RestService.class.getName());
 
@@ -86,6 +91,12 @@ public class RestService {
     Collection<Triplet<Long, Date, Integer>> tickets = iro.entries.stream()
         .map(e -> new Triplet<>(e.id, e.date, e.quantity)).collect(Collectors.toList());
     return new OrderORO(oService.create(tickets, iro.details));
+  }
+
+  @GET
+  @Path("/users/me")
+  public UserORO me() {
+    return new UserORO(uService.me());
   }
 
   @POST

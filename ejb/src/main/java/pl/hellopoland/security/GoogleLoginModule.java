@@ -56,8 +56,7 @@ public class GoogleLoginModule extends AbstractServerLoginModule {
   @Override
   public boolean login() throws LoginException {
     try {
-      SecureStore ss = getUsernameAndPassword();
-      User user = googleConnector.getUser(new String(ss.password));
+      User user = googleConnector.getUser(getToken());
       loginOk = user != null;
       if (loginOk) {
         user = userService.getOrCreateSocialMedia(user);
@@ -99,34 +98,26 @@ public class GoogleLoginModule extends AbstractServerLoginModule {
     return new Group[] {g};
   }
 
-  protected SecureStore getUsernameAndPassword() throws LoginException {
-    SecureStore info = new SecureStore();
-    NameCallback nc = new NameCallback("User name: ", "guest");
-    PasswordCallback pc = new PasswordCallback("Password: ", false);
-    Callback[] callbacks = {nc, pc};
+  private String getToken() throws LoginException {
+	    NameCallback nc = new NameCallback("User name: ", "guest");
+	    PasswordCallback pc = new PasswordCallback("Password: ", false);
+	    Callback[] callbacks = {nc, pc};
 
-    try {
-      callbackHandler.handle(callbacks);
-      info.name = nc.getName();
-      info.password = pc.getPassword();
-      pc.clearPassword();
-
-    } catch (IOException e) {
-      LoginException le = new LoginException("Failed to get username/password");
-      le.initCause(e);
-      throw le;
-    } catch (UnsupportedCallbackException e) {
-      LoginException le =
-          new LoginException("CallbackHandler does not support: " + e.getCallback());
-      le.initCause(e);
-      throw le;
-    }
-    return info;
-  }
-
-  private class SecureStore {
-    String name;
-    char[] password;
-  }
+	    try {
+	      callbackHandler.handle(callbacks);
+	      return new String (pc.getPassword());
+	    } catch (IOException e) {
+	      LoginException le = new LoginException("Failed to get username/password");
+	      le.initCause(e);
+	      throw le;
+	    } catch (UnsupportedCallbackException e) {
+	      LoginException le =
+	          new LoginException("CallbackHandler does not support: " + e.getCallback());
+	      le.initCause(e);
+	      throw le;
+	    } finally {
+	        pc.clearPassword();
+	    }
+	  }
 
 }

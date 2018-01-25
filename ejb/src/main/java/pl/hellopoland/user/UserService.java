@@ -1,6 +1,7 @@
 package pl.hellopoland.user;
 
 import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.persistence.NoResultException;
@@ -9,6 +10,11 @@ import pl.hellopoland.ServiceSuperclass;
 @LocalBean
 @Stateless
 public class UserService extends ServiceSuperclass {
+
+  @RolesAllowed("user")
+  public User me() {
+    return findByEmail(ctx.getCallerPrincipal().getName());
+  }
 
   @PermitAll
   public User getOrCreateSocialMedia(User user) {
@@ -24,7 +30,7 @@ public class UserService extends ServiceSuperclass {
   }
 
   private User create(String email, String password, String name, String picture, String location) {
-    User bo = new User();
+    User bo = new User("user");
     bo.setEmail(email);
     bo.setName(name);
     bo.setPassword(password);
@@ -34,8 +40,7 @@ public class UserService extends ServiceSuperclass {
     return bo;
   }
 
-  @PermitAll
-  public User findByEmail(String email) {
+  private User findByEmail(String email) {
     return em.createQuery("from User where email=:email", User.class).setParameter("email", email)
         .getSingleResult();
   }

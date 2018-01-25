@@ -8,6 +8,8 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javax.annotation.Resource;
+import javax.ejb.SessionContext;
 import javax.inject.Inject;
 import javax.jms.DeliveryMode;
 import javax.jms.JMSContext;
@@ -47,6 +49,8 @@ public abstract class ServiceSuperclass {
   @Inject
   private JMSContext jms;
 
+  @Resource
+  protected SessionContext ctx;
   @PersistenceContext
   protected EntityManager em;
 

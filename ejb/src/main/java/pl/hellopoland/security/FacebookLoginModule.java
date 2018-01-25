@@ -56,8 +56,7 @@ public class FacebookLoginModule extends AbstractServerLoginModule {
   @Override
   public boolean login() throws LoginException {
     try {
-      SecureStore ss = getUsernameAndPassword();
-      User user = fbConnector.getUser(new String(ss.password));
+      User user = fbConnector.getUser(getToken());
       loginOk = user != null;
       if (loginOk) {
         user = userService.getOrCreateSocialMedia(user);
@@ -99,18 +98,14 @@ public class FacebookLoginModule extends AbstractServerLoginModule {
     return new Group[] {g};
   }
 
-  protected SecureStore getUsernameAndPassword() throws LoginException {
-    SecureStore info = new SecureStore();
+  protected String getToken() throws LoginException {
     NameCallback nc = new NameCallback("User name: ", "guest");
     PasswordCallback pc = new PasswordCallback("Password: ", false);
     Callback[] callbacks = {nc, pc};
 
     try {
       callbackHandler.handle(callbacks);
-      info.name = nc.getName();
-      info.password = pc.getPassword();
-      pc.clearPassword();
-
+      return new String (pc.getPassword());
     } catch (IOException e) {
       LoginException le = new LoginException("Failed to get username/password");
       le.initCause(e);
@@ -120,13 +115,9 @@ public class FacebookLoginModule extends AbstractServerLoginModule {
           new LoginException("CallbackHandler does not support: " + e.getCallback());
       le.initCause(e);
       throw le;
+    } finally {
+        pc.clearPassword();
     }
-    return info;
-  }
-
-  private class SecureStore {
-    String name;
-    char[] password;
   }
 
 }
