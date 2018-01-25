@@ -64,11 +64,11 @@ public abstract class ServiceSuperclass {
     }
   }
 
-  public static Object lookup(String jndiName) {
+  protected Object lookup(String jndiName) {
     try {
       return namingContext.lookup(jndiName);
     } catch (NamingException e) {
-      Logger.getAnonymousLogger().log(Level.WARNING, "Failed to lookup " + jndiName, e);
+      logger.log(Level.WARNING, "Failed to lookup " + jndiName, e);
       return null;
     }
   }

@@ -4,22 +4,28 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.logging.Logger;
 import javax.json.Json;
 import javax.json.JsonObject;
 import pl.hellopoland.user.User;
 
 public class FacebookAPIConnector {
   private static final String FACEBOOK_API_HOST =
-      "https://graph.facebook.com/me?fields=email,name&access_token=";
+      "https://graph.facebook.com/me?fields=email,name,picture,location&access_token=";
 
-  public User getUser(String token) throws IllegalStateException, Exception {
-    JsonObject me = me(token);
-
-    User user = new User();
-    user.setEmail(me.getString("email"));
-    user.setName(me.getString("name"));
-    user.setPassword("");
-    return user;
+  public User getUser(String token) {
+    try {
+      Logger.getAnonymousLogger().info(token);
+      JsonObject me = me(token);
+      User user = new User();
+      user.setEmail(me.getString("email"));
+      user.setName(me.getString("name"));
+      user.setPicture(me.getJsonObject("picture").getJsonObject("data").getString("url"));
+      user.setLocation(me.getJsonObject("location").getString("name"));
+      return user;
+    } catch (Exception e) {
+      return null;
+    }
   }
 
   private JsonObject me(String token) throws IOException {

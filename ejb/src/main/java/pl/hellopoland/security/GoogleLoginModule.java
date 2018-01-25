@@ -22,16 +22,16 @@ import org.jboss.security.SimpleGroup;
 import org.jboss.security.auth.spi.AbstractServerLoginModule;
 import pl.hellopoland.user.User;
 import pl.hellopoland.user.UserService;
-import pl.hellopoland.util.FacebookAPIConnector;
+import pl.hellopoland.util.GoogleAPIConnector;
 
-public class FacebookLoginModule extends AbstractServerLoginModule {
+public class GoogleLoginModule extends AbstractServerLoginModule {
 
-  Logger logger = Logger.getLogger(FacebookLoginModule.class.getName());
+  Logger logger = Logger.getLogger(GoogleLoginModule.class.getName());
 
   Principal identity;
   DataSource ds;
   UserService userService;
-  FacebookAPIConnector fbConnector;
+  GoogleAPIConnector googleConnector;
 
 
   @Override
@@ -42,7 +42,7 @@ public class FacebookLoginModule extends AbstractServerLoginModule {
       InitialContext ctx = new InitialContext();
       ds = (DataSource) ctx.lookup("java:jboss/datasources/hellopoland");
       userService = (UserService) ctx.lookup("java:app/hellopoland.ejb/UserService");
-      fbConnector = new FacebookAPIConnector();
+      googleConnector = new GoogleAPIConnector();
     } catch (NamingException e) {
       e.printStackTrace();
     }
@@ -57,7 +57,7 @@ public class FacebookLoginModule extends AbstractServerLoginModule {
   public boolean login() throws LoginException {
     try {
       SecureStore ss = getUsernameAndPassword();
-      User user = fbConnector.getUser(new String(ss.password));
+      User user = googleConnector.getUser(new String(ss.password));
       loginOk = user != null;
       if (loginOk) {
         user = userService.getOrCreateSocialMedia(user);

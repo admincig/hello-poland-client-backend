@@ -91,11 +91,22 @@ public class RestService {
   @POST
   @Path("/login/socialMedia")
   public Response loginBySocialMedia(LoginIRO iro) {
-    boolean success = login("", iro.token);
+    String code = iro.token == null ? iro.idToken : iro.token;
+    boolean success = login("", code);
     if (!success) {
       return Response.status(Status.UNAUTHORIZED).build();
     }
     return Response.ok().build();
+  }
+
+  @GET
+  @Path("/logout")
+  public void logout() {
+    try {
+      req.logout();
+    } catch (ServletException e) {
+    }
+    req.getSession().invalidate();
   }
 
   private boolean login(String string, String password) {

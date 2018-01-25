@@ -591,6 +591,11 @@
 							<module-option name="dsJndiName"
 								value="java:jboss/datasources/@datasource.name@" />
 						</login-module>
+						<login-module code="pl.hellopoland.security.GoogleLoginModule"
+							flag="sufficient">
+							<module-option name="dsJndiName"
+								value="java:jboss/datasources/@datasource.name@" />
+						</login-module>
 					</authentication>
 				</security-domain>
 			</security-domains>

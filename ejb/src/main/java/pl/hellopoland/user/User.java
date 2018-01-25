@@ -16,6 +16,8 @@ public class User extends ModelSuperclass {
   private String email;
   private String name;
   private String password;
+  private String picture;
+  private String location;
 
 
   public String getEmail() {
@@ -40,6 +42,22 @@ public class User extends ModelSuperclass {
 
   public void setPassword(String password) {
     this.password = password;
+  }
+
+  public String getPicture() {
+    return picture;
+  }
+
+  public void setPicture(String picture) {
+    this.picture = picture;
+  }
+
+  public String getLocation() {
+    return location;
+  }
+
+  public void setLocation(String location) {
+    this.location = location;
   }
 
 }
