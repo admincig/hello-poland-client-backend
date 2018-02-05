@@ -4,25 +4,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.logging.Logger;
 import javax.json.Json;
 import javax.json.JsonObject;
 import pl.hellopoland.user.User;
 
 public class FacebookAPIConnector {
-  Logger logger = Logger.getLogger(FacebookAPIConnector.class.getName());
   private static final String FACEBOOK_API_HOST =
       "https://graph.facebook.com/me?fields=email,name,picture,location&access_token=";
 
   public User getUser(String token) {
     try {
       JsonObject me = me(token);
-      logger.info(me.toString());
       User user = new User();
       user.setEmail(me.getString("email"));
       user.setName(me.getString("name"));
       user.setPicture(me.getJsonObject("picture").getJsonObject("data").getString("url"));
-      user.setLocation(me.getJsonObject("location").getString("name"));
+      JsonObject jsonLocation = me.getJsonObject("location");
+      if (jsonLocation != null) {
+        user.setLocation(jsonLocation.getString("name"));
+      }
       return user;
     } catch (Exception e) {
       return null;
@@ -30,8 +30,6 @@ public class FacebookAPIConnector {
   }
 
   private JsonObject me(String token) throws IOException {
-
-    logger.info(FACEBOOK_API_HOST + token);
     URL url = new URL(FACEBOOK_API_HOST + token);
     URLConnection conn = url.openConnection();
     InputStream is = conn.getInputStream();
