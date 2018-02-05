@@ -10,7 +10,7 @@ import pl.hellopoland.user.User;
 
 public class FacebookAPIConnector {
   private static final String FACEBOOK_API_HOST =
-      "https://graph.facebook.com/me?fields=email,name,picture,location&access_token=";
+      "https://graph.facebook.com/me?fields=email,name,picture.type(large),location&access_token=";
 
   public User getUser(String token) {
     try {
