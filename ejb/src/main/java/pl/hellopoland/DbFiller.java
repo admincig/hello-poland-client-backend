@@ -7,6 +7,7 @@ import javax.ejb.Startup;
 import javax.inject.Inject;
 import pl.hellopoland.image.Image;
 import pl.hellopoland.image.ImageService;
+import pl.hellopoland.sight.Agreement;
 import pl.hellopoland.sight.Location;
 import pl.hellopoland.sight.OpeningHours;
 import pl.hellopoland.sight.Sight;
@@ -73,6 +74,10 @@ public class DbFiller extends ServiceSuperclass {
       oh.setSight(kolejkowo);
       em.persist(oh);
     }
+    Agreement ag = new Agreement();
+    ag.setSight(kolejkowo);
+    ag.setLinkUrl("http://hello-poland.com.pl/regulamin");
+    em.persist(ag);
   }
 
 
@@ -130,6 +135,10 @@ public class DbFiller extends ServiceSuperclass {
       oh.setSight(zoo);
       em.persist(oh);
     }
+    Agreement ag = new Agreement();
+    ag.setSight(zoo);
+    ag.setLinkUrl("http://hello-poland.com.pl/regulamin");
+    em.persist(ag);
   }
 
 
@@ -183,5 +192,9 @@ public class DbFiller extends ServiceSuperclass {
       oh.setSight(hydropolis);
       em.persist(oh);
     }
+    Agreement ag = new Agreement();
+    ag.setSight(hydropolis);
+    ag.setLinkUrl("http://hello-poland.com.pl/regulamin");
+    em.persist(ag);
   }
 }

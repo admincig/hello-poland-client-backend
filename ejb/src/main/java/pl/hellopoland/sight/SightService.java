@@ -23,6 +23,7 @@ public class SightService extends ServiceSuperclass {
     // fetch collections
     s.getTickets().size();
     s.getOpeningHours().size();
+    s.getAgreements().size();
 
     return s;
   }

@@ -20,6 +20,8 @@ public class Sight extends ModelSuperclass {
   private Image mainImage;
   @OneToMany(mappedBy = "sight")
   private Collection<Ticket> tickets;
+  @OneToMany(mappedBy = "sight")
+  private Collection<Agreement> agreements;
   private String lead;
   @Column(columnDefinition = "text")
   private String description;
@@ -54,6 +56,14 @@ public class Sight extends ModelSuperclass {
 
   public void setTickets(Collection<Ticket> tickets) {
     this.tickets = tickets;
+  }
+
+  public Collection<Agreement> getAgreements() {
+    return agreements;
+  }
+
+  public void setAgreements(Collection<Agreement> agreements) {
+    this.agreements = agreements;
   }
 
   public String getDescription() {

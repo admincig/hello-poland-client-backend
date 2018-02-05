@@ -12,6 +12,7 @@ public class SightRO extends SightOnListingRO {
   public String phone;
   public Collection<TicketRO> tickets;
   public Collection<OpeningHoursRO> openingHours;
+  public Collection<AgreementRO> agreements;
 
   public SightRO(Sight s) {
     super(s);
@@ -23,6 +24,7 @@ public class SightRO extends SightOnListingRO {
     if (s.getLocation() != null) {
       this.location = new LocationRO(s.getLocation());
     }
+    this.agreements = s.getAgreements().stream().map(AgreementRO::new).collect(Collectors.toList());
     this.email = s.getEmail();
     this.phone = s.getPhone();
   }
