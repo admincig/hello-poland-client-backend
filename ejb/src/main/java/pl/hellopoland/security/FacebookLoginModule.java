@@ -95,6 +95,7 @@ public class FacebookLoginModule extends AbstractServerLoginModule {
       String role = rs.getString(1);
       g.addMember(createIdentity(role));
     }
+    conn.close();
     return new Group[] {g};
   }
 
@@ -105,7 +106,7 @@ public class FacebookLoginModule extends AbstractServerLoginModule {
 
     try {
       callbackHandler.handle(callbacks);
-      return new String (pc.getPassword());
+      return new String(pc.getPassword());
     } catch (IOException e) {
       LoginException le = new LoginException("Failed to get username/password");
       le.initCause(e);
@@ -116,7 +117,7 @@ public class FacebookLoginModule extends AbstractServerLoginModule {
       le.initCause(e);
       throw le;
     } finally {
-        pc.clearPassword();
+      pc.clearPassword();
     }
   }
 

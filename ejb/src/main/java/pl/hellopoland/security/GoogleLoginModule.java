@@ -95,29 +95,30 @@ public class GoogleLoginModule extends AbstractServerLoginModule {
       String role = rs.getString(1);
       g.addMember(createIdentity(role));
     }
+    conn.close();
     return new Group[] {g};
   }
 
   private String getToken() throws LoginException {
-	    NameCallback nc = new NameCallback("User name: ", "guest");
-	    PasswordCallback pc = new PasswordCallback("Password: ", false);
-	    Callback[] callbacks = {nc, pc};
+    NameCallback nc = new NameCallback("User name: ", "guest");
+    PasswordCallback pc = new PasswordCallback("Password: ", false);
+    Callback[] callbacks = {nc, pc};
 
-	    try {
-	      callbackHandler.handle(callbacks);
-	      return new String (pc.getPassword());
-	    } catch (IOException e) {
-	      LoginException le = new LoginException("Failed to get username/password");
-	      le.initCause(e);
-	      throw le;
-	    } catch (UnsupportedCallbackException e) {
-	      LoginException le =
-	          new LoginException("CallbackHandler does not support: " + e.getCallback());
-	      le.initCause(e);
-	      throw le;
-	    } finally {
-	        pc.clearPassword();
-	    }
-	  }
+    try {
+      callbackHandler.handle(callbacks);
+      return new String(pc.getPassword());
+    } catch (IOException e) {
+      LoginException le = new LoginException("Failed to get username/password");
+      le.initCause(e);
+      throw le;
+    } catch (UnsupportedCallbackException e) {
+      LoginException le =
+          new LoginException("CallbackHandler does not support: " + e.getCallback());
+      le.initCause(e);
+      throw le;
+    } finally {
+      pc.clearPassword();
+    }
+  }
 
 }
