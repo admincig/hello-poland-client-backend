@@ -17,7 +17,9 @@ public class GoogleAPIConnector {
         new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new JacksonFactory())
             .setAudience(
                 List.of("876214520825-se50aq1jerrri6m50eieijobbs9ji4ij.apps.googleusercontent.com",
-                    "876214520825-8q9p0e30b9t3c3h3i6dl5pp3emjegfr9.apps.googleusercontent.com"))
+                    "876214520825-8q9p0e30b9t3c3h3i6dl5pp3emjegfr9.apps.googleusercontent.com",
+                    "876214520825-jsnb7u85kle6rnafonvitlq9n0ill06p.apps.googleusercontent.com",
+                    "876214520825-9vun30k1bo423jcsfu38ddjcs5jmkfq6.apps.googleusercontent.com"))
             .setIssuer("https://accounts.google.com").build();
     logger.info("verifying idToken=" + idToken);
     GoogleIdToken token = verifier.verify(idToken);
