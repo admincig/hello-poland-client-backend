@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.logging.Logger;
 import javax.json.Json;
 import javax.json.JsonObject;
 import pl.hellopoland.user.User;
@@ -12,9 +13,13 @@ public class FacebookAPIConnector {
   private static final String FACEBOOK_API_HOST =
       "https://graph.facebook.com/me?fields=email,name,picture.type(large),location&access_token=";
 
+  private Logger logger = Logger.getLogger(FacebookAPIConnector.class.getName());
+
   public User getUser(String token) {
     try {
+      logger.info(FACEBOOK_API_HOST + token);
       JsonObject me = me(token);
+      logger.info(me.toString());
       User user = new User();
       user.setEmail(me.getString("email"));
       user.setName(me.getString("name"));
