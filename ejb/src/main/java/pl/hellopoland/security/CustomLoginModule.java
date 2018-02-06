@@ -69,6 +69,7 @@ public class CustomLoginModule extends AbstractServerLoginModule {
     ResultSet rs = ps.getResultSet();
     rs.next();
     long c = rs.getLong(1);
+    conn.close();
     return c > 0;
   }
 
