@@ -32,7 +32,7 @@ public class OrderService extends ServiceSuperclass {
   @PermitAll
   public Order create(Collection<Triplet<Long, Date, Integer>> triplets, OrderDetails details) {
     // DEVELOPER'S PURPOSES ONLY
-    if (new Random().nextDouble() > 0.8) {
+    if (new Random().nextDouble() > 0) {
       throw new ConflictingException("Brak wolnych biletów na ten dzień");
     }
 
