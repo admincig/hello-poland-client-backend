@@ -3,6 +3,7 @@ package pl.hellopoland.user;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -29,10 +30,11 @@ public class User extends ModelSuperclass {
   private String name;
   private String password;
   private String picture;
-  private String location;
+  @Embedded
+  private UserLocation location;
+
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
   private List<UserRole> roles;
-
 
   public String getEmail() {
     return email;
@@ -66,11 +68,11 @@ public class User extends ModelSuperclass {
     this.picture = picture;
   }
 
-  public String getLocation() {
+  public UserLocation getLocation() {
     return location;
   }
 
-  public void setLocation(String location) {
+  public void setLocation(UserLocation location) {
     this.location = location;
   }
 

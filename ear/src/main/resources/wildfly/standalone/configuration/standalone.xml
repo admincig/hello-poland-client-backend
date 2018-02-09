@@ -153,8 +153,7 @@
 			<datasources>
 				<datasource jndi-name="java:jboss/datasources/@datasource.name@"
 					pool-name="@datasource.name@" enabled="true" use-java-context="true">
-					<connection-url>jdbc:@datasource.driver@://@datasource.database.host@:@datasource.database.port@/@datasource.database.name@
-					</connection-url>
+					<connection-url>jdbc:@datasource.driver@://@datasource.database.host@:@datasource.database.port@/@datasource.database.name@</connection-url>
 					<driver>@datasource.driver@</driver>
 					<transaction-isolation>TRANSACTION_READ_COMMITTED</transaction-isolation>
 					<pool>
@@ -579,7 +578,8 @@
 						<policy-module code="Delegating" flag="required" />
 					</authorization>
 				</security-domain>
-				<security-domain name="@security.domain.name@" cache-type="default">
+				<security-domain name="@security.domain.name@"
+					cache-type="default">
 					<authentication>
 						<login-module code="pl.hellopoland.security.CustomLoginModule"
 							flag="sufficient">

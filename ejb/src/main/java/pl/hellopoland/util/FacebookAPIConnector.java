@@ -6,6 +6,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import javax.json.Json;
 import javax.json.JsonObject;
+import pl.hellopoland.user.UserLocation;
 import pl.hellopoland.user.User;
 
 public class FacebookAPIConnector {
@@ -21,7 +22,11 @@ public class FacebookAPIConnector {
       user.setPicture(me.getJsonObject("picture").getJsonObject("data").getString("url"));
       JsonObject jsonLocation = me.getJsonObject("location");
       if (jsonLocation != null) {
-        user.setLocation(jsonLocation.getString("name"));
+        UserLocation location = new UserLocation();
+        location.setCity(NameAndAddressSplitter.getCity(jsonLocation.getString("name")));
+        location.setCountry(NameAndAddressSplitter.getCountry(jsonLocation.getString("name")));
+        user.setLocation(location);
+
       }
       return user;
     } catch (Exception e) {
