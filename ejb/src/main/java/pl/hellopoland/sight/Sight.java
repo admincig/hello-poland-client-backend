@@ -28,7 +28,7 @@ public class Sight extends ModelSuperclass {
   private Integer minPrice;
   private Float score;
   @Embedded
-  private Location location;
+  private SightLocation location;
   private String email;
   private String phone;
   @OneToMany(mappedBy = "sight")
@@ -106,11 +106,11 @@ public class Sight extends ModelSuperclass {
     this.openingHours = openingHours;
   }
 
-  public Location getLocation() {
+  public SightLocation getLocation() {
     return location;
   }
 
-  public void setLocation(Location location) {
+  public void setLocation(SightLocation location) {
     this.location = location;
   }
 

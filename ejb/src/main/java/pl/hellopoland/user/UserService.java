@@ -21,7 +21,7 @@ public class UserService extends ServiceSuperclass {
     String email = user.getEmail();
     String name = user.getName();
     String picture = user.getPicture();
-    String location = user.getLocation();
+    UserLocation location = user.getLocation();
     try {
       return findByEmail(email);
     } catch (NoResultException e) {
@@ -29,13 +29,15 @@ public class UserService extends ServiceSuperclass {
     }
   }
 
-  private User create(String email, String password, String name, String picture, String location) {
+  private User create(String email, String password, String name, String picture,
+      UserLocation location) {
     User bo = new User("user");
     bo.setEmail(email);
     bo.setName(name);
     bo.setPassword(password);
     bo.setPicture(picture);
     bo.setLocation(location);
+
     em.persist(bo);
     return bo;
   }
