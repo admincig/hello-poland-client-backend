@@ -24,12 +24,12 @@ import pl.hellopoland.config.SightsPagedCollectionConfig;
 import pl.hellopoland.image.ImageService;
 import pl.hellopoland.order.OrderService;
 import pl.hellopoland.rest.dto.LoginIRO;
-import pl.hellopoland.rest.dto.OrderEntryORO;
 import pl.hellopoland.rest.dto.OrderIRO;
 import pl.hellopoland.rest.dto.OrderORO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.rest.dto.SightOnListingRO;
 import pl.hellopoland.rest.dto.SightRO;
+import pl.hellopoland.rest.dto.SightWithOrderEntriesRO;
 import pl.hellopoland.rest.dto.UserORO;
 import pl.hellopoland.sight.Sight;
 import pl.hellopoland.sight.SightService;
@@ -97,8 +97,9 @@ public class RestService {
 
   @GET
   @Path("/tickets")
-  public List<OrderEntryORO> tickets() {
-    return oService.getTickets().stream().map(OrderEntryORO::new).collect(Collectors.toList());
+  public List<SightWithOrderEntriesRO> tickets() {
+    return oService.getOrderSightEntries().stream().map(SightWithOrderEntriesRO::new)
+        .collect(Collectors.toList());
   }
 
   @GET

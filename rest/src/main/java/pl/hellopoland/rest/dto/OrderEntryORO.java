@@ -11,7 +11,6 @@ public class OrderEntryORO {
 
   public String name;
   public String date;
-  public String sightName;
   public Integer quantity;
   public List<String> numbers;
 
@@ -20,6 +19,5 @@ public class OrderEntryORO {
     this.numbers = oe.getNumbers();
     this.quantity = oe.getQuantity();
     this.name = oe.getName();
-    this.sightName = oe.getSightEntry().getSight().getName();
   }
 }

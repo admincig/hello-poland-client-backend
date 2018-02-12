@@ -94,4 +94,13 @@ public class OrderService extends ServiceSuperclass {
     entries.forEach(e -> e.getNumbers().size());
     return entries;
   }
+
+  @RolesAllowed("user")
+  public List<OrderSightEntry> getOrderSightEntries() {
+    List<OrderSightEntry> entries = em.createQuery(
+        "from OrderSightEntry ose join fetch ose.sight se join fetch ose.order o where o.user=:user order by ose.id desc",
+        OrderSightEntry.class).setParameter("user", uService.me()).getResultList();
+    entries.forEach(ose -> ose.getEntries().forEach(e -> e.getNumbers().size()));
+    return entries;
+  }
 }
