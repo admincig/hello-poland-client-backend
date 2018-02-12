@@ -17,7 +17,9 @@ public class UserORO {
     this.name = user.getName();
     this.firstName = NameAndAddressSplitter.getFirstName(user.getName());
     this.lastName = NameAndAddressSplitter.getLastName(user.getName());
-    this.location = new UserLocationRO(user.getLocation());
+    if (user.getLocation() != null) {
+      this.location = new UserLocationRO(user.getLocation());
+    }
     this.picture = user.getPicture();
   }
 
