@@ -1,25 +1,20 @@
 package pl.hellopoland.order;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 import pl.hellopoland.ModelSuperclass;
-import pl.hellopoland.sight.Ticket;
 
 @Entity
 public class OrderEntry extends ModelSuperclass {
   private static final long serialVersionUID = -1590949806641422316L;
 
-  @ManyToOne(optional = false)
-  private OrderSightEntry sightEntry;
-  @ManyToOne(optional = false)
-  private Ticket ticket;
-  @NotNull
-  private Date date;
+  @ManyToOne(optional = false, fetch = FetchType.EAGER)
+  private OrderSightDateEntry dateEntry;
   @NotNull
   private Integer quantity;
   @NotNull
@@ -30,36 +25,12 @@ public class OrderEntry extends ModelSuperclass {
   private List<String> numbers;
 
 
-  public OrderSightEntry getSightEntry() {
-    return sightEntry;
-  }
-
-  public void setSightEntry(OrderSightEntry sightEntry) {
-    this.sightEntry = sightEntry;
-  }
-
-  public Ticket getTicket() {
-    return ticket;
-  }
-
-  public void setTicket(Ticket ticket) {
-    this.ticket = ticket;
-  }
-
   public Integer getQuantity() {
     return quantity;
   }
 
   public void setQuantity(Integer quantity) {
     this.quantity = quantity;
-  }
-
-  public Date getDate() {
-    return date;
-  }
-
-  public void setDate(Date date) {
-    this.date = date;
   }
 
   public Integer getUnitPrice() {
@@ -84,6 +55,16 @@ public class OrderEntry extends ModelSuperclass {
 
   public void setNumbers(List<String> numbers) {
     this.numbers = numbers;
+  }
+
+
+
+  public OrderSightDateEntry getDateEntry() {
+    return dateEntry;
+  }
+
+  public void setDateEntry(OrderSightDateEntry dateEntry) {
+    this.dateEntry = dateEntry;
   }
 
   public Integer getSum() {

@@ -1,8 +1,11 @@
 package pl.hellopoland.order;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import pl.hellopoland.ModelSuperclass;
@@ -12,10 +15,10 @@ import pl.hellopoland.sight.Sight;
 public class OrderSightEntry extends ModelSuperclass {
   private static final long serialVersionUID = 3650049507552718840L;
 
-  @ManyToOne(optional = false)
+  @ManyToOne(optional = false, fetch = FetchType.EAGER)
   private Sight sight;
   @OneToMany(mappedBy = "sightEntry")
-  private Collection<OrderEntry> entries;
+  private Collection<OrderSightDateEntry> entries;
   @ManyToOne(optional = false)
   private Order order;
 
@@ -28,11 +31,11 @@ public class OrderSightEntry extends ModelSuperclass {
     this.sight = sight;
   }
 
-  public Collection<OrderEntry> getEntries() {
+  public Collection<OrderSightDateEntry> getEntries() {
     return entries;
   }
 
-  public void setEntries(Collection<OrderEntry> entries) {
+  public void setEntries(Collection<OrderSightDateEntry> entries) {
     this.entries = entries;
   }
 
@@ -48,6 +51,10 @@ public class OrderSightEntry extends ModelSuperclass {
   public Integer getSum() {
     if (entries == null) {
       return 0;
+    }
+    List<OrderEntry> entries = new ArrayList<>();
+    for (OrderSightDateEntry e : this.entries) {
+      entries.addAll(e.getEntries());
     }
     return entries.stream().collect(Collectors.summingInt(OrderEntry::getSum));
   }

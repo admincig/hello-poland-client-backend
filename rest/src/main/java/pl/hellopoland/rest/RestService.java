@@ -26,10 +26,11 @@ import pl.hellopoland.order.OrderService;
 import pl.hellopoland.rest.dto.LoginIRO;
 import pl.hellopoland.rest.dto.OrderIRO;
 import pl.hellopoland.rest.dto.OrderORO;
+import pl.hellopoland.rest.dto.OrderSightDateEntryORO;
+import pl.hellopoland.rest.dto.OrderSightDateEntryOnListingORO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.rest.dto.SightOnListingRO;
 import pl.hellopoland.rest.dto.SightRO;
-import pl.hellopoland.rest.dto.SightWithOrderEntriesRO;
 import pl.hellopoland.rest.dto.UserORO;
 import pl.hellopoland.sight.Sight;
 import pl.hellopoland.sight.SightService;
@@ -97,9 +98,15 @@ public class RestService {
 
   @GET
   @Path("/tickets")
-  public List<SightWithOrderEntriesRO> tickets() {
-    return oService.getOrderSightEntries().stream().map(SightWithOrderEntriesRO::new)
+  public List<OrderSightDateEntryOnListingORO> tickets() {
+    return oService.getOrderSightDateEntries().stream().map(OrderSightDateEntryOnListingORO::new)
         .collect(Collectors.toList());
+  }
+
+  @GET
+  @Path("/tickets/{id}")
+  public OrderSightDateEntryORO ticket(@PathParam("id") Long id) {
+    return new OrderSightDateEntryORO(oService.getOrderSightDateEntry(id));
   }
 
   @GET

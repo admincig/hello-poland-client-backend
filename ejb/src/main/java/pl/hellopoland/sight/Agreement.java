@@ -12,7 +12,7 @@ public class Agreement extends ModelSuperclass {
   private Sight sight;
   private String linkText = "regulamin";
   private String linkUrl;
-  private String text = "Akceptuję {link} obiektu.";
+  private String text = "Akceptuję {link} obiektu";
 
 
   public Sight getSight() {

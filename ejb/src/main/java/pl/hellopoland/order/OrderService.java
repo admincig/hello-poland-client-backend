@@ -49,58 +49,84 @@ public class OrderService extends ServiceSuperclass {
     o.setDetails(details);
     em.persist(o);
 
+    Random random = new Random();
+
     Map<Long, List<Triplet<Long, Date, Integer>>> tripletsGroupedByTicketId =
         triplets.stream().collect(Collectors.groupingBy(t -> t.first));
     Set<Long> ticketsIds = tripletsGroupedByTicketId.keySet();
     List<Ticket> tickets =
         em.createQuery("from Ticket t join fetch t.sight s where t.id in (:ids) order by s.id asc",
             Ticket.class).setParameter("ids", ticketsIds).getResultList();
-
     Map<Sight, List<Ticket>> ticketsGroupedBySight =
         tickets.stream().collect(Collectors.groupingBy(Ticket::getSight));
-
-    Random random = new Random();
+    Map<Long, Ticket> ticketIdToObject =
+        tickets.stream().collect(Collectors.toMap(Ticket::getId, t -> t));
     for (Map.Entry<Sight, List<Ticket>> entry : ticketsGroupedBySight.entrySet()) {
       OrderSightEntry ose = new OrderSightEntry();
       ose.setOrder(o);
       ose.setSight(entry.getKey());
       em.persist(ose);
 
-      for (Ticket ticket : entry.getValue()) {
-        for (Triplet<Long, Date, Integer> triplet : tripletsGroupedByTicketId.get(ticket.getId())) {
-          OrderEntry oe = new OrderEntry();
-          oe.setTicket(ticket);
-          oe.setName(ticket.getName());
-          oe.setDate(triplet.second);
-          oe.setQuantity(triplet.third);
-          oe.setUnitPrice(ticket.getPrice());
-          oe.setSightEntry(ose);
-          for (int i = 0; i < oe.getQuantity(); i++) {
-            oe.addNumber("" + Math.abs(random.nextLong()));
+      List<Long> ticketsOfSight =
+          entry.getValue().stream().map(Ticket::getId).collect(Collectors.toList());
+      Map<Date, List<Triplet<Long, Date, Integer>>> inSightGroupedByDate =
+          triplets.stream().filter(trip -> ticketsOfSight.contains(trip.first))
+              .collect(Collectors.groupingBy(t -> t.second));
+      for (Map.Entry<Date, List<Triplet<Long, Date, Integer>>> inSightOnDate : inSightGroupedByDate
+          .entrySet()) {
+        if (!inSightOnDate.getValue().isEmpty()) {
+          OrderSightDateEntry dateEntry = new OrderSightDateEntry();
+          dateEntry.setDate(inSightOnDate.getKey());
+          dateEntry.setSightEntry(ose);
+          em.persist(dateEntry);
+          for (Triplet<Long, Date, Integer> trip : inSightOnDate.getValue()) {
+            OrderEntry oe = new OrderEntry();
+            oe.setName(ticketIdToObject.get(trip.first).getName());
+            oe.setQuantity(trip.third);
+            oe.setUnitPrice(ticketIdToObject.get(trip.first).getPrice());
+            oe.setDateEntry(dateEntry);
+            for (int i = 0; i < oe.getQuantity(); i++) {
+              oe.addNumber("" + Math.abs(random.nextLong()));
+            }
+            em.persist(oe);
           }
-          em.persist(oe);
         }
       }
     }
+
     // TODO place order in external API and throw ConflictingException when failed
     return o;
   }
 
   @RolesAllowed("user")
-  public List<OrderEntry> getTickets() {
-    List<OrderEntry> entries = em.createQuery(
-        "from OrderEntry oe join fetch oe.sightEntry se join fetch se.order o join fetch se.sight s where o.user=:user order by oe.id desc",
+  public List<OrderEntry> getOrderEntries() {
+    return em.createQuery(
+        "from OrderEntry oe join fetch oe.sightEntry ose join fetch ose.sight s join fetch ose.order o where o.user=:user order by oe.date asc",
         OrderEntry.class).setParameter("user", uService.me()).getResultList();
-    entries.forEach(e -> e.getNumbers().size());
-    return entries;
   }
 
   @RolesAllowed("user")
-  public List<OrderSightEntry> getOrderSightEntries() {
-    List<OrderSightEntry> entries = em.createQuery(
-        "from OrderSightEntry ose join fetch ose.sight se join fetch ose.order o where o.user=:user order by ose.id desc",
-        OrderSightEntry.class).setParameter("user", uService.me()).getResultList();
-    entries.forEach(ose -> ose.getEntries().forEach(e -> e.getNumbers().size()));
-    return entries;
+  public OrderEntry getOrderEntry(long id) {
+    OrderEntry oe = em.find(OrderEntry.class, id);
+
+    oe.getNumbers().size();
+    return oe;
+  }
+
+  @RolesAllowed("user")
+  public OrderSightDateEntry getOrderSightDateEntry(long id) {
+    OrderSightDateEntry de = em.find(OrderSightDateEntry.class, id);
+
+    de.getEntries().forEach(e -> e.getNumbers().size());
+    return de;
+  }
+
+  @RolesAllowed("user")
+  public List<OrderSightDateEntry> getOrderSightDateEntries() {
+    List<OrderSightDateEntry> osdes = em.createQuery(
+        "from OrderSightDateEntry osde join fetch osde.sightEntry ose join fetch ose.sight s join fetch ose.order o where o.user=:user order by osde.date asc",
+        OrderSightDateEntry.class).setParameter("user", uService.me()).getResultList();
+    osdes.forEach(osde -> osde.getEntries().size());
+    return osdes;
   }
 }
