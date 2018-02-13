@@ -19,6 +19,8 @@ public class OrderSightDateEntry extends ModelSuperclass {
   private OrderSightEntry sightEntry;
   @OneToMany(mappedBy = "dateEntry")
   private List<OrderEntry> entries;
+  @NotNull
+  private boolean deleted;
 
   public Date getDate() {
     return date;
@@ -44,6 +46,12 @@ public class OrderSightDateEntry extends ModelSuperclass {
     this.entries = entries;
   }
 
+  public boolean isDeleted() {
+    return deleted;
+  }
 
+  public void setDeleted(boolean deleted) {
+    this.deleted = deleted;
+  }
 
 }

@@ -114,7 +114,9 @@ public class OrderService extends ServiceSuperclass {
 
   @RolesAllowed("user")
   public OrderSightDateEntry getOrderSightDateEntry(long id) {
-    OrderSightDateEntry de = em.find(OrderSightDateEntry.class, id);
+    String queryString = "from OrderSightDateEntry where deleted=false and id=:id";
+    OrderSightDateEntry de = em.createQuery(queryString, OrderSightDateEntry.class)
+        .setParameter("id", id).getSingleResult();
 
     de.getEntries().forEach(e -> e.getNumbers().size());
     return de;
@@ -123,9 +125,14 @@ public class OrderService extends ServiceSuperclass {
   @RolesAllowed("user")
   public List<OrderSightDateEntry> getOrderSightDateEntries() {
     List<OrderSightDateEntry> osdes = em.createQuery(
-        "from OrderSightDateEntry osde join fetch osde.sightEntry ose join fetch ose.sight s join fetch ose.order o where o.user=:user order by osde.date asc",
+        "from OrderSightDateEntry osde join fetch osde.sightEntry ose join fetch ose.sight s join fetch ose.order o where osde.deleted=false and o.user=:user order by osde.date asc",
         OrderSightDateEntry.class).setParameter("user", uService.me()).getResultList();
     osdes.forEach(osde -> osde.getEntries().size());
     return osdes;
+  }
+
+  @RolesAllowed("user")
+  public void deleteOrderSightDateEntry(long id) {
+    em.find(OrderSightDateEntry.class, id).setDeleted(true);
   }
 }

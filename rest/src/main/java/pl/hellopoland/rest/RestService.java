@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -107,6 +108,12 @@ public class RestService {
   @Path("/tickets/{id}")
   public OrderSightDateEntryORO ticket(@PathParam("id") Long id) {
     return new OrderSightDateEntryORO(oService.getOrderSightDateEntry(id));
+  }
+
+  @DELETE
+  @Path("/tickets/{id}")
+  public void deleteTicket(@PathParam("id") Long id) {
+    oService.deleteOrderSightDateEntry(id);
   }
 
   @GET
