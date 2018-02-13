@@ -1,12 +1,14 @@
 package pl.hellopoland.order;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJBAccessException;
@@ -52,26 +54,23 @@ public class OrderService extends ServiceSuperclass {
     Random random = new Random();
 
     Map<Long, List<Triplet<Long, Date, Integer>>> tripletsGroupedByTicketId =
-        triplets.stream().collect(Collectors.groupingBy(t -> t.first));
+        triplets.stream().collect(groupingBy(t -> t.first));
     Set<Long> ticketsIds = tripletsGroupedByTicketId.keySet();
     List<Ticket> tickets =
         em.createQuery("from Ticket t join fetch t.sight s where t.id in (:ids) order by s.id asc",
             Ticket.class).setParameter("ids", ticketsIds).getResultList();
     Map<Sight, List<Ticket>> ticketsGroupedBySight =
-        tickets.stream().collect(Collectors.groupingBy(Ticket::getSight));
-    Map<Long, Ticket> ticketIdToObject =
-        tickets.stream().collect(Collectors.toMap(Ticket::getId, t -> t));
+        tickets.stream().collect(groupingBy(Ticket::getSight));
+    Map<Long, Ticket> ticketIdToObject = tickets.stream().collect(toMap(Ticket::getId, t -> t));
     for (Map.Entry<Sight, List<Ticket>> entry : ticketsGroupedBySight.entrySet()) {
       OrderSightEntry ose = new OrderSightEntry();
       ose.setOrder(o);
       ose.setSight(entry.getKey());
       em.persist(ose);
 
-      List<Long> ticketsOfSight =
-          entry.getValue().stream().map(Ticket::getId).collect(Collectors.toList());
-      Map<Date, List<Triplet<Long, Date, Integer>>> inSightGroupedByDate =
-          triplets.stream().filter(trip -> ticketsOfSight.contains(trip.first))
-              .collect(Collectors.groupingBy(t -> t.second));
+      List<Long> ticketsOfSight = entry.getValue().stream().map(Ticket::getId).collect(toList());
+      Map<Date, List<Triplet<Long, Date, Integer>>> inSightGroupedByDate = triplets.stream()
+          .filter(trip -> ticketsOfSight.contains(trip.first)).collect(groupingBy(t -> t.second));
       for (Map.Entry<Date, List<Triplet<Long, Date, Integer>>> inSightOnDate : inSightGroupedByDate
           .entrySet()) {
         if (!inSightOnDate.getValue().isEmpty()) {
