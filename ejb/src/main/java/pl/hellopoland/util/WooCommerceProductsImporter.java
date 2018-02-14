@@ -12,9 +12,9 @@ import java.util.regex.Pattern;
 import pl.hellopoland.image.Image;
 import pl.hellopoland.sight.Sight;
 
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class WooCommerceProductsImporter {
 
-  @SuppressWarnings("unchecked")
   public static List<LinkedHashMap<String, Object>> getListOfProductMaps(String url, String key,
       String secret) {
     WooCommerceAPIConnector wooCommerceAPIConnector = new WooCommerceAPIConnector(url, key, secret);
@@ -28,7 +28,7 @@ public class WooCommerceProductsImporter {
 
     for (int i = 0; i < list.size(); i++) {
 
-      LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
+      LinkedHashMap<String, Object> map = null;
       map = list.get(i);
 
       Sight sight = new Sight();
@@ -37,14 +37,12 @@ public class WooCommerceProductsImporter {
       sight.setDescription(withOutHTMLCode((String) map.get("description")));
       sight.setMinPrice(Integer.valueOf((String) map.get("price".toString())));
 
-      @SuppressWarnings("rawtypes")
       List listOfImages = (List) map.get("images");
-      @SuppressWarnings("rawtypes")
       Map mapOfOneImage = (Map) listOfImages.get(0);
       Image image = new Image();
       image.setImageURL((String) mapOfOneImage.get("src"));
       sight.setMainImage(image);
-      sight.setDate(setDateFromSightName((String) map.get("name")));
+      sight.setDate(getDateFromSightName((String) map.get("name")));
 
       listOfSights.add(sight);
     }
@@ -52,30 +50,61 @@ public class WooCommerceProductsImporter {
     return listOfSights;
   }
 
-  public static String withOutHTMLCode(String text) {
+  private static String withOutHTMLCode(String text) {
     return text.replaceAll("\\<[^>]*>", "").replaceAll("&nbsp;", " ");
   }
 
-  public static Date setDateFromSightName(String text) {
-
+  // /* Regex for Date formatting dd.MM.yy */
+  private static Date getDateFromSightName(String text) {
     String re1 = ".*?";
     String re2 =
         "((?:(?:[0-2]?\\d{1})|(?:[3][01]{1}))[-:\\/.](?:[0]?[1-9]|[1][012])[-:\\/.](?:(?:\\d{1}\\d{1})))(?![\\d])";
+
     Pattern p = Pattern.compile(re1 + re2, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
     Matcher m = p.matcher(text);
-    String ddmmyy = "01.01.01";
-    if (m.find()) {
-      ddmmyy = m.group(1);
-    }
 
-    SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yy");
-    try {
-      Date date = formatter.parse(ddmmyy);
-      return date;
-    } catch (ParseException e) {
-      e.printStackTrace();
+    if (m.find()) {
+      String ddmmyy = m.group(1);
+      SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yy");
+      try {
+        Date date = formatter.parse(ddmmyy);
+        return date;
+      } catch (ParseException e) {
+        e.printStackTrace();
+      }
     }
     return null;
   }
+
+  // /* Regex for Date formatting dd.MM.yyyy HH:mm */
+  // private static Date getDateFromSightName(String text) {
+  // String re1 = ".*?";
+  // String re2 =
+  // "((?:(?:[0-2]?\\d{1})|(?:[3][01]{1}))[-:\\/.](?:[0]?[1-9]|[1][012])[-:\\/.](?:(?:[1]{1}\\d{1}\\d{1}\\d{1})|(?:[2]{1}\\d{3})))(?![\\d])";
+  // String re3 = "(\\s+)";
+  // String re4 =
+  // "((?:(?:[0-1][0-9])|(?:[2][0-3])|(?:[0-9])):(?:[0-5][0-9])(?::[0-5][0-9])?(?:\\s?(?:am|AM|pm|PM))?)";
+  //
+  // Pattern p = Pattern.compile(re1 + re2 + re3 + re4, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+  // Matcher m = p.matcher(text);
+  //
+  // if (m.find()) {
+  // String ddmmyy = m.group(1);
+  // String ws = m.group(2);
+  // String time = m.group(3);
+  // String dateString = ddmmyy + ws + time;
+  //
+  // SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yy HH:mm");
+  // try {
+  // Date date = formatter.parse(dateString);
+  // return date;
+  // } catch (ParseException e) {
+  // e.printStackTrace();
+  // }
+  // }
+  //
+  // return null;
+  // }
+
 
 }
