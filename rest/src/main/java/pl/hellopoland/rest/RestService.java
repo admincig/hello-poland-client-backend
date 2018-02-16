@@ -74,6 +74,12 @@ public class RestService {
     return search(new SightsPagedCollectionConfig());
   }
 
+  @GET
+  @Path("/sights/import")
+  public void runImporter() {
+    fService.runImporter();
+  }
+
   @POST
   @Path("/sights/search")
   public PagedCollection search(SightsPagedCollectionConfig config) {

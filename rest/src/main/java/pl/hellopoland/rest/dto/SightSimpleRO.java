@@ -10,6 +10,8 @@ public class SightSimpleRO {
   public SightSimpleRO(Sight s) {
     this.id = s.getId();
     this.name = s.getName();
-    this.location = new SightLocationRO(s.getLocation());
+    if (s.getLocation() != null) {
+      this.location = new SightLocationRO(s.getLocation());
+    }
   }
 }
