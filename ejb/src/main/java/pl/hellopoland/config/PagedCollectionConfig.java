@@ -11,7 +11,7 @@ public abstract class PagedCollectionConfig<E extends ModelSuperclass> {
   private Integer pageSize;
   private Integer pageNum = 0;
   private String orderColumn = "id";
-  private String orderDirection = "asc";
+  private String orderDirection = "desc";
 
   protected void addCondition(String parameterName, Object value, String query) {
     if (conditions == null) {

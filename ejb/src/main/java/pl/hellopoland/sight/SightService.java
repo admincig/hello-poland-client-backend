@@ -2,6 +2,7 @@ package pl.hellopoland.sight;
 
 import java.net.URL;
 import java.util.List;
+import java.util.Random;
 import javax.annotation.security.PermitAll;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -42,7 +43,9 @@ public class SightService extends ServiceSuperclass {
     Woo woo = new Woo("http://woo.hello-poland.pl", "ck_5233b79180ff8b7bef81b28fe7222b2eb2b37ebe",
         "cs_2c96f574d729e8bde7b71d96007c172bc12244d9");
     List<Sight> sights = woo.importSights();
+    Random random = new Random();
     for (Sight s : sights) {
+      s.setScore((float) (4.8 + random.nextDouble() / 5));
       Image im = s.getMainImage();
       try {
         im = iService.storeImage(new URL(im.getImageURL()).openConnection().getInputStream(),
