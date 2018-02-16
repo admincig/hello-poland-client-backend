@@ -6,10 +6,12 @@ public class TicketRO {
   public Long id;
   public String name;
   public Integer price;
+  public Boolean predefinedDate;
 
   public TicketRO(Ticket t) {
     this.id = t.getId();
     this.name = t.getName();
     this.price = t.getPrice();
+    this.predefinedDate = t.isPredefinedDate();
   }
 }

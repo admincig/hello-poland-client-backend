@@ -59,6 +59,11 @@ public class OrderService extends ServiceSuperclass {
     List<Ticket> tickets =
         em.createQuery("from Ticket t join fetch t.sight s where t.id in (:ids) order by s.id asc",
             Ticket.class).setParameter("ids", ticketsIds).getResultList();
+    // fill date of predefined tickets
+    tickets.stream().filter(Ticket::isPredefinedDate).forEach(t -> {
+      tripletsGroupedByTicketId.get(t.getId())
+          .forEach(trip -> trip.second = t.getSight().getDate());
+    });
     Map<Sight, List<Ticket>> ticketsGroupedBySight =
         tickets.stream().collect(groupingBy(Ticket::getSight));
     Map<Long, Ticket> ticketIdToObject = tickets.stream().collect(toMap(Ticket::getId, t -> t));

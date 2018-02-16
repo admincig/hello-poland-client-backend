@@ -57,6 +57,7 @@ public class SightService extends ServiceSuperclass {
       t.setName("Bilet");
       t.setSight(s);
       t.setPrice(s.getMinPrice());
+      t.setPredefinedDate(true);
       em.persist(t);
     }
   }
