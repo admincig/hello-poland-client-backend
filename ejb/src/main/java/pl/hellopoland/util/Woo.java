@@ -60,7 +60,7 @@ public class Woo {
         sight.setExternalId(Long.valueOf(map.get("id").toString()));
         sight.setName((String) map.get("name"));
         sight.setDescription(Utils.clearHtml((String) map.get("description")));
-        sight.setMinPrice(Integer.valueOf((String) map.get("price".toString())));
+        sight.setMinPrice((int) (100 * Double.valueOf((String) map.get("price".toString()))));
 
         List listOfImages = (List) map.get("images");
         Map mapOfOneImage = (Map) listOfImages.get(0);

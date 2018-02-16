@@ -53,6 +53,11 @@ public class SightService extends ServiceSuperclass {
         s.setMainImage(null);
       }
       em.persist(s);
+      Ticket t = new Ticket();
+      t.setName("Bilet");
+      t.setSight(s);
+      t.setPrice(s.getMinPrice());
+      em.persist(t);
     }
   }
 }
