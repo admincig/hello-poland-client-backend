@@ -21,6 +21,7 @@ import pl.hellopoland.sight.Ticket;
 import pl.hellopoland.user.User;
 import pl.hellopoland.user.UserService;
 import pl.hellopoland.util.Triplet;
+import pl.hellopoland.util.Woo;
 
 @LocalBean
 @Stateless
@@ -82,6 +83,8 @@ public class OrderService extends ServiceSuperclass {
         }
       }
     }
+    Woo woo = new Woo("", "", "");
+    woo.placeOrder(o);
     // TODO place order in external API and throw ConflictingException when failed
     return o;
   }

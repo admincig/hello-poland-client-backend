@@ -34,7 +34,6 @@ public class Sight extends ModelSuperclass {
   private String phone;
   @OneToMany(mappedBy = "sight")
   private Collection<OpeningHours> openingHours;
-
   private Date date;
   private Long externalId;
 
