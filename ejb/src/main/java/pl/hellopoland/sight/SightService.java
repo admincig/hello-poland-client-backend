@@ -1,6 +1,7 @@
 package pl.hellopoland.sight;
 
 import java.net.URL;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import javax.annotation.security.PermitAll;
@@ -40,14 +41,22 @@ public class SightService extends ServiceSuperclass {
 
   @PermitAll
   public void runImporter() {
+    logger.info("Importing from woo.hello-poland.pl");
     Woo woo = new Woo("http://woo.hello-poland.pl", "ck_5233b79180ff8b7bef81b28fe7222b2eb2b37ebe",
         "cs_2c96f574d729e8bde7b71d96007c172bc12244d9");
     List<Sight> sights = woo.importSights();
     Random random = new Random();
     for (Sight s : sights) {
+      logger.info(s.getName());
+      if (s.getDate().before(new Date())) {
+        logger.info("Omitting. Event in past");
+        continue;
+      }
+
       s.setScore((float) (4.8 + random.nextDouble() / 5));
       Image im = s.getMainImage();
       try {
+        logger.info("Downloading image " + im.getImageURL());
         im = iService.storeImage(new URL(im.getImageURL()).openConnection().getInputStream(),
             "jpg");
         s.setMainImage(im);
@@ -57,11 +66,12 @@ public class SightService extends ServiceSuperclass {
       }
       em.persist(s);
       Ticket t = new Ticket();
-      t.setName("Bilet");
+      t.setName("Normalny");
       t.setSight(s);
       t.setPrice(s.getMinPrice());
       t.setPredefinedDate(true);
       em.persist(t);
     }
+    logger.info("Finished import");
   }
 }
