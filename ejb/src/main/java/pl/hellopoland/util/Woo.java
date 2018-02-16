@@ -15,6 +15,7 @@ import com.icoderman.woocommerce.WooCommerce;
 import com.icoderman.woocommerce.WooCommerceAPI;
 import com.icoderman.woocommerce.oauth.OAuthConfig;
 import pl.hellopoland.image.Image;
+import pl.hellopoland.order.OrderDetails;
 import pl.hellopoland.sight.Sight;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
@@ -37,7 +38,10 @@ public class Woo {
 
   public Map<String, Object> placeOrder(pl.hellopoland.order.Order o) {
     OrderPlacer.Order order = orderPlacer.new Order();
-    // TODO convert pl.hellopoland.order.Order to pl.hellopoland.util.Woo.OrderPlacer.Order
+    OrderDetails details = o.getDetails();
+    order.addBilling(details.getFirstName(), details.getLastName(), null, null, details.getCity(),
+        null, null, details.getCountry(), details.getEmail(), details.getPhone());
+    // TODO add products
     return orderPlacer.run(order);
   }
 
