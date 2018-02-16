@@ -1,6 +1,7 @@
 package pl.hellopoland.sight;
 
 import java.util.Collection;
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -33,6 +34,8 @@ public class Sight extends ModelSuperclass {
   private String phone;
   @OneToMany(mappedBy = "sight")
   private Collection<OpeningHours> openingHours;
+  private Date date;
+  private Long externalId;
 
   public String getName() {
     return name;
@@ -128,6 +131,22 @@ public class Sight extends ModelSuperclass {
 
   public void setPhone(String phone) {
     this.phone = phone;
+  }
+
+  public Date getDate() {
+    return date;
+  }
+
+  public void setDate(Date date) {
+    this.date = date;
+  }
+
+  public Long getExternalId() {
+    return externalId;
+  }
+
+  public void setExternalId(Long externalId) {
+    this.externalId = externalId;
   }
 
 

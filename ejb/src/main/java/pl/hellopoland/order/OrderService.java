@@ -93,6 +93,8 @@ public class OrderService extends ServiceSuperclass {
       }
     }
 
+    // Woo woo = new Woo("", "", "");
+    // woo.placeOrder(o);
     // TODO place order in external API and throw ConflictingException when failed
     return o;
   }
