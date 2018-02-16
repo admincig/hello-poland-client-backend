@@ -105,6 +105,4 @@ public class WooCommerceProductsImporter {
   //
   // return null;
   // }
-
-
 }

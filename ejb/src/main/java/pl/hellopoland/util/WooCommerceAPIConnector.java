@@ -32,4 +32,7 @@ public class WooCommerceAPIConnector {
     return client.getAll(EndpointBaseType.ORDERS.getValue());
   }
 
+  public Map createOrder(Map<String, Object> map) {
+    return client.create(EndpointBaseType.ORDERS.getValue(), map);
+  }
 }
