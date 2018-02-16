@@ -100,10 +100,10 @@ public class WooCommerceOrder {
     Map<String, Object> shipping_line = new LinkedHashMap<>();
     shipping_line.put("method_id", method_id);
     shipping_line.put("method_title", method_title);
-    ((List<Map<String, Object>>) map.get("shipping_line")).add(shipping_line);
+    ((List<Map<String, Object>>) map.get("shipping_lines")).add(shipping_line);
   }
 
   public List<Map<String, Object>> getShippingLines() {
-    return (List<Map<String, Object>>) map.get("shipping_line");
+    return (List<Map<String, Object>>) map.get("shipping_lines");
   }
 }

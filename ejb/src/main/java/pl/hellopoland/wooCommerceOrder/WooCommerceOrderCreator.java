@@ -1,6 +1,8 @@
 package pl.hellopoland.wooCommerceOrder;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import pl.hellopoland.util.WooCommerceAPIConnector;
 
@@ -17,12 +19,24 @@ public class WooCommerceOrderCreator {
     setConnector(url, key, secret);
     WooCommerceOrder order = new WooCommerceOrder();
 
+    // WYWOŁANIE BŁĘDU (DO USUNIĘCIA) //////////
+    if (!order.getAsMap().containsKey("shipping_lines")) {
+      order.getAsMap().put("shipping_lines", new ArrayList<Map<String, Object>>());
+    }
+    Map<String, Object> shipping_line = new LinkedHashMap<>();
+    shipping_line.put("method_id", 0);
+    shipping_line.put("method_title", 0);
+    ((List<Map<String, Object>>) order.getAsMap().get("shipping_lines")).add(shipping_line);
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     // VALIDATION
+    Map<String, Object> mapWithOrder = wooCommerceAPIConnector.createOrder(order.getAsMap());
     LinkedHashMap<String, Object> mapWithData =
-        (LinkedHashMap<String, Object>) order.getAsMap().get("data");
+        (LinkedHashMap<String, Object>) mapWithOrder.get("data");
     Integer statusCode = (Integer) mapWithData.get("status");
     if (statusCode >= 300) {
       // throw new Exception();
+      System.out.println("Złapałem");
       return null;
     }
 
@@ -46,12 +60,9 @@ public class WooCommerceOrderCreator {
     createOrder(url, key, secret);
     // System.out.print(createOrder(url, key, secret));
 
-
-
     getAllOrders(url, key, secret);
     System.out.println("koniec");
 
-    // System.out.println(mapWithOrder());
   }
 
 }
