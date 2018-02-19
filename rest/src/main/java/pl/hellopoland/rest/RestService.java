@@ -74,12 +74,6 @@ public class RestService {
     return search(new SightsPagedCollectionConfig());
   }
 
-  @GET
-  @Path("/sights/import")
-  public void runImporter() {
-    fService.runImporter();
-  }
-
   @POST
   @Path("/sights/search")
   public PagedCollection search(SightsPagedCollectionConfig config) {
@@ -101,6 +95,13 @@ public class RestService {
     Collection<Triplet<Long, Date, Integer>> tickets = iro.entries.stream()
         .map(e -> new Triplet<>(e.id, e.date, e.quantity)).collect(Collectors.toList());
     return new OrderORO(oService.create(tickets, iro.details));
+  }
+
+  @POST
+  @Path("/orders/{hash}/ackPayment")
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+  public void ackPayment(@PathParam("hash") String hash, String ack) throws Exception {
+    oService.ack(hash, ack);
   }
 
   @GET

@@ -22,6 +22,7 @@ public class OrderSightEntry extends ModelSuperclass {
   private Collection<OrderDateEntry> entries;
   @ManyToOne(optional = false)
   private Order order;
+  private Long externalId;
 
 
   public Sight getSight() {
@@ -47,6 +48,14 @@ public class OrderSightEntry extends ModelSuperclass {
 
   public void setOrder(Order order) {
     this.order = order;
+  }
+
+  public Long getExternalId() {
+    return externalId;
+  }
+
+  public void setExternalId(Long externalId) {
+    this.externalId = externalId;
   }
 
   public Integer getSum() {

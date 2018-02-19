@@ -3,6 +3,8 @@ package pl.hellopoland.order;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -17,13 +19,14 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
-import pl.hellopoland.ConflictingException;
+import javax.ws.rs.core.MediaType;
 import pl.hellopoland.ServiceSuperclass;
 import pl.hellopoland.sight.Portal;
 import pl.hellopoland.sight.Sight;
 import pl.hellopoland.sight.Ticket;
 import pl.hellopoland.user.User;
 import pl.hellopoland.user.UserService;
+import pl.hellopoland.util.PaymentUtils;
 import pl.hellopoland.util.Triplet;
 import pl.hellopoland.util.Woo;
 
@@ -37,9 +40,9 @@ public class OrderService extends ServiceSuperclass {
   @PermitAll
   public Order create(Collection<Triplet<Long, Date, Integer>> triplets, OrderDetails details) {
     // DEVELOPER'S PURPOSES ONLY
-    if (new Random().nextDouble() > 0.9) {
-      throw new ConflictingException("Brak wolnych biletów na ten dzień");
-    }
+    // if (new Random().nextDouble() > 0.9) {
+    // throw new ConflictingException("Brak wolnych biletów na ten dzień");
+    // }
 
     User user = null;
     try {
@@ -120,7 +123,12 @@ public class OrderService extends ServiceSuperclass {
       }
       logger.info("Placing external order in " + portal.getName());
       Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
-      logger.info(woo.placeOrder(o.getDetails(), orderEntries).toString());
+      Map<String, Object> resp = woo.placeOrder(o.getDetails(), orderEntries);
+      logger.info(resp.toString());
+      Long id = (Long) resp.get("id");
+      if (id != null) {
+        entry.getValue().forEach(ose -> ose.setExternalId(id));
+      }
     }
   }
 
@@ -162,4 +170,67 @@ public class OrderService extends ServiceSuperclass {
   public void deleteOrderDateEntry(long id) {
     em.find(OrderDateEntry.class, id).setDeleted(true);
   }
+
+  @PermitAll
+  public void ack(String hash, String ack) throws Exception {
+    logger.info("Got ack from P24");
+    Map<String, String> ackMap = PaymentUtils.queryToMap(ack);
+
+    // TODO fill statement title or something
+    // p24_order_id, p24_statement
+
+    logger.info("confirming payment");
+    StringBuilder signBuilder = new StringBuilder();
+    signBuilder.append(ackMap.get("p24_session_id")).append("|");
+    signBuilder.append(ackMap.get("p24_order_id")).append("|");
+    signBuilder.append(ackMap.get("p24_amount")).append("|");
+    signBuilder.append(ackMap.get("p24_currency")).append("|");
+    signBuilder.append(properties.getProperty("przelewy24.crc"));
+    String p24_sign = PaymentUtils.MD5(signBuilder.toString());
+
+    ackMap.remove("p24_method");
+    ackMap.remove("p24_statement");
+    ackMap.put("p24_sign", p24_sign);
+
+    URL url = new URL(properties.getProperty("przelewy24.confirmation.endpoint"));
+    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    conn.addRequestProperty("Accept", MediaType.APPLICATION_FORM_URLENCODED);
+    conn.addRequestProperty("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
+    conn.setDoOutput(true);
+    conn.getOutputStream().write(PaymentUtils.mapToQuery(ackMap).getBytes());
+    logger.info("" + conn.getResponseCode());
+    String resp = conn.getResponseMessage();
+    if (resp.equals("error=0")) {
+      logger.info("transaction confirmed. successful");
+      Order order = findByHash(hash);
+      order.setPaymentConfirmed(true);
+      confirmInExternalAPI(order);
+      // TODO send mail or something
+    } else {
+      logger.warning("transaction problem.");
+      // TODO handle failure
+    }
+  }
+
+  private void confirmInExternalAPI(Order order) {
+    logger.info("Checking if any of order sight entries ought to be confirmed in external API");
+    Map<Portal, List<OrderSightEntry>> groupedByPortal =
+        order.getEntries().stream().filter(ose -> ose.getSight().getPortal() != null)
+            .collect(groupingBy(ose -> ose.getSight().getPortal()));
+    for (Map.Entry<Portal, List<OrderSightEntry>> entry : groupedByPortal.entrySet()) {
+      Portal portal = entry.getKey();
+      logger.info("Placing external order in " + portal.getName());
+      Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
+
+      // they have same id. should have
+      Long id = entry.getValue().stream().map(OrderSightEntry::getExternalId).findFirst().get();
+      logger.info(woo.confirm(id).toString());
+    }
+
+  }
+
+  private Order findByHash(String hash) {
+    return em.createQuery("from Order where hash=:hash", Order.class).getSingleResult();
+  }
+
 }

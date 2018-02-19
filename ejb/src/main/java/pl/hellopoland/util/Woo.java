@@ -38,6 +38,10 @@ public class Woo {
     return orderPlacer.checkAvailability(productId);
   }
 
+  public Map<String, Object> confirm(long id) {
+    return orderPlacer.confirm(id);
+  }
+
   public Map<String, Object> placeOrder(OrderDetails details, List<OrderEntry> entries) {
     OrderPlacer.Order order = orderPlacer.new Order();
     String phone = details.getPhone() == null ? "" : details.getPhone();
@@ -94,6 +98,10 @@ public class Woo {
 
     private Map<String, Object> place(Order order) {
       return connector.createOrder(order);
+    }
+
+    public Map<String, Object> confirm(long id) {
+      return connector.confirmOrder(id);
     }
 
     private boolean checkAvailability(int id) {
@@ -211,6 +219,11 @@ public class Woo {
       this.client = new WooCommerceAPI(new OAuthConfig(url, key, secret));
     }
 
+    public Map<String, Object> confirmOrder(Long id) {
+      return client.update(EndpointBaseType.ORDERS.getValue(), id.intValue(),
+          Map.of("status", "processing"));
+    }
+
     private boolean checkAvailability(int id) {
       Map productProperties = client.get(EndpointBaseType.PRODUCTS.getValue(), id);
       return productProperties.get("in_stock").equals(true);
@@ -256,4 +269,5 @@ public class Woo {
       return text.replaceAll("\\<[^>]*>", "").replaceAll("&nbsp;", " ");
     }
   }
+
 }

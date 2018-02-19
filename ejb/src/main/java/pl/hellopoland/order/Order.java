@@ -27,6 +27,8 @@ public class Order extends ModelSuperclass {
   private OrderDetails details;
   @ManyToOne
   private User user;
+  @NotNull
+  private boolean paymentConfirmed;
 
   public Collection<OrderSightEntry> getEntries() {
     return entries;
@@ -65,6 +67,14 @@ public class Order extends ModelSuperclass {
       return 0;
     }
     return entries.stream().collect(Collectors.summingInt(OrderSightEntry::getSum));
+  }
+
+  public boolean isPaymentConfirmed() {
+    return paymentConfirmed;
+  }
+
+  public void setPaymentConfirmed(boolean paymentConfirmed) {
+    this.paymentConfirmed = paymentConfirmed;
   }
 
   public void generateHash() {
