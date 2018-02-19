@@ -96,12 +96,15 @@ public class OrderService extends ServiceSuperclass {
     }
 
     em.refresh(o);
+    logger.info("Checking if any of order sight entries ought to be places in external API");
     for (OrderSightEntry ose : o.getEntries()) {
       Portal portal = ose.getSight().getPortal();
       if (portal != null) { // place order in woo
-        logger.info("Placing order in external portal");
+        logger.info("Placing order in external portal for " + ose.getSight().getName());
         Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
         logger.info(woo.placeOrder(ose).toString());
+      } else {
+        logger.info(ose.getSight().getName() + "doesn't have external connection.");
       }
     }
 
@@ -124,8 +127,8 @@ public class OrderService extends ServiceSuperclass {
   }
 
   @RolesAllowed("user")
-  public OrderDateEntry getOrderSightDateEntry(long id) {
-    String queryString = "from OrderSightDateEntry where deleted=false and id=:id";
+  public OrderDateEntry getOrderDateEntry(long id) {
+    String queryString = "from OrderDateEntry where deleted=false and id=:id";
     OrderDateEntry de =
         em.createQuery(queryString, OrderDateEntry.class).setParameter("id", id).getSingleResult();
 
@@ -136,14 +139,14 @@ public class OrderService extends ServiceSuperclass {
   @RolesAllowed("user")
   public List<OrderDateEntry> getOrderSightDateEntries() {
     List<OrderDateEntry> osdes = em.createQuery(
-        "from OrderSightDateEntry osde join fetch osde.sightEntry ose join fetch ose.sight s join fetch ose.order o where osde.deleted=false and o.user=:user order by osde.date asc",
+        "from OrderDateEntry osde join fetch osde.sightEntry ose join fetch ose.sight s join fetch ose.order o where osde.deleted=false and o.user=:user order by osde.date asc",
         OrderDateEntry.class).setParameter("user", uService.me()).getResultList();
     osdes.forEach(osde -> osde.getEntries().size());
     return osdes;
   }
 
   @RolesAllowed("user")
-  public void deleteOrderSightDateEntry(long id) {
+  public void deleteOrderDateEntry(long id) {
     em.find(OrderDateEntry.class, id).setDeleted(true);
   }
 }

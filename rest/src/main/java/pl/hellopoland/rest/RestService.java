@@ -25,10 +25,10 @@ import pl.hellopoland.config.SightsPagedCollectionConfig;
 import pl.hellopoland.image.ImageService;
 import pl.hellopoland.order.OrderService;
 import pl.hellopoland.rest.dto.LoginIRO;
+import pl.hellopoland.rest.dto.OrderDateEntryORO;
+import pl.hellopoland.rest.dto.OrderDateEntryOnListingORO;
 import pl.hellopoland.rest.dto.OrderIRO;
 import pl.hellopoland.rest.dto.OrderORO;
-import pl.hellopoland.rest.dto.OrderSightDateEntryORO;
-import pl.hellopoland.rest.dto.OrderSightDateEntryOnListingORO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.rest.dto.SightOnListingRO;
 import pl.hellopoland.rest.dto.SightRO;
@@ -105,21 +105,21 @@ public class RestService {
 
   @GET
   @Path("/tickets")
-  public List<OrderSightDateEntryOnListingORO> tickets() {
-    return oService.getOrderSightDateEntries().stream().map(OrderSightDateEntryOnListingORO::new)
+  public List<OrderDateEntryOnListingORO> tickets() {
+    return oService.getOrderSightDateEntries().stream().map(OrderDateEntryOnListingORO::new)
         .collect(Collectors.toList());
   }
 
   @GET
   @Path("/tickets/{id}")
-  public OrderSightDateEntryORO ticket(@PathParam("id") Long id) {
-    return new OrderSightDateEntryORO(oService.getOrderSightDateEntry(id));
+  public OrderDateEntryORO ticket(@PathParam("id") Long id) {
+    return new OrderDateEntryORO(oService.getOrderDateEntry(id));
   }
 
   @DELETE
   @Path("/tickets/{id}")
   public void deleteTicket(@PathParam("id") Long id) {
-    oService.deleteOrderSightDateEntry(id);
+    oService.deleteOrderDateEntry(id);
   }
 
   @GET
