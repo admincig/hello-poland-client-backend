@@ -15,10 +15,8 @@ import com.icoderman.woocommerce.WooCommerce;
 import com.icoderman.woocommerce.WooCommerceAPI;
 import com.icoderman.woocommerce.oauth.OAuthConfig;
 import pl.hellopoland.image.Image;
-import pl.hellopoland.order.OrderDateEntry;
 import pl.hellopoland.order.OrderDetails;
 import pl.hellopoland.order.OrderEntry;
-import pl.hellopoland.order.OrderSightEntry;
 import pl.hellopoland.sight.Sight;
 import pl.hellopoland.sight.Ticket;
 
@@ -40,16 +38,13 @@ public class Woo {
     return orderPlacer.checkAvailability(productId);
   }
 
-  public Map<String, Object> placeOrder(OrderSightEntry ose) {
+  public Map<String, Object> placeOrder(OrderDetails details, List<OrderEntry> entries) {
     OrderPlacer.Order order = orderPlacer.new Order();
-    OrderDetails details = ose.getOrder().getDetails();
     order.addBilling(details.getFirstName(), details.getLastName(), "", "", details.getCity(), "",
         "", details.getCountry(), details.getEmail(), details.getPhone());
 
-    for (OrderDateEntry ode : ose.getEntries()) {
-      for (OrderEntry oe : ode.getEntries()) {
-        order.addLineItem(oe.getExternalId().intValue(), oe.getQuantity());
-      }
+    for (OrderEntry oe : entries) {
+      order.addLineItem(oe.getExternalId().intValue(), oe.getQuantity());
     }
     return orderPlacer.place(order);
   }

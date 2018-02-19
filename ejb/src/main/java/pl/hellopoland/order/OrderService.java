@@ -3,6 +3,7 @@ package pl.hellopoland.order;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -106,15 +107,20 @@ public class OrderService extends ServiceSuperclass {
 
   private void placeInExternalAPI(Order o) {
     logger.info("Checking if any of order sight entries ought to be placed in external API");
-    for (OrderSightEntry ose : o.getEntries()) {
-      Portal portal = ose.getSight().getPortal();
-      if (portal != null) { // place order in woo
-        logger.info("Placing order in external portal for " + ose.getSight().getName());
-        Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
-        logger.info(woo.placeOrder(ose).toString());
-      } else {
-        logger.info(ose.getSight().getName() + "doesn't have external connection.");
+    Map<Portal, List<OrderSightEntry>> groupedByPortal =
+        o.getEntries().stream().filter(ose -> ose.getSight().getPortal() != null)
+            .collect(groupingBy(ose -> ose.getSight().getPortal()));
+    for (Map.Entry<Portal, List<OrderSightEntry>> entry : groupedByPortal.entrySet()) {
+      Portal portal = entry.getKey();
+      List<OrderEntry> orderEntries = new ArrayList<>();
+      for (OrderSightEntry se : entry.getValue()) {
+        for (OrderDateEntry de : se.getEntries()) {
+          orderEntries.addAll(de.getEntries());
+        }
       }
+      logger.info("Placing external order in " + portal.getName());
+      Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
+      logger.info(woo.placeOrder(o.getDetails(), orderEntries).toString());
     }
   }
 
