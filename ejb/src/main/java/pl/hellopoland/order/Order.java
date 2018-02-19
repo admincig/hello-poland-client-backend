@@ -1,8 +1,10 @@
 package pl.hellopoland.order;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import javax.persistence.CascadeType;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
@@ -17,7 +19,7 @@ import pl.hellopoland.user.User;
 public class Order extends ModelSuperclass {
   private static final long serialVersionUID = 3824722747352862154L;
 
-  @OneToMany(mappedBy = "sight")
+  @OneToMany(mappedBy = "sight", cascade = CascadeType.REFRESH)
   private Collection<OrderSightEntry> entries;
   @NotNull
   private String hash;
@@ -67,5 +69,12 @@ public class Order extends ModelSuperclass {
 
   public void generateHash() {
     this.hash = UUID.randomUUID().toString();
+  }
+
+  public void addEntry(OrderSightEntry entry) {
+    if (this.getEntries() == null) {
+      this.setEntries(new ArrayList<>());
+    }
+    this.getEntries().add(entry);
   }
 }

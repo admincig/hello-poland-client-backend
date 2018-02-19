@@ -36,7 +36,7 @@ public class OrderService extends ServiceSuperclass {
   @PermitAll
   public Order create(Collection<Triplet<Long, Date, Integer>> triplets, OrderDetails details) {
     // DEVELOPER'S PURPOSES ONLY
-    if (new Random().nextDouble() > 0.5) {
+    if (new Random().nextDouble() > 0.9) {
       throw new ConflictingException("Brak wolnych biletów na ten dzień");
     }
 
@@ -69,6 +69,7 @@ public class OrderService extends ServiceSuperclass {
       ose.setOrder(o);
       ose.setSight(entry.getKey());
       em.persist(ose);
+      o.addEntry(ose);
 
       List<Long> ticketsOfSight = entry.getValue().stream().map(Ticket::getId).collect(toList());
       Map<Date, List<Triplet<Long, Date, Integer>>> inSightGroupedByDate = triplets.stream()
@@ -80,23 +81,31 @@ public class OrderService extends ServiceSuperclass {
           dateEntry.setDate(inSightOnDate.getKey());
           dateEntry.setSightEntry(ose);
           em.persist(dateEntry);
+          ose.addEntry(dateEntry);
+
           for (Triplet<Long, Date, Integer> trip : inSightOnDate.getValue()) {
+            Ticket ticket = ticketIdToObject.get(trip.first);
             OrderEntry oe = new OrderEntry();
-            oe.setName(ticketIdToObject.get(trip.first).getName());
+            oe.setName(ticket.getName());
             oe.setQuantity(trip.third);
-            oe.setUnitPrice(ticketIdToObject.get(trip.first).getPrice());
+            oe.setUnitPrice(ticket.getPrice());
             oe.setDateEntry(dateEntry);
+            oe.setExternalId(ticket.getExternalId());
             for (int i = 0; i < oe.getQuantity(); i++) {
               oe.addNumber("" + Math.abs(random.nextLong()));
             }
             em.persist(oe);
+            dateEntry.addEntry(oe);
           }
         }
       }
     }
+    placeInExternalAPI(o);
+    return o;
+  }
 
-    em.refresh(o);
-    logger.info("Checking if any of order sight entries ought to be places in external API");
+  private void placeInExternalAPI(Order o) {
+    logger.info("Checking if any of order sight entries ought to be placed in external API");
     for (OrderSightEntry ose : o.getEntries()) {
       Portal portal = ose.getSight().getPortal();
       if (portal != null) { // place order in woo
@@ -107,8 +116,6 @@ public class OrderService extends ServiceSuperclass {
         logger.info(ose.getSight().getName() + "doesn't have external connection.");
       }
     }
-
-    return o;
   }
 
   @RolesAllowed("user")

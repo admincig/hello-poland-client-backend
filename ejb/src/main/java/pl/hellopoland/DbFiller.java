@@ -12,6 +12,7 @@ import pl.hellopoland.sight.OpeningHours;
 import pl.hellopoland.sight.Portal;
 import pl.hellopoland.sight.Sight;
 import pl.hellopoland.sight.SightLocation;
+import pl.hellopoland.sight.SightService;
 import pl.hellopoland.sight.Ticket;
 
 @Startup
@@ -20,6 +21,8 @@ public class DbFiller extends ServiceSuperclass {
 
   @Inject
   ImageService iService;
+  @Inject
+  SightService sService;
 
 
   @PostConstruct
@@ -34,8 +37,14 @@ public class DbFiller extends ServiceSuperclass {
     createZoo();
     createHydropolis();
     createPortals();
+    runImporter();
 
     logger.info("dbfiller finished");
+  }
+
+
+  private void runImporter() {
+    sService.runImporter();
   }
 
 

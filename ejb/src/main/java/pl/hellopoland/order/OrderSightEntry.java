@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
@@ -17,7 +18,7 @@ public class OrderSightEntry extends ModelSuperclass {
 
   @ManyToOne(optional = false, fetch = FetchType.EAGER)
   private Sight sight;
-  @OneToMany(mappedBy = "sightEntry")
+  @OneToMany(mappedBy = "sightEntry", cascade = CascadeType.REFRESH)
   private Collection<OrderDateEntry> entries;
   @ManyToOne(optional = false)
   private Order order;
@@ -57,6 +58,13 @@ public class OrderSightEntry extends ModelSuperclass {
       entries.addAll(e.getEntries());
     }
     return entries.stream().collect(Collectors.summingInt(OrderEntry::getSum));
+  }
+
+  public void addEntry(OrderDateEntry entry) {
+    if (this.getEntries() == null) {
+      this.setEntries(new ArrayList<>());
+    }
+    this.getEntries().add(entry);
   }
 
 }

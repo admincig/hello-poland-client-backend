@@ -43,8 +43,8 @@ public class Woo {
   public Map<String, Object> placeOrder(OrderSightEntry ose) {
     OrderPlacer.Order order = orderPlacer.new Order();
     OrderDetails details = ose.getOrder().getDetails();
-    order.addBilling(details.getFirstName(), details.getLastName(), null, null, details.getCity(),
-        null, null, details.getCountry(), details.getEmail(), details.getPhone());
+    order.addBilling(details.getFirstName(), details.getLastName(), "", "", details.getCity(), "",
+        "", details.getCountry(), details.getEmail(), details.getPhone());
 
     for (OrderDateEntry ode : ose.getEntries()) {
       for (OrderEntry oe : ode.getEntries()) {
