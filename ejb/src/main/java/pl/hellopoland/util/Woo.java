@@ -40,12 +40,11 @@ public class Woo {
 
   public Map<String, Object> placeOrder(OrderDetails details, List<OrderEntry> entries) {
     OrderPlacer.Order order = orderPlacer.new Order();
-    String phone = details.getPhone();
-    if (details.getPhone() == null) {
-      phone = "";
-    }
-    order.addBilling(details.getFirstName(), details.getLastName(), "", "", details.getCity(), "",
-        "", details.getCountry(), details.getEmail(), phone);
+    String phone = details.getPhone() == null ? "" : details.getPhone();
+    String country = details.getCountry() == null ? "" : details.getCountry();
+    String city = details.getCity() == null ? "" : details.getCity();
+    order.addBilling(details.getFirstName(), details.getLastName(), "", "", city, "", "", country,
+        details.getEmail(), phone);
 
     for (OrderEntry oe : entries) {
       order.addLineItem(oe.getExternalId().intValue(), oe.getQuantity());
