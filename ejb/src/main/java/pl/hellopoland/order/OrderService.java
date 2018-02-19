@@ -18,11 +18,13 @@ import javax.inject.Inject;
 import javax.persistence.NoResultException;
 import pl.hellopoland.ConflictingException;
 import pl.hellopoland.ServiceSuperclass;
+import pl.hellopoland.sight.Portal;
 import pl.hellopoland.sight.Sight;
 import pl.hellopoland.sight.Ticket;
 import pl.hellopoland.user.User;
 import pl.hellopoland.user.UserService;
 import pl.hellopoland.util.Triplet;
+import pl.hellopoland.util.Woo;
 
 @LocalBean
 @Stateless
@@ -59,11 +61,6 @@ public class OrderService extends ServiceSuperclass {
     List<Ticket> tickets =
         em.createQuery("from Ticket t join fetch t.sight s where t.id in (:ids) order by s.id asc",
             Ticket.class).setParameter("ids", ticketsIds).getResultList();
-    // fill date of predefined tickets
-    tickets.stream().filter(Ticket::isPredefinedDate).forEach(t -> {
-      tripletsGroupedByTicketId.get(t.getId())
-          .forEach(trip -> trip.second = t.getSight().getDate());
-    });
     Map<Sight, List<Ticket>> ticketsGroupedBySight =
         tickets.stream().collect(groupingBy(Ticket::getSight));
     Map<Long, Ticket> ticketIdToObject = tickets.stream().collect(toMap(Ticket::getId, t -> t));
@@ -79,7 +76,7 @@ public class OrderService extends ServiceSuperclass {
       for (Map.Entry<Date, List<Triplet<Long, Date, Integer>>> inSightOnDate : inSightGroupedByDate
           .entrySet()) {
         if (!inSightOnDate.getValue().isEmpty()) {
-          OrderSightDateEntry dateEntry = new OrderSightDateEntry();
+          OrderDateEntry dateEntry = new OrderDateEntry();
           dateEntry.setDate(inSightOnDate.getKey());
           dateEntry.setSightEntry(ose);
           em.persist(dateEntry);
@@ -98,9 +95,16 @@ public class OrderService extends ServiceSuperclass {
       }
     }
 
-    // Woo woo = new Woo("", "", "");
-    // woo.placeOrder(o);
-    // TODO place order in external API and throw ConflictingException when failed
+    em.refresh(o);
+    for (OrderSightEntry ose : o.getEntries()) {
+      Portal portal = ose.getSight().getPortal();
+      if (portal != null) { // place order in woo
+        logger.info("Placing order in external portal");
+        Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
+        logger.info(woo.placeOrder(ose).toString());
+      }
+    }
+
     return o;
   }
 
@@ -120,26 +124,26 @@ public class OrderService extends ServiceSuperclass {
   }
 
   @RolesAllowed("user")
-  public OrderSightDateEntry getOrderSightDateEntry(long id) {
+  public OrderDateEntry getOrderSightDateEntry(long id) {
     String queryString = "from OrderSightDateEntry where deleted=false and id=:id";
-    OrderSightDateEntry de = em.createQuery(queryString, OrderSightDateEntry.class)
-        .setParameter("id", id).getSingleResult();
+    OrderDateEntry de =
+        em.createQuery(queryString, OrderDateEntry.class).setParameter("id", id).getSingleResult();
 
     de.getEntries().forEach(e -> e.getNumbers().size());
     return de;
   }
 
   @RolesAllowed("user")
-  public List<OrderSightDateEntry> getOrderSightDateEntries() {
-    List<OrderSightDateEntry> osdes = em.createQuery(
+  public List<OrderDateEntry> getOrderSightDateEntries() {
+    List<OrderDateEntry> osdes = em.createQuery(
         "from OrderSightDateEntry osde join fetch osde.sightEntry ose join fetch ose.sight s join fetch ose.order o where osde.deleted=false and o.user=:user order by osde.date asc",
-        OrderSightDateEntry.class).setParameter("user", uService.me()).getResultList();
+        OrderDateEntry.class).setParameter("user", uService.me()).getResultList();
     osdes.forEach(osde -> osde.getEntries().size());
     return osdes;
   }
 
   @RolesAllowed("user")
   public void deleteOrderSightDateEntry(long id) {
-    em.find(OrderSightDateEntry.class, id).setDeleted(true);
+    em.find(OrderDateEntry.class, id).setDeleted(true);
   }
 }

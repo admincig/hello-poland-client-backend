@@ -18,7 +18,7 @@ public class OrderSightEntry extends ModelSuperclass {
   @ManyToOne(optional = false, fetch = FetchType.EAGER)
   private Sight sight;
   @OneToMany(mappedBy = "sightEntry")
-  private Collection<OrderSightDateEntry> entries;
+  private Collection<OrderDateEntry> entries;
   @ManyToOne(optional = false)
   private Order order;
 
@@ -31,11 +31,11 @@ public class OrderSightEntry extends ModelSuperclass {
     this.sight = sight;
   }
 
-  public Collection<OrderSightDateEntry> getEntries() {
+  public Collection<OrderDateEntry> getEntries() {
     return entries;
   }
 
-  public void setEntries(Collection<OrderSightDateEntry> entries) {
+  public void setEntries(Collection<OrderDateEntry> entries) {
     this.entries = entries;
   }
 
@@ -53,7 +53,7 @@ public class OrderSightEntry extends ModelSuperclass {
       return 0;
     }
     List<OrderEntry> entries = new ArrayList<>();
-    for (OrderSightDateEntry e : this.entries) {
+    for (OrderDateEntry e : this.entries) {
       entries.addAll(e.getEntries());
     }
     return entries.stream().collect(Collectors.summingInt(OrderEntry::getSum));

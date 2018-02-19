@@ -1,6 +1,7 @@
 package pl.hellopoland.sight;
 
 import java.net.URL;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -41,37 +42,42 @@ public class SightService extends ServiceSuperclass {
 
   @PermitAll
   public void runImporter() {
-    logger.info("Importing from woo.hello-poland.pl");
-    Woo woo = new Woo("http://woo.hello-poland.pl", "ck_5233b79180ff8b7bef81b28fe7222b2eb2b37ebe",
-        "cs_2c96f574d729e8bde7b71d96007c172bc12244d9");
-    List<Sight> sights = woo.importSights();
-    Random random = new Random();
-    for (Sight s : sights) {
-      logger.info(s.getName());
-      if (s.getDate().before(new Date())) {
-        logger.info("Omitting. Event in past");
-        continue;
+    List<Portal> portals =
+        em.createQuery("from Portal order by id asc", Portal.class).getResultList();
+    for (Portal portal : portals) {
+      logger.info("Importing sights from " + portal.getName());
+      Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
+      List<Sight> sights = woo.importSights();
+      Random random = new Random();
+      for (Sight s : sights) {
+        logger.info(s.getName());
+        boolean anyTicketInFuture =
+            s.getTickets().stream().anyMatch(t -> t.getDate().after(new Date()));
+        if (!anyTicketInFuture) {
+          logger.info("Omitting. All events in past");
+          continue;
+        }
+        s.setPortal(portal);
+        s.setScore((float) (4.8 + random.nextDouble() / 5));
+        Image im = s.getMainImage();
+        try {
+          logger.info("Downloading image " + im.getImageURL());
+          im = iService.storeImage(new URL(im.getImageURL()).openConnection().getInputStream(),
+              "jpg");
+          s.setMainImage(im);
+        } catch (Exception e) {
+          logger.warning(e.getMessage());
+          s.setMainImage(null);
+        }
+        Collection<Ticket> tickets = s.getTickets();
+        em.persist(s);
+        tickets.forEach(t -> {
+          t.setSight(s);
+          em.persist(t);
+        });
       }
-
-      s.setScore((float) (4.8 + random.nextDouble() / 5));
-      Image im = s.getMainImage();
-      try {
-        logger.info("Downloading image " + im.getImageURL());
-        im = iService.storeImage(new URL(im.getImageURL()).openConnection().getInputStream(),
-            "jpg");
-        s.setMainImage(im);
-      } catch (Exception e) {
-        logger.warning(e.getMessage());
-        s.setMainImage(null);
-      }
-      em.persist(s);
-      Ticket t = new Ticket();
-      t.setName("Normalny");
-      t.setSight(s);
-      t.setPrice(s.getMinPrice());
-      t.setPredefinedDate(true);
-      em.persist(t);
+      logger.info("Finished import of " + portal.getName());
     }
-    logger.info("Finished import");
+    logger.info("Finished all imports");
   }
 }

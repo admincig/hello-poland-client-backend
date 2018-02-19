@@ -15,8 +15,12 @@ import com.icoderman.woocommerce.WooCommerce;
 import com.icoderman.woocommerce.WooCommerceAPI;
 import com.icoderman.woocommerce.oauth.OAuthConfig;
 import pl.hellopoland.image.Image;
+import pl.hellopoland.order.OrderDateEntry;
 import pl.hellopoland.order.OrderDetails;
+import pl.hellopoland.order.OrderEntry;
+import pl.hellopoland.order.OrderSightEntry;
 import pl.hellopoland.sight.Sight;
+import pl.hellopoland.sight.Ticket;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class Woo {
@@ -36,13 +40,18 @@ public class Woo {
     return orderPlacer.checkAvailability(productId);
   }
 
-  public Map<String, Object> placeOrder(pl.hellopoland.order.Order o) {
+  public Map<String, Object> placeOrder(OrderSightEntry ose) {
     OrderPlacer.Order order = orderPlacer.new Order();
-    OrderDetails details = o.getDetails();
+    OrderDetails details = ose.getOrder().getDetails();
     order.addBilling(details.getFirstName(), details.getLastName(), null, null, details.getCity(),
         null, null, details.getCountry(), details.getEmail(), details.getPhone());
-    // TODO add products
-    return orderPlacer.run(order);
+
+    for (OrderDateEntry ode : ose.getEntries()) {
+      for (OrderEntry oe : ode.getEntries()) {
+        order.addLineItem(oe.getExternalId().intValue(), oe.getQuantity());
+      }
+    }
+    return orderPlacer.place(order);
   }
 
   public List<Sight> importSights() {
@@ -57,17 +66,25 @@ public class Woo {
 
       for (Map<String, Object> map : list) {
         Sight sight = new Sight();
-        sight.setExternalId(Long.valueOf(map.get("id").toString()));
         sight.setName((String) map.get("name"));
         sight.setDescription(Utils.clearHtml((String) map.get("description")));
         sight.setMinPrice((int) (100 * Double.valueOf((String) map.get("price".toString()))));
+
+        Ticket ticket = new Ticket();
+        ticket.setName("Normalny");
+        ticket.setSight(sight);
+        ticket.setPrice(sight.getMinPrice());
+        ticket.setPredefinedDate(true);
+        ticket.setExternalId(Long.valueOf(map.get("id").toString()));
+        ticket.setDate(Utils.getDateFromSightName((String) map.get("name")));
+        sight.setTickets(new ArrayList<>());
+        sight.getTickets().add(ticket);
 
         List listOfImages = (List) map.get("images");
         Map mapOfOneImage = (Map) listOfImages.get(0);
         Image image = new Image();
         image.setImageURL((String) mapOfOneImage.get("src"));
         sight.setMainImage(image);
-        sight.setDate(Utils.getDateFromSightName((String) map.get("name")));
 
         listOfSights.add(sight);
       }
@@ -77,7 +94,7 @@ public class Woo {
 
   private class OrderPlacer {
 
-    private Map<String, Object> run(Order order) {
+    private Map<String, Object> place(Order order) {
       return connector.createOrder(order);
     }
 

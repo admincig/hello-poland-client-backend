@@ -7,11 +7,15 @@ public class TicketRO {
   public String name;
   public Integer price;
   public Boolean predefinedDate;
+  public String date;
 
   public TicketRO(Ticket t) {
     this.id = t.getId();
     this.name = t.getName();
     this.price = t.getPrice();
     this.predefinedDate = t.isPredefinedDate();
+    if (this.predefinedDate) {
+      this.date = DtoUtils.df.format(t.getDate());
+    }
   }
 }

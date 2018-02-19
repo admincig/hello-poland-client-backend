@@ -8,9 +8,10 @@ import javax.inject.Inject;
 import pl.hellopoland.image.Image;
 import pl.hellopoland.image.ImageService;
 import pl.hellopoland.sight.Agreement;
-import pl.hellopoland.sight.SightLocation;
 import pl.hellopoland.sight.OpeningHours;
+import pl.hellopoland.sight.Portal;
 import pl.hellopoland.sight.Sight;
+import pl.hellopoland.sight.SightLocation;
 import pl.hellopoland.sight.Ticket;
 
 @Startup
@@ -32,8 +33,24 @@ public class DbFiller extends ServiceSuperclass {
     createKolejkowo();
     createZoo();
     createHydropolis();
+    createPortals();
 
     logger.info("dbfiller finished");
+  }
+
+
+  private void createPortals() {
+    createWooHelloPoland();
+  }
+
+
+  private void createWooHelloPoland() {
+    Portal portal = new Portal();
+    portal.setName("Wycieczki Hello Poland");
+    portal.setUrl("http://woo.hello-poland.pl");
+    portal.setKey("ck_5233b79180ff8b7bef81b28fe7222b2eb2b37ebe");
+    portal.setSecret("cs_2c96f574d729e8bde7b71d96007c172bc12244d9");
+    em.persist(portal);
   }
 
 

@@ -14,13 +14,14 @@ public class OrderEntry extends ModelSuperclass {
   private static final long serialVersionUID = -1590949806641422316L;
 
   @ManyToOne(optional = false, fetch = FetchType.EAGER)
-  private OrderSightDateEntry dateEntry;
+  private OrderDateEntry dateEntry;
   @NotNull
   private Integer quantity;
   @NotNull
   private Integer unitPrice;
   @NotNull
   private String name;
+  private Long externalId;
   @ElementCollection
   private List<String> numbers;
 
@@ -57,13 +58,19 @@ public class OrderEntry extends ModelSuperclass {
     this.numbers = numbers;
   }
 
+  public Long getExternalId() {
+    return externalId;
+  }
 
+  public void setExternalId(Long externalId) {
+    this.externalId = externalId;
+  }
 
-  public OrderSightDateEntry getDateEntry() {
+  public OrderDateEntry getDateEntry() {
     return dateEntry;
   }
 
-  public void setDateEntry(OrderSightDateEntry dateEntry) {
+  public void setDateEntry(OrderDateEntry dateEntry) {
     this.dateEntry = dateEntry;
   }
 

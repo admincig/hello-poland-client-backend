@@ -3,13 +3,13 @@ package pl.hellopoland.rest.dto;
 import java.util.List;
 import java.util.stream.Collectors;
 import pl.hellopoland.order.OrderDetails;
-import pl.hellopoland.order.OrderSightDateEntry;
+import pl.hellopoland.order.OrderDateEntry;
 
 public class OrderSightDateEntryORO extends OrderSightDateEntryOnListingORO {
   public String buyer;
   public List<OrderEntryORO> entries;
 
-  public OrderSightDateEntryORO(OrderSightDateEntry osde) {
+  public OrderSightDateEntryORO(OrderDateEntry osde) {
     super(osde);
     this.entries = osde.getEntries().stream().map(OrderEntryORO::new).collect(Collectors.toList());
     OrderDetails details = osde.getSightEntry().getOrder().getDetails();

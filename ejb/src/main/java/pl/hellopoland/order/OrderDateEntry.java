@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 import pl.hellopoland.ModelSuperclass;
 
 @Entity
-public class OrderSightDateEntry extends ModelSuperclass {
+public class OrderDateEntry extends ModelSuperclass {
   private static final long serialVersionUID = 2682096610461687109L;
 
   @NotNull
