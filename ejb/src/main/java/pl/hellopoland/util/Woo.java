@@ -38,8 +38,12 @@ public class Woo {
     return orderPlacer.checkAvailability(productId);
   }
 
-  public Map<String, Object> confirm(long id) {
+  public Map<String, Object> confirmOrder(long id) {
     return orderPlacer.confirm(id);
+  }
+
+  public Map<String, Object> cancelOrder(long id) {
+    return orderPlacer.cancel(id);
   }
 
   public Map<String, Object> placeOrder(OrderDetails details, List<OrderEntry> entries) {
@@ -49,7 +53,6 @@ public class Woo {
     String city = details.getCity() == null ? "" : details.getCity();
     order.addBilling(details.getFirstName(), details.getLastName(), "", "", city, "", "", country,
         details.getEmail(), phone);
-
     for (OrderEntry oe : entries) {
       order.addLineItem(oe.getExternalId().intValue(), oe.getQuantity());
     }
@@ -100,8 +103,12 @@ public class Woo {
       return connector.createOrder(order);
     }
 
-    public Map<String, Object> confirm(long id) {
+    private Map<String, Object> confirm(long id) {
       return connector.confirmOrder(id);
+    }
+
+    private Map<String, Object> cancel(long id) {
+      return connector.cancelOrder(id);
     }
 
     private boolean checkAvailability(int id) {
@@ -219,9 +226,14 @@ public class Woo {
       this.client = new WooCommerceAPI(new OAuthConfig(url, key, secret));
     }
 
-    public Map<String, Object> confirmOrder(Long id) {
+    private Map<String, Object> confirmOrder(Long id) {
       return client.update(EndpointBaseType.ORDERS.getValue(), id.intValue(),
-          Map.of("status", "processing"));
+          Map.of("status", "processing", "set_paid", true, "payment_method_title", "Przelewy 24"));
+    }
+
+    private Map<String, Object> cancelOrder(Long id) {
+      return client.update(EndpointBaseType.ORDERS.getValue(), id.intValue(),
+          Map.of("status", "cancelled"));
     }
 
     private boolean checkAvailability(int id) {

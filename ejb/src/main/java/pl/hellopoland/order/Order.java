@@ -2,11 +2,14 @@ package pl.hellopoland.order;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -17,6 +20,11 @@ import pl.hellopoland.user.User;
 @Entity
 @Table(name = "orders")
 public class Order extends ModelSuperclass {
+
+  public enum Status {
+    NEW, CONFIRMED, PROBLEM, CANCELLED;
+  }
+
   private static final long serialVersionUID = 3824722747352862154L;
 
   @OneToMany(mappedBy = "sight", cascade = CascadeType.REFRESH)
@@ -28,7 +36,10 @@ public class Order extends ModelSuperclass {
   @ManyToOne
   private User user;
   @NotNull
-  private boolean paymentConfirmed;
+  @Enumerated(EnumType.STRING)
+  private Status status = Status.NEW;
+  @NotNull
+  private Date date = new Date();
 
   public Collection<OrderSightEntry> getEntries() {
     return entries;
@@ -62,19 +73,27 @@ public class Order extends ModelSuperclass {
     this.user = user;
   }
 
+  public Status getStatus() {
+    return status;
+  }
+
+  public void setStatus(Status status) {
+    this.status = status;
+  }
+
+  public Date getDate() {
+    return date;
+  }
+
+  public void setDate(Date date) {
+    this.date = date;
+  }
+
   public Integer getSum() {
     if (entries == null) {
       return 0;
     }
     return entries.stream().collect(Collectors.summingInt(OrderSightEntry::getSum));
-  }
-
-  public boolean isPaymentConfirmed() {
-    return paymentConfirmed;
-  }
-
-  public void setPaymentConfirmed(boolean paymentConfirmed) {
-    this.paymentConfirmed = paymentConfirmed;
   }
 
   public void generateHash() {

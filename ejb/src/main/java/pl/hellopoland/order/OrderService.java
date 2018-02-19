@@ -21,6 +21,7 @@ import javax.inject.Inject;
 import javax.persistence.NoResultException;
 import javax.ws.rs.core.MediaType;
 import pl.hellopoland.ServiceSuperclass;
+import pl.hellopoland.order.Order.Status;
 import pl.hellopoland.sight.Portal;
 import pl.hellopoland.sight.Sight;
 import pl.hellopoland.sight.Ticket;
@@ -125,9 +126,9 @@ public class OrderService extends ServiceSuperclass {
       Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
       Map<String, Object> resp = woo.placeOrder(o.getDetails(), orderEntries);
       logger.info(resp.toString());
-      Long id = (Long) resp.get("id");
+      Integer id = (Integer) resp.get("id");
       if (id != null) {
-        entry.getValue().forEach(ose -> ose.setExternalId(id));
+        entry.getValue().forEach(ose -> ose.setExternalId(id.longValue()));
       }
     }
   }
@@ -200,15 +201,13 @@ public class OrderService extends ServiceSuperclass {
     conn.getOutputStream().write(PaymentUtils.mapToQuery(ackMap).getBytes());
     logger.info("" + conn.getResponseCode());
     String resp = conn.getResponseMessage();
+    Order order = findByHash(hash);
     if (resp.equals("error=0")) {
       logger.info("transaction confirmed. successful");
-      Order order = findByHash(hash);
-      order.setPaymentConfirmed(true);
-      confirmInExternalAPI(order);
-      // TODO send mail or something
+      confirm(order);
     } else {
       logger.warning("transaction problem.");
-      // TODO handle failure
+      problem(order);
     }
   }
 
@@ -224,13 +223,46 @@ public class OrderService extends ServiceSuperclass {
 
       // they have same id. should have
       Long id = entry.getValue().stream().map(OrderSightEntry::getExternalId).findFirst().get();
-      logger.info(woo.confirm(id).toString());
+      logger.info(woo.confirmOrder(id).toString());
     }
+  }
 
+  private void cancelInExternalAPI(Order order) {
+    logger.info("Checking if any of order sight entries ought to be cancelled in external API");
+    Map<Portal, List<OrderSightEntry>> groupedByPortal =
+        order.getEntries().stream().filter(ose -> ose.getSight().getPortal() != null)
+            .collect(groupingBy(ose -> ose.getSight().getPortal()));
+    for (Map.Entry<Portal, List<OrderSightEntry>> entry : groupedByPortal.entrySet()) {
+      Portal portal = entry.getKey();
+      logger.info("Cancelling external order in " + portal.getName());
+      Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
+
+      // they have same id. should have
+      Long id = entry.getValue().stream().map(OrderSightEntry::getExternalId).findFirst().get();
+      logger.info(woo.cancelOrder(id).toString());
+    }
   }
 
   private Order findByHash(String hash) {
     return em.createQuery("from Order where hash=:hash", Order.class).getSingleResult();
+  }
+
+  @PermitAll
+  public void cancel(Order o) {
+    o.setStatus(Order.Status.CANCELLED);
+    cancelInExternalAPI(o);
+    // TODO send mail or something
+  }
+
+  private void problem(Order order) {
+    order.setStatus(Status.PROBLEM);
+    // TODO handle failure
+  }
+
+  private void confirm(Order order) {
+    order.setStatus(Status.CONFIRMED);
+    confirmInExternalAPI(order);
+    // TODO send mail or something
   }
 
 }
