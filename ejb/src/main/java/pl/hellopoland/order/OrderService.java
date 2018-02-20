@@ -74,7 +74,6 @@ public class OrderService extends ServiceSuperclass {
       ose.setOrder(o);
       ose.setSight(entry.getKey());
       em.persist(ose);
-      o.addEntry(ose);
 
       List<Long> ticketsOfSight = entry.getValue().stream().map(Ticket::getId).collect(toList());
       Map<Date, List<Triplet<Long, Date, Integer>>> inSightGroupedByDate = triplets.stream()
@@ -86,7 +85,6 @@ public class OrderService extends ServiceSuperclass {
           dateEntry.setDate(inSightOnDate.getKey());
           dateEntry.setSightEntry(ose);
           em.persist(dateEntry);
-          ose.addEntry(dateEntry);
 
           for (Triplet<Long, Date, Integer> trip : inSightOnDate.getValue()) {
             Ticket ticket = ticketIdToObject.get(trip.first);
@@ -100,11 +98,12 @@ public class OrderService extends ServiceSuperclass {
               oe.addNumber("" + Math.abs(random.nextLong()));
             }
             em.persist(oe);
-            dateEntry.addEntry(oe);
           }
         }
       }
     }
+    em.flush();
+    o = em.find(Order.class, o.getId());
     placeInExternalAPI(o);
     return o;
   }
@@ -218,7 +217,7 @@ public class OrderService extends ServiceSuperclass {
             .collect(groupingBy(ose -> ose.getSight().getPortal()));
     for (Map.Entry<Portal, List<OrderSightEntry>> entry : groupedByPortal.entrySet()) {
       Portal portal = entry.getKey();
-      logger.info("Placing external order in " + portal.getName());
+      logger.info("Confirming external order in " + portal.getName());
       Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
 
       // they have same id. should have

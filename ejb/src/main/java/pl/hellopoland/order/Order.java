@@ -27,7 +27,7 @@ public class Order extends ModelSuperclass {
 
   private static final long serialVersionUID = 3824722747352862154L;
 
-  @OneToMany(mappedBy = "sight", cascade = CascadeType.REFRESH)
+  @OneToMany(mappedBy = "order", cascade = CascadeType.REFRESH)
   private Collection<OrderSightEntry> entries;
   @NotNull
   private String hash;
