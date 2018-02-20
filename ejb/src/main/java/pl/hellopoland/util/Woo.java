@@ -38,8 +38,8 @@ public class Woo {
     return orderPlacer.checkAvailability(productId);
   }
 
-  public Map<String, Object> confirmOrder(long id) {
-    return orderPlacer.confirm(id);
+  public Map<String, Object> completeOrder(long id) {
+    return orderPlacer.complete(id);
   }
 
   public Map<String, Object> cancelOrder(long id) {
@@ -109,6 +109,10 @@ public class Woo {
 
     private Map<String, Object> cancel(long id) {
       return connector.cancelOrder(id);
+    }
+
+    private Map<String, Object> complete(long id) {
+      return connector.completeOrder(id);
     }
 
     private boolean checkAvailability(int id) {
@@ -224,6 +228,15 @@ public class Woo {
 
     private APIConnector(String url, String key, String secret) {
       this.client = new WooCommerceAPI(new OAuthConfig(url, key, secret));
+    }
+
+    private Map<String, Object> completeOrder(Long id) {
+      return client.update(EndpointBaseType.ORDERS.getValue(), id.intValue(),
+          Map.of("status", "completed", "set_paid", true, "payment_method_title", "Przelewy 24"));
+    }
+
+    private Map<String, Object> getProduct(int id) {
+      return client.get(EndpointBaseType.PRODUCTS.getValue(), id);
     }
 
     private Map<String, Object> confirmOrder(Long id) {

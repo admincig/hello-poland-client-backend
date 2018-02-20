@@ -219,7 +219,7 @@ public class OrderService extends ServiceSuperclass {
 
       // they have same id. should have
       Long id = entry.getValue().stream().map(OrderSightEntry::getExternalId).findFirst().get();
-      logger.info(woo.confirmOrder(id).toString());
+      logger.info(woo.completeOrder(id).toString());
     }
   }
 
