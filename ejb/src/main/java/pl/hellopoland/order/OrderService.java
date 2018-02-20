@@ -40,11 +40,6 @@ public class OrderService extends ServiceSuperclass {
 
   @PermitAll
   public Order create(Collection<Triplet<Long, Date, Integer>> triplets, OrderDetails details) {
-    // DEVELOPER'S PURPOSES ONLY
-    // if (new Random().nextDouble() > 0.9) {
-    // throw new ConflictingException("Brak wolnych biletów na ten dzień");
-    // }
-
     User user = null;
     try {
       user = uService.me();
@@ -102,13 +97,13 @@ public class OrderService extends ServiceSuperclass {
         }
       }
     }
-    em.flush();
-    o = em.find(Order.class, o.getId());
     placeInExternalAPI(o);
     return o;
   }
 
+  // em.refreshes are because of strange NPEs
   private void placeInExternalAPI(Order o) {
+    em.refresh(o);
     logger.info("Checking if any of order sight entries ought to be placed in external API");
     Map<Portal, List<OrderSightEntry>> groupedByPortal =
         o.getEntries().stream().filter(ose -> ose.getSight().getPortal() != null)
@@ -117,7 +112,9 @@ public class OrderService extends ServiceSuperclass {
       Portal portal = entry.getKey();
       List<OrderEntry> orderEntries = new ArrayList<>();
       for (OrderSightEntry se : entry.getValue()) {
+        em.refresh(se);
         for (OrderDateEntry de : se.getEntries()) {
+          em.refresh(de);
           orderEntries.addAll(de.getEntries());
         }
       }
