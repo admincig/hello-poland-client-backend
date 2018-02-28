@@ -79,8 +79,7 @@ public class RestService {
   public PagedCollection search(SightsPagedCollectionConfig config) {
     PagedEntityCollection<Sight> plist = fService.getList(config);
     return new PagedCollection(
-        plist.items.stream().map(f -> new SightOnListingRO(f)).collect(Collectors.toList()),
-        plist.config);
+        plist.items.stream().map(SightOnListingRO::new).collect(Collectors.toList()), plist.config);
   }
 
   @GET

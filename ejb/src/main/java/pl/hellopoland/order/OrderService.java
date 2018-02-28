@@ -20,6 +20,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
 import javax.ws.rs.core.MediaType;
+import pl.hellopoland.ConflictingException;
 import pl.hellopoland.ServiceSuperclass;
 import pl.hellopoland.order.Order.Status;
 import pl.hellopoland.sight.Portal;
@@ -89,6 +90,8 @@ public class OrderService extends ServiceSuperclass {
             oe.setUnitPrice(ticket.getPrice());
             oe.setDateEntry(dateEntry);
             oe.setExternalId(ticket.getExternalId());
+
+            // until we have real tickets generator
             for (int i = 0; i < oe.getQuantity(); i++) {
               oe.addNumber("" + Math.abs(random.nextLong()));
             }
@@ -97,7 +100,11 @@ public class OrderService extends ServiceSuperclass {
         }
       }
     }
-    placeInExternalAPI(o);
+    try {
+      placeInExternalAPI(o);
+    } catch (Exception e) {
+      throw new ConflictingException("Nie udało się złożyć zamówienia w zewnętrznym systemie", e);
+    }
     return o;
   }
 
