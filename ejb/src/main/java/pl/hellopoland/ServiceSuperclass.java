@@ -2,7 +2,6 @@ package pl.hellopoland;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -10,11 +9,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.ejb.SessionContext;
-import javax.inject.Inject;
-import javax.jms.DeliveryMode;
-import javax.jms.JMSContext;
-import javax.jms.JMSProducer;
-import javax.jms.Queue;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -46,8 +40,7 @@ public abstract class ServiceSuperclass {
     }
   }
 
-  @Inject
-  private JMSContext jms;
+
 
   @Resource
   protected SessionContext ctx;
@@ -56,17 +49,19 @@ public abstract class ServiceSuperclass {
 
   protected Logger logger = Logger.getLogger(getClass().getName());
 
-  protected boolean sendMessage(String queue, Serializable message) {
-    Queue q = (Queue) lookup(queue);
-    if (q == null) {
-      return false;
-    } else {
-      JMSProducer producer = jms.createProducer();
-      producer.setDeliveryMode(DeliveryMode.PERSISTENT);
-      producer.send(q, message);
-      return false;
-    }
-  }
+  // @Inject
+  // private JMSContext jms;
+  // protected boolean sendMessage(String queue, Serializable message) {
+  // Queue q = (Queue) lookup(queue);
+  // if (q == null) {
+  // return false;
+  // } else {
+  // JMSProducer producer = jms.createProducer();
+  // producer.setDeliveryMode(DeliveryMode.PERSISTENT);
+  // producer.send(q, message);
+  // return false;
+  // }
+  // }
 
   protected Object lookup(String jndiName) {
     try {
