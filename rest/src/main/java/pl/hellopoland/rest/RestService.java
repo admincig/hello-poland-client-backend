@@ -34,7 +34,6 @@ import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.rest.dto.SightOnListingRO;
 import pl.hellopoland.rest.dto.SightRO;
 import pl.hellopoland.rest.dto.UserORO;
-import pl.hellopoland.security.Realm;
 import pl.hellopoland.sight.Sight;
 import pl.hellopoland.sight.SightService;
 import pl.hellopoland.user.UserService;
@@ -58,8 +57,6 @@ public class RestService {
   OrderService oService;
   @Inject
   UserService uService;
-  @Inject
-  Realm realm;
 
   Logger logger = Logger.getLogger(RestService.class.getName());
 
@@ -141,13 +138,6 @@ public class RestService {
       return Response.status(Status.UNAUTHORIZED).build();
     }
     return Response.ok().build();
-  }
-
-  @GET
-  @Path("/login")
-  public Response getPrincipal() {
-
-    return Response.ok(realm.getPrincipal()).build();
   }
 
   @GET
