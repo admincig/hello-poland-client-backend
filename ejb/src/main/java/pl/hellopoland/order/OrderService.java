@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
@@ -54,8 +53,6 @@ public class OrderService extends ServiceSuperclass {
     o.setDetails(details);
     em.persist(o);
 
-    Random random = new Random();
-
     Map<Long, List<Triplet<Long, Date, Integer>>> tripletsGroupedByTicketId =
         triplets.stream().collect(groupingBy(t -> t.first));
     Set<Long> ticketsIds = tripletsGroupedByTicketId.keySet();
@@ -91,10 +88,6 @@ public class OrderService extends ServiceSuperclass {
             oe.setDateEntry(dateEntry);
             oe.setExternalId(ticket.getExternalId());
 
-            // until we have real tickets generator
-            for (int i = 0; i < oe.getQuantity(); i++) {
-              oe.addNumber("" + Math.abs(random.nextLong()));
-            }
             em.persist(oe);
           }
         }
@@ -263,9 +256,19 @@ public class OrderService extends ServiceSuperclass {
   }
 
   private void confirm(Order order) {
-    order.setStatus(Status.CONFIRMED);
     confirmInExternalAPI(order);
-    // TODO send mail or something
+    order.setStatus(Status.CONFIRMED);
+
+    // XXX Just for version 0.1. Will be deleted in further development
+    for (OrderSightEntry ose : order.getEntries()) {
+      for (OrderDateEntry ode : ose.getEntries()) {
+        for (OrderEntry oe : ode.getEntries()) {
+          for (int i = 0; i < oe.getQuantity(); i++) {
+            oe.addNumber(order.getHash());
+          }
+        }
+      }
+    }
   }
 
 }
