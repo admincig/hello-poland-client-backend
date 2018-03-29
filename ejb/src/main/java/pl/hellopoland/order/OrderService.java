@@ -240,7 +240,7 @@ public class OrderService extends ServiceSuperclass {
   }
 
   private Order findByHash(String hash) {
-    return em.createQuery("from Order where hash=:hash", Order.class).getSingleResult();
+    return em.createQuery("from Order where hash=:hash", Order.class).setParameter("hash", hash).getSingleResult();
   }
 
   @PermitAll
