@@ -199,7 +199,7 @@ public class OrderService extends ServiceSuperclass {
     String resp = conn.getResponseMessage();
     logger.info(resp);
     Order order = findByHash(hash);
-    if (resp.equals("error=0")) {
+    if (resp.equals("OK")) {
       logger.info("transaction confirmed. successful");
       confirm(order);
     } else {
