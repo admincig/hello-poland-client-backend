@@ -197,6 +197,7 @@ public class OrderService extends ServiceSuperclass {
     conn.getOutputStream().write(PaymentUtils.mapToQuery(ackMap).getBytes());
     logger.info("" + conn.getResponseCode());
     String resp = conn.getResponseMessage();
+    logger.info(resp);
     Order order = findByHash(hash);
     if (resp.equals("error=0")) {
       logger.info("transaction confirmed. successful");
