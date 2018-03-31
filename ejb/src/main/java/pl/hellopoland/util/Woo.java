@@ -266,15 +266,19 @@ public class Woo {
 
 
   private static class Utils {
-    private static Date getDateFromSightName(String text) {
-      SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yy");
-      String regex =
-          ".*?((?:(?:[0-2]?\\d{1})|(?:[3][01]{1}))[-:\\/.](?:[0]?[1-9]|[1][012])[-:\\/.](?:(?:\\d{1}\\d{1})))(?![\\d])";
 
+    private static Date getDateFromSightName(String text) {
+      // SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yy");
+      // String regex =
+      // ".*?((?:(?:[0-2]?\\d{1})|(?:[3][01]{1}))[-:\\/.](?:[0]?[1-9]|[1][012])[-:\\/.](?:(?:\\d{1}\\d{1})))(?![\\d])";
+      //
       // SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm");
       // String regex =
       // ".*?((?:(?:[0-2]?\\d{1})|(?:[3][01]{1}))[-:\\/.](?:[0]?[1-9]|[1][012])[-:\\/.](?:(?:[1]{1}\\d{1}\\d{1}\\d{1})|(?:[2]{1}\\d{3})))(?![\\d])(\\s+)((?:(?:[0-1][0-9])|(?:[2][0-3])|(?:[0-9])):(?:[0-5][0-9])(?::[0-5][0-9])?(?:\\s?(?:am|AM|pm|PM))?)";
 
+      SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy");
+      String regex =
+          "((0?[1-9]|[12][1-9]|3[01])\\.(0?[13578]|1[02])\\.20[0-9]{2}|(0?[1-9]|[12][1-9]|30)\\.(0?[13456789]|1[012])\\.20[0-9]{2}|(0?[1-9]|1[1-9]|2[0-8])\\.(0?[123456789]|1[012])\\.20[0-9]{2}|(0?[1-9]|[12][1-9])\\.(0?[123456789]|1[012])\\.20(00|04|08|12|16|20|24|28|32|36|40|44|48|52|56|60|64|68|72|76|80|84|88|92|96))";
       Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
       Matcher m = p.matcher(text);
 
