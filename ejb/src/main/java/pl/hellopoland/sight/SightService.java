@@ -51,10 +51,10 @@ public class SightService extends ServiceSuperclass {
       Random random = new Random();
       for (Sight s : sights) {
         logger.info(s.getName());
-        boolean anyTicketInFuture =
-            s.getTickets().stream().anyMatch(t -> t.getDate().after(new Date()));
+        boolean anyTicketInFuture = s.getTickets().stream()
+            .anyMatch(t -> t.getDate() != null && t.getDate().after(new Date()));
         if (!anyTicketInFuture) {
-          logger.info("Omitting. All events in past");
+          logger.info("Omitting. No events in future");
           continue;
         }
         s.setPortal(portal);
