@@ -30,7 +30,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-ear-plugin</artifactId>
-				<version>2.10.1</version>
+				<version>3.0.0</version>
 				<configuration>
 					<!-- Tell Maven we are using Java EE -->
 					<version>7</version>
@@ -45,7 +45,7 @@
 							<contextRoot>/api</contextRoot>
 						</webModule>
 					</modules>
-					<fileNameMapping>no-version</fileNameMapping>
+					<outputFileNameMapping>@{artifactId}@.@{extension}@</outputFileNameMapping>
 					<jboss>
 						<version>5</version>
 						<security-domain>${security.domain}</security-domain>

@@ -157,8 +157,9 @@ public class OrderService extends ServiceSuperclass {
   @RolesAllowed("user")
   public List<OrderDateEntry> getOrderSightDateEntries() {
     List<OrderDateEntry> osdes = em.createQuery(
-        "from OrderDateEntry osde join fetch osde.sightEntry ose join fetch ose.sight s join fetch ose.order o where osde.deleted=false and o.user=:user order by osde.date asc",
-        OrderDateEntry.class).setParameter("user", uService.me()).getResultList();
+        "from OrderDateEntry osde join fetch osde.sightEntry ose join fetch ose.sight s join fetch ose.order o where osde.deleted=false and o.user=:user and o.status=:status order by osde.date asc",
+        OrderDateEntry.class).setParameter("user", uService.me())
+        .setParameter("status", Order.Status.CONFIRMED).getResultList();
     osdes.forEach(osde -> osde.getEntries().size());
     return osdes;
   }
