@@ -1,5 +1,22 @@
+stages:
+    - env
+    - build
+
 variables:
     JAVA_VERSION: "10"
 
-maven_build:
-          script: mvn verify
+#
+# stage: env tasks
+#
+env_config:
+    stage: env
+    script:
+        - echoenv
+        - echo "CI_PROJECT_DIR=${PATH_HOME}/${CI_PROJECT_DIR}"
+
+#
+# stage: build tasks
+#
+build_backend:
+    stage: build
+    script: mvn verify
