@@ -11,8 +11,8 @@ variables:
 env_config:
     stage: env
     script:
-        - echoenv
-        - echo "CI_PROJECT_DIR=${PATH_HOME}/${CI_PROJECT_DIR}"
+        - envcfg -r
+        - envcfg -p
 
 #
 # stage: build tasks
