@@ -1,2 +1,16 @@
-maven_build:
-          script: mvn verify
+stages:
+    - build
+
+variables:
+    JAVA_VERSION: "10"
+
+#
+# stage: build tasks
+#
+build_backend:
+    stage: build
+    before_script:
+        - . envcfg
+        - envcfg -p
+    script:
+        - mvn verify
