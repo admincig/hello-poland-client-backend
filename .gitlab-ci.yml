@@ -1,24 +1,16 @@
 stages:
-    - env
     - build
 
 variables:
     JAVA_VERSION: "10"
 
 #
-# stage: env tasks
-#
-env_config:
-    stage: env
-    script:
-        - . envcfg
-        - envcfg -p
-
-#
 # stage: build tasks
 #
 build_backend:
     stage: build
-    script:
+    before_script:
+        - . envcfg
         - envcfg -p
+    script:
         - mvn verify
