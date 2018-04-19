@@ -19,4 +19,6 @@ env_config:
 #
 build_backend:
     stage: build
-    script: mvn verify
+    script:
+        - envcfg -p
+        - mvn verify
