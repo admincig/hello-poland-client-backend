@@ -11,7 +11,7 @@ variables:
 env_config:
     stage: env
     script:
-        - envcfg -r
+        - . envcfg
         - envcfg -p
 
 #
