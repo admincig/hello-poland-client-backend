@@ -627,7 +627,7 @@
 					<http-invoker security-realm="ApplicationRealm" />
 				</host>
 			</server>
-			<servlet-container name="default">
+			<servlet-container name="default" default-session-timeout="10080"> <!-- week -->
 				<jsp-config />
 				<websockets />
 			</servlet-container>
