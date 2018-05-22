@@ -42,7 +42,7 @@
 						<webModule>
 							<groupId>pl.hellopoland</groupId>
 							<artifactId>hellopoland.rest</artifactId>
-							<contextRoot>/api</contextRoot>
+							<contextRoot>/</contextRoot>
 						</webModule>
 					</modules>
 					<outputFileNameMapping>@{artifactId}@.@{extension}@</outputFileNameMapping>
