@@ -93,7 +93,8 @@ public class SightService extends ServiceSuperclass {
         em.persist(tbo);
         logger.log(Logger.Level.INFO, "Saved new ticket: " + sbo.getName() + ": " + tbo.getName());
       });
-      if (sbo.getTickets() != null) {
+      if (sdto.tickets != null) {
+        em.refresh(sbo);
         sbo.setMinPrice(sbo.getTickets().stream().mapToInt(Ticket::getPrice).min().orElse(0));
       }
     });
