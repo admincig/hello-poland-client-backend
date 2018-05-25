@@ -1,6 +1,7 @@
 package pl.hellopoland.sight;
 
 import java.util.Collection;
+import java.util.Random;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -140,6 +141,8 @@ public class Sight extends ModelSuperclass {
     this.portal = portal;
   }
 
-
+  public void generateRandomScore() {
+    this.setScore((float) (4.8 + new Random().nextDouble() / 5));
+  }
 
 }

@@ -4,7 +4,6 @@ import java.lang.System.Logger;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 import javax.annotation.security.PermitAll;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -48,7 +47,6 @@ public class SightService extends ServiceSuperclass {
       logger.log(Logger.Level.INFO, "Importing sights from " + portal.getName());
       Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
       List<Sight> sights = woo.importSights();
-      Random random = new Random();
       for (Sight s : sights) {
         logger.log(Logger.Level.INFO, s.getName());
         boolean anyTicketInFuture = s.getTickets().stream()
@@ -58,7 +56,7 @@ public class SightService extends ServiceSuperclass {
           continue;
         }
         s.setPortal(portal);
-        s.setScore((float) (4.8 + random.nextDouble() / 5));
+        s.generateRandomScore();
         Image im = s.getMainImage();
         s.setMainImage(iService.downloadImage(im.getImageURL()));
         Collection<Ticket> tickets = s.getTickets();
@@ -78,6 +76,7 @@ public class SightService extends ServiceSuperclass {
     sights.forEach(sdto -> {
       var sbo = new Sight();
       sbo.setName(sdto.name);
+      sbo.generateRandomScore();
       sbo.setMainImage(iService.downloadImage(sdto.mainImageUrl));
 
       em.persist(sbo);
