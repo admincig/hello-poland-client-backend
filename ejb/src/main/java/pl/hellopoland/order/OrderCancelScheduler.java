@@ -1,5 +1,6 @@
 package pl.hellopoland.order;
 
+import java.lang.System.Logger;
 import java.util.Calendar;
 import java.util.List;
 import javax.ejb.Schedule;
@@ -16,16 +17,16 @@ public class OrderCancelScheduler extends ServiceSuperclass {
   @Schedule(hour = "*", minute = "*/5", second = "0", year = "*", dayOfMonth = "*", dayOfWeek = "*",
       persistent = false)
   public void run() {
-    logger.info("Cancelling orders older than 30min");
+    logger.log(Logger.Level.INFO, "Cancelling orders older than 30min");
     Calendar cal = Calendar.getInstance();
     cal.add(Calendar.MINUTE, -30);
     List<Order> ordersToCancel =
         em.createQuery("from Order where status=:status and date<:date", Order.class)
             .setParameter("status", Order.Status.NEW).setParameter("date", cal.getTime())
             .getResultList();
-    logger.info("Found " + ordersToCancel.size() + " orders to cancel");
+    logger.log(Logger.Level.INFO, "Found " + ordersToCancel.size() + " orders to cancel");
     ordersToCancel.forEach(o -> {
-      logger.info("Cancelling order " + o.getId());
+      logger.log(Logger.Level.INFO, "Cancelling order " + o.getId());
       oService.cancel(o);
     });
   }

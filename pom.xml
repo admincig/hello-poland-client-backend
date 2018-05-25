@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>pl.hellopoland</groupId>
@@ -44,6 +45,11 @@
 				<version>7.0</version>
 				<scope>provided</scope>
 			</dependency>
+			<dependency>
+				<groupId>pl.hellopoland</groupId>
+				<artifactId>hellopoland-dto</artifactId>
+				<version>0.0.3-SNAPSHOT</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -53,6 +59,10 @@
 			<groupId>javax</groupId>
 			<artifactId>javaee-api</artifactId>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>pl.hellopoland</groupId>
+			<artifactId>hellopoland-dto</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -75,7 +85,7 @@
 							<files>
 								<file>../etc/config.properties</file>
 								<file>../etc/${user.name}.config.properties</file>
-<!-- 								<file>${local.properties}</file> -->
+								<!-- <file>${local.properties}</file> -->
 							</files>
 							<encoding>UTF-8</encoding>
 						</configuration>
@@ -110,4 +120,11 @@
 			</resource>
 		</resources>
 	</build>
+
+	<repositories>
+		<repository>
+			<id>fream-nexus</id>
+			<url>https://packages.fream.pl/repository/maven-fream-snapshots</url>
+		</repository>
+	</repositories>
 </project>

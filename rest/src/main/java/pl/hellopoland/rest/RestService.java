@@ -1,7 +1,7 @@
 package pl.hellopoland.rest;
 
 import java.io.File;
-import java.util.logging.Logger;
+import java.lang.System.Logger;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -22,7 +22,7 @@ import pl.hellopoland.image.ImageService;
 @Consumes(MediaType.APPLICATION_JSON)
 public class RestService {
 
-  Logger logger = Logger.getLogger(RestService.class.getName());
+  Logger logger = System.getLogger(RestService.class.getName());
 
   @Inject
   ImageService imageService;
@@ -31,8 +31,8 @@ public class RestService {
   @Path("/anything")
   @Consumes("*/*")
   public void anything(@Context HttpHeaders headers, String anything) {
-    logger.info("Anything - headers: " + headers.getRequestHeaders());
-    logger.info("Anything - body: " + anything);
+    logger.log(Logger.Level.INFO, "Anything - headers: " + headers.getRequestHeaders());
+    logger.log(Logger.Level.INFO, "Anything - body: " + anything);
   }
 
   @GET

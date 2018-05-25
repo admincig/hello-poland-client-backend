@@ -1,5 +1,6 @@
 package pl.hellopoland.sight;
 
+import java.lang.System.Logger;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Date;
@@ -45,28 +46,28 @@ public class SightService extends ServiceSuperclass {
     List<Portal> portals =
         em.createQuery("from Portal order by id asc", Portal.class).getResultList();
     for (Portal portal : portals) {
-      logger.info("Importing sights from " + portal.getName());
+      logger.log(Logger.Level.INFO, "Importing sights from " + portal.getName());
       Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
       List<Sight> sights = woo.importSights();
       Random random = new Random();
       for (Sight s : sights) {
-        logger.info(s.getName());
+        logger.log(Logger.Level.INFO, s.getName());
         boolean anyTicketInFuture = s.getTickets().stream()
             .anyMatch(t -> t.getDate() != null && t.getDate().after(new Date()));
         if (!anyTicketInFuture) {
-          logger.info("Omitting. No events in future");
+          logger.log(Logger.Level.INFO, "Omitting. No events in future");
           continue;
         }
         s.setPortal(portal);
         s.setScore((float) (4.8 + random.nextDouble() / 5));
         Image im = s.getMainImage();
         try {
-          logger.info("Downloading image " + im.getImageURL());
+          logger.log(Logger.Level.INFO, "Downloading image " + im.getImageURL());
           im = iService.storeImage(new URL(im.getImageURL()).openConnection().getInputStream(),
               "jpg");
           s.setMainImage(im);
         } catch (Exception e) {
-          logger.warning(e.getMessage());
+          logger.log(Logger.Level.WARNING, e.getMessage());
           s.setMainImage(null);
         }
         Collection<Ticket> tickets = s.getTickets();
@@ -76,8 +77,13 @@ public class SightService extends ServiceSuperclass {
           em.persist(t);
         });
       }
-      logger.info("Finished import of " + portal.getName());
+      logger.log(Logger.Level.INFO, "Finished import of " + portal.getName());
     }
-    logger.info("Finished all imports");
+    logger.log(Logger.Level.INFO, "Finished all imports");
+  }
+
+  @PermitAll
+  public void savePush(Collection<pl.hellopoland.dto.Sight> sights) {
+    logger.log(Logger.Level.INFO, sights);
   }
 }

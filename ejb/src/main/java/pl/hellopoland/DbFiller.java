@@ -1,5 +1,6 @@
 package pl.hellopoland;
 
+import java.lang.System.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
@@ -19,14 +20,15 @@ public class DbFiller extends ServiceSuperclass {
   public void fillDb() {
     String hibernateStrategy = properties.get("hibernate.hbm2ddl.auto").toString();
     if (!hibernateStrategy.startsWith("create")) {
-      logger.info("omitting dbfiller because hibernate.hbm2ddl.auto isnt set to create");
+      logger.log(Logger.Level.INFO,
+          "omitting dbfiller because hibernate.hbm2ddl.auto isnt set to create");
       return;
     }
 
     createPortals();
     runImporter();
 
-    logger.info("dbfiller finished");
+    logger.log(Logger.Level.INFO, "dbfiller finished");
   }
 
 

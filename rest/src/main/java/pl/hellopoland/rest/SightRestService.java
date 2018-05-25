@@ -1,5 +1,6 @@
 package pl.hellopoland.rest;
 
+import java.util.Collection;
 import java.util.stream.Collectors;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -30,6 +31,11 @@ public class SightRestService {
   @GET
   public PagedCollection getList() {
     return search(new SightsPagedCollectionConfig());
+  }
+
+  @POST
+  public void savePush(Collection<pl.hellopoland.dto.Sight> sights) {
+    sightService.savePush(sights);
   }
 
   @POST

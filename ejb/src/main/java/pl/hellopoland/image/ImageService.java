@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.System.Logger;
 import java.util.UUID;
-import java.util.logging.Level;
 import javax.annotation.security.PermitAll;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -33,7 +33,7 @@ public class ImageService extends ServiceSuperclass {
         size += ret;
       }
       out.close();
-      logger.log(Level.FINE, "Saved file of size" + size);
+      logger.log(Logger.Level.DEBUG, "Saved file of size" + size);
     } catch (Exception ioe) {
       throw new RuntimeException("File NOT stored", ioe);
     }

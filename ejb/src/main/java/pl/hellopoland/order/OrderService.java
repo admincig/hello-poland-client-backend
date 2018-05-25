@@ -3,6 +3,7 @@ package pl.hellopoland.order;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import java.lang.System.Logger;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -104,7 +105,8 @@ public class OrderService extends ServiceSuperclass {
   // em.refreshes are because of strange NPEs
   private void placeInExternalAPI(Order o) {
     em.refresh(o);
-    logger.info("Checking if any of order sight entries ought to be placed in external API");
+    logger.log(Logger.Level.INFO,
+        "Checking if any of order sight entries ought to be placed in external API");
     Map<Portal, List<OrderSightEntry>> groupedByPortal =
         o.getEntries().stream().filter(ose -> ose.getSight().getPortal() != null)
             .collect(groupingBy(ose -> ose.getSight().getPortal()));
@@ -118,10 +120,10 @@ public class OrderService extends ServiceSuperclass {
           orderEntries.addAll(de.getEntries());
         }
       }
-      logger.info("Placing external order in " + portal.getName());
+      logger.log(Logger.Level.INFO, "Placing external order in " + portal.getName());
       Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
       Map<String, Object> resp = woo.placeOrder(o.getDetails(), orderEntries);
-      logger.info(resp.toString());
+      logger.log(Logger.Level.INFO, resp.toString());
       Integer id = (Integer) resp.get("id");
       if (id != null) {
         entry.getValue().forEach(ose -> ose.setExternalId(id.longValue()));
@@ -171,13 +173,13 @@ public class OrderService extends ServiceSuperclass {
 
   @PermitAll
   public void ack(String hash, String ack) throws Exception {
-    logger.info("Got ack from P24");
+    logger.log(Logger.Level.INFO, "Got ack from P24");
     Map<String, String> ackMap = PaymentUtils.queryToMap(ack);
 
     // TODO fill statement title or something
     // p24_order_id, p24_statement
 
-    logger.info("confirming payment");
+    logger.log(Logger.Level.INFO, "confirming payment");
     StringBuilder signBuilder = new StringBuilder();
     signBuilder.append(ackMap.get("p24_session_id")).append("|");
     signBuilder.append(ackMap.get("p24_order_id")).append("|");
@@ -196,48 +198,50 @@ public class OrderService extends ServiceSuperclass {
     conn.addRequestProperty("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
     conn.setDoOutput(true);
     conn.getOutputStream().write(PaymentUtils.mapToQuery(ackMap).getBytes());
-    logger.info("" + conn.getResponseCode());
+    logger.log(Logger.Level.INFO, "" + conn.getResponseCode());
     String resp = conn.getResponseMessage();
-    logger.info(resp);
+    logger.log(Logger.Level.INFO, resp);
     Order order = findByHash(hash);
     if (resp.equals("OK")) {
-      logger.info("transaction confirmed. successful");
+      logger.log(Logger.Level.INFO, "transaction confirmed. successful");
       confirm(order);
     } else {
-      logger.warning("transaction problem.");
+      logger.log(Logger.Level.WARNING, "transaction problem.");
       problem(order);
     }
   }
 
   private void confirmInExternalAPI(Order order) {
-    logger.info("Checking if any of order sight entries ought to be confirmed in external API");
+    logger.log(Logger.Level.INFO,
+        "Checking if any of order sight entries ought to be confirmed in external API");
     Map<Portal, List<OrderSightEntry>> groupedByPortal =
         order.getEntries().stream().filter(ose -> ose.getSight().getPortal() != null)
             .collect(groupingBy(ose -> ose.getSight().getPortal()));
     for (Map.Entry<Portal, List<OrderSightEntry>> entry : groupedByPortal.entrySet()) {
       Portal portal = entry.getKey();
-      logger.info("Confirming external order in " + portal.getName());
+      logger.log(Logger.Level.INFO, "Confirming external order in " + portal.getName());
       Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
 
       // they have same id. should have
       Long id = entry.getValue().stream().map(OrderSightEntry::getExternalId).findFirst().get();
-      logger.info(woo.completeOrder(id).toString());
+      logger.log(Logger.Level.INFO, woo.completeOrder(id).toString());
     }
   }
 
   private void cancelInExternalAPI(Order order) {
-    logger.info("Checking if any of order sight entries ought to be cancelled in external API");
+    logger.log(Logger.Level.INFO,
+        "Checking if any of order sight entries ought to be cancelled in external API");
     Map<Portal, List<OrderSightEntry>> groupedByPortal =
         order.getEntries().stream().filter(ose -> ose.getSight().getPortal() != null)
             .collect(groupingBy(ose -> ose.getSight().getPortal()));
     for (Map.Entry<Portal, List<OrderSightEntry>> entry : groupedByPortal.entrySet()) {
       Portal portal = entry.getKey();
-      logger.info("Cancelling external order in " + portal.getName());
+      logger.log(Logger.Level.INFO, "Cancelling external order in " + portal.getName());
       Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
 
       // they have same id. should have
       Long id = entry.getValue().stream().map(OrderSightEntry::getExternalId).findFirst().get();
-      logger.info(woo.cancelOrder(id).toString());
+      logger.log(Logger.Level.INFO, woo.cancelOrder(id).toString());
     }
   }
 

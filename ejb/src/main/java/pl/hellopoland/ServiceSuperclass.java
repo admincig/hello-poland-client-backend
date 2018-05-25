@@ -2,10 +2,9 @@ package pl.hellopoland;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.System.Logger;
 import java.util.Collection;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.ejb.SessionContext;
@@ -24,11 +23,12 @@ public abstract class ServiceSuperclass {
 
   private static Context namingContext;
   protected static Properties properties;
+  private static Logger staticLogger = System.getLogger(ServiceSuperclass.class.getName());
   static {
     try {
       namingContext = new InitialContext();
     } catch (NamingException e) {
-      Logger.getAnonymousLogger().log(Level.WARNING, "Failed to get lookup context", e);
+      staticLogger.log(Logger.Level.WARNING, "Failed to get lookup context", e);
     }
 
     try {
@@ -36,7 +36,7 @@ public abstract class ServiceSuperclass {
       properties = new Properties();
       properties.load(input);
     } catch (IOException e) {
-      Logger.getAnonymousLogger().log(Level.WARNING, "Failed to load properties", e);
+      staticLogger.log(Logger.Level.WARNING, "Failed to load properties", e);
     }
   }
 
@@ -47,7 +47,7 @@ public abstract class ServiceSuperclass {
   @PersistenceContext
   protected EntityManager em;
 
-  protected Logger logger = Logger.getLogger(getClass().getName());
+  protected Logger logger = System.getLogger(this.getClass().getName());
 
   // @Inject
   // private JMSContext jms;
@@ -67,7 +67,7 @@ public abstract class ServiceSuperclass {
     try {
       return namingContext.lookup(jndiName);
     } catch (NamingException e) {
-      logger.log(Level.WARNING, "Failed to lookup " + jndiName, e);
+      logger.log(Logger.Level.WARNING, "Failed to lookup " + jndiName, e);
       return null;
     }
   }
@@ -90,7 +90,7 @@ public abstract class ServiceSuperclass {
       tq.setMaxResults(config.getPageSize());
       tq.setFirstResult(config.getPageSize() * config.getPageNum());
     }
-    logger.info(humanReadable(query, config.getConditions()));
+    logger.log(Logger.Level.INFO, humanReadable(query, config.getConditions()));
     return tq;
   }
 

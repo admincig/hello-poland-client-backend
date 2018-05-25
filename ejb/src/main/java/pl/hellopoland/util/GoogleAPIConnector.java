@@ -1,7 +1,7 @@
 package pl.hellopoland.util;
 
+import java.lang.System.Logger;
 import java.util.List;
-import java.util.logging.Logger;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -10,7 +10,7 @@ import pl.hellopoland.user.User;
 
 public class GoogleAPIConnector {
 
-  private Logger logger = Logger.getLogger(GoogleAPIConnector.class.getName());
+  private Logger logger = System.getLogger(GoogleAPIConnector.class.getName());
 
   public User getUser(String idToken) throws IllegalStateException, Exception {
     GoogleIdTokenVerifier verifier =
@@ -30,11 +30,11 @@ public class GoogleAPIConnector {
                     "319066854009-vd6lt8aj3373igh6tf9qu78n8krmenme.apps.googleusercontent.com",
                     "319066854009-shv7nogo8kuqa602kp62jhfe74jdkrv2.apps.googleusercontent.com"))
             .setIssuer("https://accounts.google.com").build();
-    logger.info("verifying idToken=" + idToken);
+    logger.log(Logger.Level.INFO, "verifying idToken=" + idToken);
     GoogleIdToken token = verifier.verify(idToken);
     GoogleIdToken.Payload payload = token.getPayload();
     if (payload != null) {
-      logger.info(payload.toPrettyString());
+      logger.log(Logger.Level.INFO, payload.toPrettyString());
       User user = new User();
       user.setEmail(payload.getEmail());
       user.setName((String) payload.get("name"));
