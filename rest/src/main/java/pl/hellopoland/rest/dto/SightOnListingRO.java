@@ -11,6 +11,8 @@ public class SightOnListingRO extends SightSimpleRO {
     super(f);
     this.description = f.getDescription();
     this.minPrice = f.getMinPrice();
-    this.mainImage = "/images/" + f.getMainImage().getHash() + f.getMainImage().getExtension();
+    if (f.getMainImage() != null) {
+      this.mainImage = "/images/" + f.getMainImage().getHash() + f.getMainImage().getExtension();
+    }
   }
 }
