@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.System.Logger;
+import java.net.URL;
 import java.util.UUID;
 import javax.annotation.security.PermitAll;
 import javax.ejb.LocalBean;
@@ -60,5 +61,19 @@ public class ImageService extends ServiceSuperclass {
         em.createQuery("select path from Image where concat(hash, extension)=:name", String.class)
             .setParameter("name", name).getSingleResult();
     return new File(path + name);
+  }
+
+  @PermitAll
+  public Image downloadImage(String url) {
+    Image im = null;
+    if (url != null) {
+      try {
+        logger.log(Logger.Level.INFO, "Downloading image " + url);
+        im = storeImage(new URL(url).openConnection().getInputStream(), "jpg");
+      } catch (Exception e) {
+        logger.log(Logger.Level.WARNING, e.getMessage());
+      }
+    }
+    return im;
   }
 }

@@ -1,7 +1,6 @@
 package pl.hellopoland.sight;
 
 import java.lang.System.Logger;
-import java.net.URL;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -61,15 +60,7 @@ public class SightService extends ServiceSuperclass {
         s.setPortal(portal);
         s.setScore((float) (4.8 + random.nextDouble() / 5));
         Image im = s.getMainImage();
-        try {
-          logger.log(Logger.Level.INFO, "Downloading image " + im.getImageURL());
-          im = iService.storeImage(new URL(im.getImageURL()).openConnection().getInputStream(),
-              "jpg");
-          s.setMainImage(im);
-        } catch (Exception e) {
-          logger.log(Logger.Level.WARNING, e.getMessage());
-          s.setMainImage(null);
-        }
+        s.setMainImage(iService.downloadImage(im.getImageURL()));
         Collection<Ticket> tickets = s.getTickets();
         em.persist(s);
         tickets.forEach(t -> {
@@ -87,6 +78,8 @@ public class SightService extends ServiceSuperclass {
     sights.forEach(sdto -> {
       Sight sbo = new Sight();
       sbo.setName(sdto.name);
+      sbo.setMainImage(iService.downloadImage(sdto.mainImageUrl));
+
       em.persist(sbo);
       logger.log(Logger.Level.INFO, "Saved new sight: " + sbo.getName());
 
@@ -100,6 +93,7 @@ public class SightService extends ServiceSuperclass {
         em.persist(tbo);
         logger.log(Logger.Level.INFO, "Saved new ticket: " + sbo.getName() + ": " + tbo.getName());
       });
+      sbo.setMinPrice(sbo.getTickets().stream().mapToInt(Ticket::getPrice).min().orElse(0));
     });
   }
 }
