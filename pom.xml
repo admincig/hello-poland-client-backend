@@ -60,10 +60,6 @@
 			<artifactId>javaee-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>pl.hellopoland</groupId>
-			<artifactId>hellopoland-dto</artifactId>
-		</dependency>
 	</dependencies>
 
 	<build>

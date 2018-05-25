@@ -84,6 +84,22 @@ public class SightService extends ServiceSuperclass {
 
   @PermitAll
   public void savePush(Collection<pl.hellopoland.dto.Sight> sights) {
-    logger.log(Logger.Level.INFO, sights);
+    sights.forEach(sdto -> {
+      Sight sbo = new Sight();
+      sbo.setName(sdto.name);
+      em.persist(sbo);
+      logger.log(Logger.Level.INFO, "Saved new sight: " + sbo.getName());
+
+      sdto.tickets.forEach(tdto -> {
+        Ticket tbo = new Ticket();
+        tbo.setSight(sbo);
+        tbo.setExternalId(tdto.id);
+        tbo.setName(tdto.name);
+        tbo.setPredefinedDate(tdto.predefinedDate);
+        tbo.setPrice(tdto.price);
+        em.persist(tbo);
+        logger.log(Logger.Level.INFO, "Saved new ticket: " + sbo.getName() + ": " + tbo.getName());
+      });
+    });
   }
 }
