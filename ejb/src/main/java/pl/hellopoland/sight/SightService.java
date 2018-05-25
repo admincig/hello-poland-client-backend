@@ -76,7 +76,7 @@ public class SightService extends ServiceSuperclass {
   @PermitAll
   public void savePush(Collection<pl.hellopoland.dto.Sight> sights) {
     sights.forEach(sdto -> {
-      Sight sbo = new Sight();
+      var sbo = new Sight();
       sbo.setName(sdto.name);
       sbo.setMainImage(iService.downloadImage(sdto.mainImageUrl));
 
@@ -84,7 +84,7 @@ public class SightService extends ServiceSuperclass {
       logger.log(Logger.Level.INFO, "Saved new sight: " + sbo.getName());
 
       sdto.tickets.forEach(tdto -> {
-        Ticket tbo = new Ticket();
+        var tbo = new Ticket();
         tbo.setSight(sbo);
         tbo.setExternalId(tdto.id);
         tbo.setName(tdto.name);
