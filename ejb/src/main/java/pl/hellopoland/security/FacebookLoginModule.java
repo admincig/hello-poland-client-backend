@@ -41,7 +41,7 @@ public class FacebookLoginModule extends AbstractServerLoginModule {
     try {
       InitialContext ctx = new InitialContext();
       ds = (DataSource) ctx.lookup("java:jboss/datasources/hellopoland");
-      userService = (UserService) ctx.lookup("java:app/hellopoland.ejb/UserService");
+      userService = (UserService) ctx.lookup("java:app/hellopoland.ejb-0.0.1-SNAPSHOT/UserService");
       fbConnector = new FacebookAPIConnector();
     } catch (NamingException e) {
       e.printStackTrace();

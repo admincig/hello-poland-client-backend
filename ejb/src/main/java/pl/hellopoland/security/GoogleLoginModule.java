@@ -41,7 +41,8 @@ public class GoogleLoginModule extends AbstractServerLoginModule {
     try {
       InitialContext ctx = new InitialContext();
       ds = (DataSource) ctx.lookup("java:jboss/datasources/hellopoland");
-      userService = (UserService) ctx.lookup("java:app/hellopoland.ejb/UserService");
+      // TODO: fix
+      userService = (UserService) ctx.lookup("java:app/hellopoland.ejb-0.0.1-SNAPSHOT/UserService");
       googleConnector = new GoogleAPIConnector();
     } catch (NamingException e) {
       e.printStackTrace();
