@@ -16,7 +16,6 @@ public class DbFiller extends ServiceSuperclass {
   @Inject
   SightService sService;
 
-
   @PostConstruct
   public void fillDb() {
     String hibernateStrategy = properties.get("hibernate.hbm2ddl.auto").toString();
@@ -28,7 +27,6 @@ public class DbFiller extends ServiceSuperclass {
 
     createPortals();
     runImporter();
-
     logger.log(Logger.Level.INFO, "dbfiller finished");
   }
 

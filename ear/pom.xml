@@ -38,7 +38,7 @@
 				<version>3.0.0</version>
 				<configuration>
 					<!-- Tell Maven we are using Java EE -->
-					<version>7</version>
+					<version>8</version>
 					<!-- Use Java EE ear libraries as needed. Java EE ear libraries are 
 						in easy way to package any libraries needed in the ear, and automatically 
 						have any modules (EJB-JARs and WARs) use them -->
