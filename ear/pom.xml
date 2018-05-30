@@ -24,6 +24,11 @@
 		</dependency>
 		<dependency>
 			<groupId>pl.hellopoland</groupId>
+			<artifactId>hellopoland.partner</artifactId>
+			<type>war</type>
+		</dependency>
+		<dependency>
+			<groupId>pl.hellopoland</groupId>
 			<artifactId>hellopoland-dto</artifactId>
 		</dependency>
 	</dependencies>
@@ -37,17 +42,19 @@
 				<artifactId>maven-ear-plugin</artifactId>
 				<version>3.0.0</version>
 				<configuration>
-					<!-- Tell Maven we are using Java EE -->
+					<!-- Should be 8, but eclipse hotswap doesnt work -->
 					<version>8</version>
-					<!-- Use Java EE ear libraries as needed. Java EE ear libraries are 
-						in easy way to package any libraries needed in the ear, and automatically 
-						have any modules (EJB-JARs and WARs) use them -->
 					<defaultLibBundleDir>lib</defaultLibBundleDir>
 					<modules>
 						<webModule>
 							<groupId>pl.hellopoland</groupId>
 							<artifactId>hellopoland.rest</artifactId>
 							<contextRoot>/</contextRoot>
+						</webModule>
+						<webModule>
+							<groupId>pl.hellopoland</groupId>
+							<artifactId>hellopoland.partner</artifactId>
+							<contextRoot>/partner</contextRoot>
 						</webModule>
 					</modules>
 					<outputFileNameMapping>@{artifactId}@-@{version}@.@{extension}@</outputFileNameMapping>
