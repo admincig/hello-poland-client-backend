@@ -42,7 +42,7 @@ public class UserService extends ServiceSuperclass {
     return bo;
   }
 
-  private User findByEmail(String email) {
+  public User findByEmail(String email) {
     return em.createQuery("from User where email=:email", User.class).setParameter("email", email)
         .getSingleResult();
   }
