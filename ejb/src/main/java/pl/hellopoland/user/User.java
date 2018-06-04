@@ -8,7 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.Email;
+//import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import pl.hellopoland.ModelSuperclass;
 
@@ -27,7 +27,7 @@ public class User extends ModelSuperclass {
   }
 
   @NotNull
-  @Email
+//  @Email
   private String email;
   private String name;
   private String password;

@@ -42,14 +42,13 @@
 				<artifactId>maven-ear-plugin</artifactId>
 				<version>3.0.0</version>
 				<configuration>
-					<!-- Should be 8, but eclipse hotswap doesnt work -->
 					<version>8</version>
 					<defaultLibBundleDir>lib</defaultLibBundleDir>
 					<modules>
 						<webModule>
 							<groupId>pl.hellopoland</groupId>
 							<artifactId>hellopoland.rest</artifactId>
-							<contextRoot>/</contextRoot>
+							<contextRoot>/v1</contextRoot>
 						</webModule>
 						<webModule>
 							<groupId>pl.hellopoland</groupId>

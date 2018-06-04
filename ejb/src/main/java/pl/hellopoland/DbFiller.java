@@ -26,7 +26,7 @@ public class DbFiller extends ServiceSuperclass {
     }
 
     createPortals();
-    runImporter();
+//    runImporter();
     logger.log(Logger.Level.INFO, "dbfiller finished");
   }
 

@@ -1,4 +1,4 @@
-package hellopoland.partner;
+package pl.hellopoland.partner;
 
 import javax.enterprise.context.RequestScoped;
 import javax.ws.rs.Consumes;
