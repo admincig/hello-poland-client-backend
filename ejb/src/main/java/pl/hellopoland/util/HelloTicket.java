@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.json.Json;
 import javax.json.JsonObject;
-import pl.hellopoland.dto.Booking;
+import pl.hellopoland.dto.booking.Booking;
+import pl.hellopoland.dto.booking.Ticket;
 import pl.hellopoland.order.OrderDetails;
 import pl.hellopoland.order.OrderEntry;
 
@@ -24,7 +25,7 @@ public class HelloTicket {
     booking.customerEmail = details.getEmail();
     booking.customerName = details.getFirstName() + " " + details.getLastName();
     booking.ticketBookings = orderEntries.stream().map(oe -> {
-      Booking.Ticket t = new Booking.Ticket();
+      Ticket t = new Ticket();
       t.ticketDefinitionId = oe.getExternalId();
       t.numberOfTickets = oe.getQuantity().longValue();
       return t;
