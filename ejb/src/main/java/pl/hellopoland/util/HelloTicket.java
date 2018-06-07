@@ -1,6 +1,7 @@
 package pl.hellopoland.util;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,24 +31,41 @@ public class HelloTicket {
       t.numberOfTickets = oe.getQuantity().longValue();
       return t;
     }).collect(Collectors.toList());
+    var json = prepareJson(booking);
     try {
-      return post("/bookings", booking);
+      return post("/api/v1/bookings", json);
     } catch (IOException e) {
       logger.log(System.Logger.Level.WARNING, e);
       return null;
     }
   }
 
-  private JsonObject post(String path, Booking booking) throws IOException {
-    var json = prepareJson(booking);
+  private JsonObject post(String path, JsonObject json) throws IOException {
     URL url = new URL(this.url + path);
     var conn = url.openConnection();
     conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
     logger.log(System.Logger.Level.INFO,
         "Sending POST request to url: " + url + " with body: " + json);
+    conn.setRequestProperty("Authorization",
+        "Bearer eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.");
     conn.setDoOutput(true);
     var os = conn.getOutputStream();
     Json.createWriter(os).writeObject(json);
+    var is = conn.getInputStream();
+    var resp = Json.createReader(is).readObject();
+    logger.log(System.Logger.Level.INFO, "Server responded with body: " + resp);
+    return resp;
+  }
+
+  private JsonObject put(String path, JsonObject json) throws IOException {
+    URL url = new URL(this.url + path);
+    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    conn.setRequestMethod("PUT");
+    if (json != null) {
+      conn.setDoOutput(true);
+      var os = conn.getOutputStream();
+      Json.createWriter(os).writeObject(json);
+    }
     var is = conn.getInputStream();
     var resp = Json.createReader(is).readObject();
     logger.log(System.Logger.Level.INFO, "Server responded with body: " + resp);
