@@ -1,6 +1,5 @@
 package pl.hellopoland.rest;
 
-import java.util.Collection;
 import java.util.stream.Collectors;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -12,6 +11,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import pl.hellopoland.config.SightsPagedCollectionConfig;
+import pl.hellopoland.dto.Push;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.rest.dto.SightOnListingRO;
 import pl.hellopoland.rest.dto.SightRO;
@@ -34,8 +34,8 @@ public class SightRestService {
   }
 
   @POST
-  public void savePush(Collection<pl.hellopoland.dto.SightEventDefinition> sights) {
-    sightService.savePush(sights);
+  public void savePush(Push push) {
+    sightService.savePush(push.sightEvents);
   }
 
   @POST
