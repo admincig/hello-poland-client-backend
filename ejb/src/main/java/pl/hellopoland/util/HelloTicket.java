@@ -19,7 +19,7 @@ public class HelloTicket {
   private System.Logger logger = System.getLogger(HelloTicket.class.getName());
   private String url;
 
-  public JsonObject book(OrderDetails details, List<OrderEntry> orderEntries) throws IOException {
+  public JsonObject book(OrderDetails details, List<OrderEntry> orderEntries) {
     Booking booking = new Booking();
     booking.customerEmail = details.getEmail();
     booking.customerName = details.getFirstName() + " " + details.getLastName();
@@ -29,7 +29,12 @@ public class HelloTicket {
       t.numberOfTickets = oe.getQuantity().longValue();
       return t;
     }).collect(Collectors.toList());
-    return post("/bookings", booking);
+    try {
+      return post("/bookings", booking);
+    } catch (IOException e) {
+      logger.log(System.Logger.Level.WARNING, e);
+      return null;
+    }
   }
 
   private JsonObject post(String path, Booking booking) throws IOException {

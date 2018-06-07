@@ -34,7 +34,7 @@ public class SightRestService {
   }
 
   @POST
-  public void savePush(Collection<pl.hellopoland.dto.SightEvent> sights) {
+  public void savePush(Collection<pl.hellopoland.dto.SightEventDefinition> sights) {
     sightService.savePush(sights);
   }
 

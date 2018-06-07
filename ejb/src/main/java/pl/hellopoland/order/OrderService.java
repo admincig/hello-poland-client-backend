@@ -19,6 +19,7 @@ import javax.ejb.EJBAccessException;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.json.JsonObject;
 import javax.persistence.NoResultException;
 import javax.ws.rs.core.MediaType;
 import pl.hellopoland.ConflictingException;
@@ -138,12 +139,8 @@ public class OrderService extends ServiceSuperclass {
     }
 
     HelloTicket hpt = new HelloTicket(portal.getUrl());
-    Map<String, Object> resp = hpt.book(details, orderEntries);
+    JsonObject resp = hpt.book(details, orderEntries);
     logger.log(Logger.Level.INFO, resp.toString());
-    Integer id = (Integer) resp.get("id");
-    if (id != null) {
-      entry.getValue().forEach(ose -> ose.setExternalId(id.longValue()));
-    }
   }
 
   private void placeInWooCommerce(OrderDetails details,
