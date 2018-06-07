@@ -49,7 +49,6 @@ public class HelloTicket {
     conn.setRequestProperty("Authorization",
         "Bearer eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.");
     conn.setDoOutput(true);
-    logger.log(System.Logger.Level.INFO, conn.getHeaderFields());
     var os = conn.getOutputStream();
     Json.createWriter(os).writeObject(json);
     var is = conn.getInputStream();
