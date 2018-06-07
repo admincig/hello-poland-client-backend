@@ -72,12 +72,14 @@ public class SightService extends ServiceSuperclass {
   }
 
   @PermitAll
-  public void savePush(Collection<pl.hellopoland.dto.Sight> sights) {
+  public void savePush(Collection<pl.hellopoland.dto.SightEventDefinition> sights) {
+    Portal hpt = getPortal("Hello Ticket Cloud");
     sights.forEach(sdto -> {
       var sbo = new Sight();
       sbo.setName(sdto.name);
       sbo.generateRandomScore();
       sbo.setMainImage(iService.downloadImage(sdto.mainImageUrl));
+      sbo.setPortal(hpt);
 
       em.persist(sbo);
       logger.log(Logger.Level.INFO, "Saved new sight: " + sbo.getName());
@@ -97,5 +99,10 @@ public class SightService extends ServiceSuperclass {
         sbo.setMinPrice(sbo.getTickets().stream().mapToInt(Ticket::getPrice).min().orElse(0));
       }
     });
+  }
+
+  private Portal getPortal(String name) {
+    return em.createQuery("from Portal where name=:name", Portal.class).setParameter("name", name)
+        .getSingleResult();
   }
 }

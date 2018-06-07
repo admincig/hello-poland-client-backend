@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
@@ -28,6 +29,7 @@ import pl.hellopoland.sight.Sight;
 import pl.hellopoland.sight.Ticket;
 import pl.hellopoland.user.User;
 import pl.hellopoland.user.UserService;
+import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PaymentUtils;
 import pl.hellopoland.util.Triplet;
 import pl.hellopoland.util.Woo;
@@ -112,22 +114,56 @@ public class OrderService extends ServiceSuperclass {
             .collect(groupingBy(ose -> ose.getSight().getPortal()));
     for (Map.Entry<Portal, List<OrderSightEntry>> entry : groupedByPortal.entrySet()) {
       Portal portal = entry.getKey();
-      List<OrderEntry> orderEntries = new ArrayList<>();
-      for (OrderSightEntry se : entry.getValue()) {
-        em.refresh(se);
-        for (OrderDateEntry de : se.getEntries()) {
-          em.refresh(de);
-          orderEntries.addAll(de.getEntries());
-        }
-      }
       logger.log(Logger.Level.INFO, "Placing external order in " + portal.getName());
-      Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
-      Map<String, Object> resp = woo.placeOrder(o.getDetails(), orderEntries);
-      logger.log(Logger.Level.INFO, resp.toString());
-      Integer id = (Integer) resp.get("id");
-      if (id != null) {
-        entry.getValue().forEach(ose -> ose.setExternalId(id.longValue()));
+      switch (portal.getType()) {
+        case WOOCOMMERCE:
+          placeInWooCommerce(o.getDetails(), entry);
+          break;
+        case HELLOTICKET_CLOUD_1:
+          placeInHptCloud(o.getDetails(), entry);
+          break;
       }
+    }
+  }
+
+  private void placeInHptCloud(OrderDetails details, Entry<Portal, List<OrderSightEntry>> entry) {
+    Portal portal = entry.getKey();
+    List<OrderEntry> orderEntries = new ArrayList<>();
+    for (OrderSightEntry se : entry.getValue()) {
+      em.refresh(se);
+      for (OrderDateEntry de : se.getEntries()) {
+        em.refresh(de);
+        orderEntries.addAll(de.getEntries());
+      }
+    }
+
+    HelloTicket hpt = new HelloTicket(portal.getUrl());
+    Map<String, Object> resp = hpt.book(details, orderEntries);
+    logger.log(Logger.Level.INFO, resp.toString());
+    Integer id = (Integer) resp.get("id");
+    if (id != null) {
+      entry.getValue().forEach(ose -> ose.setExternalId(id.longValue()));
+    }
+  }
+
+  private void placeInWooCommerce(OrderDetails details,
+      Entry<Portal, List<OrderSightEntry>> entry) {
+    Portal portal = entry.getKey();
+    List<OrderEntry> orderEntries = new ArrayList<>();
+    for (OrderSightEntry se : entry.getValue()) {
+      em.refresh(se);
+      for (OrderDateEntry de : se.getEntries()) {
+        em.refresh(de);
+        orderEntries.addAll(de.getEntries());
+      }
+    }
+
+    Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
+    Map<String, Object> resp = woo.placeOrder(details, orderEntries);
+    logger.log(Logger.Level.INFO, resp.toString());
+    Integer id = (Integer) resp.get("id");
+    if (id != null) {
+      entry.getValue().forEach(ose -> ose.setExternalId(id.longValue()));
     }
   }
 

@@ -50,7 +50,6 @@
 		<dependency>
 			<groupId>pl.hellopoland</groupId>
 			<artifactId>hellopoland-dto</artifactId>
-			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 
