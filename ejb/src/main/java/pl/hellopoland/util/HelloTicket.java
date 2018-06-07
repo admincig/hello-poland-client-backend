@@ -44,7 +44,8 @@ public class HelloTicket {
     var conn = url.openConnection();
     conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
     logger.log(System.Logger.Level.INFO,
-        "Sending POST request to url: " + url.getPath() + " with body: " + json);
+        "Sending POST request to url: " + url + " with body: " + json);
+    conn.setDoOutput(true);
     var os = conn.getOutputStream();
     Json.createWriter(os).writeObject(json);
     var is = conn.getInputStream();
