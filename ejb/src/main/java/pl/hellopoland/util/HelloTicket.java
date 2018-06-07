@@ -24,7 +24,7 @@ public class HelloTicket {
     booking.customerEmail = details.getEmail();
     booking.customerName = details.getFirstName() + " " + details.getLastName();
     booking.ticketBookings = orderEntries.stream().map(oe -> {
-      Booking.Ticket t = booking.new Ticket();
+      Booking.Ticket t = new Booking.Ticket();
       t.ticketDefinitionId = oe.getExternalId();
       t.numberOfTickets = oe.getQuantity().longValue();
       return t;
