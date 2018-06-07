@@ -1,6 +1,7 @@
 package pl.hellopoland.rest;
 
 import java.util.stream.Collectors;
+import javax.annotation.security.PermitAll;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -29,6 +30,7 @@ public class SightRestService {
   SightService sightService;
 
   @GET
+  @PermitAll
   public PagedCollection getList() {
     return search(new SightsPagedCollectionConfig());
   }

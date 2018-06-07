@@ -7,7 +7,6 @@ import java.io.OutputStream;
 import java.lang.System.Logger;
 import java.net.URL;
 import java.util.UUID;
-import javax.annotation.security.PermitAll;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import pl.hellopoland.ServiceSuperclass;
@@ -16,7 +15,6 @@ import pl.hellopoland.ServiceSuperclass;
 @Stateless
 public class ImageService extends ServiceSuperclass {
 
-  @PermitAll
   public Image storeImage(InputStream is, String extension) {
     String hash = UUID.randomUUID().toString().replace('-', 'x');
     String path = properties.getProperty("dms.root.path") + File.separator + hash.substring(0, 1)
@@ -55,7 +53,6 @@ public class ImageService extends ServiceSuperclass {
     }
   }
 
-  @PermitAll
   public File getImage(String name) {
     String path =
         em.createQuery("select path from Image where concat(hash, extension)=:name", String.class)
@@ -63,7 +60,6 @@ public class ImageService extends ServiceSuperclass {
     return new File(path + name);
   }
 
-  @PermitAll
   public Image downloadImage(String url) {
     Image im = null;
     if (url != null) {

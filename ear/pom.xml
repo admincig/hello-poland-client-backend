@@ -59,7 +59,7 @@
 					<outputFileNameMapping>@{artifactId}@-@{version}@.@{extension}@</outputFileNameMapping>
 					<jboss>
 						<version>5</version>
-						<security-domain>${security.domain}</security-domain>
+						<security-domain>hellopoland-legacy</security-domain>
 					</jboss>
 				</configuration>
 			</plugin>

@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJBAccessException;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -41,7 +39,6 @@ public class OrderService extends ServiceSuperclass {
   @Inject
   UserService uService;
 
-  @PermitAll
   public Order create(Collection<Triplet<Long, Date, Integer>> triplets, OrderDetails details) {
     User user = null;
     try {
@@ -207,14 +204,12 @@ public class OrderService extends ServiceSuperclass {
     }
   }
 
-  @RolesAllowed("user")
   public List<OrderEntry> getOrderEntries() {
     return em.createQuery(
         "from OrderEntry oe join fetch oe.sightEntry ose join fetch ose.sight s join fetch ose.order o where o.user=:user order by oe.date asc",
         OrderEntry.class).setParameter("user", uService.me()).getResultList();
   }
 
-  @RolesAllowed("user")
   public OrderEntry getOrderEntry(long id) {
     OrderEntry oe = em.find(OrderEntry.class, id);
 
@@ -222,7 +217,6 @@ public class OrderService extends ServiceSuperclass {
     return oe;
   }
 
-  @RolesAllowed("user")
   public OrderDateEntry getOrderDateEntry(long id) {
     String queryString = "from OrderDateEntry where deleted=false and id=:id";
     OrderDateEntry de =
@@ -232,7 +226,6 @@ public class OrderService extends ServiceSuperclass {
     return de;
   }
 
-  @RolesAllowed("user")
   public List<OrderDateEntry> getOrderSightDateEntries() {
     List<OrderDateEntry> osdes = em.createQuery(
         "from OrderDateEntry osde join fetch osde.sightEntry ose join fetch ose.sight s join fetch ose.order o where osde.deleted=false and o.user=:user and o.status=:status order by osde.date asc",
@@ -242,12 +235,10 @@ public class OrderService extends ServiceSuperclass {
     return osdes;
   }
 
-  @RolesAllowed("user")
   public void deleteOrderDateEntry(long id) {
     em.find(OrderDateEntry.class, id).setDeleted(true);
   }
 
-  @PermitAll
   public void ack(String hash, String ack) throws Exception {
     logger.log(Logger.Level.INFO, "Got ack from P24");
     Map<String, String> ackMap = PaymentUtils.queryToMap(ack);
@@ -309,7 +300,6 @@ public class OrderService extends ServiceSuperclass {
         .getSingleResult();
   }
 
-  @PermitAll
   public void cancel(Order o) {
     o.setStatus(Order.Status.CANCELLED);
     cancelInExternalAPI(o);

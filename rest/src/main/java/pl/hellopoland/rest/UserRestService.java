@@ -1,6 +1,7 @@
 package pl.hellopoland.rest;
 
 import java.util.logging.Logger;
+import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.servlet.ServletException;
@@ -33,6 +34,7 @@ public class UserRestService {
 
   @GET
   @Path("/users/me")
+  @RolesAllowed("user")
   public UserORO me() {
     return new UserORO(userService.me());
   }

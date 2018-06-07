@@ -1,6 +1,8 @@
 package pl.hellopoland.partner;
 
-import javax.annotation.security.RolesAllowed;
+import javax.annotation.security.DeclareRoles;
+import javax.annotation.security.DenyAll;
+import javax.annotation.security.PermitAll;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.security.enterprise.SecurityContext;
@@ -16,6 +18,7 @@ import javax.ws.rs.core.Response;
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@DeclareRoles({"root", "admin", "user"})
 public class RestService {
 
   @Inject
@@ -25,8 +28,15 @@ public class RestService {
   private CurrentUser currentUser;
 
   @GET
+  @Path("/secured/helloWorld")
+  @DenyAll
+  public String securedHelloWorld() {
+    return "Hello, world!";
+  }
+
+  @GET
   @Path("/helloWorld")
-  @RolesAllowed("user")
+  @PermitAll
   public String helloWorld() {
     return "Hello, world!";
   }

@@ -4,7 +4,6 @@ import java.lang.System.Logger;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import javax.annotation.security.PermitAll;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -22,12 +21,10 @@ public class SightService extends ServiceSuperclass {
   @Inject
   ImageService iService;
 
-  @PermitAll
   public PagedEntityCollection<Sight> getList(SightsPagedCollectionConfig config) {
     return new PagedEntityCollection<>(getQuery(config).getResultList(), config);
   }
 
-  @PermitAll
   public Sight get(Long id) {
     Sight s = em.find(Sight.class, id);
 
@@ -39,7 +36,6 @@ public class SightService extends ServiceSuperclass {
     return s;
   }
 
-  @PermitAll
   public void runImporter() {
     List<Portal> portals =
         em.createQuery("from Portal where type=:type order by id asc", Portal.class)
@@ -72,7 +68,6 @@ public class SightService extends ServiceSuperclass {
     logger.log(Logger.Level.INFO, "Finished all imports");
   }
 
-  @PermitAll
   public void savePush(Collection<pl.hellopoland.dto.SightEventDefinition> sights) {
     Portal hpt = getPortal("Hello Ticket Cloud");
     sights.forEach(sdto -> {
