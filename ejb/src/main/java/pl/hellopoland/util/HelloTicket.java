@@ -25,12 +25,13 @@ public class HelloTicket {
     Booking booking = new Booking();
     booking.customerEmail = details.getEmail();
     booking.customerName = details.getFirstName() + " " + details.getLastName();
-    booking.ticketBookings = orderEntries.stream().map(oe -> {
+    List<Ticket> ticketBookings = orderEntries.stream().map(oe -> {
       Ticket t = new Ticket();
       t.ticketDefinitionId = oe.getExternalId();
       t.numberOfTickets = oe.getQuantity().longValue();
       return t;
     }).collect(Collectors.toList());
+    booking.ticketBookings = (Ticket[]) ticketBookings.toArray();
     var json = prepareJson(booking);
     try {
       return post("/api/v1/bookings", json);
@@ -75,10 +76,10 @@ public class HelloTicket {
   // TODO change for jsonb in JEE8
   private JsonObject prepareJson(Booking booking) {
     var ticketBuilder = Json.createArrayBuilder();
-    booking.ticketBookings.forEach(t -> {
+    for (Ticket t : booking.ticketBookings) {
       ticketBuilder.add(Json.createObjectBuilder().add("ticketDefinitionId", t.ticketDefinitionId)
           .add("numberOfTickets", t.numberOfTickets).build());
-    });
+    } ;
     return Json.createObjectBuilder().add("customerEmail", booking.customerEmail)
         .add("customerName", booking.customerName).add("ticketBookings", ticketBuilder.build())
         .build();
