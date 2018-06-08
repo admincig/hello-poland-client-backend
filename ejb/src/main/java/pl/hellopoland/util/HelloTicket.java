@@ -31,7 +31,7 @@ public class HelloTicket {
       t.numberOfTickets = oe.getQuantity().longValue();
       return t;
     }).collect(Collectors.toList());
-    booking.ticketBookings = (Ticket[]) ticketBookings.toArray();
+    booking.ticketBookings = ticketBookings.toArray(new Ticket[ticketBookings.size()]);
     var json = prepareJson(booking);
     try {
       return post("/api/v1/bookings", json);
