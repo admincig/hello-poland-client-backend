@@ -70,6 +70,8 @@ public class HelloTicket {
   private JsonObject put(String path, JsonObject json) throws IOException {
     URL url = new URL(this.url + path);
     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    logger.log(System.Logger.Level.INFO,
+        "Sending PUT request to url: " + url + " with body: " + json);
     conn.setRequestMethod("PUT");
     conn.setRequestProperty("Authorization",
         "Bearer eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.");
