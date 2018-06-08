@@ -173,6 +173,10 @@ public class OrderService extends ServiceSuperclass {
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     JsonObject resp = hpt.book(details, orderEntries);
     logger.log(Logger.Level.INFO, resp.toString());
+    Integer id = resp.getInt("id");
+    if (id != null) {
+      entry.getValue().forEach(ose -> ose.setExternalId(id.longValue()));
+    }
   }
 
   private void placeInWooCommerce(OrderDetails details,
