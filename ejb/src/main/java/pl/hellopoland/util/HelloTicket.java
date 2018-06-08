@@ -71,6 +71,8 @@ public class HelloTicket {
     URL url = new URL(this.url + path);
     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
     conn.setRequestMethod("PUT");
+    conn.setRequestProperty("Authorization",
+        "Bearer eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.");
     if (json != null) {
       conn.setDoOutput(true);
       var os = conn.getOutputStream();
