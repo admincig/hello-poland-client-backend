@@ -62,7 +62,6 @@ public class HelloTicket {
           JsonObject ticket = (JsonObject) iter.next();
           if (oe.getExternalId().intValue() == ticket.getInt("id")) {
             oe.addNumber(ticket.getString("serialNumber"));
-            break;
           }
         }
       }
