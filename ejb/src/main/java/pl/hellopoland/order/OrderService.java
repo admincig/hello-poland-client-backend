@@ -352,10 +352,13 @@ public class OrderService extends ServiceSuperclass {
 
     // XXX Just for version 0.1. Will be deleted in further development
     for (OrderSightEntry ose : order.getEntries()) {
-      for (OrderDateEntry ode : ose.getEntries()) {
-        for (OrderEntry oe : ode.getEntries()) {
-          for (int i = 0; i < oe.getQuantity(); i++) {
-            oe.addNumber(order.getHash());
+      Portal portal = ose.getSight().getPortal();
+      if (portal != null && portal.getType() == Portal.Type.WOOCOMMERCE) {
+        for (OrderDateEntry ode : ose.getEntries()) {
+          for (OrderEntry oe : ode.getEntries()) {
+            for (int i = 0; i < oe.getQuantity(); i++) {
+              oe.addNumber(order.getHash());
+            }
           }
         }
       }
