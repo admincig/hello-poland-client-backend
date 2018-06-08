@@ -22,6 +22,7 @@ public class OrderEntry extends ModelSuperclass {
   @NotNull
   private String name;
   private Long externalId;
+  private Long externalDefinitionId;
   @ElementCollection
   private List<String> numbers;
 
@@ -72,6 +73,14 @@ public class OrderEntry extends ModelSuperclass {
 
   public void setDateEntry(OrderDateEntry dateEntry) {
     this.dateEntry = dateEntry;
+  }
+
+  public Long getExternalDefinitionId() {
+    return externalDefinitionId;
+  }
+
+  public void setExternalDefinitionId(Long externalDefinitionId) {
+    this.externalDefinitionId = externalDefinitionId;
   }
 
   public Integer getSum() {

@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonObject;
 import pl.hellopoland.dto.booking.Booking;
 import pl.hellopoland.dto.booking.Ticket;
@@ -27,23 +28,45 @@ public class HelloTicket {
     booking.customerName = details.getFirstName() + " " + details.getLastName();
     List<Ticket> ticketBookings = orderEntries.stream().map(oe -> {
       Ticket t = new Ticket();
-      t.ticketDefinitionId = oe.getExternalId();
+      t.ticketDefinitionId = oe.getExternalDefinitionId();
       t.numberOfTickets = oe.getQuantity().longValue();
       return t;
     }).collect(Collectors.toList());
     booking.ticketBookings = ticketBookings.toArray(new Ticket[ticketBookings.size()]);
     var json = prepareJson(booking);
     try {
-      return post("/api/v1/bookings", json);
+      var resp = post("/api/v1/bookings", json);
+      JsonArray tickets = resp.getJsonArray("tickets");
+      orderEntries.forEach(oe -> {
+        for (var iter = tickets.iterator(); iter.hasNext();) {
+          JsonObject ticket = (JsonObject) iter.next();
+          if (oe.getExternalId().intValue() == ticket.getInt("definitionId")) {
+            oe.setExternalId((long) ticket.getInt("id"));
+            break;
+          }
+        }
+      });
+      return resp;
     } catch (IOException e) {
       logger.log(System.Logger.Level.WARNING, e);
       return null;
     }
   }
 
-  public JsonObject confirm(Long orderId) {
+  public JsonObject confirm(Long orderId, List<OrderEntry> orderEntries) {
     try {
-      return put("/api/v1/bookings/buy/" + orderId, null);
+      var resp = put("/api/v1/bookings/buy/" + orderId, null);
+      JsonArray tickets = resp.getJsonArray("tickets");
+      for (var oe : orderEntries) {
+        for (var iter = tickets.iterator(); iter.hasNext();) {
+          JsonObject ticket = (JsonObject) iter.next();
+          if (oe.getExternalId().intValue() == ticket.getInt("id")) {
+            oe.addNumber(ticket.getString("serialNumber"));
+            break;
+          }
+        }
+      }
+      return resp;
     } catch (IOException e) {
       logger.log(System.Logger.Level.WARNING, e);
       return null;

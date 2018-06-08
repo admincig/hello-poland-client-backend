@@ -19,8 +19,6 @@ import javax.ejb.EJBAccessException;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
 import javax.persistence.NoResultException;
 import javax.ws.rs.core.MediaType;
 import pl.hellopoland.ConflictingException;
@@ -91,7 +89,7 @@ public class OrderService extends ServiceSuperclass {
             oe.setQuantity(trip.third);
             oe.setUnitPrice(ticket.getPrice());
             oe.setDateEntry(dateEntry);
-            oe.setExternalId(ticket.getExternalId());
+            oe.setExternalDefinitionId(ticket.getExternalId());
 
             em.persist(oe);
           }
@@ -150,24 +148,11 @@ public class OrderService extends ServiceSuperclass {
 
   private void confirmInHpt(Map.Entry<Portal, List<OrderSightEntry>> entry) {
     Portal portal = entry.getKey();
-    HelloTicket hpt = new HelloTicket(portal.getUrl());
+    List<OrderEntry> orderEntries = gatherOrderEntries(entry.getValue());
     Long externalId =
         entry.getValue().stream().map(OrderSightEntry::getExternalId).findFirst().get();
-    JsonObject resp = hpt.confirm(externalId);
-    JsonArray tickets = resp.getJsonArray("tickets");
-    entry.getValue().forEach(ose -> {
-      for (var ode : ose.getEntries()) {
-        for (var oe : ode.getEntries()) {
-          for (var iter = tickets.iterator(); iter.hasNext();) {
-            JsonObject ticket = (JsonObject) iter.next();
-            if (oe.getExternalId().intValue() == ticket.getInt("id")) {
-              oe.addNumber(ticket.getString("serialNumber"));
-              break;
-            }
-          }
-        }
-      }
-    });
+    HelloTicket hpt = new HelloTicket(portal.getUrl());
+    hpt.confirm(externalId, orderEntries);
   }
 
   private void confirmInWooCommerce(Map.Entry<Portal, List<OrderSightEntry>> entry) {
@@ -181,34 +166,24 @@ public class OrderService extends ServiceSuperclass {
 
   private void placeInHpt(OrderDetails details, Entry<Portal, List<OrderSightEntry>> entry) {
     Portal portal = entry.getKey();
-    List<OrderEntry> orderEntries = new ArrayList<>();
-    for (OrderSightEntry se : entry.getValue()) {
+    List<OrderEntry> orderEntries = gatherOrderEntries(entry.getValue());
+
+    HelloTicket hpt = new HelloTicket(portal.getUrl());
+    var resp = hpt.book(details, orderEntries);
+    Integer externalOrderId = resp.getInt("id");
+    entry.getValue().forEach(ose -> ose.setExternalId(externalOrderId.longValue()));
+  }
+
+  private List<OrderEntry> gatherOrderEntries(List<OrderSightEntry> list) {
+    List<OrderEntry> returnList = new ArrayList<>();
+    for (OrderSightEntry se : list) {
       em.refresh(se);
       for (OrderDateEntry de : se.getEntries()) {
         em.refresh(de);
-        orderEntries.addAll(de.getEntries());
+        returnList.addAll(de.getEntries());
       }
     }
-
-    HelloTicket hpt = new HelloTicket(portal.getUrl());
-    JsonObject resp = hpt.book(details, orderEntries);
-    JsonArray tickets = resp.getJsonArray("tickets");
-    Integer externalOrderId = resp.getInt("id");
-    entry.getValue().forEach(ose -> {
-      ose.setExternalId(externalOrderId.longValue());
-      for (var ode : ose.getEntries()) {
-        for (var oe : ode.getEntries()) {
-          for (var iter = tickets.iterator(); iter.hasNext();) {
-            JsonObject ticket = (JsonObject) iter.next();
-            if (oe.getExternalId().intValue() == ticket.getInt("definitionId")) {
-              oe.setExternalId((long) ticket.getInt("id"));
-              break;
-            }
-          }
-        }
-      }
-    });
-
+    return returnList;
   }
 
   private void placeInWooCommerce(OrderDetails details,
