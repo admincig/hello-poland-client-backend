@@ -19,6 +19,7 @@ import javax.ejb.EJBAccessException;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.persistence.NoResultException;
 import javax.ws.rs.core.MediaType;
@@ -134,27 +135,46 @@ public class OrderService extends ServiceSuperclass {
     for (var entry : groupedByPortal.entrySet()) {
       Portal portal = entry.getKey();
       logger.log(Logger.Level.INFO, "Confirming external order in " + portal.getName());
-      Long externalId =
-          entry.getValue().stream().map(OrderSightEntry::getExternalId).findFirst().get();
 
       switch (portal.getType()) {
         case WOOCOMMERCE:
-          confirmInWooCommerce(portal, externalId);
+          confirmInWooCommerce(entry);
           break;
         case HELLOTICKET_CLOUD_1:
-          confirmInHpt(portal, externalId);
+          confirmInHpt(entry);
           break;
       }
 
     }
   }
 
-  private void confirmInHpt(Portal portal, Long externalId) {
+  private void confirmInHpt(Map.Entry<Portal, List<OrderSightEntry>> entry) {
+    Portal portal = entry.getKey();
     HelloTicket hpt = new HelloTicket(portal.getUrl());
-    logger.log(Logger.Level.INFO, hpt.confirm(externalId));
+    Long externalId =
+        entry.getValue().stream().map(OrderSightEntry::getExternalId).findFirst().get();
+    JsonObject resp = hpt.confirm(externalId);
+    JsonArray tickets = resp.getJsonArray("tickets");
+    entry.getValue().forEach(ose -> {
+      for (var ode : ose.getEntries()) {
+        for (var oe : ode.getEntries()) {
+          for (var iter = tickets.iterator(); iter.hasNext();) {
+            JsonObject ticket = (JsonObject) iter.next();
+            if (oe.getExternalId().intValue() == ticket.getInt("id")) {
+              oe.addNumber(ticket.getString("serialNumber"));
+              break;
+            }
+          }
+        }
+      }
+    });
   }
 
-  private void confirmInWooCommerce(Portal portal, Long externalId) {
+  private void confirmInWooCommerce(Map.Entry<Portal, List<OrderSightEntry>> entry) {
+    Portal portal = entry.getKey();
+    Long externalId =
+        entry.getValue().stream().map(OrderSightEntry::getExternalId).findFirst().get();
+
     Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
     logger.log(Logger.Level.INFO, woo.completeOrder(externalId));
   }
@@ -172,10 +192,23 @@ public class OrderService extends ServiceSuperclass {
 
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     JsonObject resp = hpt.book(details, orderEntries);
-    Integer id = resp.getInt("id");
-    if (id != null) {
-      entry.getValue().forEach(ose -> ose.setExternalId(id.longValue()));
-    }
+    JsonArray tickets = resp.getJsonArray("tickets");
+    Integer externalOrderId = resp.getInt("id");
+    entry.getValue().forEach(ose -> {
+      ose.setExternalId(externalOrderId.longValue());
+      for (var ode : ose.getEntries()) {
+        for (var oe : ode.getEntries()) {
+          for (var iter = tickets.iterator(); iter.hasNext();) {
+            JsonObject ticket = (JsonObject) iter.next();
+            if (oe.getExternalId().intValue() == ticket.getInt("definitionId")) {
+              oe.setExternalId((long) ticket.getInt("id"));
+              break;
+            }
+          }
+        }
+      }
+    });
+
   }
 
   private void placeInWooCommerce(OrderDetails details,
