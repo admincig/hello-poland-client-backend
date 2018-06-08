@@ -110,10 +110,9 @@ public class OrderService extends ServiceSuperclass {
     em.refresh(o);
     logger.log(Logger.Level.INFO,
         "Checking if any of order sight entries ought to be placed in external API");
-    Map<Portal, List<OrderSightEntry>> groupedByPortal =
-        o.getEntries().stream().filter(ose -> ose.getSight().getPortal() != null)
-            .collect(groupingBy(ose -> ose.getSight().getPortal()));
-    for (Map.Entry<Portal, List<OrderSightEntry>> entry : groupedByPortal.entrySet()) {
+    var groupedByPortal = o.getEntries().stream().filter(ose -> ose.getSight().getPortal() != null)
+        .collect(groupingBy(ose -> ose.getSight().getPortal()));
+    for (var entry : groupedByPortal.entrySet()) {
       Portal portal = entry.getKey();
       logger.log(Logger.Level.INFO, "Placing external order in " + portal.getName());
       switch (portal.getType()) {
@@ -121,13 +120,46 @@ public class OrderService extends ServiceSuperclass {
           placeInWooCommerce(o.getDetails(), entry);
           break;
         case HELLOTICKET_CLOUD_1:
-          placeInHptCloud(o.getDetails(), entry);
+          placeInHpt(o.getDetails(), entry);
           break;
       }
     }
   }
 
-  private void placeInHptCloud(OrderDetails details, Entry<Portal, List<OrderSightEntry>> entry) {
+  private void confirmInExternalAPI(Order o) {
+    logger.log(Logger.Level.INFO,
+        "Checking if any of order sight entries ought to be confirmed in external API");
+    var groupedByPortal = o.getEntries().stream().filter(ose -> ose.getSight().getPortal() != null)
+        .collect(groupingBy(ose -> ose.getSight().getPortal()));
+    for (var entry : groupedByPortal.entrySet()) {
+      Portal portal = entry.getKey();
+      logger.log(Logger.Level.INFO, "Confirming external order in " + portal.getName());
+      Long externalId =
+          entry.getValue().stream().map(OrderSightEntry::getExternalId).findFirst().get();
+
+      switch (portal.getType()) {
+        case WOOCOMMERCE:
+          confirmInWooCommerce(portal, externalId);
+          break;
+        case HELLOTICKET_CLOUD_1:
+          confirmInHpt(portal, externalId);
+          break;
+      }
+
+    }
+  }
+
+  private void confirmInHpt(Portal portal, Long externalId) {
+    HelloTicket hpt = new HelloTicket(portal.getUrl());
+    logger.log(Logger.Level.INFO, hpt.confirm(externalId));
+  }
+
+  private void confirmInWooCommerce(Portal portal, Long externalId) {
+    Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
+    logger.log(Logger.Level.INFO, woo.completeOrder(externalId));
+  }
+
+  private void placeInHpt(OrderDetails details, Entry<Portal, List<OrderSightEntry>> entry) {
     Portal portal = entry.getKey();
     List<OrderEntry> orderEntries = new ArrayList<>();
     for (OrderSightEntry se : entry.getValue()) {
@@ -241,23 +273,6 @@ public class OrderService extends ServiceSuperclass {
     } else {
       logger.log(Logger.Level.WARNING, "transaction problem.");
       problem(order);
-    }
-  }
-
-  private void confirmInExternalAPI(Order order) {
-    logger.log(Logger.Level.INFO,
-        "Checking if any of order sight entries ought to be confirmed in external API");
-    Map<Portal, List<OrderSightEntry>> groupedByPortal =
-        order.getEntries().stream().filter(ose -> ose.getSight().getPortal() != null)
-            .collect(groupingBy(ose -> ose.getSight().getPortal()));
-    for (Map.Entry<Portal, List<OrderSightEntry>> entry : groupedByPortal.entrySet()) {
-      Portal portal = entry.getKey();
-      logger.log(Logger.Level.INFO, "Confirming external order in " + portal.getName());
-      Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
-
-      // they have same id. should have
-      Long id = entry.getValue().stream().map(OrderSightEntry::getExternalId).findFirst().get();
-      logger.log(Logger.Level.INFO, woo.completeOrder(id).toString());
     }
   }
 

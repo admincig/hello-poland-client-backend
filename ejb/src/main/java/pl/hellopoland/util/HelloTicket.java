@@ -41,6 +41,15 @@ public class HelloTicket {
     }
   }
 
+  public JsonObject confirm(Long orderId) {
+    try {
+      return put("/api/v1/bookings/buy/" + orderId, null);
+    } catch (IOException e) {
+      logger.log(System.Logger.Level.WARNING, e);
+      return null;
+    }
+  }
+
   private JsonObject post(String path, JsonObject json) throws IOException {
     URL url = new URL(this.url + path);
     var conn = url.openConnection();
