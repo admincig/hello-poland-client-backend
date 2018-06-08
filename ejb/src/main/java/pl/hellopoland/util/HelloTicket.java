@@ -40,7 +40,7 @@ public class HelloTicket {
       orderEntries.forEach(oe -> {
         for (var iter = tickets.iterator(); iter.hasNext();) {
           JsonObject ticket = (JsonObject) iter.next();
-          if (oe.getExternalId().intValue() == ticket.getInt("definitionId")) {
+          if (oe.getExternalDefinitionId().intValue() == ticket.getInt("definitionId")) {
             oe.setExternalId((long) ticket.getInt("id"));
             break;
           }
