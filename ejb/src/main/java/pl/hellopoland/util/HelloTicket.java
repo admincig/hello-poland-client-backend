@@ -3,6 +3,8 @@ package pl.hellopoland.util;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.json.Json;
@@ -30,6 +32,7 @@ public class HelloTicket {
       Ticket t = new Ticket();
       t.ticketDefinitionId = oe.getExternalDefinitionId();
       t.numberOfTickets = oe.getQuantity().longValue();
+      t.date = oe.getDateEntry().getDate();
       return t;
     }).collect(Collectors.toList());
     booking.ticketBookings = ticketBookings.toArray(new Ticket[ticketBookings.size()]);
@@ -37,17 +40,19 @@ public class HelloTicket {
     try {
       var resp = post("/api/v1/bookings", json);
       JsonArray tickets = resp.getJsonArray("tickets");
-      orderEntries.forEach(oe -> {
+      for (var oe : orderEntries) {
         for (var iter = tickets.iterator(); iter.hasNext();) {
           JsonObject ticket = (JsonObject) iter.next();
-          if (oe.getExternalDefinitionId().intValue() == ticket.getInt("definitionId")) {
+          if (oe.getExternalDefinitionId().intValue() == ticket.getInt("definitionId")
+              && oe.getDateEntry().getDate()
+                  .compareTo(new SimpleDateFormat().parse(ticket.getString("date"))) == 0) {
             oe.setExternalId((long) ticket.getInt("id"));
             break;
           }
         }
-      });
+      } ;
       return resp;
-    } catch (IOException e) {
+    } catch (IOException | ParseException e) {
       logger.log(System.Logger.Level.WARNING, e);
       return null;
     }
