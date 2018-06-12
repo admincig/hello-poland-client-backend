@@ -3,6 +3,7 @@ package pl.hellopoland.util;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -19,10 +20,12 @@ public class HelloTicket {
 
   public HelloTicket(String url) {
     this.url = url;
+    this.df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
   }
 
   private System.Logger logger = System.getLogger(HelloTicket.class.getName());
   private String url;
+  private DateFormat df;
 
   public JsonObject book(OrderDetails details, List<OrderEntry> orderEntries) {
     Booking booking = new Booking();
@@ -44,8 +47,7 @@ public class HelloTicket {
         for (var iter = tickets.iterator(); iter.hasNext();) {
           JsonObject ticket = (JsonObject) iter.next();
           if (oe.getExternalDefinitionId().intValue() == ticket.getInt("definitionId")
-              && oe.getDateEntry().getDate()
-                  .compareTo(new SimpleDateFormat().parse(ticket.getString("date"))) == 0) {
+              && oe.getDateEntry().getDate().compareTo(df.parse(ticket.getString("date"))) == 0) {
             oe.setExternalId((long) ticket.getInt("id"));
             break;
           }
@@ -118,7 +120,7 @@ public class HelloTicket {
     var ticketBuilder = Json.createArrayBuilder();
     for (Ticket t : booking.ticketBookings) {
       ticketBuilder.add(Json.createObjectBuilder().add("ticketDefinitionId", t.ticketDefinitionId)
-          .add("numberOfTickets", t.numberOfTickets).build());
+          .add("numberOfTickets", t.numberOfTickets).add("date", df.format(t.date)).build());
     } ;
     return Json.createObjectBuilder().add("customerEmail", booking.customerEmail)
         .add("customerName", booking.customerName).add("ticketBookings", ticketBuilder.build())
