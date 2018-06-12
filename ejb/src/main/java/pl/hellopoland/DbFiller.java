@@ -6,6 +6,7 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
 import pl.hellopoland.sight.Portal;
+import pl.hellopoland.sight.Portal.Type;
 import pl.hellopoland.sight.SightService;
 
 @Startup
@@ -48,6 +49,13 @@ public class DbFiller extends ServiceSuperclass {
     portal.setUrl("http://woo.hello-poland.pl");
     portal.setKey("ck_5233b79180ff8b7bef81b28fe7222b2eb2b37ebe");
     portal.setSecret("cs_2c96f574d729e8bde7b71d96007c172bc12244d9");
+    portal.setType(Type.WOOCOMMERCE);
+    em.persist(portal);
+
+    portal = new Portal();
+    portal.setName("Hello Ticket Cloud");
+    portal.setUrl("https://hpt.fream.pl");
+    portal.setType(Type.HELLOTICKET_CLOUD_1);
     em.persist(portal);
   }
 

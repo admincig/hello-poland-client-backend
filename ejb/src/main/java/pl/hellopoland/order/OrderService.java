@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
@@ -28,6 +29,7 @@ import pl.hellopoland.sight.Sight;
 import pl.hellopoland.sight.Ticket;
 import pl.hellopoland.user.User;
 import pl.hellopoland.user.UserService;
+import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PaymentUtils;
 import pl.hellopoland.util.Triplet;
 import pl.hellopoland.util.Woo;
@@ -87,7 +89,7 @@ public class OrderService extends ServiceSuperclass {
             oe.setQuantity(trip.third);
             oe.setUnitPrice(ticket.getPrice());
             oe.setDateEntry(dateEntry);
-            oe.setExternalId(ticket.getExternalId());
+            oe.setExternalDefinitionId(ticket.getExternalId());
 
             em.persist(oe);
           }
@@ -107,27 +109,101 @@ public class OrderService extends ServiceSuperclass {
     em.refresh(o);
     logger.log(Logger.Level.INFO,
         "Checking if any of order sight entries ought to be placed in external API");
-    Map<Portal, List<OrderSightEntry>> groupedByPortal =
-        o.getEntries().stream().filter(ose -> ose.getSight().getPortal() != null)
-            .collect(groupingBy(ose -> ose.getSight().getPortal()));
-    for (Map.Entry<Portal, List<OrderSightEntry>> entry : groupedByPortal.entrySet()) {
+    var groupedByPortal = o.getEntries().stream().filter(ose -> ose.getSight().getPortal() != null)
+        .collect(groupingBy(ose -> ose.getSight().getPortal()));
+    for (var entry : groupedByPortal.entrySet()) {
       Portal portal = entry.getKey();
-      List<OrderEntry> orderEntries = new ArrayList<>();
-      for (OrderSightEntry se : entry.getValue()) {
-        em.refresh(se);
-        for (OrderDateEntry de : se.getEntries()) {
-          em.refresh(de);
-          orderEntries.addAll(de.getEntries());
-        }
-      }
       logger.log(Logger.Level.INFO, "Placing external order in " + portal.getName());
-      Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
-      Map<String, Object> resp = woo.placeOrder(o.getDetails(), orderEntries);
-      logger.log(Logger.Level.INFO, resp.toString());
-      Integer id = (Integer) resp.get("id");
-      if (id != null) {
-        entry.getValue().forEach(ose -> ose.setExternalId(id.longValue()));
+      switch (portal.getType()) {
+        case WOOCOMMERCE:
+          placeInWooCommerce(o.getDetails(), entry);
+          break;
+        case HELLOTICKET_CLOUD_1:
+          placeInHpt(o.getDetails(), entry);
+          break;
       }
+    }
+  }
+
+  private void confirmInExternalAPI(Order o) {
+    logger.log(Logger.Level.INFO,
+        "Checking if any of order sight entries ought to be confirmed in external API");
+    var groupedByPortal = o.getEntries().stream().filter(ose -> ose.getSight().getPortal() != null)
+        .collect(groupingBy(ose -> ose.getSight().getPortal()));
+    for (var entry : groupedByPortal.entrySet()) {
+      Portal portal = entry.getKey();
+      logger.log(Logger.Level.INFO, "Confirming external order in " + portal.getName());
+
+      switch (portal.getType()) {
+        case WOOCOMMERCE:
+          confirmInWooCommerce(entry);
+          break;
+        case HELLOTICKET_CLOUD_1:
+          confirmInHpt(entry);
+          break;
+      }
+
+    }
+  }
+
+  private void confirmInHpt(Map.Entry<Portal, List<OrderSightEntry>> entry) {
+    Portal portal = entry.getKey();
+    List<OrderEntry> orderEntries = gatherOrderEntries(entry.getValue());
+    String serialNumber =
+        entry.getValue().stream().map(OrderSightEntry::getSerialNumber).findFirst().get();
+    HelloTicket hpt = new HelloTicket(portal.getUrl());
+    hpt.confirm(serialNumber, orderEntries);
+  }
+
+  private void confirmInWooCommerce(Map.Entry<Portal, List<OrderSightEntry>> entry) {
+    Portal portal = entry.getKey();
+    Long externalId =
+        entry.getValue().stream().map(OrderSightEntry::getExternalId).findFirst().get();
+
+    Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
+    logger.log(Logger.Level.INFO, woo.completeOrder(externalId));
+  }
+
+  private void placeInHpt(OrderDetails details, Entry<Portal, List<OrderSightEntry>> entry) {
+    Portal portal = entry.getKey();
+    List<OrderEntry> orderEntries = gatherOrderEntries(entry.getValue());
+
+    HelloTicket hpt = new HelloTicket(portal.getUrl());
+    var resp = hpt.book(details, orderEntries);
+    Integer externalOrderId = resp.getInt("id");
+    entry.getValue().forEach(ose -> ose.setExternalId(externalOrderId.longValue()));
+  }
+
+  private List<OrderEntry> gatherOrderEntries(List<OrderSightEntry> list) {
+    List<OrderEntry> returnList = new ArrayList<>();
+    for (OrderSightEntry se : list) {
+      em.refresh(se);
+      for (OrderDateEntry de : se.getEntries()) {
+        em.refresh(de);
+        returnList.addAll(de.getEntries());
+      }
+    }
+    return returnList;
+  }
+
+  private void placeInWooCommerce(OrderDetails details,
+      Entry<Portal, List<OrderSightEntry>> entry) {
+    Portal portal = entry.getKey();
+    List<OrderEntry> orderEntries = new ArrayList<>();
+    for (OrderSightEntry se : entry.getValue()) {
+      em.refresh(se);
+      for (OrderDateEntry de : se.getEntries()) {
+        em.refresh(de);
+        orderEntries.addAll(de.getEntries());
+      }
+    }
+
+    Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
+    Map<String, Object> resp = woo.placeOrder(details, orderEntries);
+    logger.log(Logger.Level.INFO, resp.toString());
+    Integer id = (Integer) resp.get("id");
+    if (id != null) {
+      entry.getValue().forEach(ose -> ose.setExternalId(id.longValue()));
     }
   }
 
@@ -211,23 +287,6 @@ public class OrderService extends ServiceSuperclass {
     }
   }
 
-  private void confirmInExternalAPI(Order order) {
-    logger.log(Logger.Level.INFO,
-        "Checking if any of order sight entries ought to be confirmed in external API");
-    Map<Portal, List<OrderSightEntry>> groupedByPortal =
-        order.getEntries().stream().filter(ose -> ose.getSight().getPortal() != null)
-            .collect(groupingBy(ose -> ose.getSight().getPortal()));
-    for (Map.Entry<Portal, List<OrderSightEntry>> entry : groupedByPortal.entrySet()) {
-      Portal portal = entry.getKey();
-      logger.log(Logger.Level.INFO, "Confirming external order in " + portal.getName());
-      Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
-
-      // they have same id. should have
-      Long id = entry.getValue().stream().map(OrderSightEntry::getExternalId).findFirst().get();
-      logger.log(Logger.Level.INFO, woo.completeOrder(id).toString());
-    }
-  }
-
   private void cancelInExternalAPI(Order order) {
     logger.log(Logger.Level.INFO,
         "Checking if any of order sight entries ought to be cancelled in external API");
@@ -268,10 +327,13 @@ public class OrderService extends ServiceSuperclass {
 
     // XXX Just for version 0.1. Will be deleted in further development
     for (OrderSightEntry ose : order.getEntries()) {
-      for (OrderDateEntry ode : ose.getEntries()) {
-        for (OrderEntry oe : ode.getEntries()) {
-          for (int i = 0; i < oe.getQuantity(); i++) {
-            oe.addNumber(order.getHash());
+      Portal portal = ose.getSight().getPortal();
+      if (portal != null && portal.getType() == Portal.Type.WOOCOMMERCE) {
+        for (OrderDateEntry ode : ose.getEntries()) {
+          for (OrderEntry oe : ode.getEntries()) {
+            for (int i = 0; i < oe.getQuantity(); i++) {
+              oe.addNumber(order.getHash());
+            }
           }
         }
       }

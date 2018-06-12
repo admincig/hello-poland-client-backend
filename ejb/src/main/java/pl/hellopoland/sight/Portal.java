@@ -1,6 +1,8 @@
 package pl.hellopoland.sight;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.validation.constraints.NotNull;
 import pl.hellopoland.ModelSuperclass;
 
@@ -14,6 +16,13 @@ public class Portal extends ModelSuperclass {
   private String url;
   private String key;
   private String secret;
+  @NotNull
+  @Enumerated(EnumType.STRING)
+  private Type type;
+
+  public enum Type {
+    WOOCOMMERCE, HELLOTICKET_CLOUD_1;
+  }
 
   public String getName() {
     return name;
@@ -47,5 +56,12 @@ public class Portal extends ModelSuperclass {
     this.secret = secret;
   }
 
+  public Type getType() {
+    return type;
+  }
+
+  public void setType(Type type) {
+    this.type = type;
+  }
 
 }
