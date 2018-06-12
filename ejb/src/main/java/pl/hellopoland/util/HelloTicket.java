@@ -74,7 +74,7 @@ public class HelloTicket {
         for (var iter = tickets.iterator(); iter.hasNext();) {
           JsonObject ticket = (JsonObject) iter.next();
           if (oe.getDateEntry().getDate().equals(df.parse(ticket.getString("date")))
-              && oe.getExternalDefinitionId().intValue() == ticket.getInt("ticketDefinitionId")) {
+              && oe.getExternalDefinitionId().intValue() == ticket.getInt("definitionId")) {
             oe.addNumber(ticket.getString("serialNumber"));
           }
         }
