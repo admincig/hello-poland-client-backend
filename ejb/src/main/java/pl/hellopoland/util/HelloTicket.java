@@ -6,6 +6,7 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.json.Json;
@@ -73,7 +74,9 @@ public class HelloTicket {
       for (var oe : orderEntries) {
         for (var iter = tickets.iterator(); iter.hasNext();) {
           JsonObject ticket = (JsonObject) iter.next();
-          if (oe.getDateEntry().getDate().equals(df.parse(ticket.getString("date")))
+          Date date1 = df.parse(ticket.getString("date"));
+          Date date2 = oe.getDateEntry().getDate();
+          if (date2.compareTo(date1) == 0
               && oe.getExternalDefinitionId().intValue() == ticket.getInt("definitionId")) {
             oe.addNumber(ticket.getString("serialNumber"));
           }
