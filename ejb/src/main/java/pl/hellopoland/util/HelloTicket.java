@@ -73,13 +73,14 @@ public class HelloTicket {
       for (var oe : orderEntries) {
         for (var iter = tickets.iterator(); iter.hasNext();) {
           JsonObject ticket = (JsonObject) iter.next();
-          if (oe.getExternalId().intValue() == ticket.getInt("id")) {
+          if (oe.getDateEntry().getDate().equals(df.parse(ticket.getString("date")))
+              && oe.getExternalDefinitionId().intValue() == ticket.getInt("ticketDefinitionId")) {
             oe.addNumber(ticket.getString("serialNumber"));
           }
         }
       }
       return resp;
-    } catch (IOException e) {
+    } catch (IOException | ParseException e) {
       logger.log(System.Logger.Level.WARNING, e);
       return null;
     }
