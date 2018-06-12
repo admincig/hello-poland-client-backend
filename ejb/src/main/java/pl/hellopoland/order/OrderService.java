@@ -149,10 +149,10 @@ public class OrderService extends ServiceSuperclass {
   private void confirmInHpt(Map.Entry<Portal, List<OrderSightEntry>> entry) {
     Portal portal = entry.getKey();
     List<OrderEntry> orderEntries = gatherOrderEntries(entry.getValue());
-    Long externalId =
-        entry.getValue().stream().map(OrderSightEntry::getExternalId).findFirst().get();
+    String serialNumber =
+        entry.getValue().stream().map(OrderSightEntry::getSerialNumber).findFirst().get();
     HelloTicket hpt = new HelloTicket(portal.getUrl());
-    hpt.confirm(externalId, orderEntries);
+    hpt.confirm(serialNumber, orderEntries);
   }
 
   private void confirmInWooCommerce(Map.Entry<Portal, List<OrderSightEntry>> entry) {

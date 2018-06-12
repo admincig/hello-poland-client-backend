@@ -42,8 +42,14 @@ public class HelloTicket {
     var json = prepareJson(booking);
     try {
       var resp = post("/api/v1/bookings", json);
+      String serialNumber = resp.getString("serialNumber");
+      boolean serialNumberSetAlready = false;
       JsonArray tickets = resp.getJsonArray("tickets");
       for (var oe : orderEntries) {
+        if (!serialNumberSetAlready) {
+          oe.getDateEntry().getSightEntry().setSerialNumber(serialNumber);
+        }
+        oe.getDateEntry().getSightEntry().setSerialNumber(serialNumber);
         for (var iter = tickets.iterator(); iter.hasNext();) {
           JsonObject ticket = (JsonObject) iter.next();
           if (oe.getExternalDefinitionId().intValue() == ticket.getInt("definitionId")
@@ -52,7 +58,7 @@ public class HelloTicket {
             break;
           }
         }
-      } ;
+      }
       return resp;
     } catch (IOException | ParseException e) {
       logger.log(System.Logger.Level.WARNING, e);
@@ -60,9 +66,9 @@ public class HelloTicket {
     }
   }
 
-  public JsonObject confirm(Long orderId, List<OrderEntry> orderEntries) {
+  public JsonObject confirm(String serialNumber, List<OrderEntry> orderEntries) {
     try {
-      var resp = put("/api/v1/bookings/buy/" + orderId, null);
+      var resp = put("/api/v1/bookings/buy/" + serialNumber, null);
       JsonArray tickets = resp.getJsonArray("tickets");
       for (var oe : orderEntries) {
         for (var iter = tickets.iterator(); iter.hasNext();) {
