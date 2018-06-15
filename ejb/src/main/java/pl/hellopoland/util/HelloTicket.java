@@ -42,7 +42,7 @@ public class HelloTicket {
     booking.ticketBookings = ticketBookings.toArray(new Ticket[ticketBookings.size()]);
     var json = prepareJson(booking);
     try {
-      var resp = post("/api/v1/bookings", json);
+      var resp = post("/v1/bookings", json);
       String serialNumber = resp.getString("serialNumber");
       boolean serialNumberSetAlready = false;
       JsonArray tickets = resp.getJsonArray("tickets");
@@ -69,7 +69,7 @@ public class HelloTicket {
 
   public JsonObject confirm(String serialNumber, List<OrderEntry> orderEntries) {
     try {
-      var resp = put("/api/v1/bookings/buy/" + serialNumber, null);
+      var resp = put("/v1/bookings/buy/" + serialNumber, null);
       JsonArray tickets = resp.getJsonArray("tickets");
       for (var oe : orderEntries) {
         for (var iter = tickets.iterator(); iter.hasNext();) {
