@@ -1,4 +1,4 @@
-package pl.hellopoland.partner;
+package pl.hellopoland.security;
 
 import static javax.security.enterprise.identitystore.CredentialValidationResult.NOT_VALIDATED_RESULT;
 
@@ -10,7 +10,7 @@ import javax.security.enterprise.credential.Credential;
 import javax.security.enterprise.credential.UsernamePasswordCredential;
 import javax.security.enterprise.identitystore.CredentialValidationResult;
 import javax.security.enterprise.identitystore.IdentityStore;
-import pl.hellopoland.partner.password.PasswordEncoder;
+import pl.hellopoland.security.password.PasswordEncoder;
 import pl.hellopoland.user.UserRole;
 import pl.hellopoland.user.UserService;
 

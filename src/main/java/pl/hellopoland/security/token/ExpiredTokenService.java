@@ -1,4 +1,4 @@
-package pl.hellopoland.security;
+package pl.hellopoland.security.token;
 
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;

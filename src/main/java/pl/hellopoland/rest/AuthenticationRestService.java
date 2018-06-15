@@ -1,4 +1,4 @@
-package pl.hellopoland.partner;
+package pl.hellopoland.rest;
 
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.DenyAll;
@@ -13,13 +13,15 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import pl.hellopoland.security.dto.CurrentUser;
+import pl.hellopoland.security.dto.UserAuthDTO;
 
 @RequestScoped
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @DeclareRoles({"root", "admin", "user"})
-public class RestService {
+public class AuthenticationRestService {
 
   @Inject
   private SecurityContext securityContext;

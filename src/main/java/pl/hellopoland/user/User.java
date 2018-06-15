@@ -1,5 +1,7 @@
 package pl.hellopoland.user;
 
+import static javax.persistence.FetchType.EAGER;
+
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -38,7 +40,7 @@ public class User extends ModelSuperclass {
   @Embedded
   private UserLocation location;
 
-  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = EAGER)
   private List<UserRole> roles;
 
   public String getEmail() {

@@ -1,4 +1,4 @@
-package pl.hellopoland.partner.password;
+package pl.hellopoland.security.password;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;

@@ -1,4 +1,4 @@
-package pl.hellopoland.partner;
+package pl.hellopoland.security.token;
 
 import static java.util.stream.Collectors.joining;
 

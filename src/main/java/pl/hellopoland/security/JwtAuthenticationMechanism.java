@@ -1,12 +1,15 @@
-package pl.hellopoland.partner;
+package pl.hellopoland.security;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toSet;
+import static javax.security.enterprise.AuthenticationStatus.SEND_FAILURE;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Optional;
+import java.util.Set;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
@@ -22,7 +25,18 @@ import javax.security.enterprise.identitystore.IdentityStoreHandler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.HttpHeaders;
-import pl.hellopoland.security.ExpiredTokenService;
+import pl.hellopoland.security.dto.CurrentUser;
+import pl.hellopoland.security.dto.UserAuthDTO;
+import pl.hellopoland.security.token.ExpiredTokenService;
+import pl.hellopoland.security.token.JwtCredential;
+import pl.hellopoland.security.token.TokenInExpiredTokensListException;
+import pl.hellopoland.security.token.TokenProvider;
+import pl.hellopoland.security.token.TokenType;
+import pl.hellopoland.user.User;
+import pl.hellopoland.user.UserRole;
+import pl.hellopoland.user.UserService;
+import pl.hellopoland.util.FacebookAPIConnector;
+import pl.hellopoland.util.GoogleAPIConnector;
 
 @ApplicationScoped
 public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
@@ -46,6 +60,15 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
   @Inject
   private ExpiredTokenService expiredTokenService;
 
+  @Inject
+  private FacebookAPIConnector facebookAPIConnector;
+
+  @Inject
+  private GoogleAPIConnector googleAPIConnector;
+
+  @Inject
+  private UserService userService;
+
   @Override
   public AuthenticationStatus validateRequest(HttpServletRequest request,
       HttpServletResponse response, HttpMessageContext context) {
@@ -59,12 +82,17 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
       String login = userAuthDTO.map(u -> u.login).orElse(null);
       String password = userAuthDTO.map(u -> u.password).orElse(null);
 
+      String socialMediaAuthenticationToken = userAuthDTO.map(u -> u.socialMediaAuthenticationToken)
+          .orElse(null);
+
       String accessToken = userAuthDTO.map(u -> u.accessToken).orElse(null);
       String refreshToken = userAuthDTO.map(u -> u.refreshToken).orElse(null);
 
       if (isLoginRequest(request)) {
         if (hasProperDataToLogin(login, password)) {
           authenticationStatus = login(login, password, context);
+        } else if (hasProperDataToLoginUsingSocialMedia(socialMediaAuthenticationToken)) {
+          authenticationStatus = login(socialMediaAuthenticationToken, context);
         } else {
           authenticationStatus = context.responseUnauthorized();
         }
@@ -152,6 +180,10 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
     return email != null && password != null;
   }
 
+  private boolean hasProperDataToLoginUsingSocialMedia(String socialMediaAuthenticationToken) {
+    return socialMediaAuthenticationToken != null;
+  }
+
 
   private boolean isAuthRequest(HttpServletRequest request) {
     return request.getRequestURI().endsWith(LOGIN_REQUEST_PATH)
@@ -181,6 +213,37 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
       authenticationStatus = createToken(credentialValidationResult, context);
     } else {
       authenticationStatus = context.responseUnauthorized();
+    }
+
+    return authenticationStatus;
+  }
+
+
+  private AuthenticationStatus login(String socialMediaAuthenticationToken,
+      HttpMessageContext context) {
+    AuthenticationStatus authenticationStatus;
+
+    User user = null;
+    try {
+      user = facebookAPIConnector.getUser(socialMediaAuthenticationToken);
+    } catch (Exception ignored) {
+    }
+    if (user == null) {
+      try {
+        user = googleAPIConnector.getUser(socialMediaAuthenticationToken);
+      } catch (Exception ignored) {
+      }
+    }
+
+    try {
+      if (user != null) {
+        user = userService.getOrCreateSocialMedia(user);
+        authenticationStatus = createToken(user, context);
+      } else {
+        authenticationStatus = SEND_FAILURE;
+      }
+    } catch (Exception e) {
+      authenticationStatus = SEND_FAILURE;
     }
 
     return authenticationStatus;
@@ -244,6 +307,31 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
     authenticatedEvent.fire(user);
 
     return context.notifyContainerAboutLogin(result.getCallerPrincipal(), result.getCallerGroups());
+  }
+
+  private AuthenticationStatus createToken(User user,
+      HttpMessageContext context) {
+
+    String principal = user.getEmail();
+
+    Set<String> authorities = user.getRoles().stream()
+        .map(UserRole::getRole)
+        .collect(toSet());
+
+    String accessToken = tokenProvider
+        .createToken(user.getEmail(), authorities, TokenType.ACCESS_TOKEN);
+
+    String refreshToken = tokenProvider
+        .createToken(user.getEmail(), authorities, TokenType.REFRESH_TOKEN);
+
+    var currentUserUser = new CurrentUser();
+    currentUserUser.setEmail(user.getEmail());
+    currentUserUser.setRoles(authorities);
+    currentUserUser.setAccessToken(accessToken);
+    currentUserUser.setRefreshToken(refreshToken);
+    authenticatedEvent.fire(currentUserUser);
+
+    return context.notifyContainerAboutLogin(principal, authorities);
   }
 
   private AuthenticationStatus createToken(JwtCredential jwtCredential,

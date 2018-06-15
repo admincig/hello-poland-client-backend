@@ -575,29 +575,6 @@
 						<auth-module code="Dummy" />
 					</authentication-jaspi>
 				</security-domain>
-				<security-domain name="hellopoland-legacy"
-					cache-type="default">
-					<authentication>
-						<login-module
-							code="pl.hellopoland.security.CustomLoginModule"
-							flag="sufficient">
-							<module-option name="dsJndiName"
-								value="java:jboss/datasources/hellopoland" />
-						</login-module>
-						<login-module
-							code="pl.hellopoland.security.FacebookLoginModule"
-							flag="sufficient">
-							<module-option name="dsJndiName"
-								value="java:jboss/datasources/hellopoland" />
-						</login-module>
-						<login-module
-							code="pl.hellopoland.security.GoogleLoginModule"
-							flag="sufficient">
-							<module-option name="dsJndiName"
-								value="java:jboss/datasources/hellopoland" />
-						</login-module>
-					</authentication>
-				</security-domain>
 			</security-domains>
 		</subsystem>
 		<subsystem xmlns="urn:jboss:domain:security-manager:1.0">

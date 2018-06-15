@@ -1,4 +1,4 @@
-package pl.hellopoland.partner;
+package pl.hellopoland.security.dto;
 
 import static java.util.Arrays.asList;
 

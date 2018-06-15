@@ -1,4 +1,4 @@
-package pl.hellopoland.security;
+package pl.hellopoland.security.token;
 
 import java.util.List;
 import java.util.Optional;

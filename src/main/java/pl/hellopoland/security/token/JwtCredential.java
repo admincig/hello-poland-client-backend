@@ -1,4 +1,4 @@
-package pl.hellopoland.partner;
+package pl.hellopoland.security.token;
 
 import java.util.Set;
 import javax.security.enterprise.credential.Credential;

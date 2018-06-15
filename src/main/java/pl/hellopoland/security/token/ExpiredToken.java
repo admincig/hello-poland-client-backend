@@ -1,4 +1,4 @@
-package pl.hellopoland.security;
+package pl.hellopoland.security.token;
 
 import java.io.Serializable;
 import javax.persistence.Column;

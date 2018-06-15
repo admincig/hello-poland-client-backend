@@ -1,4 +1,4 @@
-package pl.hellopoland.partner;
+package pl.hellopoland.security.dto;
 
 import java.io.Serializable;
 
@@ -8,6 +8,7 @@ public class UserAuthDTO implements Serializable {
 
   public String login;
   public String password;
+  public String socialMediaAuthenticationToken;
   public String accessToken;
   public String refreshToken;
 
