@@ -2,19 +2,26 @@ package pl.hellopoland;
 
 import java.lang.System.Logger;
 import javax.annotation.PostConstruct;
+import javax.ejb.DependsOn;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
+import pl.hellopoland.security.password.PasswordEncoder;
 import pl.hellopoland.sight.Portal;
 import pl.hellopoland.sight.Portal.Type;
 import pl.hellopoland.sight.SightService;
+import pl.hellopoland.user.User;
 
 @Startup
 @Singleton
+@DependsOn({"Configuration"})
 public class DbFiller extends ServiceSuperclass {
 
   @Inject
   SightService sService;
+
+  @Inject
+  private PasswordEncoder passwordEncoder;
 
   @PostConstruct
   public void fillDb() {
@@ -27,7 +34,16 @@ public class DbFiller extends ServiceSuperclass {
 
     createPortals();
 //    runImporter();
+    createUsers();
     logger.log(Logger.Level.INFO, "dbfiller finished");
+  }
+
+  private void createUsers() {
+    User user = new User();
+    user.setEmail("partner@partner.pl");
+    user.setPassword(passwordEncoder.encode("partner"));
+
+    em.persist(user);
   }
 
 
