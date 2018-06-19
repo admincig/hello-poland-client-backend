@@ -1,5 +1,7 @@
 package pl.hellopoland;
 
+import static java.util.Collections.singletonList;
+
 import java.lang.System.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.DependsOn;
@@ -11,6 +13,7 @@ import pl.hellopoland.sight.Portal;
 import pl.hellopoland.sight.Portal.Type;
 import pl.hellopoland.sight.SightService;
 import pl.hellopoland.user.User;
+import pl.hellopoland.user.UserRole;
 
 @Startup
 @Singleton
@@ -40,8 +43,14 @@ public class DbFiller extends ServiceSuperclass {
 
   private void createUsers() {
     User user = new User();
+
+    UserRole userRole = new UserRole();
+    userRole.setRole("partner");
+    userRole.setUser(user);
+
     user.setEmail("partner@partner.pl");
     user.setPassword(passwordEncoder.encode("partner"));
+    user.setRoles(singletonList(userRole));
 
     em.persist(user);
   }
