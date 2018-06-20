@@ -82,7 +82,7 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
       String login = userAuthDTO.map(u -> u.login).orElse(null);
       String password = userAuthDTO.map(u -> u.password).orElse(null);
 
-      String socialMediaAuthenticationToken = userAuthDTO.map(u -> u.socialMediaAuthenticationToken)
+      String socialMediaAuthenticationToken = userAuthDTO.map(u -> u.socialMediaAccessToken)
           .orElse(null);
 
       String accessToken = userAuthDTO.map(u -> u.accessToken).orElse(null);

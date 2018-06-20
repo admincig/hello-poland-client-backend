@@ -14,9 +14,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import pl.hellopoland.rest.dto.LoginIRO;
 import pl.hellopoland.rest.dto.UserORO;
+import pl.hellopoland.security.dto.CurrentUser;
+import pl.hellopoland.security.dto.UserAuthDTO;
 import pl.hellopoland.user.UserService;
 
 @Path("/")
@@ -32,6 +33,9 @@ public class UserRestService {
   @Inject
   UserService userService;
 
+  @Inject
+  private CurrentUser currentUser;
+
   @GET
   @Path("/users/me")
   @RolesAllowed("user")
@@ -40,14 +44,15 @@ public class UserRestService {
   }
 
   @POST
+  @Path("/login")
+  public Response loginBySocialMedia(UserAuthDTO user) {
+    return Response.ok(currentUser).build();
+  }
+
+  @POST
   @Path("/login/socialMedia")
   public Response loginBySocialMedia(LoginIRO iro) {
-    String code = iro.token == null ? iro.idToken : iro.token;
-    boolean success = login("", code);
-    if (!success) {
-      return Response.status(Status.UNAUTHORIZED).build();
-    }
-    return Response.ok().build();
+    return Response.ok(currentUser).build();
   }
 
   @GET

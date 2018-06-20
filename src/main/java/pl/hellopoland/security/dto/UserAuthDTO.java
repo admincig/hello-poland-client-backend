@@ -8,7 +8,7 @@ public class UserAuthDTO implements Serializable {
 
   public String login;
   public String password;
-  public String socialMediaAuthenticationToken;
+  public String socialMediaAccessToken;
   public String accessToken;
   public String refreshToken;
 
