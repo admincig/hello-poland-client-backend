@@ -1,6 +1,7 @@
 package pl.hellopoland.rest;
 
 import java.util.logging.Logger;
+import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -41,18 +42,6 @@ public class UserRestService {
   @RolesAllowed("user")
   public UserORO me() {
     return new UserORO(userService.me());
-  }
-
-  @POST
-  @Path("/login")
-  public Response loginBySocialMedia(UserAuthDTO user) {
-    return Response.ok(currentUser).build();
-  }
-
-  @POST
-  @Path("/login/socialMedia")
-  public Response loginBySocialMedia(LoginIRO iro) {
-    return Response.ok(currentUser).build();
   }
 
   @GET
