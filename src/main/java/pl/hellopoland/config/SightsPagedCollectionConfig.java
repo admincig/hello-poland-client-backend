@@ -1,8 +1,8 @@
 package pl.hellopoland.config;
 
-import pl.hellopoland.sight.Sight;
+import pl.hellopoland.sight.SightEvent;
 
-public class SightsPagedCollectionConfig extends PagedCollectionConfig<Sight> {
+public class SightsPagedCollectionConfig extends PagedCollectionConfig<SightEvent> {
 
   @Override
   public String joins() {

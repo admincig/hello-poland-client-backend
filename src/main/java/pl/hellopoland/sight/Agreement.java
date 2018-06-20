@@ -10,18 +10,18 @@ public class Agreement extends ModelSuperclass {
   private static final long serialVersionUID = -3524491821261836536L;
 
   @ManyToOne(optional = false)
-  private Sight sight;
+  private SightEvent sightEvent;
   private String linkText = "regulamin";
   private String linkUrl;
   private String text = "Akceptuję {link} obiektu";
 
 
-  public Sight getSight() {
-    return sight;
+  public SightEvent getSightEvent() {
+    return sightEvent;
   }
 
-  public void setSight(Sight sight) {
-    this.sight = sight;
+  public void setSightEvent(SightEvent sightEvent) {
+    this.sightEvent = sightEvent;
   }
 
   public String getLinkText() {

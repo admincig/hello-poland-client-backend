@@ -16,7 +16,7 @@ public class Ticket extends ModelSuperclass {
   @NotNull
   private Integer price;
   @ManyToOne(optional = false)
-  private Sight sight;
+  private SightEvent sightEvent;
   @NotNull
   private boolean predefinedDate;
   private Date date;
@@ -38,12 +38,12 @@ public class Ticket extends ModelSuperclass {
     this.price = price;
   }
 
-  public Sight getSight() {
-    return sight;
+  public SightEvent getSightEvent() {
+    return sightEvent;
   }
 
-  public void setSight(Sight sight) {
-    this.sight = sight;
+  public void setSightEvent(SightEvent sightEvent) {
+    this.sightEvent = sightEvent;
   }
 
   public boolean isPredefinedDate() {

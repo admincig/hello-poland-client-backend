@@ -9,24 +9,26 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.ServiceSuperclass;
 import pl.hellopoland.config.SightsPagedCollectionConfig;
+import pl.hellopoland.dto.SightEventDefinition;
 import pl.hellopoland.image.Image;
 import pl.hellopoland.image.ImageService;
+import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PagedEntityCollection;
 import pl.hellopoland.util.Woo;
 
 @LocalBean
 @Stateless
-public class SightService extends ServiceSuperclass {
+public class SightEventService extends ServiceSuperclass {
 
   @Inject
   ImageService iService;
 
-  public PagedEntityCollection<Sight> getList(SightsPagedCollectionConfig config) {
+  public PagedEntityCollection<SightEvent> getList(SightsPagedCollectionConfig config) {
     return new PagedEntityCollection<>(getQuery(config).getResultList(), config);
   }
 
-  public Sight get(Long id) {
-    Sight s = em.find(Sight.class, id);
+  public SightEvent get(Long id) {
+    SightEvent s = em.find(SightEvent.class, id);
 
     // fetch collections
     s.getTickets().size();
@@ -41,10 +43,10 @@ public class SightService extends ServiceSuperclass {
         em.createQuery("from Portal where type=:type order by id asc", Portal.class)
             .setParameter("type", Portal.Type.WOOCOMMERCE).getResultList();
     for (Portal portal : portals) {
-      logger.log(Logger.Level.INFO, "Importing sights from " + portal.getName());
+      logger.log(Logger.Level.INFO, "Importing sightEvents from " + portal.getName());
       Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
-      List<Sight> sights = woo.importSights();
-      for (Sight s : sights) {
+      List<SightEvent> sightEvents = woo.importSights();
+      for (SightEvent s : sightEvents) {
         logger.log(Logger.Level.INFO, s.getName());
         boolean anyTicketInFuture = s.getTickets().stream()
             .anyMatch(t -> t.getDate() != null && t.getDate().after(new Date()));
@@ -59,7 +61,7 @@ public class SightService extends ServiceSuperclass {
         Collection<Ticket> tickets = s.getTickets();
         em.persist(s);
         tickets.forEach(t -> {
-          t.setSight(s);
+          t.setSightEvent(s);
           em.persist(t);
         });
       }
@@ -68,10 +70,10 @@ public class SightService extends ServiceSuperclass {
     logger.log(Logger.Level.INFO, "Finished all imports");
   }
 
-  public void savePush(Collection<pl.hellopoland.dto.SightEventDefinition> sights) {
+  public void savePush(Collection<pl.hellopoland.dto.SightEventDefinition> sightEvents) {
     Portal hpt = getPortal("Hello Ticket Cloud");
-    sights.forEach(sdto -> {
-      var sbo = new Sight();
+    sightEvents.forEach(sdto -> {
+      var sbo = new SightEvent();
       sbo.setName(sdto.name);
       sbo.generateRandomScore();
       sbo.setMainImage(iService.downloadImage(sdto.mainImageUrl));
@@ -82,7 +84,7 @@ public class SightService extends ServiceSuperclass {
 
       sdto.tickets.forEach(tdto -> {
         var tbo = new Ticket();
-        tbo.setSight(sbo);
+        tbo.setSightEvent(sbo);
         tbo.setExternalId(tdto.id);
         tbo.setName(tdto.name);
         tbo.setPredefinedDate(tdto.predefinedDate);
@@ -100,5 +102,11 @@ public class SightService extends ServiceSuperclass {
   private Portal getPortal(String name) {
     return em.createQuery("from Portal where name=:name", Portal.class).setParameter("name", name)
         .getSingleResult();
+  }
+
+  public void addToHpt(SightEventDefinition sightEvent) {
+//    HelloTicket helloTicket = new HelloTicket();
+//
+//    helloTicket.
   }
 }

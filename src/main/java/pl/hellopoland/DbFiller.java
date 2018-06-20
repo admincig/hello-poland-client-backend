@@ -11,7 +11,7 @@ import javax.inject.Inject;
 import pl.hellopoland.security.password.PasswordEncoder;
 import pl.hellopoland.sight.Portal;
 import pl.hellopoland.sight.Portal.Type;
-import pl.hellopoland.sight.SightService;
+import pl.hellopoland.sight.SightEventService;
 import pl.hellopoland.user.User;
 import pl.hellopoland.user.UserRole;
 
@@ -21,7 +21,7 @@ import pl.hellopoland.user.UserRole;
 public class DbFiller extends ServiceSuperclass {
 
   @Inject
-  SightService sService;
+  SightEventService sService;
 
   @Inject
   private PasswordEncoder passwordEncoder;

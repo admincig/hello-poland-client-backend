@@ -12,7 +12,7 @@ import pl.hellopoland.ModelSuperclass;
 import pl.hellopoland.image.Image;
 
 @Entity
-public class Sight extends ModelSuperclass {
+public class SightEvent extends ModelSuperclass {
 
   private static final long serialVersionUID = -34796485244638912L;
 
@@ -20,9 +20,9 @@ public class Sight extends ModelSuperclass {
   private String name;
   @ManyToOne
   private Image mainImage;
-  @OneToMany(mappedBy = "sight")
+  @OneToMany(mappedBy = "sightEvent")
   private Collection<Ticket> tickets;
-  @OneToMany(mappedBy = "sight")
+  @OneToMany(mappedBy = "sightEvent")
   private Collection<Agreement> agreements;
   private String lead;
   @Column(columnDefinition = "text")
@@ -33,7 +33,7 @@ public class Sight extends ModelSuperclass {
   private SightLocation location;
   private String email;
   private String phone;
-  @OneToMany(mappedBy = "sight")
+  @OneToMany(mappedBy = "sightEvent")
   private Collection<OpeningHours> openingHours;
   @ManyToOne
   private Portal portal;

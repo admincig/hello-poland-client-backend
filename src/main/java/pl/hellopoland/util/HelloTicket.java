@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.bind.JsonbBuilder;
+import pl.hellopoland.dto.SightEventDefinition;
 import pl.hellopoland.dto.booking.Booking;
 import pl.hellopoland.dto.booking.Ticket;
 import pl.hellopoland.order.OrderDetails;
@@ -87,6 +89,12 @@ public class HelloTicket {
       logger.log(System.Logger.Level.WARNING, e);
       return null;
     }
+  }
+
+  public JsonObject addSightEvent(SightEventDefinition sightEvent) {
+    String sightEventJson = JsonbBuilder.create().toJson(sightEvent);
+
+    return post("", sightEventJson);
   }
 
   private JsonObject post(String path, JsonObject json) throws IOException {
