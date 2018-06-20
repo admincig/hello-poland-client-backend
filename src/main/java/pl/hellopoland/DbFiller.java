@@ -3,6 +3,7 @@ package pl.hellopoland;
 import static java.util.Collections.singletonList;
 
 import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import javax.annotation.PostConstruct;
 import javax.ejb.DependsOn;
 import javax.ejb.Singleton;
@@ -42,6 +43,7 @@ public class DbFiller extends ServiceSuperclass {
   }
 
   private void createUsers() {
+    logger.log(Level.ERROR, "DbFiller test1");
     User user = new User();
 
     UserRole userRole = new UserRole();
@@ -52,7 +54,10 @@ public class DbFiller extends ServiceSuperclass {
     user.setPassword(passwordEncoder.encode("partner"));
     user.setRoles(singletonList(userRole));
 
+    logger.log(Level.ERROR, "DbFiller test2");
+
     em.persist(user);
+    logger.log(Level.ERROR, "DbFiller test3");
   }
 
 
