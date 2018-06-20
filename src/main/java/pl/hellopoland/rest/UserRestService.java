@@ -1,7 +1,6 @@
 package pl.hellopoland.rest;
 
 import java.util.logging.Logger;
-import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -9,16 +8,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import pl.hellopoland.rest.dto.LoginIRO;
 import pl.hellopoland.rest.dto.UserORO;
 import pl.hellopoland.security.dto.CurrentUser;
-import pl.hellopoland.security.dto.UserAuthDTO;
 import pl.hellopoland.user.UserService;
 
 @Path("/")
@@ -41,7 +36,7 @@ public class UserRestService {
   @Path("/users/me")
   @RolesAllowed("user")
   public UserORO me() {
-    return new UserORO(userService.me());
+    return new UserORO(userService.me(currentUser));
   }
 
   @GET

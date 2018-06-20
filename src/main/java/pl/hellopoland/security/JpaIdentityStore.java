@@ -2,6 +2,7 @@ package pl.hellopoland.security;
 
 import static javax.security.enterprise.identitystore.CredentialValidationResult.NOT_VALIDATED_RESULT;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.enterprise.context.RequestScoped;
@@ -11,6 +12,7 @@ import javax.security.enterprise.credential.UsernamePasswordCredential;
 import javax.security.enterprise.identitystore.CredentialValidationResult;
 import javax.security.enterprise.identitystore.IdentityStore;
 import pl.hellopoland.security.password.PasswordEncoder;
+import pl.hellopoland.user.User;
 import pl.hellopoland.user.UserRole;
 import pl.hellopoland.user.UserService;
 
@@ -20,19 +22,24 @@ public class JpaIdentityStore implements IdentityStore {
   @Inject
   private UserService userDao;
 
+  @Inject
+  private PasswordEncoder passwordEncoder;
+
   @Override
   public CredentialValidationResult validate(Credential credential) {
-
     if (credential instanceof UsernamePasswordCredential) {
       UsernamePasswordCredential usernamePassword = (UsernamePasswordCredential) credential;
 
-      var user = userDao.findByEmail(usernamePassword.getCaller());
-      if (new PasswordEncoder().matches(new String(usernamePassword.getPassword().getValue()),
-          user.getPassword())) {
+      Optional<User> user = userDao.findByEmail(usernamePassword.getCaller());
+
+      if (user.isPresent() &&
+          passwordEncoder.matches(new String(usernamePassword.getPassword().getValue()),
+              user.get().getPassword())) {
         return new CredentialValidationResult(usernamePassword.getCaller(),
-            user.getRoles().stream().map(UserRole::getRole).collect(Collectors.toSet()));
+            user.get().getRoles().stream().map(UserRole::getRole).collect(Collectors.toSet()));
       }
     }
+
     return NOT_VALIDATED_RESULT;
   }
 

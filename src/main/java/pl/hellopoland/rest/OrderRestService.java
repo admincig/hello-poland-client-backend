@@ -20,6 +20,7 @@ import pl.hellopoland.rest.dto.OrderDateEntryORO;
 import pl.hellopoland.rest.dto.OrderDateEntryOnListingORO;
 import pl.hellopoland.rest.dto.OrderIRO;
 import pl.hellopoland.rest.dto.OrderORO;
+import pl.hellopoland.security.dto.CurrentUser;
 import pl.hellopoland.util.Triplet;
 
 @Path("/")
@@ -31,12 +32,15 @@ public class OrderRestService {
   @Inject
   OrderService orderService;
 
+  @Inject
+  private CurrentUser currentUser;
+
   @POST
   @Path("/orders")
   public OrderORO create(OrderIRO iro) {
     Collection<Triplet<Long, Date, Integer>> tickets = iro.entries.stream()
         .map(e -> new Triplet<>(e.id, e.date, e.quantity)).collect(Collectors.toList());
-    return new OrderORO(orderService.create(tickets, iro.details));
+    return new OrderORO(orderService.create(tickets, iro.details, currentUser));
   }
 
   @POST
@@ -50,7 +54,8 @@ public class OrderRestService {
   @Path("/tickets")
   @RolesAllowed("user")
   public List<OrderDateEntryOnListingORO> tickets() {
-    return orderService.getOrderSightDateEntries().stream().map(OrderDateEntryOnListingORO::new)
+    return orderService.getOrderSightDateEntries(currentUser).stream()
+        .map(OrderDateEntryOnListingORO::new)
         .collect(Collectors.toList());
   }
 

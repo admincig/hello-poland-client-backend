@@ -1,16 +1,18 @@
 package pl.hellopoland.user;
 
+import java.util.Optional;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.persistence.NoResultException;
 import pl.hellopoland.ServiceSuperclass;
+import pl.hellopoland.security.dto.CurrentUser;
 
 @LocalBean
 @Stateless
 public class UserService extends ServiceSuperclass {
 
-  public User me() {
-    return findByEmail(ctx.getCallerPrincipal().getName());
+  public User me(CurrentUser currentUser) {
+    return findOneByEmail(currentUser.getEmail());
   }
 
   public User getOrCreateSocialMedia(User user) {
@@ -19,7 +21,7 @@ public class UserService extends ServiceSuperclass {
     String picture = user.getPicture();
     UserLocation location = user.getLocation();
     try {
-      return findByEmail(email);
+      return findOneByEmail(email);
     } catch (NoResultException e) {
       return create(email, null, name, picture, location);
     }
@@ -38,8 +40,14 @@ public class UserService extends ServiceSuperclass {
     return bo;
   }
 
-  public User findByEmail(String email) {
+  public User findOneByEmail(String email) {
     return em.createQuery("from User where email=:email", User.class).setParameter("email", email)
         .getSingleResult();
+  }
+
+  public Optional<User> findByEmail(String email) {
+    return em.createQuery("from User where email=:email", User.class).setParameter("email", email)
+        .getResultStream()
+        .findFirst();
   }
 }

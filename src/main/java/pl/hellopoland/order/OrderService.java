@@ -23,6 +23,7 @@ import javax.ws.rs.core.MediaType;
 import pl.hellopoland.ConflictingException;
 import pl.hellopoland.ServiceSuperclass;
 import pl.hellopoland.order.Order.Status;
+import pl.hellopoland.security.dto.CurrentUser;
 import pl.hellopoland.sight.Portal;
 import pl.hellopoland.sight.Sight;
 import pl.hellopoland.sight.Ticket;
@@ -40,10 +41,11 @@ public class OrderService extends ServiceSuperclass {
   @Inject
   UserService uService;
 
-  public Order create(Collection<Triplet<Long, Date, Integer>> triplets, OrderDetails details) {
+  public Order create(Collection<Triplet<Long, Date, Integer>> triplets, OrderDetails details,
+      CurrentUser currentUser) {
     User user = null;
     try {
-      user = uService.me();
+      user = uService.me(currentUser);
     } catch (NoResultException | EJBAccessException e) {
       // anonymous user
     }
@@ -205,10 +207,10 @@ public class OrderService extends ServiceSuperclass {
     }
   }
 
-  public List<OrderEntry> getOrderEntries() {
+  public List<OrderEntry> getOrderEntries(CurrentUser currentUser) {
     return em.createQuery(
         "from OrderEntry oe join fetch oe.sightEntry ose join fetch ose.sight s join fetch ose.order o where o.user=:user order by oe.date asc",
-        OrderEntry.class).setParameter("user", uService.me()).getResultList();
+        OrderEntry.class).setParameter("user", uService.me(currentUser)).getResultList();
   }
 
   public OrderEntry getOrderEntry(long id) {
@@ -227,10 +229,10 @@ public class OrderService extends ServiceSuperclass {
     return de;
   }
 
-  public List<OrderDateEntry> getOrderSightDateEntries() {
+  public List<OrderDateEntry> getOrderSightDateEntries(CurrentUser currentUser) {
     List<OrderDateEntry> osdes = em.createQuery(
         "from OrderDateEntry osde join fetch osde.sightEntry ose join fetch ose.sight s join fetch ose.order o where osde.deleted=false and o.user=:user and o.status=:status order by osde.date asc",
-        OrderDateEntry.class).setParameter("user", uService.me())
+        OrderDateEntry.class).setParameter("user", uService.me(currentUser))
         .setParameter("status", Order.Status.CONFIRMED).getResultList();
     osdes.forEach(osde -> osde.getEntries().size());
     return osdes;
