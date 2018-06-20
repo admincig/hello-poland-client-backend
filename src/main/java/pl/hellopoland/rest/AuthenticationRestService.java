@@ -1,5 +1,8 @@
 package pl.hellopoland.rest;
 
+import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
+import static pl.hellopoland.security.dto.UserAuthDTO.ofCurrentUser;
+
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.DenyAll;
 import javax.annotation.security.PermitAll;
@@ -14,7 +17,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import pl.hellopoland.security.dto.CurrentUser;
-import pl.hellopoland.security.dto.UserAuthDTO;
 
 @RequestScoped
 @Path("/")
@@ -44,12 +46,29 @@ public class AuthenticationRestService {
   }
 
   @POST
-  @Path("/login")
+  @Path("login")
   public Response login() {
     if (securityContext.getCallerPrincipal() != null) {
-      return Response.ok(UserAuthDTO.ofCurrentUser(currentUser)).build();
+      return Response.ok(ofCurrentUser(currentUser)).build();
     }
 
     return Response.status(Response.Status.UNAUTHORIZED).build();
+  }
+
+  @POST
+  @Path("refresh")
+  public Response refresh() {
+    if (securityContext.getCallerPrincipal() != null) {
+      return Response.ok(ofCurrentUser(currentUser))
+          .build();
+    }
+
+    return Response.status(UNAUTHORIZED).build();
+  }
+
+  @POST
+  @Path("logout")
+  public Response logout() {
+    return Response.ok().build();
   }
 }
