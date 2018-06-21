@@ -70,7 +70,7 @@ public class SightEventService extends ServiceSuperclass {
     logger.log(Logger.Level.INFO, "Finished all imports");
   }
 
-  public void savePush(Collection<pl.hellopoland.dto.SightEventDefinition> sightEvents) {
+  public void savePush(List<pl.hellopoland.dto.SightEventDefinition> sightEvents) {
     Portal hpt = getPortal("Hello Ticket Cloud");
     sightEvents.forEach(sdto -> {
       var sbo = new SightEvent();
@@ -90,8 +90,10 @@ public class SightEventService extends ServiceSuperclass {
         tbo.setPredefinedDate(tdto.predefinedDate);
         tbo.setPrice(tdto.price);
         em.persist(tbo);
-        logger.log(Logger.Level.INFO, "Saved new ticket: " + sbo.getName() + ": " + tbo.getName());
+        logger
+            .log(Logger.Level.INFO, "Saved new ticket: " + sbo.getName() + ": " + tbo.getName());
       });
+
       if (sdto.tickets != null) {
         em.refresh(sbo);
         sbo.setMinPrice(sbo.getTickets().stream().mapToInt(Ticket::getPrice).min().orElse(0));

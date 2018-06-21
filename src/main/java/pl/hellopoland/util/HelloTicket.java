@@ -42,7 +42,7 @@ public class HelloTicket {
       t.date = oe.getDateEntry().getDate();
       return t;
     }).collect(Collectors.toList());
-    booking.ticketBookings = ticketBookings.toArray(new Ticket[ticketBookings.size()]);
+    booking.ticketBookings = ticketBookings;
     var json = prepareJson(booking);
     try {
       var resp = post("/v1/bookings", json);
