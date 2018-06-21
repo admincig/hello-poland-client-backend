@@ -37,7 +37,7 @@ public class SightEventRestService {
   }
 
   @POST
-  @Path("/")
+  @Path("/add")
   public void addToHpt(SightEventDefinition sightEvent) {
     sightEventService.addToHpt(sightEvent);
   }
