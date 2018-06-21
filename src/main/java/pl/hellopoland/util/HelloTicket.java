@@ -1,6 +1,7 @@
 package pl.hellopoland.util;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DateFormat;
@@ -94,9 +95,36 @@ public class HelloTicket {
   public JsonObject addSightEvent(SightEventDefinition sightEvent) {
     String sightEventJson = JsonbBuilder.create().toJson(sightEvent);
 
-    return post("", sightEventJson);
+    try {
+      return post("/v1/sight-events", sightEventJson);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    return null;
   }
 
+
+  private JsonObject post(String path, String json) throws IOException {
+    URL url = new URL(this.url + path);
+    var conn = url.openConnection();
+    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+    logger.log(System.Logger.Level.INFO,
+        "Sending POST request to url: " + url + " with body: " + json);
+    conn.setRequestProperty("Authorization",
+        "Bearer eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.");
+    conn.setDoOutput(true);
+    var os = conn.getOutputStream();
+    PrintWriter printWriter = new PrintWriter(os);
+    printWriter.append(json);
+    printWriter.close();
+    var is = conn.getInputStream();
+    var resp = Json.createReader(is).readObject();
+    logger.log(System.Logger.Level.INFO, "Server responded with body: " + resp);
+    return resp;
+  }
+
+  //TODO REFACTOR MAKING THE MODEL CONSISTENT
   private JsonObject post(String path, JsonObject json) throws IOException {
     URL url = new URL(this.url + path);
     var conn = url.openConnection();

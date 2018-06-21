@@ -99,14 +99,18 @@ public class SightEventService extends ServiceSuperclass {
     });
   }
 
+
+  public void addToHpt(SightEventDefinition sightEvent) {
+    Portal hpt = getPortal("Hello Ticket Cloud");
+
+    HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
+
+    helloTicket.addSightEvent(sightEvent);
+  }
+
   private Portal getPortal(String name) {
     return em.createQuery("from Portal where name=:name", Portal.class).setParameter("name", name)
         .getSingleResult();
   }
 
-  public void addToHpt(SightEventDefinition sightEvent) {
-//    HelloTicket helloTicket = new HelloTicket();
-//
-//    helloTicket.
-  }
 }
