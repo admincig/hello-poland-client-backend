@@ -1,4 +1,4 @@
-package pl.hellopoland.rest;
+package pl.hellopoland.rest.market;
 
 import java.util.Collection;
 import java.util.Date;
@@ -23,7 +23,7 @@ import pl.hellopoland.rest.dto.OrderORO;
 import pl.hellopoland.security.dto.CurrentUser;
 import pl.hellopoland.util.Triplet;
 
-@Path("/")
+@Path("/market")
 @RequestScoped
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

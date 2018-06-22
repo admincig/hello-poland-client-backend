@@ -43,7 +43,7 @@ public class HelloTicket {
       return t;
     }).collect(Collectors.toList());
     booking.ticketBookings = ticketBookings;
-    var json = prepareJson(booking);
+    var json = JsonbBuilder.create().toJson(booking);
     try {
       var resp = post("/v1/bookings", json);
       String serialNumber = resp.getString("serialNumber");
@@ -104,7 +104,6 @@ public class HelloTicket {
     return null;
   }
 
-
   private JsonObject post(String path, String json) throws IOException {
     URL url = new URL(this.url + path);
     var conn = url.openConnection();
@@ -118,24 +117,6 @@ public class HelloTicket {
     PrintWriter printWriter = new PrintWriter(os);
     printWriter.append(json);
     printWriter.close();
-    var is = conn.getInputStream();
-    var resp = Json.createReader(is).readObject();
-    logger.log(System.Logger.Level.INFO, "Server responded with body: " + resp);
-    return resp;
-  }
-
-  //TODO REFACTOR MAKING THE MODEL CONSISTENT
-  private JsonObject post(String path, JsonObject json) throws IOException {
-    URL url = new URL(this.url + path);
-    var conn = url.openConnection();
-    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-    logger.log(System.Logger.Level.INFO,
-        "Sending POST request to url: " + url + " with body: " + json);
-    conn.setRequestProperty("Authorization",
-        "Bearer eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.");
-    conn.setDoOutput(true);
-    var os = conn.getOutputStream();
-    Json.createWriter(os).writeObject(json);
     var is = conn.getInputStream();
     var resp = Json.createReader(is).readObject();
     logger.log(System.Logger.Level.INFO, "Server responded with body: " + resp);
@@ -159,19 +140,6 @@ public class HelloTicket {
     var resp = Json.createReader(is).readObject();
     logger.log(System.Logger.Level.INFO, "Server responded with body: " + resp);
     return resp;
-  }
-
-  // TODO change for jsonb in JEE8
-  private JsonObject prepareJson(Booking booking) {
-    var ticketBuilder = Json.createArrayBuilder();
-    for (Ticket t : booking.ticketBookings) {
-      ticketBuilder.add(Json.createObjectBuilder().add("ticketDefinitionId", t.ticketDefinitionId)
-          .add("numberOfTickets", t.numberOfTickets).add("date", df.format(t.date)).build());
-    }
-    ;
-    return Json.createObjectBuilder().add("customerEmail", booking.customerEmail)
-        .add("customerName", booking.customerName).add("ticketBookings", ticketBuilder.build())
-        .build();
   }
 
 }

@@ -1,4 +1,4 @@
-package pl.hellopoland.rest;
+package pl.hellopoland.rest.partner;
 
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
@@ -21,7 +21,7 @@ import pl.hellopoland.sight.SightEvent;
 import pl.hellopoland.sight.SightEventService;
 import pl.hellopoland.util.PagedEntityCollection;
 
-@Path("/sight-events")
+@Path("/partner/sight-events")
 @RequestScoped
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)

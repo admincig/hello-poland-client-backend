@@ -1,4 +1,4 @@
-package pl.hellopoland.rest;
+package pl.hellopoland.rest.partner;
 
 import static javax.ws.rs.core.Response.noContent;
 
@@ -19,7 +19,7 @@ import javax.ws.rs.core.Response;
 import pl.hellopoland.dto.Sight;
 import pl.hellopoland.sight.SightService;
 
-@Path("/sights")
+@Path("/partner/sights")
 @RequestScoped
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -30,7 +30,8 @@ public class SightRestService {
 
   @POST
   public Response add(Sight sight) throws URISyntaxException {
-    return Response.created(new URI("sights/" + sight.id)).entity(sightService.add(sight)).build();
+    return Response.created(new URI("/partner/sights/" + sight.id)).entity(sightService.add(sight))
+        .build();
   }
 
   @GET
