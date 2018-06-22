@@ -29,6 +29,8 @@ public class Sight extends ModelSuperclass {
   @Embedded
   private SightLocation sightLocation;
 
+  private boolean active = true;
+
   public Sight() {
   }
 
@@ -86,5 +88,13 @@ public class Sight extends ModelSuperclass {
 
   public void setSightLocation(SightLocation sightLocation) {
     this.sightLocation = sightLocation;
+  }
+
+  public boolean isActive() {
+    return active;
+  }
+
+  public void setActive(boolean active) {
+    this.active = active;
   }
 }

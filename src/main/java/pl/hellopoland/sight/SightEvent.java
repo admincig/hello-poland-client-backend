@@ -37,6 +37,8 @@ public class SightEvent extends ModelSuperclass {
   private Collection<OpeningHours> openingHours;
   @ManyToOne
   private Portal portal;
+  @ManyToOne
+  private Sight sight;
 
   public String getName() {
     return name;
@@ -146,4 +148,11 @@ public class SightEvent extends ModelSuperclass {
     this.setScore((float) (4.8 + new Random().nextDouble() / 5));
   }
 
+  public Sight getSight() {
+    return sight;
+  }
+
+  public void setSight(Sight sight) {
+    this.sight = sight;
+  }
 }

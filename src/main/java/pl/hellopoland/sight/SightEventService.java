@@ -21,7 +21,7 @@ import pl.hellopoland.util.Woo;
 public class SightEventService extends ServiceSuperclass {
 
   @Inject
-  ImageService iService;
+  private ImageService iService;
 
   public PagedEntityCollection<SightEvent> getList(SightsPagedCollectionConfig config) {
     return new PagedEntityCollection<>(getQuery(config).getResultList(), config);
@@ -79,6 +79,10 @@ public class SightEventService extends ServiceSuperclass {
       sbo.setMainImage(iService.downloadImage(sdto.mainImageUrl));
       sbo.setPortal(hpt);
 
+      if (sdto.sightId != null) {
+        assignSightToSightEvent(sbo, sdto.sightId);
+      }
+
       em.persist(sbo);
       logger.log(Logger.Level.INFO, "Saved new sight: " + sbo.getName());
 
@@ -101,7 +105,6 @@ public class SightEventService extends ServiceSuperclass {
     });
   }
 
-
   public void addToHpt(SightEventDefinition sightEvent) {
     Portal hpt = getPortal("Hello Ticket Cloud");
 
@@ -115,4 +118,13 @@ public class SightEventService extends ServiceSuperclass {
         .getSingleResult();
   }
 
+  private void assignSightToSightEvent(SightEvent sightEvent, Long sightId) {
+    Sight sight = em.createQuery("from Sight sight where sight.id=:sightId", Sight.class)
+        .setParameter("sightId", sightId)
+        .getResultStream()
+        .findFirst()
+        .get();
+
+    sightEvent.setSight(sight);
+  }
 }
