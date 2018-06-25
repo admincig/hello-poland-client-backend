@@ -10,11 +10,11 @@ import pl.hellopoland.rest.dto.UserORO;
 import pl.hellopoland.security.dto.CurrentUser;
 import pl.hellopoland.user.UserService;
 
-@Path("/partner")
+@Path("/partner/users")
 @RequestScoped
-public class PartnerRestService {
+public class UserRestService {
 
-  Logger logger = Logger.getLogger(PartnerRestService.class.getName());
+  Logger logger = Logger.getLogger(UserRestService.class.getName());
 
   @Inject
   private UserService userService;

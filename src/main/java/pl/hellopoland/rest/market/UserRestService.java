@@ -10,7 +10,7 @@ import pl.hellopoland.rest.dto.UserORO;
 import pl.hellopoland.security.dto.CurrentUser;
 import pl.hellopoland.user.UserService;
 
-@Path("/users")
+@Path("/market/users")
 @RequestScoped
 public class UserRestService {
 
