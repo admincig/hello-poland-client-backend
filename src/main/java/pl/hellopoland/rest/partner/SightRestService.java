@@ -17,6 +17,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import pl.hellopoland.dto.Sight;
+import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.security.dto.CurrentUser;
 import pl.hellopoland.sight.SightService;
 
@@ -41,7 +42,9 @@ public class SightRestService {
 
   @GET
   public Response get() {
-    return Response.ok(sightService.getAllForPartner(currentUser)).build();
+    return Response
+        .ok(new PagedCollection(sightService.getAllForPartner(currentUser), null))
+        .build();
   }
 
   @GET
