@@ -45,7 +45,8 @@ public class HelloTicket {
     booking.ticketBookings = ticketBookings;
     var json = JsonbBuilder.create().toJson(booking);
     try {
-      var resp = post("/v1/bookings", json);
+      String authToken = "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.";
+      var resp = post("/v1/bookings", json, authToken);
       String serialNumber = resp.getString("serialNumber");
       boolean serialNumberSetAlready = false;
       JsonArray tickets = resp.getJsonArray("tickets");
@@ -72,7 +73,8 @@ public class HelloTicket {
 
   public JsonObject confirm(String serialNumber, List<OrderEntry> orderEntries) {
     try {
-      var resp = put("/v1/bookings/buy/" + serialNumber, null);
+      String authToken = "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.";
+      var resp = put("/v1/bookings/buy/" + serialNumber, null, authToken);
       JsonArray tickets = resp.getJsonArray("tickets");
       for (var oe : orderEntries) {
         for (var iter = tickets.iterator(); iter.hasNext(); ) {
@@ -92,11 +94,11 @@ public class HelloTicket {
     }
   }
 
-  public JsonObject addSightEvent(SightEventDefinition sightEvent) {
+  public JsonObject addSightEvent(SightEventDefinition sightEvent, String partnerAuthToken) {
     String sightEventJson = JsonbBuilder.create().toJson(sightEvent);
 
     try {
-      return post("/v1/sight-events", sightEventJson);
+      return post("/v1/sight-events", sightEventJson, partnerAuthToken);
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -104,14 +106,13 @@ public class HelloTicket {
     return null;
   }
 
-  private JsonObject post(String path, String json) throws IOException {
+  private JsonObject post(String path, String json, String authToken) throws IOException {
     URL url = new URL(this.url + path);
     var conn = url.openConnection();
     conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
     logger.log(System.Logger.Level.INFO,
         "Sending POST request to url: " + url + " with body: " + json);
-    conn.setRequestProperty("Authorization",
-        "Bearer eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.");
+    conn.setRequestProperty("Authorization", "Bearer " + authToken);
     conn.setDoOutput(true);
     var os = conn.getOutputStream();
     PrintWriter printWriter = new PrintWriter(os);
@@ -123,14 +124,14 @@ public class HelloTicket {
     return resp;
   }
 
-  private JsonObject put(String path, JsonObject json) throws IOException {
+  private JsonObject put(String path, JsonObject json, String authToken) throws IOException {
     URL url = new URL(this.url + path);
     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
     logger.log(System.Logger.Level.INFO,
         "Sending PUT request to url: " + url + " with body: " + json);
     conn.setRequestMethod("PUT");
     conn.setRequestProperty("Authorization",
-        "Bearer eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.");
+        "Bearer " + authToken);
     if (json != null) {
       conn.setDoOutput(true);
       var os = conn.getOutputStream();

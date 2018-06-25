@@ -17,6 +17,7 @@ import pl.hellopoland.dto.SightEventDefinition;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.rest.dto.SightEventEventRO;
 import pl.hellopoland.rest.dto.SightEventOnListingRO;
+import pl.hellopoland.security.dto.CurrentUser;
 import pl.hellopoland.sight.SightEvent;
 import pl.hellopoland.sight.SightEventService;
 import pl.hellopoland.util.PagedEntityCollection;
@@ -30,6 +31,9 @@ public class SightEventRestService {
   @Inject
   SightEventService sightEventService;
 
+  @Inject
+  private CurrentUser currentUser;
+
   @GET
   @PermitAll
   public PagedCollection getList() {
@@ -39,12 +43,12 @@ public class SightEventRestService {
   @POST
   @Path("/add")
   public void addToHpt(SightEventDefinition sightEvent) {
-    sightEventService.addToHpt(sightEvent);
+    sightEventService.addToHpt(sightEvent, currentUser);
   }
 
   @POST
   public void savePush(Push push) {
-    sightEventService.savePush(push.sightEvents);
+    sightEventService.savePush(push);
   }
 
   @POST

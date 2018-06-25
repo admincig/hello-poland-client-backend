@@ -10,6 +10,7 @@ import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 import pl.hellopoland.ModelSuperclass;
 import pl.hellopoland.image.Image;
+import pl.hellopoland.partner.Partner;
 
 @Entity
 public class SightEvent extends ModelSuperclass {
@@ -39,6 +40,8 @@ public class SightEvent extends ModelSuperclass {
   private Portal portal;
   @ManyToOne
   private Sight sight;
+  @ManyToOne
+  private Partner partner;
 
   public String getName() {
     return name;
@@ -154,5 +157,13 @@ public class SightEvent extends ModelSuperclass {
 
   public void setSight(Sight sight) {
     this.sight = sight;
+  }
+
+  public Partner getPartner() {
+    return partner;
+  }
+
+  public void setPartner(Partner partner) {
+    this.partner = partner;
   }
 }

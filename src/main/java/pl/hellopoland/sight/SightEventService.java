@@ -9,9 +9,13 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.ServiceSuperclass;
 import pl.hellopoland.config.SightsPagedCollectionConfig;
+import pl.hellopoland.dto.Push;
 import pl.hellopoland.dto.SightEventDefinition;
 import pl.hellopoland.image.Image;
 import pl.hellopoland.image.ImageService;
+import pl.hellopoland.partner.Partner;
+import pl.hellopoland.partner.PartnerService;
+import pl.hellopoland.security.dto.CurrentUser;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PagedEntityCollection;
 import pl.hellopoland.util.Woo;
@@ -22,6 +26,9 @@ public class SightEventService extends ServiceSuperclass {
 
   @Inject
   private ImageService iService;
+
+  @Inject
+  private PartnerService partnerService;
 
   public PagedEntityCollection<SightEvent> getList(SightsPagedCollectionConfig config) {
     return new PagedEntityCollection<>(getQuery(config).getResultList(), config);
@@ -70,9 +77,9 @@ public class SightEventService extends ServiceSuperclass {
     logger.log(Logger.Level.INFO, "Finished all imports");
   }
 
-  public void savePush(List<pl.hellopoland.dto.SightEventDefinition> sightEvents) {
+  public void savePush(Push push) {
     Portal hpt = getPortal("Hello Ticket Cloud");
-    sightEvents.forEach(sdto -> {
+    push.sightEvents.forEach(sdto -> {
       var sbo = new SightEvent();
       sbo.setName(sdto.name);
       sbo.generateRandomScore();
@@ -105,12 +112,14 @@ public class SightEventService extends ServiceSuperclass {
     });
   }
 
-  public void addToHpt(SightEventDefinition sightEvent) {
+  public void addToHpt(SightEventDefinition sightEvent, CurrentUser currentUser) {
+    Partner partner = partnerService.findByUserEmail(currentUser.getEmail());
+
     Portal hpt = getPortal("Hello Ticket Cloud");
 
     HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
 
-    helloTicket.addSightEvent(sightEvent);
+    helloTicket.addSightEvent(sightEvent, partner.getHptToken());
   }
 
   private Portal getPortal(String name) {
