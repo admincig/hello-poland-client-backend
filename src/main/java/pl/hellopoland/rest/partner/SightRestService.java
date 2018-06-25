@@ -17,6 +17,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import pl.hellopoland.dto.Sight;
+import pl.hellopoland.security.dto.CurrentUser;
 import pl.hellopoland.sight.SightService;
 
 @Path("/partner/sights")
@@ -28,15 +29,19 @@ public class SightRestService {
   @Inject
   private SightService sightService;
 
+  @Inject
+  private CurrentUser currentUser;
+
   @POST
   public Response add(Sight sight) throws URISyntaxException {
-    return Response.created(new URI("/partner/sights/" + sight.id)).entity(sightService.add(sight))
+    return Response.created(new URI("/partner/sights/" + sight.id))
+        .entity(sightService.add(sight, currentUser))
         .build();
   }
 
   @GET
   public Response get() {
-    return Response.ok(sightService.get()).build();
+    return Response.ok(sightService.getAllForPartner(currentUser)).build();
   }
 
   @GET
@@ -48,7 +53,7 @@ public class SightRestService {
   @PUT
   @Path("/{id}")
   public Response update(@PathParam("id") Long id, Sight sight) {
-    return Response.ok(sightService.update(id, sight)).build();
+    return Response.ok(sightService.update(id, sight, currentUser)).build();
   }
 
   @DELETE

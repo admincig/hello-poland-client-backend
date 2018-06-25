@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import pl.hellopoland.ModelSuperclass;
 import pl.hellopoland.image.Image;
+import pl.hellopoland.partner.Partner;
 
 @Entity
 public class Sight extends ModelSuperclass {
@@ -28,6 +29,9 @@ public class Sight extends ModelSuperclass {
 
   @Embedded
   private SightLocation sightLocation;
+
+  @ManyToOne
+  private Partner partner;
 
   private boolean active = true;
 
@@ -96,5 +100,13 @@ public class Sight extends ModelSuperclass {
 
   public void setActive(boolean active) {
     this.active = active;
+  }
+
+  public Partner getPartner() {
+    return partner;
+  }
+
+  public void setPartner(Partner partner) {
+    this.partner = partner;
   }
 }

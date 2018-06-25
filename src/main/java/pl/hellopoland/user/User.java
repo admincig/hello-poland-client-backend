@@ -1,5 +1,6 @@
 package pl.hellopoland.user;
 
+import static javax.persistence.CascadeType.PERSIST;
 import static javax.persistence.FetchType.EAGER;
 
 import java.util.ArrayList;
@@ -7,11 +8,13 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import pl.hellopoland.ModelSuperclass;
+import pl.hellopoland.partner.Partner;
 
 //import javax.validation.constraints.Email;
 
@@ -42,6 +45,9 @@ public class User extends ModelSuperclass {
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = EAGER)
   private List<UserRole> roles;
+
+  @ManyToOne(cascade = PERSIST)
+  private Partner partner;
 
   public String getEmail() {
     return email;
@@ -101,4 +107,11 @@ public class User extends ModelSuperclass {
     this.roles.add(ur);
   }
 
+  public Partner getPartner() {
+    return partner;
+  }
+
+  public void setPartner(Partner partner) {
+    this.partner = partner;
+  }
 }
