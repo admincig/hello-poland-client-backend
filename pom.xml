@@ -5,15 +5,9 @@
 	<groupId>pl.hellopoland</groupId>
 	<artifactId>hellopoland</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>pom</packaging>
+	<packaging>war</packaging>
 	<name>Hello Poland</name>
 	<description>Hello Poland backend project</description>
-
-	<modules>
-		<module>ejb</module>
-		<module>rest</module>
-		<module>ear</module>
-	</modules>
 
 	<properties>
 		<maven.compiler.source>10</maven.compiler.source>
@@ -27,22 +21,9 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>pl.hellopoland</groupId>
-				<artifactId>hellopoland.ejb</artifactId>
-				<version>${project.version}</version>
-				<type>ejb</type>
-			</dependency>
-			<dependency>
-				<groupId>pl.hellopoland</groupId>
-				<artifactId>hellopoland.rest</artifactId>
-				<version>${project.version}</version>
-				<type>war</type>
-				<scope>compile</scope>
-			</dependency>
-			<dependency>
 				<groupId>javax</groupId>
 				<artifactId>javaee-api</artifactId>
-				<version>7.0</version>
+				<version>8.0</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
@@ -60,9 +41,54 @@
 			<artifactId>javaee-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt</artifactId>
+			<version>0.9.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.picketbox</groupId>
+			<artifactId>picketbox</artifactId>
+			<version>5.0.2.Final</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- GoogleAPIConnector -->
+		<dependency>
+			<groupId>com.google.api-client</groupId>
+			<artifactId>google-api-client</artifactId>
+			<version>1.23.0</version>
+		</dependency>
+
+		<!-- WooCommerceAPIConnector -->
+		<dependency>
+			<groupId>com.icoderman</groupId>
+			<artifactId>wc-api-java</artifactId>
+			<version>1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.5.2</version>
+			<scope>runtime</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>pl.hellopoland</groupId>
+			<artifactId>hellopoland-dto</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
+		<finalName>hellopoland</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -79,8 +105,8 @@
 						<configuration>
 							<quiet>true</quiet>
 							<files>
-								<file>../etc/config.properties</file>
-								<file>../etc/${user.name}.config.properties</file>
+								<file>etc/config.properties</file>
+								<file>etc/${user.name}.config.properties</file>
 								<!-- <file>${local.properties}</file> -->
 							</files>
 							<encoding>UTF-8</encoding>
@@ -116,6 +142,47 @@
 			</resource>
 		</resources>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>copy-wildfly-files</id>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-resources-plugin</artifactId>
+						<version>3.0.2</version>
+						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${wildfly.home}</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${project.build.directory}/classes/wildfly</directory>
+											<filtering>false</filtering>
+											<includes>
+												<include>**/*.jar</include>
+											</includes>
+										</resource>
+										<resource>
+											<directory>${project.build.directory}/classes/wildfly</directory>
+											<filtering>true</filtering>
+											<excludes>
+												<exclude>**/*.jar</exclude>
+											</excludes>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 	<repositories>
 		<repository>
