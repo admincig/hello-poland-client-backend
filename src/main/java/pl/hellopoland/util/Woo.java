@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 import pl.hellopoland.image.Image;
 import pl.hellopoland.order.OrderDetails;
 import pl.hellopoland.order.OrderEntry;
-import pl.hellopoland.sight.Sight;
+import pl.hellopoland.sight.SightEvent;
 import pl.hellopoland.sight.Ticket;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
@@ -60,41 +60,41 @@ public class Woo {
     return orderPlacer.place(order);
   }
 
-  public List<Sight> importSights() {
+  public List<SightEvent> importSights() {
     return importer.run();
   }
 
   private class Importer {
 
-    public List<Sight> run() {
-      List<Sight> listOfSights = new ArrayList<Sight>();
+    public List<SightEvent> run() {
+      List<SightEvent> listOfSightEvents = new ArrayList<SightEvent>();
       List<Map<String, Object>> list = connector.allProducts();
 
       for (Map<String, Object> map : list) {
-        Sight sight = new Sight();
-        sight.setName((String) map.get("name"));
-        sight.setDescription(Utils.clearHtml((String) map.get("description")));
-        sight.setMinPrice((int) (100 * Double.valueOf((String) map.get("price".toString()))));
+        SightEvent sightEvent = new SightEvent();
+        sightEvent.setName((String) map.get("name"));
+        sightEvent.setDescription(Utils.clearHtml((String) map.get("description")));
+        sightEvent.setMinPrice((int) (100 * Double.valueOf((String) map.get("price".toString()))));
 
         Ticket ticket = new Ticket();
         ticket.setName("Normalny");
-        ticket.setSight(sight);
-        ticket.setPrice(sight.getMinPrice());
+        ticket.setSightEvent(sightEvent);
+        ticket.setPrice(sightEvent.getMinPrice());
         ticket.setPredefinedDate(true);
         ticket.setExternalId(Long.valueOf(map.get("id").toString()));
         ticket.setDate(Utils.getDateFromSightName((String) map.get("name")));
-        sight.setTickets(new ArrayList<>());
-        sight.getTickets().add(ticket);
+        sightEvent.setTickets(new ArrayList<>());
+        sightEvent.getTickets().add(ticket);
 
         List listOfImages = (List) map.get("images");
         Map mapOfOneImage = (Map) listOfImages.get(0);
         Image image = new Image();
         image.setImageURL((String) mapOfOneImage.get("src"));
-        sight.setMainImage(image);
+        sightEvent.setMainImage(image);
 
-        listOfSights.add(sight);
+        listOfSightEvents.add(sightEvent);
       }
-      return listOfSights;
+      return listOfSightEvents;
     }
   }
 

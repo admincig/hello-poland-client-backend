@@ -1,14 +1,14 @@
 package pl.hellopoland.rest.dto;
 
-import pl.hellopoland.sight.Sight;
+import pl.hellopoland.sight.SightEvent;
 
-public class SightOnListingRO extends SightSimpleRO {
+public class SightEventOnListingRO extends SightSimpleRO {
 
   public String description;
   public Integer minPrice;
   public String mainImage;
 
-  public SightOnListingRO(Sight f) {
+  public SightEventOnListingRO(SightEvent f) {
     super(f);
     this.description = f.getDescription();
     this.minPrice = f.getMinPrice();

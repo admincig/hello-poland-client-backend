@@ -1,4 +1,4 @@
-package pl.hellopoland.rest;
+package pl.hellopoland.rest.market;
 
 import java.util.logging.Logger;
 import javax.annotation.security.RolesAllowed;
@@ -13,7 +13,7 @@ import pl.hellopoland.rest.dto.UserORO;
 import pl.hellopoland.security.dto.CurrentUser;
 import pl.hellopoland.user.UserService;
 
-@Path("/")
+@Path("/market/users")
 @RequestScoped
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -22,13 +22,13 @@ public class UserRestService {
   Logger logger = Logger.getLogger(UserRestService.class.getName());
 
   @Inject
-  UserService userService;
+  private UserService userService;
 
   @Inject
   private CurrentUser currentUser;
 
   @GET
-  @Path("/users/me")
+  @Path("/me")
   @RolesAllowed("user")
   public UserORO me() {
     return new UserORO(userService.me(currentUser));

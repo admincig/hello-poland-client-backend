@@ -25,7 +25,7 @@ import pl.hellopoland.ServiceSuperclass;
 import pl.hellopoland.order.Order.Status;
 import pl.hellopoland.security.dto.CurrentUser;
 import pl.hellopoland.sight.Portal;
-import pl.hellopoland.sight.Sight;
+import pl.hellopoland.sight.SightEvent;
 import pl.hellopoland.sight.Ticket;
 import pl.hellopoland.user.User;
 import pl.hellopoland.user.UserService;
@@ -62,13 +62,13 @@ public class OrderService extends ServiceSuperclass {
     List<Ticket> tickets =
         em.createQuery("from Ticket t join fetch t.sight s where t.id in (:ids) order by s.id asc",
             Ticket.class).setParameter("ids", ticketsIds).getResultList();
-    Map<Sight, List<Ticket>> ticketsGroupedBySight =
-        tickets.stream().collect(groupingBy(Ticket::getSight));
+    Map<SightEvent, List<Ticket>> ticketsGroupedBySight =
+        tickets.stream().collect(groupingBy(Ticket::getSightEvent));
     Map<Long, Ticket> ticketIdToObject = tickets.stream().collect(toMap(Ticket::getId, t -> t));
-    for (Map.Entry<Sight, List<Ticket>> entry : ticketsGroupedBySight.entrySet()) {
+    for (Map.Entry<SightEvent, List<Ticket>> entry : ticketsGroupedBySight.entrySet()) {
       OrderSightEntry ose = new OrderSightEntry();
       ose.setOrder(o);
-      ose.setSight(entry.getKey());
+      ose.setSightEvent(entry.getKey());
       em.persist(ose);
 
       List<Long> ticketsOfSight = entry.getValue().stream().map(Ticket::getId).collect(toList());
@@ -109,8 +109,9 @@ public class OrderService extends ServiceSuperclass {
     em.refresh(o);
     logger.log(Logger.Level.INFO,
         "Checking if any of order sight entries ought to be placed in external API");
-    var groupedByPortal = o.getEntries().stream().filter(ose -> ose.getSight().getPortal() != null)
-        .collect(groupingBy(ose -> ose.getSight().getPortal()));
+    var groupedByPortal = o.getEntries().stream()
+        .filter(ose -> ose.getSightEvent().getPortal() != null)
+        .collect(groupingBy(ose -> ose.getSightEvent().getPortal()));
     for (var entry : groupedByPortal.entrySet()) {
       Portal portal = entry.getKey();
       logger.log(Logger.Level.INFO, "Placing external order in " + portal.getName());
@@ -128,8 +129,9 @@ public class OrderService extends ServiceSuperclass {
   private void confirmInExternalAPI(Order o) {
     logger.log(Logger.Level.INFO,
         "Checking if any of order sight entries ought to be confirmed in external API");
-    var groupedByPortal = o.getEntries().stream().filter(ose -> ose.getSight().getPortal() != null)
-        .collect(groupingBy(ose -> ose.getSight().getPortal()));
+    var groupedByPortal = o.getEntries().stream()
+        .filter(ose -> ose.getSightEvent().getPortal() != null)
+        .collect(groupingBy(ose -> ose.getSightEvent().getPortal()));
     for (var entry : groupedByPortal.entrySet()) {
       Portal portal = entry.getKey();
       logger.log(Logger.Level.INFO, "Confirming external order in " + portal.getName());
@@ -285,8 +287,8 @@ public class OrderService extends ServiceSuperclass {
     logger.log(Logger.Level.INFO,
         "Checking if any of order sight entries ought to be cancelled in external API");
     Map<Portal, List<OrderSightEntry>> groupedByPortal =
-        order.getEntries().stream().filter(ose -> ose.getSight().getPortal() != null)
-            .collect(groupingBy(ose -> ose.getSight().getPortal()));
+        order.getEntries().stream().filter(ose -> ose.getSightEvent().getPortal() != null)
+            .collect(groupingBy(ose -> ose.getSightEvent().getPortal()));
     for (Map.Entry<Portal, List<OrderSightEntry>> entry : groupedByPortal.entrySet()) {
       Portal portal = entry.getKey();
       logger.log(Logger.Level.INFO, "Cancelling external order in " + portal.getName());
@@ -320,7 +322,7 @@ public class OrderService extends ServiceSuperclass {
 
     // XXX Just for version 0.1. Will be deleted in further development
     for (OrderSightEntry ose : order.getEntries()) {
-      Portal portal = ose.getSight().getPortal();
+      Portal portal = ose.getSightEvent().getPortal();
       if (portal != null && portal.getType() == Portal.Type.WOOCOMMERCE) {
         for (OrderDateEntry ode : ose.getEntries()) {
           for (OrderEntry oe : ode.getEntries()) {

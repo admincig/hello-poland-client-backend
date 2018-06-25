@@ -1,6 +1,7 @@
 package pl.hellopoland.util;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DateFormat;
@@ -12,6 +13,8 @@ import java.util.stream.Collectors;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.bind.JsonbBuilder;
+import pl.hellopoland.dto.SightEventDefinition;
 import pl.hellopoland.dto.booking.Booking;
 import pl.hellopoland.dto.booking.Ticket;
 import pl.hellopoland.order.OrderDetails;
@@ -39,8 +42,8 @@ public class HelloTicket {
       t.date = oe.getDateEntry().getDate();
       return t;
     }).collect(Collectors.toList());
-    booking.ticketBookings = ticketBookings.toArray(new Ticket[ticketBookings.size()]);
-    var json = prepareJson(booking);
+    booking.ticketBookings = ticketBookings;
+    var json = JsonbBuilder.create().toJson(booking);
     try {
       var resp = post("/v1/bookings", json);
       String serialNumber = resp.getString("serialNumber");
@@ -89,7 +92,19 @@ public class HelloTicket {
     }
   }
 
-  private JsonObject post(String path, JsonObject json) throws IOException {
+  public JsonObject addSightEvent(SightEventDefinition sightEvent) {
+    String sightEventJson = JsonbBuilder.create().toJson(sightEvent);
+
+    try {
+      return post("/v1/sight-events", sightEventJson);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    return null;
+  }
+
+  private JsonObject post(String path, String json) throws IOException {
     URL url = new URL(this.url + path);
     var conn = url.openConnection();
     conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
@@ -99,7 +114,9 @@ public class HelloTicket {
         "Bearer eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.");
     conn.setDoOutput(true);
     var os = conn.getOutputStream();
-    Json.createWriter(os).writeObject(json);
+    PrintWriter printWriter = new PrintWriter(os);
+    printWriter.append(json);
+    printWriter.close();
     var is = conn.getInputStream();
     var resp = Json.createReader(is).readObject();
     logger.log(System.Logger.Level.INFO, "Server responded with body: " + resp);
@@ -123,19 +140,6 @@ public class HelloTicket {
     var resp = Json.createReader(is).readObject();
     logger.log(System.Logger.Level.INFO, "Server responded with body: " + resp);
     return resp;
-  }
-
-  // TODO change for jsonb in JEE8
-  private JsonObject prepareJson(Booking booking) {
-    var ticketBuilder = Json.createArrayBuilder();
-    for (Ticket t : booking.ticketBookings) {
-      ticketBuilder.add(Json.createObjectBuilder().add("ticketDefinitionId", t.ticketDefinitionId)
-          .add("numberOfTickets", t.numberOfTickets).add("date", df.format(t.date)).build());
-    }
-    ;
-    return Json.createObjectBuilder().add("customerEmail", booking.customerEmail)
-        .add("customerName", booking.customerName).add("ticketBookings", ticketBuilder.build())
-        .build();
   }
 
 }

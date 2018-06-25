@@ -1,4 +1,4 @@
-package pl.hellopoland.rest;
+package pl.hellopoland.rest.partner;
 
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
@@ -13,21 +13,22 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import pl.hellopoland.config.SightsPagedCollectionConfig;
 import pl.hellopoland.dto.Push;
+import pl.hellopoland.dto.SightEventDefinition;
 import pl.hellopoland.rest.dto.PagedCollection;
-import pl.hellopoland.rest.dto.SightOnListingRO;
-import pl.hellopoland.rest.dto.SightRO;
-import pl.hellopoland.sight.Sight;
-import pl.hellopoland.sight.SightService;
+import pl.hellopoland.rest.dto.SightEventEventRO;
+import pl.hellopoland.rest.dto.SightEventOnListingRO;
+import pl.hellopoland.sight.SightEvent;
+import pl.hellopoland.sight.SightEventService;
 import pl.hellopoland.util.PagedEntityCollection;
 
-@Path("/sights")
+@Path("/partner/sight-events")
 @RequestScoped
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class SightRestService {
+public class SightEventRestService {
 
   @Inject
-  SightService sightService;
+  SightEventService sightEventService;
 
   @GET
   @PermitAll
@@ -36,21 +37,28 @@ public class SightRestService {
   }
 
   @POST
+  @Path("/add")
+  public void addToHpt(SightEventDefinition sightEvent) {
+    sightEventService.addToHpt(sightEvent);
+  }
+
+  @POST
   public void savePush(Push push) {
-    sightService.savePush(push.sightEvents);
+    sightEventService.savePush(push.sightEvents);
   }
 
   @POST
   @Path("/search")
   public PagedCollection search(SightsPagedCollectionConfig config) {
-    PagedEntityCollection<Sight> plist = sightService.getList(config);
+    PagedEntityCollection<SightEvent> plist = sightEventService.getList(config);
     return new PagedCollection(
-        plist.items.stream().map(SightOnListingRO::new).collect(Collectors.toList()), plist.config);
+        plist.items.stream().map(SightEventOnListingRO::new).collect(Collectors.toList()),
+        plist.config);
   }
 
   @GET
   @Path("/{id}")
-  public SightRO get(@PathParam("id") Long id) {
-    return new SightRO(sightService.get(id));
+  public SightEventEventRO get(@PathParam("id") Long id) {
+    return new SightEventEventRO(sightEventService.get(id));
   }
 }

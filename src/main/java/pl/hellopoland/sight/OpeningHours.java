@@ -12,7 +12,7 @@ public class OpeningHours extends ModelSuperclass {
   private static final long serialVersionUID = -9192565384148638549L;
 
   @ManyToOne(optional = false)
-  private Sight sight;
+  private SightEvent sightEvent;
   @NotNull
   private Integer day;
   @NotNull
@@ -21,12 +21,12 @@ public class OpeningHours extends ModelSuperclass {
   private LocalTime closeTime;
 
 
-  public Sight getSight() {
-    return sight;
+  public SightEvent getSightEvent() {
+    return sightEvent;
   }
 
-  public void setSight(Sight sight) {
-    this.sight = sight;
+  public void setSightEvent(SightEvent sightEvent) {
+    this.sightEvent = sightEvent;
   }
 
   public Integer getDay() {

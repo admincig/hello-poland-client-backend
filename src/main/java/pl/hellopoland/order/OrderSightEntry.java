@@ -10,7 +10,7 @@ import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import pl.hellopoland.ModelSuperclass;
-import pl.hellopoland.sight.Sight;
+import pl.hellopoland.sight.SightEvent;
 
 @Entity
 public class OrderSightEntry extends ModelSuperclass {
@@ -18,7 +18,7 @@ public class OrderSightEntry extends ModelSuperclass {
   private static final long serialVersionUID = 3650049507552718840L;
 
   @ManyToOne(optional = false, fetch = FetchType.EAGER)
-  private Sight sight;
+  private SightEvent sightEvent;
   @OneToMany(mappedBy = "sightEntry", cascade = CascadeType.REFRESH)
   private Collection<OrderDateEntry> entries;
   @ManyToOne(optional = false)
@@ -27,12 +27,12 @@ public class OrderSightEntry extends ModelSuperclass {
   private Long externalId;
 
 
-  public Sight getSight() {
-    return sight;
+  public SightEvent getSightEvent() {
+    return sightEvent;
   }
 
-  public void setSight(Sight sight) {
-    this.sight = sight;
+  public void setSightEvent(SightEvent sightEvent) {
+    this.sightEvent = sightEvent;
   }
 
   public Collection<OrderDateEntry> getEntries() {

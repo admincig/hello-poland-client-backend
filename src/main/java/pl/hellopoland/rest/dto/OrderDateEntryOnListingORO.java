@@ -14,7 +14,7 @@ public class OrderDateEntryOnListingORO {
   public OrderDateEntryOnListingORO(OrderDateEntry ode) {
     this.id = ode.getId();
     this.date = DtoUtils.df.format(ode.getDate());
-    this.sight = new SightSimpleRO(ode.getSightEntry().getSight());
+    this.sight = new SightSimpleRO(ode.getSightEntry().getSightEvent());
     this.entries =
         ode.getEntries().stream().map(OrderEntryOnListingORO::new).collect(Collectors.toList());
   }
