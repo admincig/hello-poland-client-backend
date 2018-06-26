@@ -67,7 +67,7 @@ public class DbFiller extends ServiceSuperclass {
     String email = partnerName.toLowerCase().replaceAll(" ", "") + "@" + partnerName.toLowerCase()
         .replaceAll(" ", "") + ".pl";
     user.setEmail(email);
-    user.setPassword(passwordEncoder.encode(partnerName.toLowerCase()));
+    user.setPassword(passwordEncoder.encode(partnerName.toLowerCase().replaceAll(" ", "")));
     user.setRoles(singletonList(userRole));
     user.setPartner(helloPolandPartner);
 
