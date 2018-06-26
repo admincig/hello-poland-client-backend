@@ -8,6 +8,7 @@ import javax.ejb.DependsOn;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
+import pl.hellopoland.partner.Partner;
 import pl.hellopoland.security.password.PasswordEncoder;
 import pl.hellopoland.sight.Portal;
 import pl.hellopoland.sight.Portal.Type;
@@ -42,6 +43,9 @@ public class DbFiller extends ServiceSuperclass {
   }
 
   private void createUsers() {
+    Partner partner = new Partner();
+    partner.setName("My Partner");
+
     User user = new User();
 
     UserRole userRole = new UserRole();
@@ -51,6 +55,7 @@ public class DbFiller extends ServiceSuperclass {
     user.setEmail("partner@partner.pl");
     user.setPassword(passwordEncoder.encode("partner"));
     user.setRoles(singletonList(userRole));
+    user.setPartner(partner);
 
     em.persist(user);
   }

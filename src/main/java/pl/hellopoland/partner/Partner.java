@@ -14,10 +14,33 @@ public class Partner extends ModelSuperclass {
 
   private String name;
 
-  @OneToMany
+  @OneToMany(mappedBy = "partner")
   private List<User> users;
 
-  @OneToMany
-  private List<Sight> sightEvents;
+  @OneToMany(mappedBy = "partner")
+  private List<Sight> sight;
 
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public List<User> getUsers() {
+    return users;
+  }
+
+  public void setUsers(List<User> users) {
+    this.users = users;
+  }
+
+  public List<Sight> getSight() {
+    return sight;
+  }
+
+  public void setSight(List<Sight> sight) {
+    this.sight = sight;
+  }
 }
