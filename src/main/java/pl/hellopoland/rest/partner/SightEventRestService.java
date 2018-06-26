@@ -1,5 +1,7 @@
 package pl.hellopoland.rest.partner;
 
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
 import javax.enterprise.context.RequestScoped;
@@ -28,6 +30,8 @@ import pl.hellopoland.util.PagedEntityCollection;
 @Consumes(MediaType.APPLICATION_JSON)
 public class SightEventRestService {
 
+  private Logger logger = System.getLogger(this.getClass().getName());
+
   @Inject
   SightEventService sightEventService;
 
@@ -48,6 +52,7 @@ public class SightEventRestService {
 
   @POST
   public void savePush(Push push) {
+    logger.log(Level.ERROR, "SightEventRestService savePush");
     sightEventService.savePush(push);
   }
 
