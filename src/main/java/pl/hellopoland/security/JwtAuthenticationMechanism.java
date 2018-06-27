@@ -8,6 +8,8 @@ import static javax.security.enterprise.AuthenticationStatus.SEND_FAILURE;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.util.Optional;
 import java.util.Set;
 import javax.enterprise.context.ApplicationScoped;
@@ -25,6 +27,7 @@ import javax.security.enterprise.identitystore.IdentityStoreHandler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.HttpHeaders;
+import pl.hellopoland.ServiceSuperclass;
 import pl.hellopoland.security.dto.CurrentUser;
 import pl.hellopoland.security.dto.UserAuthDTO;
 import pl.hellopoland.security.token.ExpiredTokenService;
@@ -40,6 +43,8 @@ import pl.hellopoland.util.GoogleAPIConnector;
 
 @ApplicationScoped
 public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
+
+  private static Logger staticLogger = System.getLogger(JwtAuthenticationMechanism.class.getName());
 
   private static final String AUTHORIZATION_PREFIX = "Bearer ";
   private static final String AUTHENTICATION_METHOD = "POST";
@@ -73,11 +78,13 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
   public AuthenticationStatus validateRequest(HttpServletRequest request,
       HttpServletResponse response, HttpMessageContext context) {
     AuthenticationStatus authenticationStatus = null;
-
+    staticLogger.log(Level.ERROR, "JWTAuthenticationMechanism validateRequest1");
     String authorizationToken = extractToken(context);
+    staticLogger.log(Level.ERROR, "JWTAuthenticationMechanism validateRequest2");
 
     if (isAuthRequest(request)) {
       Optional<UserAuthDTO> userAuthDTO = extractUserAuthDTO(request);
+      staticLogger.log(Level.ERROR, "JWTAuthenticationMechanism validateRequest3");
 
       String login = userAuthDTO.map(u -> u.login).orElse(null);
       String password = userAuthDTO.map(u -> u.password).orElse(null);
@@ -87,6 +94,7 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
 
       String accessToken = userAuthDTO.map(u -> u.accessToken).orElse(null);
       String refreshToken = userAuthDTO.map(u -> u.refreshToken).orElse(null);
+      staticLogger.log(Level.ERROR, "JWTAuthenticationMechanism validateRequest4");
 
       if (isLoginRequest(request)) {
         if (hasProperDataToLogin(login, password)) {
@@ -108,6 +116,7 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
     } else {
       authenticationStatus = context.doNothing();
     }
+    staticLogger.log(Level.ERROR, "JWTAuthenticationMechanism validateRequest5");
 
     return authenticationStatus;
   }

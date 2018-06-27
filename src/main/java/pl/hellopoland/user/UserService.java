@@ -1,5 +1,6 @@
 package pl.hellopoland.user;
 
+import java.lang.System.Logger;
 import java.util.Optional;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
