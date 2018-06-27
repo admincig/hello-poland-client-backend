@@ -82,8 +82,8 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
     staticLogger.log(Level.ERROR, "JWTAuthenticationMechanism validateRequest2");
 
     if (isAuthRequest(request)) {
-      Optional<UserAuthDTO> userAuthDTO = extractUserAuthDTO(request);
       staticLogger.log(Level.ERROR, "JWTAuthenticationMechanism validateRequest3");
+      Optional<UserAuthDTO> userAuthDTO = extractUserAuthDTO(request);
 
       String login = userAuthDTO.map(u -> u.login).orElse(null);
       String password = userAuthDTO.map(u -> u.password).orElse(null);
