@@ -109,10 +109,13 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
         authenticationStatus = logout(accessToken, refreshToken, context);
       }
     } else if (authorizationToken != null) {
+      staticLogger.log(Level.ERROR, "JWTAuthenticationMechanism validateRequest11");
       authenticationStatus = validateAccessToken(authorizationToken, context);
     } else if (context.isProtected()) {
+      staticLogger.log(Level.ERROR, "JWTAuthenticationMechanism validateRequest12");
       authenticationStatus = context.responseUnauthorized();
     } else {
+      staticLogger.log(Level.ERROR, "JWTAuthenticationMechanism validateRequest13");
       authenticationStatus = context.doNothing();
     }
     staticLogger
