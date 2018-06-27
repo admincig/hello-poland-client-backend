@@ -1,7 +1,6 @@
 package pl.hellopoland.sight;
 
 import java.lang.System.Logger;
-import java.lang.System.Logger.Level;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -24,8 +23,6 @@ import pl.hellopoland.util.Woo;
 @LocalBean
 @Stateless
 public class SightEventService extends ServiceSuperclass {
-
-  private static Logger staticLogger = System.getLogger(ServiceSuperclass.class.getName());
 
   @Inject
   private ImageService iService;
@@ -81,7 +78,6 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public void savePush(Push push) {
-    logger.log(Level.ERROR, "SightEventService savePush1");
     Portal hpt = getPortal("Hello Ticket Cloud");
     push.sightEvents.forEach(sdto -> {
       var sbo = new SightEvent();
@@ -94,7 +90,6 @@ public class SightEventService extends ServiceSuperclass {
         assignSightToSightEvent(sbo, sdto.sightId);
       }
 
-      logger.log(Level.ERROR, "SightEventService savePush2");
       em.persist(sbo);
       logger.log(Logger.Level.INFO, "Saved new sight: " + sbo.getName());
 
@@ -115,7 +110,6 @@ public class SightEventService extends ServiceSuperclass {
         sbo.setMinPrice(sbo.getTickets().stream().mapToInt(Ticket::getPrice).min().orElse(0));
       }
     });
-    logger.log(Level.ERROR, "SightEventService savePush3");
   }
 
   public void addToHpt(SightEventDefinition sightEvent, CurrentUser currentUser) {

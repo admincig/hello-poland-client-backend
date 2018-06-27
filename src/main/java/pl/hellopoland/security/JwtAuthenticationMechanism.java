@@ -8,8 +8,6 @@ import static javax.security.enterprise.AuthenticationStatus.SEND_FAILURE;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.lang.System.Logger;
-import java.lang.System.Logger.Level;
 import java.util.Optional;
 import java.util.Set;
 import javax.enterprise.context.ApplicationScoped;
@@ -43,8 +41,6 @@ import pl.hellopoland.util.GoogleAPIConnector;
 @ApplicationScoped
 public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
 
-  private static Logger staticLogger = System.getLogger(JwtAuthenticationMechanism.class.getName());
-
   private static final String AUTHORIZATION_PREFIX = "Bearer ";
   private static final String AUTHENTICATION_METHOD = "POST";
 
@@ -77,12 +73,9 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
   public AuthenticationStatus validateRequest(HttpServletRequest request,
       HttpServletResponse response, HttpMessageContext context) {
     AuthenticationStatus authenticationStatus = null;
-    staticLogger.log(Level.ERROR, "JWTAuthenticationMechanism validateRequest1");
     String authorizationToken = extractToken(context);
-    staticLogger.log(Level.ERROR, "JWTAuthenticationMechanism validateRequest2");
 
     if (isAuthRequest(request)) {
-      staticLogger.log(Level.ERROR, "JWTAuthenticationMechanism validateRequest3");
       Optional<UserAuthDTO> userAuthDTO = extractUserAuthDTO(request);
 
       String login = userAuthDTO.map(u -> u.login).orElse(null);
@@ -93,7 +86,6 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
 
       String accessToken = userAuthDTO.map(u -> u.accessToken).orElse(null);
       String refreshToken = userAuthDTO.map(u -> u.refreshToken).orElse(null);
-      staticLogger.log(Level.ERROR, "JWTAuthenticationMechanism validateRequest4");
 
       if (isLoginRequest(request)) {
         if (hasProperDataToLogin(login, password)) {
@@ -109,15 +101,10 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
         authenticationStatus = logout(accessToken, refreshToken, context);
       }
     } else if (authorizationToken != null) {
-      staticLogger
-          .log(Level.ERROR, "JWTAuthenticationMechanism validateRequest1 {}" + authorizationToken);
       authenticationStatus = validateAccessToken(authorizationToken, context);
     } else if (context.isProtected()) {
-      staticLogger.log(Level.ERROR, "JWTAuthenticationMechanism validateRequest12");
       authenticationStatus = context.responseUnauthorized();
     } else {
-      staticLogger.log(Level.ERROR,
-          "JWTAuthenticationMechanism validateRequest13 " + request.getRequestURI());
       authenticationStatus = context.doNothing();
     }
 
