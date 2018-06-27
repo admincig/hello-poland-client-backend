@@ -27,7 +27,6 @@ import javax.security.enterprise.identitystore.IdentityStoreHandler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.HttpHeaders;
-import pl.hellopoland.ServiceSuperclass;
 import pl.hellopoland.security.dto.CurrentUser;
 import pl.hellopoland.security.dto.UserAuthDTO;
 import pl.hellopoland.security.token.ExpiredTokenService;
@@ -116,7 +115,9 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
     } else {
       authenticationStatus = context.doNothing();
     }
-    staticLogger.log(Level.ERROR, "JWTAuthenticationMechanism validateRequest5");
+    staticLogger
+        .log(Level.ERROR, "JWTAuthenticationMechanism validateRequest5. Authentication status {}",
+            authenticationStatus);
 
     return authenticationStatus;
   }
