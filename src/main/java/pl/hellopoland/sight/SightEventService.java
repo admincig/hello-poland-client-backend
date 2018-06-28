@@ -81,13 +81,38 @@ public class SightEventService extends ServiceSuperclass {
     Portal hpt = getPortal("Hello Ticket Cloud");
     push.sightEvents.forEach(sdto -> {
       var sbo = new SightEvent();
+
       sbo.setName(sdto.name);
-      sbo.generateRandomScore();
+      sbo.setDate(sdto.date);
+      sbo.setAvailableTicketsNumber(sdto.availableTicketsNumber);
       sbo.setMainImage(iService.downloadImage(sdto.mainImageUrl));
       sbo.setPortal(hpt);
+      sbo.setLead(sdto.lead);
+      sbo.setDescription(sdto.description);
+      sbo.setEmail(sdto.email);
+      sbo.setPhone(sdto.phone);
+
+      if (sdto.location != null) {
+        SightLocation location = new SightLocation();
+
+        location.setLatitude(sdto.location.latitude);
+        location.setLongitude(sdto.location.longitude);
+        location.setStreet(sdto.location.street);
+        location.setZipCode(sdto.location.zipCode);
+        location.setCity(sdto.location.city);
+        location.setCountry(sdto.location.country);
+
+        sbo.setLocation(location);
+      }
+
+      sbo.generateRandomScore();
 
       if (sdto.sightId != null) {
         assignSightToSightEvent(sbo, sdto.sightId);
+      }
+
+      if (push.secret != null) {
+        sbo.setPartner(partnerService.findByToken(push.secret));
       }
 
       em.persist(sbo);

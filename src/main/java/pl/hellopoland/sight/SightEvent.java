@@ -1,6 +1,7 @@
 package pl.hellopoland.sight;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.Random;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -19,27 +20,47 @@ public class SightEvent extends ModelSuperclass {
 
   @NotNull
   private String name;
+
+  private Date date;
+
+  private Integer availableTicketsNumber;
+
   @ManyToOne
   private Image mainImage;
+
   @OneToMany(mappedBy = "sightEvent")
   private Collection<Ticket> tickets;
+
   @OneToMany(mappedBy = "sightEvent")
   private Collection<Agreement> agreements;
+
   private String lead;
+
   @Column(columnDefinition = "text")
   private String description;
+
+  private Integer duration;
+
   private Integer minPrice;
+
   private Float score;
+
   @Embedded
   private SightLocation location;
+
   private String email;
+
   private String phone;
+
   @OneToMany(mappedBy = "sightEvent")
   private Collection<OpeningHours> openingHours;
+
   @ManyToOne
   private Portal portal;
+
   @ManyToOne
   private Sight sight;
+
   @ManyToOne
   private Partner partner;
 
@@ -165,5 +186,29 @@ public class SightEvent extends ModelSuperclass {
 
   public void setPartner(Partner partner) {
     this.partner = partner;
+  }
+
+  public Date getDate() {
+    return date;
+  }
+
+  public void setDate(Date date) {
+    this.date = date;
+  }
+
+  public Integer getAvailableTicketsNumber() {
+    return availableTicketsNumber;
+  }
+
+  public void setAvailableTicketsNumber(Integer availableTicketsNumber) {
+    this.availableTicketsNumber = availableTicketsNumber;
+  }
+
+  public Integer getDuration() {
+    return duration;
+  }
+
+  public void setDuration(Integer duration) {
+    this.duration = duration;
   }
 }

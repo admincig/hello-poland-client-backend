@@ -1,5 +1,6 @@
 package pl.hellopoland.sight;
 
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
@@ -7,6 +8,10 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.ServiceSuperclass;
+import pl.hellopoland.dto.DateType;
+import pl.hellopoland.dto.Location;
+import pl.hellopoland.dto.SightEventDefinition;
+import pl.hellopoland.dto.TicketDefinition;
 import pl.hellopoland.image.Image;
 import pl.hellopoland.image.ImageService;
 import pl.hellopoland.partner.Partner;
@@ -132,8 +137,63 @@ public class SightService extends ServiceSuperclass {
     sightDTO.lead = sight.getLead();
     sightDTO.description = sight.getDescription();
     sightDTO.mainImage = sight.getMainImage() != null ? createImageDTO(sight.getMainImage()) : null;
+    sightDTO.sightEventDefinitions = sight.getSightEvents().stream()
+        .map(this::createSightEventDTO)
+        .collect(toList());
 
     return sightDTO;
+  }
+
+  private SightEventDefinition createSightEventDTO(SightEvent sightEvent) {
+    SightEventDefinition sightEventDefinition = new SightEventDefinition();
+
+    sightEventDefinition.id = sightEvent.getId();
+    sightEventDefinition.name = sightEvent.getName();
+    sightEventDefinition.date = sightEvent.getDate();
+    sightEventDefinition.availableTicketsNumber = sightEvent.getAvailableTicketsNumber();
+    sightEventDefinition.description = sightEvent.getDescription();
+    sightEventDefinition.duration = sightEvent.getDuration();
+    sightEventDefinition.mainImage = createImageDTO(sightEvent.getMainImage());
+    sightEventDefinition.email = sightEvent.getEmail();
+    sightEventDefinition.phone = sightEvent.getPhone();
+    sightEventDefinition.sightId = sightEvent.getSight().getId();
+
+    sightEventDefinition.location = ofNullable(sightEvent.getLocation())
+        .map(this::createSightLocationDTO)
+        .orElse(null);
+
+    sightEventDefinition.tickets = sightEvent.getTickets().stream()
+        .map(this::createTicketDefinitionDTO)
+        .collect(toList());
+
+    return sightEventDefinition;
+  }
+
+  private Location createSightLocationDTO(SightLocation sightLocation) {
+    Location location = new Location();
+
+    location.latitude = sightLocation.getLatitude();
+    location.longitude = sightLocation.getLongitude();
+    location.street = sightLocation.getStreet();
+    location.zipCode = sightLocation.getZipCode();
+    location.city = sightLocation.getCity();
+    location.country = sightLocation.getCountry();
+
+    return location;
+  }
+
+  private TicketDefinition createTicketDefinitionDTO(Ticket ticket) {
+    TicketDefinition ticketDefinitionDTO = new TicketDefinition();
+
+    ticketDefinitionDTO.id = ticket.getId();
+    ticketDefinitionDTO.name = ticket.getName();
+    ticketDefinitionDTO.price = ticket.getPrice();
+    ticketDefinitionDTO.predefinedDate = ticket.isPredefinedDate();
+    ticketDefinitionDTO.date = ticket.getDate();
+    ticketDefinitionDTO.dateType = DateType.valueOf(ticket.getDateType().name());
+    ticketDefinitionDTO.sightEventId = ticket.getSightEvent().getId();
+
+    return ticketDefinitionDTO;
   }
 
   private pl.hellopoland.dto.Image createImageDTO(Image image) {
