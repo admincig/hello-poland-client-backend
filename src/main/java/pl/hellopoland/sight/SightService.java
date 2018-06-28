@@ -180,7 +180,8 @@ public class SightService extends ServiceSuperclass {
     sightEventDefinition.availableTicketsNumber = sightEvent.getAvailableTicketsNumber();
     sightEventDefinition.description = sightEvent.getDescription();
     sightEventDefinition.duration = sightEvent.getDuration();
-    sightEventDefinition.mainImage = createImageDTO(sightEvent.getMainImage());
+    sightEventDefinition.mainImage =
+        sightEvent.getMainImage() != null ? createImageDTO(sightEvent.getMainImage()) : null;
     sightEventDefinition.email = sightEvent.getEmail();
     sightEventDefinition.phone = sightEvent.getPhone();
     sightEventDefinition.sightId = sightEvent.getSight().getId();
