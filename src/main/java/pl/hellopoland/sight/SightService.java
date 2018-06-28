@@ -28,8 +28,17 @@ public class SightService extends ServiceSuperclass {
   @Inject
   private PartnerService partnerService;
 
+  @Inject
+  private SightEventService sightEventService;
+
   public pl.hellopoland.dto.Sight add(pl.hellopoland.dto.Sight sightDTO, CurrentUser currentUser) {
-    fillInSightWithDTOData(new Sight(), sightDTO, currentUser);
+    Sight sight = new Sight();
+
+    fillInSightWithDTOData(sight, sightDTO, currentUser);
+
+    if (sightDTO.generalAdmission) {
+      createGeneralAdmissionSightEvent(sight, currentUser);
+    }
 
     return sightDTO;
   }
@@ -127,6 +136,24 @@ public class SightService extends ServiceSuperclass {
     }
 
     sight.setSightLocation(sightLocation);
+  }
+
+  private void createGeneralAdmissionSightEvent(Sight sight, CurrentUser currentUser) {
+    SightEventDefinition sightEventDefinition = new SightEventDefinition();
+
+    sightEventDefinition.name = sight.getName();
+    sightEventDefinition.description = sight.getDescription();
+    sightEventDefinition.mainImageUrl =
+        sight.getMainImage() != null ? sight.getMainImage().getImageURL() : null;
+    sightEventDefinition.email = sight.getEmail();
+    sightEventDefinition.phone = sight.getPhone();
+    sightEventDefinition.sightId = sight.getId();
+
+    sightEventDefinition.location = ofNullable(sight.getSightLocation())
+        .map(this::createSightLocationDTO)
+        .orElse(null);
+
+    sightEventService.addToHpt(sightEventDefinition, currentUser);
   }
 
   private pl.hellopoland.dto.Sight createSightDTO(Sight sight) {
