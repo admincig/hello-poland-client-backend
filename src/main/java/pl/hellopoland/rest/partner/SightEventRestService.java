@@ -15,8 +15,8 @@ import pl.hellopoland.config.SightsPagedCollectionConfig;
 import pl.hellopoland.dto.Push;
 import pl.hellopoland.dto.SightEventDefinition;
 import pl.hellopoland.rest.dto.PagedCollection;
-import pl.hellopoland.rest.dto.SightEventEventRO;
-import pl.hellopoland.rest.dto.SightEventOnListingRO;
+import pl.hellopoland.rest.dto.SightEventEventEventRO;
+import pl.hellopoland.rest.dto.SightEventEventOnListingRO;
 import pl.hellopoland.security.dto.CurrentUser;
 import pl.hellopoland.sight.SightEvent;
 import pl.hellopoland.sight.SightEventService;
@@ -56,13 +56,13 @@ public class SightEventRestService {
   public PagedCollection search(SightsPagedCollectionConfig config) {
     PagedEntityCollection<SightEvent> plist = sightEventService.getList(config);
     return new PagedCollection(
-        plist.items.stream().map(SightEventOnListingRO::new).collect(Collectors.toList()),
+        plist.items.stream().map(SightEventEventOnListingRO::new).collect(Collectors.toList()),
         plist.config);
   }
 
   @GET
   @Path("/{id}")
-  public SightEventEventRO get(@PathParam("id") Long id) {
-    return new SightEventEventRO(sightEventService.get(id));
+  public SightEventEventEventRO get(@PathParam("id") Long id) {
+    return new SightEventEventEventRO(sightEventService.get(id));
   }
 }
