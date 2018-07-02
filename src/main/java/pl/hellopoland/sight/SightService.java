@@ -183,6 +183,7 @@ public class SightService extends ServiceSuperclass {
     sightDTO.description = sight.getDescription();
     sightDTO.mainImage = sight.getMainImage() != null ? createImageDTO(sight.getMainImage()) : null;
     sightDTO.sightEventDefinitions = sight.getSightEvents().stream()
+        .filter(SightEvent::isActive)
         .map(this::createSightEventDTO)
         .collect(toList());
 

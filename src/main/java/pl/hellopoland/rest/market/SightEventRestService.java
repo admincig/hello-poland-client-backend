@@ -41,6 +41,7 @@ public class SightEventRestService {
   @POST
   @Path("/search")
   public PagedCollection search(SightsPagedCollectionConfig config) {
+    config.onlyActive();
     PagedEntityCollection<SightEvent> plist = sightEventService.getList(config);
     return new PagedCollection(
         plist.items.stream().map(SightEventEventOnListingRO::new).collect(Collectors.toList()),
