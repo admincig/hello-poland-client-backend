@@ -165,6 +165,7 @@ public class SightEventService extends ServiceSuperclass {
 
     sightEvent.setPartner(partner);
     em.persist(sightEvent);
+    em.flush();
     logger.log(Logger.Level.INFO, "Saved new sight: " + sightEvent.getName());
 
     return sightEvent;
