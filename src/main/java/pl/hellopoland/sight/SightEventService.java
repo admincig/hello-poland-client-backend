@@ -9,6 +9,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.ServiceSuperclass;
 import pl.hellopoland.config.SightsPagedCollectionConfig;
+import pl.hellopoland.dto.Location;
 import pl.hellopoland.dto.Push;
 import pl.hellopoland.dto.SightEventDefinition;
 import pl.hellopoland.image.Image;
@@ -149,16 +150,11 @@ public class SightEventService extends ServiceSuperclass {
     sightEvent.setHptId(sightEventDTO.id);
 
     if (sightEventDTO.location != null) {
-      SightLocation location = new SightLocation();
+      SightLocation sightLocation = new SightLocation();
 
-      location.setLatitude(sightEventDTO.location.latitude);
-      location.setLongitude(sightEventDTO.location.longitude);
-      location.setStreet(sightEventDTO.location.street);
-      location.setZipCode(sightEventDTO.location.zipCode);
-      location.setCity(sightEventDTO.location.city);
-      location.setCountry(sightEventDTO.location.country);
+      fillInLocationData(sightLocation, sightEventDTO.location);
 
-      sightEvent.setLocation(location);
+      sightEvent.setLocation(sightLocation);
     }
 
     sightEvent.generateRandomScore();
@@ -190,8 +186,7 @@ public class SightEventService extends ServiceSuperclass {
     sightEvent.setSight(sight);
   }
 
-
-  public void update(SightEvent sightEvent, SightEventDefinition sightEventDTO) {
+  private void update(SightEvent sightEvent, SightEventDefinition sightEventDTO) {
     sightEvent.setName(sightEventDTO.name);
     sightEvent.setDate(sightEventDTO.date);
     sightEvent.setAvailableTicketsNumber(sightEventDTO.availableTicketsNumber);
@@ -201,5 +196,21 @@ public class SightEventService extends ServiceSuperclass {
     sightEvent.setEmail(sightEventDTO.email);
     sightEvent.setPhone(sightEventDTO.phone);
     sightEvent.setHptId(sightEventDTO.id);
+
+    if (sightEventDTO.location != null) {
+      if (sightEvent.getLocation() == null) {
+        sightEvent.setLocation(new SightLocation());
+      }
+
+    }
+  }
+
+  private void fillInLocationData(SightLocation sightLocation, Location location) {
+    sightLocation.setLatitude(location.latitude);
+    sightLocation.setLongitude(location.longitude);
+    sightLocation.setStreet(location.street);
+    sightLocation.setZipCode(location.zipCode);
+    sightLocation.setCity(location.city);
+    sightLocation.setCountry(location.country);
   }
 }
