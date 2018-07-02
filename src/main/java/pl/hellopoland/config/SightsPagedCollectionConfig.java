@@ -17,4 +17,8 @@ public class SightsPagedCollectionConfig extends PagedCollectionConfig<SightEven
   public void setName(String name) {
     addCondition("name", name, "e.name=:name");
   }
+
+  public void onlyActive() {
+    addCondition("active", true, "e.active=:active");
+  }
 }

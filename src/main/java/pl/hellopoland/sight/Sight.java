@@ -1,9 +1,11 @@
 package pl.hellopoland.sight;
 
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import pl.hellopoland.ModelSuperclass;
 import pl.hellopoland.image.Image;
 import pl.hellopoland.partner.Partner;
@@ -34,6 +36,9 @@ public class Sight extends ModelSuperclass {
   private Partner partner;
 
   private boolean active = true;
+
+  @OneToMany(mappedBy = "sight")
+  private List<SightEvent> sightEvents;
 
   public Sight() {
   }
@@ -108,5 +113,13 @@ public class Sight extends ModelSuperclass {
 
   public void setPartner(Partner partner) {
     this.partner = partner;
+  }
+
+  public List<SightEvent> getSightEvents() {
+    return sightEvents;
+  }
+
+  public void setSightEvents(List<SightEvent> sightEvents) {
+    this.sightEvents = sightEvents;
   }
 }

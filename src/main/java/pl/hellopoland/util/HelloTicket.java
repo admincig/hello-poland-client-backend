@@ -1,5 +1,7 @@
 package pl.hellopoland.util;
 
+import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
@@ -17,8 +19,10 @@ import javax.json.bind.JsonbBuilder;
 import pl.hellopoland.dto.SightEventDefinition;
 import pl.hellopoland.dto.booking.Booking;
 import pl.hellopoland.dto.booking.Ticket;
+import pl.hellopoland.exception.conflict.CannotDeleteSightEventFromExternalSystemException;
 import pl.hellopoland.order.OrderDetails;
 import pl.hellopoland.order.OrderEntry;
+import pl.hellopoland.sight.SightEvent;
 
 public class HelloTicket {
 
@@ -45,7 +49,8 @@ public class HelloTicket {
     booking.ticketBookings = ticketBookings;
     var json = JsonbBuilder.create().toJson(booking);
     try {
-      var resp = post("/v1/bookings", json);
+      String authToken = "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.";
+      var resp = post("/v1/bookings", json, authToken);
       String serialNumber = resp.getString("serialNumber");
       boolean serialNumberSetAlready = false;
       JsonArray tickets = resp.getJsonArray("tickets");
@@ -72,7 +77,8 @@ public class HelloTicket {
 
   public JsonObject confirm(String serialNumber, List<OrderEntry> orderEntries) {
     try {
-      var resp = put("/v1/bookings/buy/" + serialNumber, null);
+      String authToken = "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.";
+      var resp = put("/v1/bookings/buy/" + serialNumber, null, authToken);
       JsonArray tickets = resp.getJsonArray("tickets");
       for (var oe : orderEntries) {
         for (var iter = tickets.iterator(); iter.hasNext(); ) {
@@ -92,11 +98,14 @@ public class HelloTicket {
     }
   }
 
-  public JsonObject addSightEvent(SightEventDefinition sightEvent) {
+  public SightEventDefinition addSightEvent(SightEventDefinition sightEvent,
+      String partnerAuthToken) {
     String sightEventJson = JsonbBuilder.create().toJson(sightEvent);
 
     try {
-      return post("/v1/sight-events", sightEventJson);
+      return JsonbBuilder.create()
+          .fromJson(post("/v1/sight-events", sightEventJson, partnerAuthToken).toString(),
+              SightEventDefinition.class);
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -104,14 +113,36 @@ public class HelloTicket {
     return null;
   }
 
-  private JsonObject post(String path, String json) throws IOException {
+  public void deleteSightEvent(SightEvent sightEvent, String partnerAuthToken) {
+    try {
+      delete("/v1/sight-events/" + sightEvent.getHptId(), partnerAuthToken);
+    } catch (IOException e) {
+      throw new CannotDeleteSightEventFromExternalSystemException();
+    }
+  }
+
+  public SightEventDefinition updateSightEvent(SightEventDefinition sightEvent,
+      String partnerAuthToken) {
+    String sightEventJson = JsonbBuilder.create().toJson(sightEvent);
+
+    try {
+      return JsonbBuilder.create().fromJson(
+          put("/v1/sight-events/" + sightEvent.id, sightEventJson, partnerAuthToken).toString(),
+          SightEventDefinition.class);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    return null;
+  }
+
+  private JsonObject post(String path, String json, String authToken) throws IOException {
     URL url = new URL(this.url + path);
     var conn = url.openConnection();
     conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
     logger.log(System.Logger.Level.INFO,
         "Sending POST request to url: " + url + " with body: " + json);
-    conn.setRequestProperty("Authorization",
-        "Bearer eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.");
+    conn.setRequestProperty("Authorization", "Bearer " + authToken);
     conn.setDoOutput(true);
     var os = conn.getOutputStream();
     PrintWriter printWriter = new PrintWriter(os);
@@ -123,18 +154,21 @@ public class HelloTicket {
     return resp;
   }
 
-  private JsonObject put(String path, JsonObject json) throws IOException {
+  private JsonObject put(String path, String json, String authToken) throws IOException {
     URL url = new URL(this.url + path);
     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
     logger.log(System.Logger.Level.INFO,
         "Sending PUT request to url: " + url + " with body: " + json);
     conn.setRequestMethod("PUT");
     conn.setRequestProperty("Authorization",
-        "Bearer eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.");
+        "Bearer " + authToken);
     if (json != null) {
       conn.setDoOutput(true);
       var os = conn.getOutputStream();
-      Json.createWriter(os).writeObject(json);
+      PrintWriter printWriter = new PrintWriter(os);
+      printWriter.append(json);
+      printWriter.close();
     }
     var is = conn.getInputStream();
     var resp = Json.createReader(is).readObject();
@@ -142,4 +176,22 @@ public class HelloTicket {
     return resp;
   }
 
+  private void delete(String path, String authToken) throws IOException {
+    URL url = new URL(this.url + path);
+    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+    logger.log(System.Logger.Level.INFO,
+        "Sending DELETE request to url: " + url);
+    conn.setRequestMethod("DELETE");
+    conn.setRequestProperty("Authorization", "Bearer " + authToken);
+    conn.setDoOutput(true);
+    conn.connect();
+    var is = conn.getInputStream();
+    int responseCode = conn.getResponseCode();
+    logger.log(System.Logger.Level.INFO, "Server responded with code: " + responseCode);
+
+    if (responseCode != NO_CONTENT.getStatusCode()) {
+      throw new CannotDeleteSightEventFromExternalSystemException();
+    }
+  }
 }

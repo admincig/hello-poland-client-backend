@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 import pl.hellopoland.sight.SightEvent;
 
-public class SightEventEventRO extends SightEventOnListingRO {
+public class SightEventEventEventRO extends SightEventEventOnListingRO {
 
   public String lead;
   public String score;
@@ -14,7 +14,7 @@ public class SightEventEventRO extends SightEventOnListingRO {
   public Collection<OpeningHoursRO> openingHours;
   public Collection<AgreementRO> agreements;
 
-  public SightEventEventRO(SightEvent s) {
+  public SightEventEventEventRO(SightEvent s) {
     super(s);
     this.lead = s.getLead();
     this.score = String.format("%.1f", s.getScore());

@@ -15,4 +15,12 @@ public class PartnerService extends ServiceSuperclass {
         .setParameter("email", email)
         .getSingleResult();
   }
+
+  public Partner findByToken(String token) {
+    return em.createQuery(
+        "select partner from Partner partner where partner.hptToken=:token",
+        Partner.class)
+        .setParameter("token", token)
+        .getSingleResult();
+  }
 }

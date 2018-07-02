@@ -1,10 +1,13 @@
 package pl.hellopoland.partner;
 
 import java.util.List;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
 import pl.hellopoland.ModelSuperclass;
 import pl.hellopoland.sight.Sight;
+import pl.hellopoland.sight.SightEvent;
 import pl.hellopoland.user.User;
 
 @Entity
@@ -12,13 +15,22 @@ public class Partner extends ModelSuperclass {
 
   private static final long serialVersionUID = 6118414827783500940L;
 
+  @NotNull
+  @Column(nullable = false)
   private String name;
+
+  @NotNull
+  @Column(nullable = false)
+  private String hptToken;
 
   @OneToMany(mappedBy = "partner")
   private List<User> users;
 
   @OneToMany(mappedBy = "partner")
   private List<Sight> sight;
+
+  @OneToMany(mappedBy = "partner")
+  private List<SightEvent> sightEvents;
 
   public String getName() {
     return name;
@@ -42,5 +54,13 @@ public class Partner extends ModelSuperclass {
 
   public void setSight(List<Sight> sight) {
     this.sight = sight;
+  }
+
+  public String getHptToken() {
+    return hptToken;
+  }
+
+  public void setHptToken(String hptToken) {
+    this.hptToken = hptToken;
   }
 }

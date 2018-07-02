@@ -73,7 +73,6 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
   public AuthenticationStatus validateRequest(HttpServletRequest request,
       HttpServletResponse response, HttpMessageContext context) {
     AuthenticationStatus authenticationStatus = null;
-
     String authorizationToken = extractToken(context);
 
     if (isAuthRequest(request)) {

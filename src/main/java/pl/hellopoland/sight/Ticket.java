@@ -13,13 +13,20 @@ public class Ticket extends ModelSuperclass {
 
   @NotNull
   private String name;
+
   @NotNull
   private Integer price;
+
   @ManyToOne(optional = false)
   private SightEvent sightEvent;
+
   @NotNull
   private boolean predefinedDate;
+
   private Date date;
+
+  private DateType dateType;
+
   private Long externalId;
 
   public String getName() {
@@ -70,4 +77,11 @@ public class Ticket extends ModelSuperclass {
     this.externalId = externalId;
   }
 
+  public DateType getDateType() {
+    return dateType;
+  }
+
+  public void setDateType(DateType dateType) {
+    this.dateType = dateType;
+  }
 }
