@@ -43,14 +43,14 @@ public class SightEventRestService {
   }
 
   @POST
-  public void addToHpt(SightEventDefinition sightEvent) {
-    sightEventService.addToHpt(sightEvent, currentUser);
+  public Response addToHpt(SightEventDefinition sightEvent) {
+    return Response.ok(sightEventService.addToHpt(sightEvent, currentUser)).build();
   }
 
   @PUT
   @Path("/{id}")
-  public void updatedInHpt(@PathParam("id") Long id, SightEventDefinition sightEvent) {
-    sightEventService.updateInHpt(id, sightEvent, currentUser);
+  public Response updatedInHpt(@PathParam("id") Long id, SightEventDefinition sightEvent) {
+    return Response.ok(sightEventService.updateInHpt(id, sightEvent, currentUser)).build();
   }
 
   @POST

@@ -84,7 +84,8 @@ public class SightEventService extends ServiceSuperclass {
     });
   }
 
-  public void addToHpt(SightEventDefinition sightEventDTO, CurrentUser currentUser) {
+  public SightEventDefinition addToHpt(SightEventDefinition sightEventDTO,
+      CurrentUser currentUser) {
     Partner partner = partnerService.findByUserEmail(currentUser.getEmail());
 
     Portal hpt = getPortal("Hello Ticket Cloud");
@@ -95,6 +96,8 @@ public class SightEventService extends ServiceSuperclass {
         .addSightEvent(sightEventDTO, partner.getHptToken());
 
     createSightEvent(sightEventAddedToHpt, partner);
+
+    return sightEventAddedToHpt;
   }
 
   public void delete(Long sightEventId, CurrentUser currentUser) {
@@ -113,7 +116,7 @@ public class SightEventService extends ServiceSuperclass {
     sightEvent.setActive(false);
   }
 
-  public void updateInHpt(Long sightEventId, SightEventDefinition sightEventDTO,
+  public SightEventDefinition updateInHpt(Long sightEventId, SightEventDefinition sightEventDTO,
       CurrentUser currentUser) {
     SightEvent sightEvent = get(sightEventId);
     Partner partner = partnerService.findByUserEmail(currentUser.getEmail());
@@ -126,6 +129,8 @@ public class SightEventService extends ServiceSuperclass {
         .updateSightEvent(sightEventDTO, partner.getHptToken());
 
     update(sightEvent, sightEventUpdatedInHpt);
+
+    return sightEventUpdatedInHpt;
   }
 
   private SightEvent createSightEvent(SightEventDefinition sightEventDTO, Partner partner) {
