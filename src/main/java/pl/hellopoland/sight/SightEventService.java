@@ -202,6 +202,7 @@ public class SightEventService extends ServiceSuperclass {
         sightEvent.setLocation(new SightLocation());
       }
 
+      fillInLocationData(sightEvent.getLocation(), sightEventDTO.location);
     }
   }
 
