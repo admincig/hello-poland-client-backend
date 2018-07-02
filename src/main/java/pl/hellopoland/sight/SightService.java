@@ -12,6 +12,7 @@ import pl.hellopoland.dto.DateType;
 import pl.hellopoland.dto.Location;
 import pl.hellopoland.dto.SightEventDefinition;
 import pl.hellopoland.dto.TicketDefinition;
+import pl.hellopoland.exception.ExceptionFactory;
 import pl.hellopoland.image.Image;
 import pl.hellopoland.image.ImageService;
 import pl.hellopoland.partner.Partner;
@@ -30,6 +31,9 @@ public class SightService extends ServiceSuperclass {
 
   @Inject
   private SightEventService sightEventService;
+
+  @Inject
+  private ExceptionFactory exceptionFactory;
 
   public pl.hellopoland.dto.Sight add(pl.hellopoland.dto.Sight sightDTO, CurrentUser currentUser) {
     Sight sight = new Sight();
@@ -86,7 +90,21 @@ public class SightService extends ServiceSuperclass {
         .setParameter("sightId", sightId)
         .getSingleResult();
 
-    sight.setActive(false);
+    if (hasActiveSightEvents(sight.getSightEvents())) {
+      throw exceptionFactory.sightHasAssignedSightEventsException();
+    } else {
+      sight.setActive(false);
+    }
+  }
+
+  private boolean hasActiveSightEvents(List<SightEvent> sightEvents) {
+    for (SightEvent sightEvent : sightEvents) {
+      if (sightEvent.isActive()) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   private void fillInSightWithDTOData(Sight sight, pl.hellopoland.dto.Sight sightDTO,

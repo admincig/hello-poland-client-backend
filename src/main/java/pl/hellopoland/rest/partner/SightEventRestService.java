@@ -5,14 +5,16 @@ import javax.annotation.security.PermitAll;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import pl.hellopoland.config.SightsPagedCollectionConfig;
-import pl.hellopoland.dto.Push;
 import pl.hellopoland.dto.SightEventDefinition;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.rest.dto.SightEventEventEventRO;
@@ -41,14 +43,14 @@ public class SightEventRestService {
   }
 
   @POST
-  @Path("/add")
   public void addToHpt(SightEventDefinition sightEvent) {
     sightEventService.addToHpt(sightEvent, currentUser);
   }
 
-  @POST
-  public void savePush(Push push) {
-    sightEventService.savePush(push);
+  @PUT
+  @Path("/{id}")
+  public void updatedInHpt(@PathParam("id") Long id, SightEventDefinition sightEvent) {
+    sightEventService.updateInHpt(id, sightEvent, currentUser);
   }
 
   @POST
@@ -64,5 +66,13 @@ public class SightEventRestService {
   @Path("/{id}")
   public SightEventEventEventRO get(@PathParam("id") Long id) {
     return new SightEventEventEventRO(sightEventService.get(id));
+  }
+
+  @DELETE
+  @Path("/{id}")
+  public Response delete(@PathParam("id") Long id) {
+    sightEventService.delete(id, currentUser);
+
+    return Response.noContent().build();
   }
 }

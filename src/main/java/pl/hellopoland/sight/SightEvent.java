@@ -64,6 +64,11 @@ public class SightEvent extends ModelSuperclass {
   @ManyToOne
   private Partner partner;
 
+  @NotNull
+  private Long hptId;
+
+  private boolean active = true;
+
   public String getName() {
     return name;
   }
@@ -210,5 +215,21 @@ public class SightEvent extends ModelSuperclass {
 
   public void setDuration(Integer duration) {
     this.duration = duration;
+  }
+
+  public boolean isActive() {
+    return active;
+  }
+
+  public void setActive(boolean active) {
+    this.active = active;
+  }
+
+  public Long getHptId() {
+    return hptId;
+  }
+
+  public void setHptId(Long hptId) {
+    this.hptId = hptId;
   }
 }

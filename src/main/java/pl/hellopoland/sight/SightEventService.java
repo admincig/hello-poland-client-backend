@@ -78,74 +78,97 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public void savePush(Push push) {
-    Portal hpt = getPortal("Hello Ticket Cloud");
+    Partner partner = partnerService.findByToken(push.secret);
     push.sightEvents.forEach(sdto -> {
-      var sbo = new SightEvent();
-
-      sbo.setName(sdto.name);
-      sbo.setDate(sdto.date);
-      sbo.setAvailableTicketsNumber(sdto.availableTicketsNumber);
-      sbo.setMainImage(iService.downloadImage(sdto.mainImageUrl));
-      sbo.setPortal(hpt);
-      sbo.setLead(sdto.lead);
-      sbo.setDescription(sdto.description);
-      sbo.setEmail(sdto.email);
-      sbo.setPhone(sdto.phone);
-
-      if (sdto.location != null) {
-        SightLocation location = new SightLocation();
-
-        location.setLatitude(sdto.location.latitude);
-        location.setLongitude(sdto.location.longitude);
-        location.setStreet(sdto.location.street);
-        location.setZipCode(sdto.location.zipCode);
-        location.setCity(sdto.location.city);
-        location.setCountry(sdto.location.country);
-
-        sbo.setLocation(location);
-      }
-
-      sbo.generateRandomScore();
-
-      if (sdto.sightId != null) {
-        assignSightToSightEvent(sbo, sdto.sightId);
-      }
-
-      if (push.secret != null) {
-        sbo.setPartner(partnerService.findByToken(push.secret));
-      }
-
-      em.persist(sbo);
-      logger.log(Logger.Level.INFO, "Saved new sight: " + sbo.getName());
-
-      sdto.tickets.forEach(tdto -> {
-        var tbo = new Ticket();
-        tbo.setSightEvent(sbo);
-        tbo.setExternalId(tdto.id);
-        tbo.setName(tdto.name);
-        tbo.setPredefinedDate(tdto.predefinedDate);
-        tbo.setPrice(tdto.price);
-        em.persist(tbo);
-        logger
-            .log(Logger.Level.INFO, "Saved new ticket: " + sbo.getName() + ": " + tbo.getName());
-      });
-
-      if (sdto.tickets != null) {
-        em.refresh(sbo);
-        sbo.setMinPrice(sbo.getTickets().stream().mapToInt(Ticket::getPrice).min().orElse(0));
-      }
+      createSightEvent(sdto, partner);
     });
   }
 
-  public void addToHpt(SightEventDefinition sightEvent, CurrentUser currentUser) {
+  public void addToHpt(SightEventDefinition sightEventDTO, CurrentUser currentUser) {
     Partner partner = partnerService.findByUserEmail(currentUser.getEmail());
 
     Portal hpt = getPortal("Hello Ticket Cloud");
 
     HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
 
-    helloTicket.addSightEvent(sightEvent, partner.getHptToken());
+    SightEventDefinition sightEventAddedToHpt = helloTicket
+        .addSightEvent(sightEventDTO, partner.getHptToken());
+
+    createSightEvent(sightEventAddedToHpt, partner);
   }
+
+  public void delete(Long sightEventId, CurrentUser currentUser) {
+    Partner partner = partnerService.findByUserEmail(currentUser.getEmail());
+    Portal hpt = getPortal("Hello Ticket Cloud");
+    HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
+
+    SightEvent sightEvent = em
+        .createQuery("from SightEvent sightEvent where sightEvent.id=:sightEventId",
+            SightEvent.class)
+        .setParameter("sightEventId", sightEventId)
+        .getSingleResult();
+
+    helloTicket.deleteSightEvent(sightEvent, partner.getHptToken());
+
+    sightEvent.setActive(false);
+  }
+
+  public void updateInHpt(Long sightEventId, SightEventDefinition sightEventDTO,
+      CurrentUser currentUser) {
+    SightEvent sightEvent = get(sightEventId);
+    Partner partner = partnerService.findByUserEmail(currentUser.getEmail());
+    Portal hpt = getPortal("Hello Ticket Cloud");
+    HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
+
+    sightEventDTO.id = sightEvent.getHptId();
+
+    SightEventDefinition sightEventUpdatedInHpt = helloTicket
+        .updateSightEvent(sightEventDTO, partner.getHptToken());
+
+    update(sightEvent, sightEventUpdatedInHpt);
+  }
+
+  private SightEvent createSightEvent(SightEventDefinition sightEventDTO, Partner partner) {
+    Portal hpt = getPortal("Hello Ticket Cloud");
+    SightEvent sightEvent = new SightEvent();
+
+    sightEvent.setName(sightEventDTO.name);
+    sightEvent.setDate(sightEventDTO.date);
+    sightEvent.setAvailableTicketsNumber(sightEventDTO.availableTicketsNumber);
+    sightEvent.setMainImage(iService.downloadImage(sightEventDTO.mainImageUrl));
+    sightEvent.setPortal(hpt);
+    sightEvent.setLead(sightEventDTO.lead);
+    sightEvent.setDescription(sightEventDTO.description);
+    sightEvent.setEmail(sightEventDTO.email);
+    sightEvent.setPhone(sightEventDTO.phone);
+    sightEvent.setHptId(sightEventDTO.id);
+
+    if (sightEventDTO.location != null) {
+      SightLocation location = new SightLocation();
+
+      location.setLatitude(sightEventDTO.location.latitude);
+      location.setLongitude(sightEventDTO.location.longitude);
+      location.setStreet(sightEventDTO.location.street);
+      location.setZipCode(sightEventDTO.location.zipCode);
+      location.setCity(sightEventDTO.location.city);
+      location.setCountry(sightEventDTO.location.country);
+
+      sightEvent.setLocation(location);
+    }
+
+    sightEvent.generateRandomScore();
+
+    if (sightEventDTO.sightId != null) {
+      assignSightToSightEvent(sightEvent, sightEventDTO.sightId);
+    }
+
+    sightEvent.setPartner(partner);
+    em.persist(sightEvent);
+    logger.log(Logger.Level.INFO, "Saved new sight: " + sightEvent.getName());
+
+    return sightEvent;
+  }
+
 
   private Portal getPortal(String name) {
     return em.createQuery("from Portal where name=:name", Portal.class).setParameter("name", name)
@@ -160,5 +183,18 @@ public class SightEventService extends ServiceSuperclass {
         .get();
 
     sightEvent.setSight(sight);
+  }
+
+
+  public void update(SightEvent sightEvent, SightEventDefinition sightEventDTO) {
+    sightEvent.setName(sightEventDTO.name);
+    sightEvent.setDate(sightEventDTO.date);
+    sightEvent.setAvailableTicketsNumber(sightEventDTO.availableTicketsNumber);
+    sightEvent.setMainImage(iService.downloadImage(sightEventDTO.mainImageUrl));
+    sightEvent.setLead(sightEventDTO.lead);
+    sightEvent.setDescription(sightEventDTO.description);
+    sightEvent.setEmail(sightEventDTO.email);
+    sightEvent.setPhone(sightEventDTO.phone);
+    sightEvent.setHptId(sightEventDTO.id);
   }
 }
