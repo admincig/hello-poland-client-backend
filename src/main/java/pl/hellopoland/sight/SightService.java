@@ -187,6 +187,10 @@ public class SightService extends ServiceSuperclass {
         .map(this::createSightEventDTO)
         .collect(toList());
 
+    sightDTO.sightLocation = ofNullable(sight.getSightLocation())
+        .map(this::createSightLocationDTO)
+        .orElse(null);
+
     return sightDTO;
   }
 

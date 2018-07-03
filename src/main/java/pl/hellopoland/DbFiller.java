@@ -8,11 +8,15 @@ import javax.ejb.DependsOn;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
+import pl.hellopoland.dto.Image;
+import pl.hellopoland.dto.Location;
 import pl.hellopoland.partner.Partner;
+import pl.hellopoland.security.dto.CurrentUser;
 import pl.hellopoland.security.password.PasswordEncoder;
 import pl.hellopoland.sight.Portal;
 import pl.hellopoland.sight.Portal.Type;
 import pl.hellopoland.sight.SightEventService;
+import pl.hellopoland.sight.SightService;
 import pl.hellopoland.user.User;
 import pl.hellopoland.user.UserRole;
 
@@ -26,6 +30,9 @@ public class DbFiller extends ServiceSuperclass {
 
   @Inject
   private PasswordEncoder passwordEncoder;
+
+  @Inject
+  private SightService sightService;
 
   @PostConstruct
   public void fillDb() {
@@ -43,17 +50,70 @@ public class DbFiller extends ServiceSuperclass {
   }
 
   private void createUsers() {
-    createPartner("Hello Poland",
+    User userHelloPoland = createPartner("Hello Poland",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.");
-    createPartner("Zoo",
+    User userZoo = createPartner("Zoo",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiJDOTU1NTI0MDk2REU0MjlEQjBGODM1NTA1RUI5MzAxNzkzQzE4NEJBQzM2NTFBNzI2MDFCRDNGMUFEQTkyQzAzIn0.");
     createPartner("Kolejkowo",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiI0MDc5MTkyRkI2NTQyQTYyRjc3QTcwNDZDRDU1QkJGNUM5NDAzNkE0MjRFRDI4RTM0MEYwODNCRDE1MDRFODZBIn0.");
     createPartner("Statek",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiIyODQyODcyRThEQ0EzMENFNkJBOTk5REMzQjBGODJFNUNFOTNFNzA5RTJEMjlGMEQ4NjFFOTU4QjMxQ0QwQzREIn0.");
+
+    createZooSight(userZoo);
+    createHelloPolandSight(userHelloPoland);
   }
 
-  private void createPartner(String partnerName, String token) {
+  private void createZooSight(User user) {
+    CurrentUser currentUser = new CurrentUser();
+    currentUser.setEmail(user.getEmail());
+
+    Image image = new Image();
+    image.ImageURL = "https://www.wroclaw.pl/files/cmsdocuments/302431/630x350/1333630762.jpg";
+
+    Location location = new Location();
+    location.city = "Poznań";
+    location.country = "Polska";
+    location.street = "Poznańska 1";
+    location.zipCode = "10-100";
+
+    pl.hellopoland.dto.Sight sight = new pl.hellopoland.dto.Sight();
+
+    sight.name = "Zoo w Poznaniu";
+    sight.lead = "Poznańskie zoo lead";
+    sight.description = "Wrocławskie zoo zaprasza na zwiedzanie description";
+    sight.mainImage = image;
+    sight.sightLocation = location;
+    sight.generalAdmission = true;
+
+    sightService.add(sight, currentUser);
+  }
+
+  private void createHelloPolandSight(User user) {
+    CurrentUser currentUser = new CurrentUser();
+    currentUser.setEmail(user.getEmail());
+
+    Image image = new Image();
+    image.ImageURL = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2Cot-jP4Z76ViaMuIzp3l2RzMo_BvsNvKDtbQsXW-zQ9UTP35";
+
+    Location location = new Location();
+    location.city = "Wrocław";
+    location.country = "Polska";
+    location.street = "Wrocławska 1";
+    location.zipCode = "50-500";
+
+    pl.hellopoland.dto.Sight sight = new pl.hellopoland.dto.Sight();
+
+    sight.name = "Wycieczki Hello Poland";
+    sight.lead = "Wyvieczka Hello Poland lead";
+    sight.description = "Hello Poland zaprasza na wycieczki description";
+    sight.mainImage = image;
+    sight.sightLocation = location;
+    sight.generalAdmission = true;
+
+    sightService.add(sight, currentUser);
+  }
+
+  private User createPartner(String partnerName, String token) {
     Partner helloPolandPartner = new Partner();
     helloPolandPartner.setName(partnerName + " Partner");
     helloPolandPartner.setHptToken(token);
@@ -72,6 +132,8 @@ public class DbFiller extends ServiceSuperclass {
     user.setPartner(helloPolandPartner);
 
     em.persist(user);
+
+    return user;
   }
 
 
