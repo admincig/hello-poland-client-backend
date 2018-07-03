@@ -15,7 +15,7 @@ import pl.hellopoland.ServiceSuperclass;
 @Stateless
 public class ImageService extends ServiceSuperclass {
 
-  public Image storeImage(InputStream is, String extension) {
+  public Image storeImage(InputStream is, String extension, String url) {
     String hash = UUID.randomUUID().toString().replace('-', 'x');
     String path = properties.getProperty("dms.root.path") + File.separator + hash.substring(0, 1)
         + File.separator + hash.substring(1, 2) + File.separator;
@@ -41,6 +41,7 @@ public class ImageService extends ServiceSuperclass {
     image.setPath(path);
     image.setHash(hash);
     image.setExtension(extension);
+    image.setImageURL(url);
     em.persist(image);
     return image;
   }
@@ -65,7 +66,7 @@ public class ImageService extends ServiceSuperclass {
     if (url != null) {
       try {
         logger.log(Logger.Level.INFO, "Downloading image " + url);
-        im = storeImage(new URL(url).openConnection().getInputStream(), "jpg");
+        im = storeImage(new URL(url).openConnection().getInputStream(), "jpg", url);
       } catch (Exception e) {
         logger.log(Logger.Level.WARNING, e.getMessage());
       }
