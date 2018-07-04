@@ -1,7 +1,6 @@
 package pl.hellopoland.util;
 
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
@@ -49,7 +48,8 @@ public class HelloTicket {
     booking.ticketBookings = ticketBookings;
     var json = JsonbBuilder.create().toJson(booking);
     try {
-      String authToken = "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.";
+      String authToken =
+          "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.";
       var resp = post("/v1/bookings", json, authToken);
       String serialNumber = resp.getString("serialNumber");
       boolean serialNumberSetAlready = false;
@@ -59,7 +59,7 @@ public class HelloTicket {
           oe.getDateEntry().getSightEntry().setSerialNumber(serialNumber);
         }
         oe.getDateEntry().getSightEntry().setSerialNumber(serialNumber);
-        for (var iter = tickets.iterator(); iter.hasNext(); ) {
+        for (var iter = tickets.iterator(); iter.hasNext();) {
           JsonObject ticket = (JsonObject) iter.next();
           if (oe.getExternalDefinitionId().intValue() == ticket.getInt("definitionId")
               && oe.getDateEntry().getDate().compareTo(df.parse(ticket.getString("date"))) == 0) {
@@ -77,11 +77,12 @@ public class HelloTicket {
 
   public JsonObject confirm(String serialNumber, List<OrderEntry> orderEntries) {
     try {
-      String authToken = "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.";
+      String authToken =
+          "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.";
       var resp = put("/v1/bookings/buy/" + serialNumber, null, authToken);
       JsonArray tickets = resp.getJsonArray("tickets");
       for (var oe : orderEntries) {
-        for (var iter = tickets.iterator(); iter.hasNext(); ) {
+        for (var iter = tickets.iterator(); iter.hasNext();) {
           JsonObject ticket = (JsonObject) iter.next();
           Date date1 = df.parse(ticket.getString("date"));
           Date date2 = oe.getDateEntry().getDate();
@@ -103,9 +104,9 @@ public class HelloTicket {
     String sightEventJson = JsonbBuilder.create().toJson(sightEvent);
 
     try {
-      return JsonbBuilder.create()
-          .fromJson(post("/v1/sight-events", sightEventJson, partnerAuthToken).toString(),
-              SightEventDefinition.class);
+      return JsonbBuilder.create().fromJson(
+          post("/v1/sight-events", sightEventJson, partnerAuthToken).toString(),
+          SightEventDefinition.class);
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -161,8 +162,7 @@ public class HelloTicket {
     logger.log(System.Logger.Level.INFO,
         "Sending PUT request to url: " + url + " with body: " + json);
     conn.setRequestMethod("PUT");
-    conn.setRequestProperty("Authorization",
-        "Bearer " + authToken);
+    conn.setRequestProperty("Authorization", "Bearer " + authToken);
     if (json != null) {
       conn.setDoOutput(true);
       var os = conn.getOutputStream();
@@ -180,8 +180,7 @@ public class HelloTicket {
     URL url = new URL(this.url + path);
     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
     conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-    logger.log(System.Logger.Level.INFO,
-        "Sending DELETE request to url: " + url);
+    logger.log(System.Logger.Level.INFO, "Sending DELETE request to url: " + url);
     conn.setRequestMethod("DELETE");
     conn.setRequestProperty("Authorization", "Bearer " + authToken);
     conn.setDoOutput(true);
@@ -189,6 +188,7 @@ public class HelloTicket {
     var is = conn.getInputStream();
     int responseCode = conn.getResponseCode();
     logger.log(System.Logger.Level.INFO, "Server responded with code: " + responseCode);
+    is.close();
 
     if (responseCode != NO_CONTENT.getStatusCode()) {
       throw new CannotDeleteSightEventFromExternalSystemException();

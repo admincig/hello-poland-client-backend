@@ -19,9 +19,9 @@ import pl.hellopoland.dto.SightEventDefinition;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.rest.dto.SightEventEventEventRO;
 import pl.hellopoland.rest.dto.SightEventEventOnListingRO;
-import pl.hellopoland.security.dto.CurrentUser;
 import pl.hellopoland.sight.SightEvent;
 import pl.hellopoland.sight.SightEventService;
+import pl.hellopoland.util.HplMapper;
 import pl.hellopoland.util.PagedEntityCollection;
 
 @Path("/partner/sight-events")
@@ -33,9 +33,6 @@ public class SightEventRestService {
   @Inject
   SightEventService sightEventService;
 
-  @Inject
-  private CurrentUser currentUser;
-
   @GET
   @PermitAll
   public PagedCollection getList() {
@@ -43,14 +40,14 @@ public class SightEventRestService {
   }
 
   @POST
-  public Response addToHpt(SightEventDefinition sightEvent) {
-    return Response.ok(sightEventService.addToHpt(sightEvent, currentUser)).build();
+  public Response create(SightEventDefinition dto) {
+    return Response.ok(HplMapper.getDTO(sightEventService.create(dto, null))).build();
   }
 
   @PUT
   @Path("/{id}")
-  public Response updatedInHpt(@PathParam("id") Long id, SightEventDefinition sightEvent) {
-    return Response.ok(sightEventService.updateInHpt(id, sightEvent, currentUser)).build();
+  public Response update(@PathParam("id") Long id, SightEventDefinition dto) {
+    return Response.ok(HplMapper.getDTO(sightEventService.update(id, dto))).build();
   }
 
   @POST
@@ -71,9 +68,7 @@ public class SightEventRestService {
 
   @DELETE
   @Path("/{id}")
-  public Response delete(@PathParam("id") Long id) {
-    sightEventService.delete(id, currentUser);
-
-    return Response.noContent().build();
+  public void delete(@PathParam("id") Long id) {
+    sightEventService.delete(id);
   }
 }

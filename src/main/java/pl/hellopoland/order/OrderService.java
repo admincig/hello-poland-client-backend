@@ -3,7 +3,6 @@ package pl.hellopoland.order;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-
 import java.lang.System.Logger;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -109,9 +108,9 @@ public class OrderService extends ServiceSuperclass {
     em.refresh(o);
     logger.log(Logger.Level.INFO,
         "Checking if any of order sight entries ought to be placed in external API");
-    var groupedByPortal = o.getEntries().stream()
-        .filter(ose -> ose.getSightEvent().getPortal() != null)
-        .collect(groupingBy(ose -> ose.getSightEvent().getPortal()));
+    var groupedByPortal =
+        o.getEntries().stream().filter(ose -> ose.getSightEvent().getPortal() != null)
+            .collect(groupingBy(ose -> ose.getSightEvent().getPortal()));
     for (var entry : groupedByPortal.entrySet()) {
       Portal portal = entry.getKey();
       logger.log(Logger.Level.INFO, "Placing external order in " + portal.getName());
@@ -129,9 +128,9 @@ public class OrderService extends ServiceSuperclass {
   private void confirmInExternalAPI(Order o) {
     logger.log(Logger.Level.INFO,
         "Checking if any of order sight entries ought to be confirmed in external API");
-    var groupedByPortal = o.getEntries().stream()
-        .filter(ose -> ose.getSightEvent().getPortal() != null)
-        .collect(groupingBy(ose -> ose.getSightEvent().getPortal()));
+    var groupedByPortal =
+        o.getEntries().stream().filter(ose -> ose.getSightEvent().getPortal() != null)
+            .collect(groupingBy(ose -> ose.getSightEvent().getPortal()));
     for (var entry : groupedByPortal.entrySet()) {
       Portal portal = entry.getKey();
       logger.log(Logger.Level.INFO, "Confirming external order in " + portal.getName());
@@ -319,20 +318,6 @@ public class OrderService extends ServiceSuperclass {
   private void confirm(Order order) {
     confirmInExternalAPI(order);
     order.setStatus(Status.CONFIRMED);
-
-    // XXX Just for version 0.1. Will be deleted in further development
-    for (OrderSightEntry ose : order.getEntries()) {
-      Portal portal = ose.getSightEvent().getPortal();
-      if (portal != null && portal.getType() == Portal.Type.WOOCOMMERCE) {
-        for (OrderDateEntry ode : ose.getEntries()) {
-          for (OrderEntry oe : ode.getEntries()) {
-            for (int i = 0; i < oe.getQuantity(); i++) {
-              oe.addNumber(order.getHash());
-            }
-          }
-        }
-      }
-    }
   }
 
 }

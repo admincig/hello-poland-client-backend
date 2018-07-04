@@ -1,7 +1,6 @@
 package pl.hellopoland.rest.partner;
 
 import static javax.ws.rs.core.Response.noContent;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import javax.enterprise.context.RequestScoped;
@@ -16,7 +15,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import pl.hellopoland.dto.Sight;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.security.dto.CurrentUser;
 import pl.hellopoland.sight.SightService;
@@ -34,17 +32,14 @@ public class SightRestService {
   private CurrentUser currentUser;
 
   @POST
-  public Response add(Sight sight) throws URISyntaxException {
+  public Response add(pl.hellopoland.dto.Sight sight) throws URISyntaxException {
     return Response.created(new URI("/partner/sights/" + sight.id))
-        .entity(sightService.add(sight, currentUser))
-        .build();
+        .entity(sightService.create(sight, null)).build();
   }
 
   @GET
   public Response get() {
-    return Response
-        .ok(new PagedCollection(sightService.getAllForPartner(currentUser), null))
-        .build();
+    return Response.ok(new PagedCollection(sightService.getForPartner(currentUser), null)).build();
   }
 
   @GET
@@ -55,8 +50,8 @@ public class SightRestService {
 
   @PUT
   @Path("/{id}")
-  public Response update(@PathParam("id") Long id, Sight sight) {
-    return Response.ok(sightService.update(id, sight, currentUser)).build();
+  public Response update(@PathParam("id") Long id, pl.hellopoland.dto.Sight sight) {
+    return Response.ok(sightService.update(id, sight)).build();
   }
 
   @DELETE

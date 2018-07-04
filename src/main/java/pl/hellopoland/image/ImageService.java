@@ -9,7 +9,9 @@ import java.net.URL;
 import java.util.UUID;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
+import javax.persistence.NoResultException;
 import pl.hellopoland.ServiceSuperclass;
+import pl.hellopoland.util.Imaged;
 
 @LocalBean
 @Stateless
@@ -72,5 +74,23 @@ public class ImageService extends ServiceSuperclass {
       }
     }
     return im;
+  }
+
+  public void update(Imaged bo, String importUrl) {
+    Image boImage = bo.getMainImage();
+    Image image = getOrDownload(importUrl);
+    if (boImage == null || !boImage.getId().equals(image.getId())) {
+      bo.setMainImage(image);
+    }
+  }
+
+  private Image getOrDownload(String importUrl) {
+    try {
+      return em.createQuery("from Image where imageURL=:url", Image.class)
+          .setParameter("url", importUrl).getSingleResult();
+    } catch (NoResultException e) {
+      return downloadImage(importUrl);
+    }
+
   }
 }

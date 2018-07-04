@@ -13,7 +13,7 @@ public class SightEventEventOnListingRO extends SightEventSimpleRO {
     this.description = f.getDescription();
     this.minPrice = f.getMinPrice();
     if (f.getMainImage() != null) {
-      this.mainImage = "/images/" + f.getMainImage().getHash() + f.getMainImage().getExtension();
+      this.mainImage = f.getMainImage().getDownloadUrl();
     }
   }
 }

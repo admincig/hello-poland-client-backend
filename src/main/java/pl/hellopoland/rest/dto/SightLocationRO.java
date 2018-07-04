@@ -1,6 +1,6 @@
 package pl.hellopoland.rest.dto;
 
-import pl.hellopoland.sight.SightLocation;
+import pl.hellopoland.sight.Location;
 
 public class SightLocationRO {
 
@@ -11,7 +11,7 @@ public class SightLocationRO {
   public String city;
   public String country;
 
-  public SightLocationRO(SightLocation l) {
+  public SightLocationRO(Location l) {
     this.latitude = l.getLatitude();
     this.longitude = l.getLongitude();
     this.street = l.getStreet();

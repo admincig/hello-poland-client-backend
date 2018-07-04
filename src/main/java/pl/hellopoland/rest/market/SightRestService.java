@@ -1,5 +1,6 @@
 package pl.hellopoland.rest.market;
 
+import java.util.stream.Collectors;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -11,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.sight.SightService;
+import pl.hellopoland.util.HplMapper;
 
 @Path("/market/sights")
 @RequestScoped
@@ -23,14 +25,14 @@ public class SightRestService {
 
   @GET
   public Response get() {
-    return Response
-        .ok(new PagedCollection(sightService.get(), null))
-        .build();
+    return Response.ok(new PagedCollection(
+        sightService.getActive().stream().map(HplMapper::getDTO).collect(Collectors.toList()),
+        null)).build();
   }
 
   @GET
   @Path("/{id}")
   public Response get(@PathParam("id") Long id) {
-    return Response.ok(sightService.get(id)).build();
+    return Response.ok(HplMapper.getDTO(sightService.get(id))).build();
   }
 }

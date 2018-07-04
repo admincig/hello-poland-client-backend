@@ -1,7 +1,6 @@
 package pl.hellopoland;
 
 import static java.util.Collections.singletonList;
-
 import java.lang.System.Logger;
 import javax.annotation.PostConstruct;
 import javax.ejb.DependsOn;
@@ -11,7 +10,6 @@ import javax.inject.Inject;
 import pl.hellopoland.dto.Image;
 import pl.hellopoland.dto.Location;
 import pl.hellopoland.partner.Partner;
-import pl.hellopoland.security.dto.CurrentUser;
 import pl.hellopoland.security.password.PasswordEncoder;
 import pl.hellopoland.sight.Portal;
 import pl.hellopoland.sight.Portal.Type;
@@ -44,7 +42,7 @@ public class DbFiller extends ServiceSuperclass {
     }
 
     createPortals();
-//    runImporter();
+    // runImporter();
     createUsers();
     logger.log(Logger.Level.INFO, "dbfiller finished");
   }
@@ -64,11 +62,8 @@ public class DbFiller extends ServiceSuperclass {
   }
 
   private void createZooSight(User user) {
-    CurrentUser currentUser = new CurrentUser();
-    currentUser.setEmail(user.getEmail());
-
     Image image = new Image();
-    image.ImageURL = "https://www.wroclaw.pl/files/cmsdocuments/302431/630x350/1333630762.jpg";
+    image.original = "https://www.wroclaw.pl/files/cmsdocuments/302431/630x350/1333630762.jpg";
 
     Location location = new Location();
     location.city = "Poznań";
@@ -85,15 +80,13 @@ public class DbFiller extends ServiceSuperclass {
     sight.sightLocation = location;
     sight.generalAdmission = true;
 
-    sightService.add(sight, currentUser);
+    sightService.create(sight, user.getPartner());
   }
 
   private void createHelloPolandSight(User user) {
-    CurrentUser currentUser = new CurrentUser();
-    currentUser.setEmail(user.getEmail());
-
     Image image = new Image();
-    image.ImageURL = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2Cot-jP4Z76ViaMuIzp3l2RzMo_BvsNvKDtbQsXW-zQ9UTP35";
+    image.original =
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2Cot-jP4Z76ViaMuIzp3l2RzMo_BvsNvKDtbQsXW-zQ9UTP35";
 
     Location location = new Location();
     location.city = "Wrocław";
@@ -110,7 +103,7 @@ public class DbFiller extends ServiceSuperclass {
     sight.sightLocation = location;
     sight.generalAdmission = true;
 
-    sightService.add(sight, currentUser);
+    sightService.create(sight, user.getPartner());
   }
 
   private User createPartner(String partnerName, String token) {
@@ -124,8 +117,8 @@ public class DbFiller extends ServiceSuperclass {
     userRole.setRole("partner");
     userRole.setUser(user);
 
-    String email = partnerName.toLowerCase().replaceAll(" ", "") + "@" + partnerName.toLowerCase()
-        .replaceAll(" ", "") + ".pl";
+    String email = partnerName.toLowerCase().replaceAll(" ", "") + "@"
+        + partnerName.toLowerCase().replaceAll(" ", "") + ".pl";
     user.setEmail(email);
     user.setPassword(passwordEncoder.encode(partnerName.toLowerCase().replaceAll(" ", "")));
     user.setRoles(singletonList(userRole));
@@ -138,7 +131,7 @@ public class DbFiller extends ServiceSuperclass {
 
 
   private void runImporter() {
-    sService.runImporter();
+    sService.runWooCommerceImporter();
   }
 
 

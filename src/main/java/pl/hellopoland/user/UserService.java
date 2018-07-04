@@ -1,6 +1,5 @@
 package pl.hellopoland.user;
 
-import java.lang.System.Logger;
 import java.util.Optional;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -48,7 +47,6 @@ public class UserService extends ServiceSuperclass {
 
   public Optional<User> findByEmail(String email) {
     return em.createQuery("from User where email=:email", User.class).setParameter("email", email)
-        .getResultStream()
-        .findFirst();
+        .getResultStream().findFirst();
   }
 }

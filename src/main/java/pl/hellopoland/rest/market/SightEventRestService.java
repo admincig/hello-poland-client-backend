@@ -15,7 +15,6 @@ import pl.hellopoland.config.SightsPagedCollectionConfig;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.rest.dto.SightEventEventEventRO;
 import pl.hellopoland.rest.dto.SightEventEventOnListingRO;
-import pl.hellopoland.security.dto.CurrentUser;
 import pl.hellopoland.sight.SightEvent;
 import pl.hellopoland.sight.SightEventService;
 import pl.hellopoland.util.PagedEntityCollection;
@@ -28,9 +27,6 @@ public class SightEventRestService {
 
   @Inject
   SightEventService sightEventService;
-
-  @Inject
-  private CurrentUser currentUser;
 
   @GET
   @PermitAll

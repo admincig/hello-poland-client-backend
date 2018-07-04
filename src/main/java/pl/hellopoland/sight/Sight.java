@@ -9,9 +9,11 @@ import javax.persistence.OneToMany;
 import pl.hellopoland.ModelSuperclass;
 import pl.hellopoland.image.Image;
 import pl.hellopoland.partner.Partner;
+import pl.hellopoland.util.Imaged;
+import pl.hellopoland.util.Located;
 
 @Entity
-public class Sight extends ModelSuperclass {
+public class Sight extends ModelSuperclass implements Located, Imaged {
 
   private static final long serialVersionUID = -6821312294116712881L;
 
@@ -30,7 +32,7 @@ public class Sight extends ModelSuperclass {
   private String phone;
 
   @Embedded
-  private SightLocation sightLocation;
+  private Location location;
 
   @ManyToOne
   private Partner partner;
@@ -40,8 +42,7 @@ public class Sight extends ModelSuperclass {
   @OneToMany(mappedBy = "sight")
   private List<SightEvent> sightEvents;
 
-  public Sight() {
-  }
+  public Sight() {}
 
   public String getName() {
     return name;
@@ -67,10 +68,12 @@ public class Sight extends ModelSuperclass {
     this.description = description;
   }
 
+  @Override
   public Image getMainImage() {
     return mainImage;
   }
 
+  @Override
   public void setMainImage(Image mainImage) {
     this.mainImage = mainImage;
   }
@@ -91,12 +94,14 @@ public class Sight extends ModelSuperclass {
     this.phone = phone;
   }
 
-  public SightLocation getSightLocation() {
-    return sightLocation;
+  @Override
+  public Location getLocation() {
+    return location;
   }
 
-  public void setSightLocation(SightLocation sightLocation) {
-    this.sightLocation = sightLocation;
+  @Override
+  public void setLocation(Location sightLocation) {
+    this.location = sightLocation;
   }
 
   public boolean isActive() {

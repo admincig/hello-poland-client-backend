@@ -2,6 +2,7 @@ package pl.hellopoland.image;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import pl.hellopoland.ModelSuperclass;
@@ -19,7 +20,7 @@ public class Image extends ModelSuperclass {
   @NotNull
   private String extension;
 
-  private String ImageURL;
+  private String imageURL;
 
   public String getPath() {
     return path;
@@ -46,12 +47,16 @@ public class Image extends ModelSuperclass {
   }
 
   public String getImageURL() {
-    return ImageURL;
+    return imageURL;
   }
 
   public void setImageURL(String imageURL) {
-    ImageURL = imageURL;
+    this.imageURL = imageURL;
   }
 
+  @Transient
+  public String getDownloadUrl() {
+    return "/images/" + hash + extension;
+  }
 
 }

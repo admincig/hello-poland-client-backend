@@ -12,9 +12,11 @@ import javax.validation.constraints.NotNull;
 import pl.hellopoland.ModelSuperclass;
 import pl.hellopoland.image.Image;
 import pl.hellopoland.partner.Partner;
+import pl.hellopoland.util.Imaged;
+import pl.hellopoland.util.Located;
 
 @Entity
-public class SightEvent extends ModelSuperclass {
+public class SightEvent extends ModelSuperclass implements Located, Imaged {
 
   private static final long serialVersionUID = -34796485244638912L;
 
@@ -46,7 +48,7 @@ public class SightEvent extends ModelSuperclass {
   private Float score;
 
   @Embedded
-  private SightLocation location;
+  private Location location;
 
   private String email;
 
@@ -77,10 +79,12 @@ public class SightEvent extends ModelSuperclass {
     this.name = name;
   }
 
+  @Override
   public Image getMainImage() {
     return mainImage;
   }
 
+  @Override
   public void setMainImage(Image mainImage) {
     this.mainImage = mainImage;
   }
@@ -141,11 +145,13 @@ public class SightEvent extends ModelSuperclass {
     this.openingHours = openingHours;
   }
 
-  public SightLocation getLocation() {
+  @Override
+  public Location getLocation() {
     return location;
   }
 
-  public void setLocation(SightLocation location) {
+  @Override
+  public void setLocation(Location location) {
     this.location = location;
   }
 

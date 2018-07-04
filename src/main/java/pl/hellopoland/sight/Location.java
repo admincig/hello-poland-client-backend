@@ -3,7 +3,7 @@ package pl.hellopoland.sight;
 import javax.persistence.Embeddable;
 
 @Embeddable
-public class SightLocation {
+public class Location {
 
   private Double latitude;
   private Double longitude;

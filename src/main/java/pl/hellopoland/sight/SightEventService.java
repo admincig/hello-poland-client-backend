@@ -9,15 +9,14 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.ServiceSuperclass;
 import pl.hellopoland.config.SightsPagedCollectionConfig;
-import pl.hellopoland.dto.Location;
 import pl.hellopoland.dto.Push;
-import pl.hellopoland.dto.SightEventDefinition;
 import pl.hellopoland.image.Image;
 import pl.hellopoland.image.ImageService;
 import pl.hellopoland.partner.Partner;
 import pl.hellopoland.partner.PartnerService;
 import pl.hellopoland.security.dto.CurrentUser;
 import pl.hellopoland.util.HelloTicket;
+import pl.hellopoland.util.HplMapper;
 import pl.hellopoland.util.PagedEntityCollection;
 import pl.hellopoland.util.Woo;
 
@@ -29,7 +28,13 @@ public class SightEventService extends ServiceSuperclass {
   private ImageService iService;
 
   @Inject
+  private SightService sightService;
+
+  @Inject
   private PartnerService partnerService;
+
+  @Inject
+  private CurrentUser currentUser;
 
   public PagedEntityCollection<SightEvent> getList(SightsPagedCollectionConfig config) {
     return new PagedEntityCollection<>(getQuery(config).getResultList(), config);
@@ -46,7 +51,7 @@ public class SightEventService extends ServiceSuperclass {
     return s;
   }
 
-  public void runImporter() {
+  public void runWooCommerceImporter() {
     List<Portal> portals =
         em.createQuery("from Portal where type=:type order by id asc", Portal.class)
             .setParameter("type", Portal.Type.WOOCOMMERCE).getResultList();
@@ -81,94 +86,48 @@ public class SightEventService extends ServiceSuperclass {
   public void savePush(Push push) {
     Partner partner = partnerService.findByToken(push.secret);
     push.sightEvents.forEach(sdto -> {
-      createSightEvent(sdto, partner);
+      create(sdto, partner);
     });
   }
 
-  public SightEventDefinition addToHpt(SightEventDefinition sightEventDTO,
-      CurrentUser currentUser) {
-    Partner partner = partnerService.findByUserEmail(currentUser.getEmail());
 
-    Portal hpt = getPortal("Hello Ticket Cloud");
-
-    HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
-
-    SightEventDefinition sightEventAddedToHpt = helloTicket
-        .addSightEvent(sightEventDTO, partner.getHptToken());
-
-    createSightEvent(sightEventAddedToHpt, partner);
-
-    return sightEventAddedToHpt;
-  }
-
-  public void delete(Long sightEventId, CurrentUser currentUser) {
+  public void delete(Long sightEventId) {
     Partner partner = partnerService.findByUserEmail(currentUser.getEmail());
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
 
-    SightEvent sightEvent = em
-        .createQuery("from SightEvent sightEvent where sightEvent.id=:sightEventId",
-            SightEvent.class)
-        .setParameter("sightEventId", sightEventId)
-        .getSingleResult();
+    SightEvent sightEvent =
+        em.createQuery("from SightEvent sightEvent where sightEvent.id=:sightEventId",
+            SightEvent.class).setParameter("sightEventId", sightEventId).getSingleResult();
 
     helloTicket.deleteSightEvent(sightEvent, partner.getHptToken());
 
     sightEvent.setActive(false);
   }
 
-  public SightEventDefinition updateInHpt(Long sightEventId, SightEventDefinition sightEventDTO,
-      CurrentUser currentUser) {
-    SightEvent sightEvent = get(sightEventId);
-    Partner partner = partnerService.findByUserEmail(currentUser.getEmail());
+  public SightEvent create(pl.hellopoland.dto.SightEventDefinition dto, Partner partner) {
+    if (partner == null) {
+      partner = partnerService.findByUserEmail(currentUser.getEmail());
+    }
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
+    dto = helloTicket.addSightEvent(dto, partner.getHptToken());
 
-    sightEventDTO.id = sightEvent.getHptId();
+    SightEvent bo = new SightEvent();
+    HplMapper.copy(dto, bo);
+    iService.update(bo, dto.mainImage.original);
+    bo.generateRandomScore();
+    bo.setPortal(hpt);
 
-    SightEventDefinition sightEventUpdatedInHpt = helloTicket
-        .updateSightEvent(sightEventDTO, partner.getHptToken());
-
-    update(sightEvent, sightEventUpdatedInHpt);
-
-    return sightEventUpdatedInHpt;
-  }
-
-  private SightEvent createSightEvent(SightEventDefinition sightEventDTO, Partner partner) {
-    Portal hpt = getPortal("Hello Ticket Cloud");
-    SightEvent sightEvent = new SightEvent();
-
-    sightEvent.setName(sightEventDTO.name);
-    sightEvent.setDate(sightEventDTO.date);
-    sightEvent.setAvailableTicketsNumber(sightEventDTO.availableTicketsNumber);
-    sightEvent.setMainImage(iService.downloadImage(sightEventDTO.mainImageUrl));
-    sightEvent.setPortal(hpt);
-    sightEvent.setLead(sightEventDTO.lead);
-    sightEvent.setDescription(sightEventDTO.description);
-    sightEvent.setEmail(sightEventDTO.email);
-    sightEvent.setPhone(sightEventDTO.phone);
-    sightEvent.setHptId(sightEventDTO.id);
-
-    if (sightEventDTO.location != null) {
-      SightLocation sightLocation = new SightLocation();
-
-      fillInLocationData(sightLocation, sightEventDTO.location);
-
-      sightEvent.setLocation(sightLocation);
+    if (dto.sightId != null) {
+      Sight sight = sightService.get(dto.sightId);
+      bo.setSight(sight);
     }
 
-    sightEvent.generateRandomScore();
-
-    if (sightEventDTO.sightId != null) {
-      assignSightToSightEvent(sightEvent, sightEventDTO.sightId);
-    }
-
-    sightEvent.setPartner(partner);
-    em.persist(sightEvent);
-    em.flush();
-    logger.log(Logger.Level.INFO, "Saved new sight: " + sightEvent.getName());
-
-    return sightEvent;
+    bo.setPartner(partner);
+    em.persist(bo);
+    logger.log(Logger.Level.INFO, "Saved new sight: " + bo.getName());
+    return bo;
   }
 
 
@@ -177,42 +136,19 @@ public class SightEventService extends ServiceSuperclass {
         .getSingleResult();
   }
 
-  private void assignSightToSightEvent(SightEvent sightEvent, Long sightId) {
-    Sight sight = em.createQuery("from Sight sight where sight.id=:sightId", Sight.class)
-        .setParameter("sightId", sightId)
-        .getResultStream()
-        .findFirst()
-        .get();
+  public SightEvent update(Long id, pl.hellopoland.dto.SightEventDefinition dto) {
+    SightEvent bo = get(id);
+    if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
+      Partner partner = partnerService.findByUserEmail(currentUser.getEmail());
+      Portal hpt = getPortal("Hello Ticket Cloud");
+      HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
 
-    sightEvent.setSight(sight);
-  }
-
-  private void update(SightEvent sightEvent, SightEventDefinition sightEventDTO) {
-    sightEvent.setName(sightEventDTO.name);
-    sightEvent.setDate(sightEventDTO.date);
-    sightEvent.setAvailableTicketsNumber(sightEventDTO.availableTicketsNumber);
-    sightEvent.setMainImage(iService.downloadImage(sightEventDTO.mainImageUrl));
-    sightEvent.setLead(sightEventDTO.lead);
-    sightEvent.setDescription(sightEventDTO.description);
-    sightEvent.setEmail(sightEventDTO.email);
-    sightEvent.setPhone(sightEventDTO.phone);
-    sightEvent.setHptId(sightEventDTO.id);
-
-    if (sightEventDTO.location != null) {
-      if (sightEvent.getLocation() == null) {
-        sightEvent.setLocation(new SightLocation());
-      }
-
-      fillInLocationData(sightEvent.getLocation(), sightEventDTO.location);
+      dto.id = bo.getHptId();
+      dto = helloTicket.updateSightEvent(dto, partner.getHptToken());
     }
+    HplMapper.copy(dto, bo);
+    iService.update(bo, dto.mainImage.original);
+    return bo;
   }
 
-  private void fillInLocationData(SightLocation sightLocation, Location location) {
-    sightLocation.setLatitude(location.latitude);
-    sightLocation.setLongitude(location.longitude);
-    sightLocation.setStreet(location.street);
-    sightLocation.setZipCode(location.zipCode);
-    sightLocation.setCity(location.city);
-    sightLocation.setCountry(location.country);
-  }
 }
