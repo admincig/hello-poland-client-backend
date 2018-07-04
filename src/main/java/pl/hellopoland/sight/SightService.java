@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import pl.hellopoland.ServiceSuperclass;
 import pl.hellopoland.dto.SightEventDefinition;
 import pl.hellopoland.exception.ExceptionFactory;
-import pl.hellopoland.image.Image;
 import pl.hellopoland.image.ImageService;
 import pl.hellopoland.partner.Partner;
 import pl.hellopoland.partner.PartnerService;
@@ -34,10 +33,7 @@ public class SightService extends ServiceSuperclass {
     Sight bo = new Sight();
     HplMapper.copy(dto, bo);
     bo.setPartner(partner);
-    if (dto.mainImage != null) {
-      Image im = imageService.downloadImage(dto.mainImage.original);
-      bo.setMainImage(im);
-    }
+    imageService.update(bo, dto.mainImage == null ? null : dto.mainImage.original);
     if (dto.generalAdmission) {
       createGeneralAdmissionSightEvent(bo, partner);
     }
