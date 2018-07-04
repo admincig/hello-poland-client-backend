@@ -36,11 +36,11 @@ public class SightRestService {
   @POST
   public Response add(pl.hellopoland.dto.Sight sight) throws URISyntaxException {
     return Response.created(new URI("/partner/sights/" + sight.id))
-        .entity(sightService.create(sight, null)).build();
+        .entity(HplMapper.getDTOwithEvents(sightService.create(sight, null))).build();
   }
 
   @GET
-  public Response get() {
+  public Response getList() {
     return Response.ok(new PagedCollection(sightService.getForPartner(currentUser).stream()
         .map(HplMapper::getDTO).collect(Collectors.toList()), null)).build();
   }
@@ -48,20 +48,19 @@ public class SightRestService {
   @GET
   @Path("/{id}")
   public Response get(@PathParam("id") Long id) {
-    return Response.ok(sightService.get(id)).build();
+    return Response.ok(HplMapper.getDTOwithEvents(sightService.get(id))).build();
   }
 
   @PUT
   @Path("/{id}")
   public Response update(@PathParam("id") Long id, pl.hellopoland.dto.Sight sight) {
-    return Response.ok(sightService.update(id, sight)).build();
+    return Response.ok(HplMapper.getDTOwithEvents(sightService.update(id, sight))).build();
   }
 
   @DELETE
   @Path("/{id}")
   public Response delete(@PathParam("id") Long id) {
     sightService.delete(id);
-
     return noContent().build();
   }
 }

@@ -38,7 +38,7 @@ public class SightService extends ServiceSuperclass {
       createGeneralAdmissionSightEvent(bo, partner);
     }
     em.persist(bo);
-    return bo;
+    return get(bo.getId());
   }
 
   public Sight get(Long id) {
@@ -62,7 +62,7 @@ public class SightService extends ServiceSuperclass {
   public Sight update(Long id, pl.hellopoland.dto.Sight dto) {
     Sight bo = get(id);
     HplMapper.copy(dto, bo);
-    return bo;
+    return get(id);
   }
 
   public void delete(Long sightId) {

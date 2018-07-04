@@ -30,11 +30,15 @@ public class HplMapper {
     dto.lead = bo.getLead();
     dto.description = bo.getDescription();
     dto.mainImage = bo.getMainImage() != null ? getDTO(bo.getMainImage()) : null;
-    dto.sightEventDefinitions = bo.getSightEvents().stream().filter(SightEvent::isActive)
-        .map(HplMapper::getDTO).collect(toList());
-
     dto.sightLocation = ofNullable(bo.getLocation()).map(HplMapper::getDTO).orElse(null);
 
+    return dto;
+  }
+
+  public static pl.hellopoland.dto.Sight getDTOwithEvents(Sight bo) {
+    pl.hellopoland.dto.Sight dto = getDTO(bo);
+    dto.sightEventDefinitions =
+        bo.getSightEvents().stream().map(HplMapper::getDTO).collect(toList());
     return dto;
   }
 
