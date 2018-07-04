@@ -56,7 +56,7 @@ public class Image extends ModelSuperclass {
 
   @Transient
   public String getDownloadUrl() {
-    return "/images/" + hash + extension;
+    return System.getProperty("base.url") + "/images/" + hash + "." + extension;
   }
 
 }
