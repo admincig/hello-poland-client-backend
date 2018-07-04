@@ -25,8 +25,8 @@ public class ImageService extends ServiceSuperclass {
     byte[] buf = new byte[10000];
     int size = 0;
     try {
-      createEmptyFileOnDisc(path + hash + extension);
-      final File file = new File(path + hash + extension);
+      createEmptyFileOnDisc(path + hash + "." + extension);
+      final File file = new File(path + hash + "." + extension);
       final OutputStream out = new FileOutputStream(file);
       int ret;
       while ((ret = is.read(buf)) > 0) {
