@@ -22,7 +22,7 @@ public class Portal extends ModelSuperclass {
   private Type type;
 
   public enum Type {
-    WOOCOMMERCE, HELLOTICKET_CLOUD_1;
+    HELLOTICKET_CLOUD_1;
   }
 
   public String getName() {

@@ -130,13 +130,7 @@ public class DbFiller extends ServiceSuperclass {
   }
 
 
-  private void runImporter() {
-    sService.runWooCommerceImporter();
-  }
-
-
   private void createPortals() {
-    createTestWooHelloPoland();
     createHelloTicketCloud();
   }
 
@@ -146,17 +140,6 @@ public class DbFiller extends ServiceSuperclass {
     portal.setName("Hello Ticket Cloud");
     portal.setUrl("https://hpt.fream.pl/api");
     portal.setType(Type.HELLOTICKET_CLOUD_1);
-    em.persist(portal);
-  }
-
-
-  private void createTestWooHelloPoland() {
-    Portal portal = new Portal();
-    portal.setName("[TEST] Wycieczki Hello Poland");
-    portal.setUrl("http://woo.hello-poland.pl");
-    portal.setKey("ck_5233b79180ff8b7bef81b28fe7222b2eb2b37ebe");
-    portal.setSecret("cs_2c96f574d729e8bde7b71d96007c172bc12244d9");
-    portal.setType(Type.WOOCOMMERCE);
     em.persist(portal);
   }
 

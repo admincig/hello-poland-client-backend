@@ -31,7 +31,6 @@ import pl.hellopoland.user.UserService;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PaymentUtils;
 import pl.hellopoland.util.Triplet;
-import pl.hellopoland.util.Woo;
 
 @LocalBean
 @Stateless
@@ -115,9 +114,6 @@ public class OrderService extends ServiceSuperclass {
       Portal portal = entry.getKey();
       logger.log(Logger.Level.INFO, "Placing external order in " + portal.getName());
       switch (portal.getType()) {
-        case WOOCOMMERCE:
-          placeInWooCommerce(o.getDetails(), entry);
-          break;
         case HELLOTICKET_CLOUD_1:
           placeInHpt(o.getDetails(), entry);
           break;
@@ -136,9 +132,6 @@ public class OrderService extends ServiceSuperclass {
       logger.log(Logger.Level.INFO, "Confirming external order in " + portal.getName());
 
       switch (portal.getType()) {
-        case WOOCOMMERCE:
-          confirmInWooCommerce(entry);
-          break;
         case HELLOTICKET_CLOUD_1:
           confirmInHpt(entry);
           break;
@@ -154,15 +147,6 @@ public class OrderService extends ServiceSuperclass {
         entry.getValue().stream().map(OrderSightEntry::getSerialNumber).findFirst().get();
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     hpt.confirm(serialNumber, orderEntries);
-  }
-
-  private void confirmInWooCommerce(Map.Entry<Portal, List<OrderSightEntry>> entry) {
-    Portal portal = entry.getKey();
-    Long externalId =
-        entry.getValue().stream().map(OrderSightEntry::getExternalId).findFirst().get();
-
-    Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
-    logger.log(Logger.Level.INFO, woo.completeOrder(externalId));
   }
 
   private void placeInHpt(OrderDetails details, Entry<Portal, List<OrderSightEntry>> entry) {
@@ -185,27 +169,6 @@ public class OrderService extends ServiceSuperclass {
       }
     }
     return returnList;
-  }
-
-  private void placeInWooCommerce(OrderDetails details,
-      Entry<Portal, List<OrderSightEntry>> entry) {
-    Portal portal = entry.getKey();
-    List<OrderEntry> orderEntries = new ArrayList<>();
-    for (OrderSightEntry se : entry.getValue()) {
-      em.refresh(se);
-      for (OrderDateEntry de : se.getEntries()) {
-        em.refresh(de);
-        orderEntries.addAll(de.getEntries());
-      }
-    }
-
-    Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
-    Map<String, Object> resp = woo.placeOrder(details, orderEntries);
-    logger.log(Logger.Level.INFO, resp.toString());
-    Integer id = (Integer) resp.get("id");
-    if (id != null) {
-      entry.getValue().forEach(ose -> ose.setExternalId(id.longValue()));
-    }
   }
 
   public List<OrderEntry> getOrderEntries(CurrentUser currentUser) {
@@ -291,11 +254,11 @@ public class OrderService extends ServiceSuperclass {
     for (Map.Entry<Portal, List<OrderSightEntry>> entry : groupedByPortal.entrySet()) {
       Portal portal = entry.getKey();
       logger.log(Logger.Level.INFO, "Cancelling external order in " + portal.getName());
-      Woo woo = new Woo(portal.getUrl(), portal.getKey(), portal.getSecret());
 
       // they have same id. should have
-      Long id = entry.getValue().stream().map(OrderSightEntry::getExternalId).findFirst().get();
-      logger.log(Logger.Level.INFO, woo.cancelOrder(id).toString());
+      /* Long id = */
+      entry.getValue().stream().map(OrderSightEntry::getExternalId).findFirst().get();
+      // TODO cancel in HPT
     }
   }
 
