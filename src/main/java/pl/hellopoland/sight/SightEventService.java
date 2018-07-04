@@ -55,14 +55,14 @@ public class SightEventService extends ServiceSuperclass {
 
 
   public void delete(Long id) {
-    SightEvent sightEvent = get(id);
+    SightEvent bo = get(id);
 
     Partner partner = partnerService.findByUserEmail(currentUser.getEmail());
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
-    helloTicket.deleteSightEvent(sightEvent, partner.getHptToken());
+    helloTicket.deleteSightEvent(bo, partner.getHptToken());
 
-    sightEvent.setActive(false);
+    bo.setActive(false);
   }
 
   public SightEvent create(pl.hellopoland.dto.SightEventDefinition dto, Partner partner) {
@@ -75,7 +75,7 @@ public class SightEventService extends ServiceSuperclass {
 
     SightEvent bo = new SightEvent();
     HplMapper.copy(dto, bo);
-    iService.update(bo, dto.mainImage.original);
+    iService.update(bo, dto.mainImage == null ? null : dto.mainImage.original);
     bo.generateRandomScore();
     bo.setPortal(hpt);
 
@@ -107,7 +107,7 @@ public class SightEventService extends ServiceSuperclass {
       dto = helloTicket.updateSightEvent(dto, partner.getHptToken());
     }
     HplMapper.copy(dto, bo);
-    iService.update(bo, dto.mainImage.original);
+    iService.update(bo, dto.mainImage == null ? null : dto.mainImage.original);
     return bo;
   }
 

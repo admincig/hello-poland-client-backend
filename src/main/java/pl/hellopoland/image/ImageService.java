@@ -77,10 +77,14 @@ public class ImageService extends ServiceSuperclass {
   }
 
   public void update(Imaged bo, String importUrl) {
-    Image boImage = bo.getMainImage();
-    Image image = getOrDownload(importUrl);
-    if (boImage == null || !boImage.getId().equals(image.getId())) {
-      bo.setMainImage(image);
+    if (importUrl == null) {
+      bo.setMainImage(null);
+    } else {
+      Image boImage = bo.getMainImage();
+      Image image = getOrDownload(importUrl);
+      if (boImage == null || !boImage.getId().equals(image.getId())) {
+        bo.setMainImage(image);
+      }
     }
   }
 
