@@ -57,9 +57,8 @@ public class ImageService extends ServiceSuperclass {
   }
 
   public File getImage(String name) {
-    String path =
-        em.createQuery("select path from Image where concat(hash, extension)=:name", String.class)
-            .setParameter("name", name).getSingleResult();
+    String path = em.createQuery("select path from Image where concat(hash, '.' ,extension)=:name",
+        String.class).setParameter("name", name).getSingleResult();
     return new File(path + name);
   }
 
