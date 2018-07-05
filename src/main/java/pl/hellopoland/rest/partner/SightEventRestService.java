@@ -15,10 +15,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import pl.hellopoland.config.SightsPagedCollectionConfig;
-import pl.hellopoland.dto.SightEventDefinition;
 import pl.hellopoland.rest.dto.PagedCollection;
-import pl.hellopoland.rest.dto.SightEventEventEventRO;
-import pl.hellopoland.rest.dto.SightEventEventOnListingRO;
+import pl.hellopoland.rest.dto.SightEventOnListingRO;
+import pl.hellopoland.rest.dto.SightEventRO;
 import pl.hellopoland.sight.SightEvent;
 import pl.hellopoland.sight.SightEventService;
 import pl.hellopoland.util.HplMapper;
@@ -40,13 +39,13 @@ public class SightEventRestService {
   }
 
   @POST
-  public Response create(SightEventDefinition dto) {
+  public Response create(pl.hellopoland.dto.SightEvent dto) {
     return Response.ok(HplMapper.getDTO(sightEventService.create(dto, null))).build();
   }
 
   @PUT
   @Path("/{id}")
-  public Response update(@PathParam("id") Long id, SightEventDefinition dto) {
+  public Response update(@PathParam("id") Long id, pl.hellopoland.dto.SightEvent dto) {
     return Response.ok(HplMapper.getDTO(sightEventService.update(id, dto))).build();
   }
 
@@ -56,14 +55,14 @@ public class SightEventRestService {
     config.onlyActive();
     PagedEntityCollection<SightEvent> plist = sightEventService.getList(config);
     return new PagedCollection(
-        plist.items.stream().map(SightEventEventOnListingRO::new).collect(Collectors.toList()),
+        plist.items.stream().map(SightEventOnListingRO::new).collect(Collectors.toList()),
         plist.config);
   }
 
   @GET
   @Path("/{id}")
-  public SightEventEventEventRO get(@PathParam("id") Long id) {
-    return new SightEventEventEventRO(sightEventService.get(id));
+  public SightEventRO get(@PathParam("id") Long id) {
+    return new SightEventRO(sightEventService.get(id));
   }
 
   @DELETE

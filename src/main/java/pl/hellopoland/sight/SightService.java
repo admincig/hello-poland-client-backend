@@ -5,7 +5,6 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.ServiceSuperclass;
-import pl.hellopoland.dto.SightEventDefinition;
 import pl.hellopoland.exception.ExceptionFactory;
 import pl.hellopoland.image.ImageService;
 import pl.hellopoland.partner.Partner;
@@ -46,11 +45,11 @@ public class SightService extends ServiceSuperclass {
         .setParameter("sightId", id).getSingleResult();
     // fetch events
     if (bo.getSightEvents() != null) {
-      bo.getSightEvents().forEach(se->{
-          // fetch tickets
-          if (se.getTickets() != null) {
-              se.getTickets().size();
-          }
+      bo.getSightEvents().forEach(se -> {
+        // fetch tickets
+        if (se.getTickets() != null) {
+          se.getTickets().size();
+        }
       });
     }
     return bo;
@@ -96,7 +95,7 @@ public class SightService extends ServiceSuperclass {
   }
 
   private void createGeneralAdmissionSightEvent(Sight sight, Partner partner) {
-    SightEventDefinition sed = HplMapper.getGAEventDTO(sight);
+    pl.hellopoland.dto.SightEvent sed = HplMapper.getGAEventDTO(sight);
     sightEventService.create(sed, partner);
   }
 

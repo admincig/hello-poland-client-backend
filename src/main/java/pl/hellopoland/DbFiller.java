@@ -77,7 +77,7 @@ public class DbFiller extends ServiceSuperclass {
     sight.lead = "Poznańskie zoo lead";
     sight.description = "Wrocławskie zoo zaprasza na zwiedzanie description";
     sight.mainImage = image;
-    sight.sightLocation = location;
+    sight.location = location;
     sight.generalAdmission = true;
 
     sightService.create(sight, user.getPartner());
@@ -99,7 +99,7 @@ public class DbFiller extends ServiceSuperclass {
     sight.lead = "Wyvieczka Hello Poland lead";
     sight.description = "Hello Poland zaprasza na wycieczki description";
     sight.mainImage = image;
-    sight.sightLocation = location;
+    sight.location = location;
     sight.generalAdmission = true;
 
     sightService.create(sight, user.getPartner());

@@ -3,7 +3,6 @@ package pl.hellopoland.util;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import pl.hellopoland.dto.DateType;
-import pl.hellopoland.dto.SightEventDefinition;
 import pl.hellopoland.image.Image;
 import pl.hellopoland.sight.Location;
 import pl.hellopoland.sight.Sight;
@@ -19,7 +18,7 @@ public class HplMapper {
     target.setEmail(source.email);
     target.setPhone(source.phone);
 
-    copyLocation(source.sightLocation, target);
+    copyLocation(source.location, target);
   }
 
   public static pl.hellopoland.dto.Sight getDTO(Sight bo) {
@@ -30,25 +29,23 @@ public class HplMapper {
     dto.lead = bo.getLead();
     dto.description = bo.getDescription();
     dto.mainImage = bo.getMainImage() != null ? getDTO(bo.getMainImage()) : null;
-    dto.sightLocation = ofNullable(bo.getLocation()).map(HplMapper::getDTO).orElse(null);
+    dto.location = ofNullable(bo.getLocation()).map(HplMapper::getDTO).orElse(null);
 
     return dto;
   }
 
   public static pl.hellopoland.dto.Sight getDTOwithEvents(Sight bo) {
     pl.hellopoland.dto.Sight dto = getDTO(bo);
-    dto.sightEventDefinitions =
-        bo.getSightEvents().stream().map(HplMapper::getDTO).collect(toList());
+    dto.sightEvents = bo.getSightEvents().stream().map(HplMapper::getDTO).collect(toList());
     return dto;
   }
 
-  public static pl.hellopoland.dto.SightEventDefinition getDTO(SightEvent bo) {
-    pl.hellopoland.dto.SightEventDefinition dto = new SightEventDefinition();
+  public static pl.hellopoland.dto.SightEvent getDTO(SightEvent bo) {
+    pl.hellopoland.dto.SightEvent dto = new pl.hellopoland.dto.SightEvent();
 
     dto.id = bo.getId();
     dto.name = bo.getName();
     dto.date = bo.getDate();
-    dto.availableTicketsNumber = bo.getAvailableTicketsNumber();
     dto.description = bo.getDescription();
     dto.duration = bo.getDuration();
     dto.mainImage = bo.getMainImage() != null ? getDTO(bo.getMainImage()) : null;
@@ -91,8 +88,9 @@ public class HplMapper {
   }
 
   private static pl.hellopoland.dto.Image getDTO(Image bo) {
-    if (bo == null)
+    if (bo == null) {
       return null;
+    }
     pl.hellopoland.dto.Image dto = new pl.hellopoland.dto.Image();
     dto.original = bo.getDownloadUrl();
     return dto;
@@ -118,8 +116,8 @@ public class HplMapper {
     }
   }
 
-  public static pl.hellopoland.dto.SightEventDefinition getGAEventDTO(Sight bo) {
-    pl.hellopoland.dto.SightEventDefinition dto = new pl.hellopoland.dto.SightEventDefinition();
+  public static pl.hellopoland.dto.SightEvent getGAEventDTO(Sight bo) {
+    pl.hellopoland.dto.SightEvent dto = new pl.hellopoland.dto.SightEvent();
     dto.sightId = bo.getId();
     dto.name = bo.getName();
     dto.description = bo.getDescription();
@@ -130,10 +128,9 @@ public class HplMapper {
     return dto;
   }
 
-  public static void copy(pl.hellopoland.dto.SightEventDefinition source, SightEvent target) {
+  public static void copy(pl.hellopoland.dto.SightEvent source, SightEvent target) {
     target.setName(source.name);
     target.setDate(source.date);
-    target.setAvailableTicketsNumber(source.availableTicketsNumber);
     target.setLead(source.lead);
     target.setDescription(source.description);
     target.setEmail(source.email);

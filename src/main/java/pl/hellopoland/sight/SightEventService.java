@@ -65,7 +65,7 @@ public class SightEventService extends ServiceSuperclass {
     bo.setActive(false);
   }
 
-  public SightEvent create(pl.hellopoland.dto.SightEventDefinition dto, Partner partner) {
+  public SightEvent create(pl.hellopoland.dto.SightEvent dto, Partner partner) {
     if (partner == null) {
       partner = partnerService.findByUserEmail(currentUser.getEmail());
     }
@@ -95,7 +95,7 @@ public class SightEventService extends ServiceSuperclass {
         .getSingleResult();
   }
 
-  public SightEvent update(Long id, pl.hellopoland.dto.SightEventDefinition dto) {
+  public SightEvent update(Long id, pl.hellopoland.dto.SightEvent dto) {
     SightEvent bo = get(id);
     if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
       Partner partner = partnerService.findByUserEmail(currentUser.getEmail());
