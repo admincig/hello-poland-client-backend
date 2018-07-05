@@ -34,16 +34,21 @@ public class SightService extends ServiceSuperclass {
     HplMapper.copy(dto, bo);
     bo.setPartner(partner);
     imageService.update(bo, dto.mainImage == null ? null : dto.mainImage.original);
+    em.persist(bo);
     if (dto.generalAdmission) {
       createGeneralAdmissionSightEvent(bo, partner);
     }
-    em.persist(bo);
     return get(bo.getId());
   }
 
   public Sight get(Long id) {
-    return em.createQuery("from Sight sight where sight.id=:sightId", Sight.class)
+    Sight bo = em.createQuery("from Sight sight where sight.id=:sightId", Sight.class)
         .setParameter("sightId", id).getSingleResult();
+    //fetch events
+    if (bo.getSightEvents() != null) {
+      bo.getSightEvents().size();
+    }
+    return bo;
   }
 
   public List<Sight> getActive() {

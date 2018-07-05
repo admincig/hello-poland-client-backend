@@ -89,8 +89,11 @@ public class ImageService extends ServiceSuperclass {
 
   private Image getOrDownload(String importUrl) {
     try {
-      return em.createQuery("from Image where imageURL=:url", Image.class)
-          .setParameter("url", importUrl).getSingleResult();
+      var parts = importUrl.split("\\/");
+      String name = parts[parts.length-1];
+      String hash = name.split("\\.")[0];
+      return em.createQuery("from Image where imageURL=:url or hash=:hash", Image.class)
+          .setParameter("url", importUrl).setParameter("hash", hash).getSingleResult();
     } catch (NoResultException e) {
       return downloadImage(importUrl);
     }

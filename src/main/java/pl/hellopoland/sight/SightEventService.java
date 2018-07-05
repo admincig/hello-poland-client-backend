@@ -72,7 +72,6 @@ public class SightEventService extends ServiceSuperclass {
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
     dto = helloTicket.addSightEvent(dto, partner.getHptToken());
-
     SightEvent bo = new SightEvent();
     HplMapper.copy(dto, bo);
     iService.update(bo, dto.mainImage == null ? null : dto.mainImage.original);
