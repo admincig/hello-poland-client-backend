@@ -85,8 +85,7 @@ public class DbFiller extends ServiceSuperclass {
 
   private void createHelloPolandSight(User user) {
     Image image = new Image();
-    image.original =
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2Cot-jP4Z76ViaMuIzp3l2RzMo_BvsNvKDtbQsXW-zQ9UTP35";
+    image.original = "https://hpl.fream.pl/head.jpg";
 
     Location location = new Location();
     location.city = "Wrocław";

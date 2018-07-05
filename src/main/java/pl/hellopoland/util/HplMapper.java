@@ -91,6 +91,8 @@ public class HplMapper {
   }
 
   private static pl.hellopoland.dto.Image getDTO(Image bo) {
+    if (bo == null)
+      return null;
     pl.hellopoland.dto.Image dto = new pl.hellopoland.dto.Image();
     dto.original = bo.getDownloadUrl();
     return dto;
