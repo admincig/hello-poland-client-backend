@@ -33,6 +33,6 @@ public class SightRestService {
   @GET
   @Path("/{id}")
   public Response get(@PathParam("id") Long id) {
-    return Response.ok(HplMapper.getDTO(sightService.get(id))).build();
+    return Response.ok(HplMapper.getFullDTO(sightService.get(id))).build();
   }
 }

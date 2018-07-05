@@ -13,10 +13,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import pl.hellopoland.config.SightsPagedCollectionConfig;
 import pl.hellopoland.rest.dto.PagedCollection;
-import pl.hellopoland.rest.dto.SightEventRO;
-import pl.hellopoland.rest.dto.SightEventOnListingRO;
 import pl.hellopoland.sight.SightEvent;
 import pl.hellopoland.sight.SightEventService;
+import pl.hellopoland.util.HplMapper;
 import pl.hellopoland.util.PagedEntityCollection;
 
 @Path("/market/sight-events")
@@ -40,13 +39,12 @@ public class SightEventRestService {
     config.onlyActive();
     PagedEntityCollection<SightEvent> plist = sightEventService.getList(config);
     return new PagedCollection(
-        plist.items.stream().map(SightEventOnListingRO::new).collect(Collectors.toList()),
-        plist.config);
+        plist.items.stream().map(HplMapper::getDTO).collect(Collectors.toList()), plist.config);
   }
 
   @GET
   @Path("/{id}")
-  public SightEventRO get(@PathParam("id") Long id) {
-    return new SightEventRO(sightEventService.get(id));
+  public pl.hellopoland.dto.SightEvent get(@PathParam("id") Long id) {
+    return HplMapper.getFullDTO(sightEventService.get(id));
   }
 }

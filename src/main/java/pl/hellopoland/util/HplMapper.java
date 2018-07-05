@@ -34,9 +34,9 @@ public class HplMapper {
     return dto;
   }
 
-  public static pl.hellopoland.dto.Sight getDTOwithEvents(Sight bo) {
+  public static pl.hellopoland.dto.Sight getFullDTO(Sight bo) {
     pl.hellopoland.dto.Sight dto = getDTO(bo);
-    dto.sightEvents = bo.getSightEvents().stream().map(HplMapper::getDTO).collect(toList());
+    dto.sightEvents = bo.getSightEvents().stream().map(HplMapper::getFullDTO).collect(toList());
     return dto;
   }
 
@@ -52,11 +52,14 @@ public class HplMapper {
     dto.email = bo.getEmail();
     dto.phone = bo.getPhone();
     dto.sightId = bo.getSight().getId();
-
     dto.location = ofNullable(bo.getLocation()).map(HplMapper::getDTO).orElse(null);
 
-    dto.tickets = bo.getTickets().stream().map(HplMapper::getDTO).collect(toList());
+    return dto;
+  }
 
+  public static pl.hellopoland.dto.SightEvent getFullDTO(SightEvent bo) {
+    pl.hellopoland.dto.SightEvent dto = getDTO(bo);
+    dto.tickets = bo.getTickets().stream().map(HplMapper::getDTO).collect(toList());
     return dto;
   }
 
