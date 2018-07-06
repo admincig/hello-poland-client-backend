@@ -51,6 +51,7 @@ public class SightEventRestService {
   @Path("/search")
   public PagedCollection search(SightsPagedCollectionConfig config) {
     config.onlyCurrentPartner(true);
+    config.onlyActive();
     PagedEntityCollection<SightEvent> plist = sightEventService.getList(config);
     return new PagedCollection(
         plist.items.stream().map(HplMapper::getDTO).collect(Collectors.toList()),
