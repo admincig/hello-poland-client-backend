@@ -89,7 +89,7 @@ public class SightEventService extends ServiceSuperclass {
 
     bo.setPartner(partner);
     em.persist(bo);
-    logger.log(Logger.Level.INFO, "Saved new sight: " + bo.getName());
+    logger.log(Logger.Level.INFO, "Saved new sight event: " + bo.getName());
     return bo;
   }
 

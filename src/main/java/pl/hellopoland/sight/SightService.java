@@ -37,7 +37,7 @@ public class SightService extends ServiceSuperclass {
     bo.setPartner(partner);
     imageService.update(bo, dto.mainImage == null ? null : dto.mainImage.original);
     em.persist(bo);
-    if (dto.generalAdmission) {
+    if (Boolean.TRUE.equals(dto.generalAdmission)) {
       createGeneralAdmissionSightEvent(bo, partner);
     }
     return get(bo.getId());

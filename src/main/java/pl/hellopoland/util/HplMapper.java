@@ -2,6 +2,7 @@ package pl.hellopoland.util;
 
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+
 import pl.hellopoland.dto.DateType;
 import pl.hellopoland.image.Image;
 import pl.hellopoland.sight.Location;
@@ -36,7 +37,9 @@ public class HplMapper {
 
   public static pl.hellopoland.dto.Sight getFullDTO(Sight bo) {
     pl.hellopoland.dto.Sight dto = getDTO(bo);
-    dto.sightEvents = bo.getSightEvents().stream().map(HplMapper::getFullDTO).collect(toList());
+    if (bo.getSightEvents() != null) {
+      dto.sightEvents = bo.getSightEvents().stream().map(HplMapper::getFullDTO).collect(toList());
+    }
     return dto;
   }
 
