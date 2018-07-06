@@ -73,6 +73,7 @@ public class SightEventService extends ServiceSuperclass {
     if (partner == null) {
       partner = partnerService.findByUserEmail(currentUser.getEmail());
     }
+    dto.generalAdmission = Boolean.TRUE.equals(dto.generalAdmission);
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
     dto = helloTicket.addSightEvent(dto, partner.getHptToken());
