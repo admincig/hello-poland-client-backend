@@ -6,6 +6,7 @@ import java.util.Random;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
@@ -60,7 +61,7 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
   @ManyToOne
   private Portal portal;
 
-  @ManyToOne
+  @ManyToOne(fetch=FetchType.EAGER)
   private Sight sight;
 
   @ManyToOne

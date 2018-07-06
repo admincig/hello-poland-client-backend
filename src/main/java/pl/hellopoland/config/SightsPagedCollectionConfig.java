@@ -1,8 +1,11 @@
 package pl.hellopoland.config;
 
+import pl.hellopoland.partner.Partner;
 import pl.hellopoland.sight.SightEvent;
 
 public class SightsPagedCollectionConfig extends PagedCollectionConfig<SightEvent> {
+
+  private boolean currentPartner;
 
   @Override
   public String joins() {
@@ -20,5 +23,17 @@ public class SightsPagedCollectionConfig extends PagedCollectionConfig<SightEven
 
   public void onlyActive() {
     addCondition("active", true, "e.active=:active");
+  }
+
+  public void onlyCurrentPartner(boolean only) {
+    currentPartner = only;
+  }
+
+  public boolean isCurrentPartner() {
+    return currentPartner;
+  }
+
+  public void setPartner(Long partnerId) {
+    addCondition("partner", partnerId, "e.sight.partner.id=:partner");
   }
 }

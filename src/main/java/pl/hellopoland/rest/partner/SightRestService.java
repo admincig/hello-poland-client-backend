@@ -41,7 +41,7 @@ public class SightRestService {
 
   @GET
   public Response getList() {
-    return Response.ok(new PagedCollection(sightService.getForPartner(currentUser).stream()
+    return Response.ok(new PagedCollection(sightService.getForPartner().stream()
         .map(HplMapper::getDTO).collect(Collectors.toList()), null)).build();
   }
 

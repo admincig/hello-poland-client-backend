@@ -16,8 +16,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import pl.hellopoland.config.SightsPagedCollectionConfig;
 import pl.hellopoland.rest.dto.PagedCollection;
-import pl.hellopoland.rest.dto.SightEventOnListingRO;
-import pl.hellopoland.rest.dto.SightEventRO;
 import pl.hellopoland.sight.SightEvent;
 import pl.hellopoland.sight.SightEventService;
 import pl.hellopoland.util.HplMapper;
@@ -52,17 +50,17 @@ public class SightEventRestService {
   @POST
   @Path("/search")
   public PagedCollection search(SightsPagedCollectionConfig config) {
-    config.onlyActive();
+    config.onlyCurrentPartner(true);
     PagedEntityCollection<SightEvent> plist = sightEventService.getList(config);
     return new PagedCollection(
-        plist.items.stream().map(SightEventOnListingRO::new).collect(Collectors.toList()),
+        plist.items.stream().map(HplMapper::getDTO).collect(Collectors.toList()),
         plist.config);
   }
 
   @GET
   @Path("/{id}")
-  public SightEventRO get(@PathParam("id") Long id) {
-    return new SightEventRO(sightEventService.get(id));
+  public pl.hellopoland.dto.SightEvent get(@PathParam("id") Long id) {
+    return HplMapper.getDTO(sightEventService.get(id));
   }
 
   @DELETE

@@ -1,6 +1,7 @@
 package pl.hellopoland.sight;
 
 import java.lang.System.Logger;
+import java.util.List;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -32,6 +33,9 @@ public class SightEventService extends ServiceSuperclass {
   private CurrentUser currentUser;
 
   public PagedEntityCollection<SightEvent> getList(SightsPagedCollectionConfig config) {
+    if (config.isCurrentPartner()){
+      config.setPartner(partnerService.findByUserEmail(currentUser.getEmail()).getId());
+    }
     return new PagedEntityCollection<>(getQuery(config).getResultList(), config);
   }
 
@@ -108,6 +112,13 @@ public class SightEventService extends ServiceSuperclass {
     HplMapper.copy(dto, bo);
     iService.update(bo, dto.mainImage == null ? null : dto.mainImage.original);
     return bo;
+  }
+
+  public List<SightEvent> getForPartner() {
+    Partner partner = partnerService.findByUserEmail(currentUser.getEmail());
+
+    return em.createQuery("from SightEvent event where event.sight.partner=:partner order by event.id desc",
+        SightEvent.class).setParameter("partner", partner).getResultList();
   }
 
 }

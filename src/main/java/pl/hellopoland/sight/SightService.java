@@ -28,6 +28,9 @@ public class SightService extends ServiceSuperclass {
   @Inject
   private ExceptionFactory exceptionFactory;
 
+  @Inject
+  private CurrentUser currentUser;
+
   public Sight create(pl.hellopoland.dto.Sight dto, Partner partner) {
     Sight bo = new Sight();
     HplMapper.copy(dto, bo);
@@ -61,7 +64,7 @@ public class SightService extends ServiceSuperclass {
         .getResultList();
   }
 
-  public List<Sight> getForPartner(CurrentUser currentUser) {
+  public List<Sight> getForPartner() {
     Partner partner = partnerService.findByUserEmail(currentUser.getEmail());
 
     return em.createQuery("from Sight sight where sight.partner=:partner order by sight.id desc",
