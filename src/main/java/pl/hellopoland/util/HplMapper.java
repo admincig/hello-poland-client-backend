@@ -52,6 +52,7 @@ public class HplMapper {
     dto.email = bo.getEmail();
     dto.phone = bo.getPhone();
     dto.sightId = bo.getSight().getId();
+    dto.generalAdmission = bo.getGeneralAdmission();
     dto.location = ofNullable(bo.getLocation()).map(HplMapper::getDTO).orElse(null);
 
     return dto;
@@ -128,6 +129,7 @@ public class HplMapper {
     dto.email = bo.getEmail();
     dto.phone = bo.getPhone();
     dto.location = ofNullable(bo.getLocation()).map(HplMapper::getDTO).orElse(null);
+    dto.generalAdmission = true;
     return dto;
   }
 
@@ -138,6 +140,7 @@ public class HplMapper {
     target.setDescription(source.description);
     target.setEmail(source.email);
     target.setPhone(source.phone);
+    target.setGeneralAdmission(source.generalAdmission);
     target.setHptId(source.id);
 
     copyLocation(source.location, target);

@@ -3,6 +3,7 @@ package pl.hellopoland.util;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.System.Logger.Level;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DateFormat;
@@ -98,16 +99,16 @@ public class HelloTicket {
     }
   }
 
-  public pl.hellopoland.dto.SightEvent addSightEvent(pl.hellopoland.dto.SightEvent sightEvent,
+  public pl.hellopoland.dto.SightEvent addSightEvent(pl.hellopoland.dto.SightEvent dto,
       String partnerAuthToken) {
-    String sightEventJson = JsonbBuilder.create().toJson(sightEvent);
+    String json = JsonbBuilder.create().toJson(dto);
 
     try {
       return JsonbBuilder.create().fromJson(
-          post("/v1/sight-events", sightEventJson, partnerAuthToken).toString(),
+          post("/v1/sight-events", json, partnerAuthToken).toString(),
           pl.hellopoland.dto.SightEvent.class);
     } catch (IOException e) {
-      e.printStackTrace();
+      logger.log(Level.ERROR, e);
     }
 
     return null;

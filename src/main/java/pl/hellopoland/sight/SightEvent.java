@@ -25,7 +25,7 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
 
   private Date date;
 
-  private Integer availableTicketsNumber;
+  private Boolean generalAdmission;
 
   @ManyToOne
   private Image mainImage;
@@ -207,14 +207,6 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
     this.date = date;
   }
 
-  public Integer getAvailableTicketsNumber() {
-    return availableTicketsNumber;
-  }
-
-  public void setAvailableTicketsNumber(Integer availableTicketsNumber) {
-    this.availableTicketsNumber = availableTicketsNumber;
-  }
-
   public Integer getDuration() {
     return duration;
   }
@@ -237,5 +229,13 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
 
   public void setHptId(Long hptId) {
     this.hptId = hptId;
+  }
+
+  public Boolean getGeneralAdmission() {
+    return generalAdmission;
+  }
+
+  public void setGeneralAdmission(Boolean generalAdmission) {
+    this.generalAdmission = generalAdmission;
   }
 }
