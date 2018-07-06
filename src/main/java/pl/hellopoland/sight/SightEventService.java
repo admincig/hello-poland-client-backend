@@ -139,15 +139,15 @@ public class SightEventService extends ServiceSuperclass {
         Date current = new Date();
 
         if (sightEvent1.getDate() == null) {
-          return 1;
-        }
-        if (sightEvent2.getDate() == null) {
           return -1;
         }
+        if (sightEvent2.getDate() == null) {
+          return 1;
+        }
         if (areAllUpToDate(sightEvent1, sightEvent2, current)) {
-          return sightEvent1.getDate().compareTo(sightEvent2.getDate()) * -1;
-        } else {
           return sightEvent1.getDate().compareTo(sightEvent2.getDate());
+        } else {
+          return sightEvent1.getDate().compareTo(sightEvent2.getDate()) * -1;
         }
       }
 
