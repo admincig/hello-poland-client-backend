@@ -1,6 +1,10 @@
 package pl.hellopoland.sight;
 
+import static java.util.stream.Collectors.toList;
+
 import java.lang.System.Logger;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -33,10 +37,15 @@ public class SightEventService extends ServiceSuperclass {
   private CurrentUser currentUser;
 
   public PagedEntityCollection<SightEvent> getList(SightsPagedCollectionConfig config) {
-    if (config.isCurrentPartner()){
+    if (config.isCurrentPartner()) {
       config.setPartner(partnerService.findByUserEmail(currentUser.getEmail()).getId());
     }
-    return new PagedEntityCollection<>(getQuery(config).getResultList(), config);
+
+    List<SightEvent> sightEvents = getQuery(config).getResultList()
+        .stream()
+        .sorted(sightEventDatesComparator())
+        .collect(toList());
+    return new PagedEntityCollection<>(sightEvents, config);
   }
 
   public SightEvent get(Long id) {
@@ -94,12 +103,6 @@ public class SightEventService extends ServiceSuperclass {
     return bo;
   }
 
-
-  private Portal getPortal(String name) {
-    return em.createQuery("from Portal where name=:name", Portal.class).setParameter("name", name)
-        .getSingleResult();
-  }
-
   public SightEvent update(Long id, pl.hellopoland.dto.SightEvent dto) {
     SightEvent bo = get(id);
     if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
@@ -118,8 +121,40 @@ public class SightEventService extends ServiceSuperclass {
   public List<SightEvent> getForPartner() {
     Partner partner = partnerService.findByUserEmail(currentUser.getEmail());
 
-    return em.createQuery("from SightEvent event where event.sight.partner=:partner order by event.id desc",
+    return em.createQuery(
+        "from SightEvent event where event.sight.partner=:partner order by event.id desc",
         SightEvent.class).setParameter("partner", partner).getResultList();
   }
 
+
+  private Portal getPortal(String name) {
+    return em.createQuery("from Portal where name=:name", Portal.class).setParameter("name", name)
+        .getSingleResult();
+  }
+
+  private Comparator<SightEvent> sightEventDatesComparator() {
+    return new Comparator<>() {
+      @Override
+      public int compare(SightEvent sightEvent1, SightEvent sightEvent2) {
+        Date current = new Date();
+
+        if (sightEvent1.getDate() == null) {
+          return 1;
+        }
+        if (sightEvent2.getDate() == null) {
+          return -1;
+        }
+        if (areAllUpToDate(sightEvent1, sightEvent2, current)) {
+          return sightEvent1.getDate().compareTo(sightEvent2.getDate()) * -1;
+        } else {
+          return sightEvent1.getDate().compareTo(sightEvent2.getDate());
+        }
+      }
+
+      private boolean areAllUpToDate(SightEvent sightEvent1, SightEvent sightEvent2, Date current) {
+        return sightEvent1.getDate().compareTo(current) > 0
+            && sightEvent2.getDate().compareTo(current) > 0;
+      }
+    };
+  }
 }
