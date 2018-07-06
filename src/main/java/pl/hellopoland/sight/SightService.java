@@ -67,10 +67,10 @@ public class SightService extends ServiceSuperclass {
         .getResultList();
   }
 
-  public List<Sight> getForPartner() {
+  public List<Sight> getActiveForPartner() {
     Partner partner = partnerService.findByUserEmail(currentUser.getEmail());
 
-    return em.createQuery("from Sight sight where sight.partner=:partner order by sight.id desc",
+    return em.createQuery("from Sight sight where sight.active=true and sight.partner=:partner order by sight.id desc",
         Sight.class).setParameter("partner", partner).getResultList();
   }
 
