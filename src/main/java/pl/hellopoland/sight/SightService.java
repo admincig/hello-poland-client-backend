@@ -34,6 +34,9 @@ public class SightService extends ServiceSuperclass {
   public Sight create(pl.hellopoland.dto.Sight dto, Partner partner) {
     Sight bo = new Sight();
     HplMapper.copy(dto, bo);
+    if (partner == null) {
+      partner = partnerService.findByUserEmail(currentUser.getEmail());
+    }
     bo.setPartner(partner);
     imageService.update(bo, dto.mainImage == null ? null : dto.mainImage.original);
     em.persist(bo);
