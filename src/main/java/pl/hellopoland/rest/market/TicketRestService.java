@@ -30,7 +30,6 @@ public class TicketRestService {
   private CurrentUser currentUser;
 
   @GET
-  @Path("/tickets")
   @RolesAllowed("user")
   public List<OrderDateEntryOnListingORO> tickets() {
     return orderService.getOrderSightDateEntries(currentUser).stream()
@@ -39,14 +38,14 @@ public class TicketRestService {
   }
 
   @GET
-  @Path("/tickets/{id}")
+  @Path("/{id}")
   @RolesAllowed("user")
   public OrderDateEntryORO ticket(@PathParam("id") Long id) {
     return new OrderDateEntryORO(orderService.getOrderDateEntry(id));
   }
 
   @DELETE
-  @Path("/tickets/{id}")
+  @Path("/{id}")
   @RolesAllowed("user")
   public void deleteTicket(@PathParam("id") Long id) {
     orderService.deleteOrderDateEntry(id);

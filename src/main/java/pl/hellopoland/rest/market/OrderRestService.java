@@ -30,7 +30,6 @@ public class OrderRestService {
   private CurrentUser currentUser;
 
   @POST
-  @Path("/orders")
   public OrderORO create(OrderIRO iro) {
     Collection<Triplet<Long, Date, Integer>> tickets = iro.entries.stream()
         .map(e -> new Triplet<>(e.id, e.date, e.quantity)).collect(Collectors.toList());
@@ -38,7 +37,7 @@ public class OrderRestService {
   }
 
   @POST
-  @Path("/orders/{hash}/ackPayment")
+  @Path("/{hash}/ackPayment")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   public void ackPayment(@PathParam("hash") String hash, String ack) throws Exception {
     orderService.ack(hash, ack);
