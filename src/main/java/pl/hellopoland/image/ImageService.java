@@ -34,6 +34,7 @@ public class ImageService extends ServiceSuperclass {
         size += ret;
       }
       out.close();
+      is.close();
       logger.log(Logger.Level.DEBUG, "Saved file of size" + size);
     } catch (Exception ioe) {
       throw new RuntimeException("File NOT stored", ioe);

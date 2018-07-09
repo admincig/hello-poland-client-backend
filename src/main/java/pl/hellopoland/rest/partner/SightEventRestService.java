@@ -69,4 +69,11 @@ public class SightEventRestService {
   public void delete(@PathParam("id") Long id) {
     sightEventService.delete(id);
   }
+
+  @PUT
+  @Path("/{id}/mainImage")
+  @Consumes({"image/jpeg", "image/jpg"})
+  public Response uploadIcon(@PathParam("id") Long id, byte[] icon){
+    return Response.ok(HplMapper.getDTO(sightEventService.uploadMainImage(id, icon))).build();
+  }
 }

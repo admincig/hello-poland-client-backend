@@ -1,11 +1,13 @@
 package pl.hellopoland.sight;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.ServiceSuperclass;
 import pl.hellopoland.exception.ExceptionFactory;
+import pl.hellopoland.image.Image;
 import pl.hellopoland.image.ImageService;
 import pl.hellopoland.partner.Partner;
 import pl.hellopoland.partner.PartnerService;
@@ -105,4 +107,11 @@ public class SightService extends ServiceSuperclass {
     sightEventService.create(sed, partner);
   }
 
+  public Sight uploadMainImage(Long id, byte[] icon) {
+    ByteArrayInputStream is = new ByteArrayInputStream(icon);
+    Image image = imageService.storeImage(is, "jpeg", null);
+    Sight bo = get(id);
+    get(id).setMainImage(image);
+    return bo;
+  }
 }

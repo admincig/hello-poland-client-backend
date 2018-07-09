@@ -2,6 +2,7 @@ package pl.hellopoland.sight;
 
 import static java.util.stream.Collectors.toList;
 
+import java.io.ByteArrayInputStream;
 import java.lang.System.Logger;
 import java.util.Comparator;
 import java.util.Date;
@@ -12,6 +13,7 @@ import javax.inject.Inject;
 import pl.hellopoland.ServiceSuperclass;
 import pl.hellopoland.config.SightsPagedCollectionConfig;
 import pl.hellopoland.dto.Push;
+import pl.hellopoland.image.Image;
 import pl.hellopoland.image.ImageService;
 import pl.hellopoland.partner.Partner;
 import pl.hellopoland.partner.PartnerService;
@@ -156,5 +158,13 @@ public class SightEventService extends ServiceSuperclass {
             && sightEvent2.getDate().compareTo(current) > 0;
       }
     };
+  }
+
+  public SightEvent uploadMainImage(Long id, byte[] icon) {
+    ByteArrayInputStream is = new ByteArrayInputStream(icon);
+    Image image = iService.storeImage(is, "jpeg", null);
+    SightEvent bo = get(id);
+    get(id).setMainImage(image);
+    return bo;
   }
 }

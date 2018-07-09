@@ -63,4 +63,11 @@ public class SightRestService {
     sightService.delete(id);
     return noContent().build();
   }
+
+  @PUT
+  @Path("/{id}/mainImage")
+  @Consumes({"image/jpeg", "image/jpg"})
+  public Response uploadIcon(@PathParam("id") Long id, byte[] icon){
+    return Response.ok(HplMapper.getDTO(sightService.uploadMainImage(id, icon))).build();
+  }
 }
