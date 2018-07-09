@@ -29,6 +29,8 @@ public class Ticket extends ModelSuperclass {
 
   private Long externalId;
 
+  private Integer availableTicketsNumber;
+
   public String getName() {
     return name;
   }
@@ -83,5 +85,13 @@ public class Ticket extends ModelSuperclass {
 
   public void setDateType(DateType dateType) {
     this.dateType = dateType;
+  }
+
+  public void setAvailableTicketsNumber(Integer availableTicketsNumber) {
+    this.availableTicketsNumber = availableTicketsNumber;
+  }
+
+  public Integer getAvailableTicketsNumber() {
+    return availableTicketsNumber;
   }
 }
