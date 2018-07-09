@@ -1,23 +1,49 @@
 package pl.hellopoland.image;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.net.URL;
 import java.util.UUID;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
+import javax.imageio.ImageIO;
 import javax.persistence.NoResultException;
+import pl.hellopoland.ConflictingException;
 import pl.hellopoland.ServiceSuperclass;
+import pl.hellopoland.exception.ExceptionFactory;
 import pl.hellopoland.util.Imaged;
 
 @LocalBean
 @Stateless
 public class ImageService extends ServiceSuperclass {
 
-  public Image storeImage(InputStream is, String extension, String url) {
+  public Image validateAndStoreImage(InputStream is, String extension, String url) {
+    BufferedImage buffImage = validate(is);
+    return storeImage(buffImage, extension, url);
+  }
+
+  private BufferedImage validate(InputStream is) {
+    try {
+      BufferedImage imageIO = ImageIO.read(is);
+      logger.log(Level.INFO, "image width: " + imageIO.getWidth() + ", height: " + imageIO.getHeight());
+      if (imageIO.getWidth() < 2000){
+        throw new ConflictingException("Image width must be a minimum of 2000px");
+      }
+      return imageIO;
+    } catch (IOException e) {
+      throw new ConflictingException("Failed to validate image", e);
+    }
+  }
+
+  private Image storeImage(BufferedImage buffImage, String extension, String url) {
     String hash = UUID.randomUUID().toString().replace('-', 'x');
     String path = properties.getProperty("dms.root.path") + File.separator + hash.substring(0, 1)
         + File.separator + hash.substring(1, 2) + File.separator;
@@ -27,14 +53,7 @@ public class ImageService extends ServiceSuperclass {
     try {
       createEmptyFileOnDisc(path + hash + "." + extension);
       final File file = new File(path + hash + "." + extension);
-      final OutputStream out = new FileOutputStream(file);
-      int ret;
-      while ((ret = is.read(buf)) > 0) {
-        out.write(buf, 0, ret);
-        size += ret;
-      }
-      out.close();
-      is.close();
+      ImageIO.write(buffImage, extension, file);
       logger.log(Logger.Level.DEBUG, "Saved file of size" + size);
     } catch (Exception ioe) {
       throw new RuntimeException("File NOT stored", ioe);
@@ -68,7 +87,7 @@ public class ImageService extends ServiceSuperclass {
     if (url != null) {
       try {
         logger.log(Logger.Level.INFO, "Downloading image " + url);
-        im = storeImage(new URL(url).openConnection().getInputStream(), "jpg", url);
+        im = validateAndStoreImage(new URL(url).openConnection().getInputStream(), "jpg", url);
       } catch (Exception e) {
         logger.log(Logger.Level.WARNING, e.getMessage());
       }

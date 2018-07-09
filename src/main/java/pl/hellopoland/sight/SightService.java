@@ -109,7 +109,7 @@ public class SightService extends ServiceSuperclass {
 
   public Sight uploadMainImage(Long id, byte[] icon) {
     ByteArrayInputStream is = new ByteArrayInputStream(icon);
-    Image image = imageService.storeImage(is, "jpeg", null);
+    Image image = imageService.validateAndStoreImage(is, "jpeg", null);
     Sight bo = get(id);
     get(id).setMainImage(image);
     return bo;

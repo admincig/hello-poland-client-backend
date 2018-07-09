@@ -2,13 +2,16 @@ package pl.hellopoland.sight;
 
 import static java.util.stream.Collectors.toList;
 
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.lang.System.Logger;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
+import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import pl.hellopoland.ServiceSuperclass;
 import pl.hellopoland.config.SightsPagedCollectionConfig;
@@ -162,7 +165,7 @@ public class SightEventService extends ServiceSuperclass {
 
   public SightEvent uploadMainImage(Long id, byte[] icon) {
     ByteArrayInputStream is = new ByteArrayInputStream(icon);
-    Image image = iService.storeImage(is, "jpeg", null);
+    Image image = iService.validateAndStoreImage(is, "jpeg", null);
     SightEvent bo = get(id);
     get(id).setMainImage(image);
     return bo;
