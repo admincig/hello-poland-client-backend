@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.util.Optional;
 import java.util.Set;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.RequestScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.json.bind.JsonbBuilder;
@@ -38,7 +39,7 @@ import pl.hellopoland.user.UserService;
 import pl.hellopoland.util.FacebookAPIConnector;
 import pl.hellopoland.util.GoogleAPIConnector;
 
-@ApplicationScoped
+@RequestScoped
 public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
 
   private static final String AUTHORIZATION_PREFIX = "Bearer ";
