@@ -195,7 +195,7 @@ public class OrderService extends ServiceSuperclass {
 
   public List<OrderDateEntry> getOrderSightDateEntries(CurrentUser currentUser) {
     List<OrderDateEntry> osdes = em.createQuery(
-        "from OrderDateEntry osde join fetch osde.sightEntry ose join fetch ose.sight s join fetch ose.order o where osde.deleted=false and o.user=:user and o.status=:status order by osde.date asc",
+        "from OrderDateEntry osde join fetch osde.sightEntry ose join fetch ose.sightEvent s join fetch ose.order o where osde.deleted=false and o.user=:user and o.status=:status order by osde.date asc",
         OrderDateEntry.class).setParameter("user", uService.me(currentUser))
         .setParameter("status", Order.Status.CONFIRMED).getResultList();
     osdes.forEach(osde -> osde.getEntries().size());
