@@ -131,12 +131,6 @@ public class SightEventService extends ServiceSuperclass {
         SightEvent.class).setParameter("partner", partner).getResultList();
   }
 
-
-  private Portal getPortal(String name) {
-    return em.createQuery("from Portal where name=:name", Portal.class).setParameter("name", name)
-        .getSingleResult();
-  }
-
   private Comparator<SightEvent> sightEventDatesComparator() {
     return new Comparator<>() {
       @Override

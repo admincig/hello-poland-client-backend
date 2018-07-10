@@ -4,6 +4,7 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
 import pl.hellopoland.dto.DateType;
+import pl.hellopoland.dto.TicketDefinition;
 import pl.hellopoland.image.Image;
 import pl.hellopoland.sight.Location;
 import pl.hellopoland.sight.Sight;
@@ -80,7 +81,7 @@ public class HplMapper {
     return dto;
   }
 
-  private static pl.hellopoland.dto.TicketDefinition getDTO(Ticket bo) {
+  public static pl.hellopoland.dto.TicketDefinition getDTO(Ticket bo) {
     pl.hellopoland.dto.TicketDefinition dto = new pl.hellopoland.dto.TicketDefinition();
 
     dto.id = bo.getId();
@@ -90,6 +91,7 @@ public class HplMapper {
     dto.date = bo.getDate();
     dto.dateType = DateType.valueOf(bo.getDateType().name());
     dto.sightEventId = bo.getSightEvent().getId();
+    dto.availableTicketsNumber = bo.getAvailableTicketsNumber();
 
     return dto;
   }
@@ -149,4 +151,13 @@ public class HplMapper {
     copyLocation(source.location, target);
   }
 
+  public static void copy(pl.hellopoland.dto.TicketDefinition source, Ticket target) {
+    target.setDate(source.date);
+    target.setDateType(pl.hellopoland.sight.DateType.valueOf(source.dateType.name()));
+    target.setExternalId(source.id);
+    target.setName(source.name);
+    target.setPredefinedDate(source.predefinedDate);
+    target.setPrice(source.price);
+    target.setAvailableTicketsNumber(source.availableTicketsNumber);
+  }
 }

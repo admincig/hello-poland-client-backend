@@ -16,6 +16,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import pl.hellopoland.config.PagedCollectionConfig;
 import pl.hellopoland.config.PagedCollectionConfig.Entry;
+import pl.hellopoland.sight.Portal;
 
 
 public abstract class ServiceSuperclass {
@@ -104,4 +105,8 @@ public abstract class ServiceSuperclass {
     return "Executing select query:\n" + query;
   }
 
+  public Portal getPortal(String name) {
+    return em.createQuery("from Portal where name=:name", Portal.class).setParameter("name", name)
+        .getSingleResult();
+  }
 }
