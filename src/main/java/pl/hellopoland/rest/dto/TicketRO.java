@@ -1,0 +1,22 @@
+package pl.hellopoland.rest.dto;
+
+import pl.hellopoland.sight.Ticket;
+
+public class TicketRO {
+
+  public Long id;
+  public String name;
+  public Integer price;
+  public Boolean predefinedDate;
+  public String date;
+
+  public TicketRO(Ticket t) {
+    this.id = t.getId();
+    this.name = t.getName();
+    this.price = t.getPrice();
+    this.predefinedDate = t.isPredefinedDate();
+    if (this.predefinedDate) {
+      this.date = DtoUtils.df.format(t.getDate());
+    }
+  }
+}
