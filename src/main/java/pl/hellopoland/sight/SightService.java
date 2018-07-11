@@ -30,14 +30,11 @@ public class SightService extends ServiceSuperclass {
   @Inject
   private ExceptionFactory exceptionFactory;
 
-  @Inject
-  private CurrentUser currentUser;
-
   public Sight create(pl.hellopoland.dto.Sight dto, Partner partner) {
     Sight bo = new Sight();
     HplMapper.copy(dto, bo);
     if (partner == null) {
-      partner = partnerService.findByUserEmail(currentUser.getEmail());
+      partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
     }
     bo.setPartner(partner);
     imageService.update(bo, dto.mainImage == null ? null : dto.mainImage.original);
@@ -70,7 +67,7 @@ public class SightService extends ServiceSuperclass {
   }
 
   public List<Sight> getActiveForPartner() {
-    Partner partner = partnerService.findByUserEmail(currentUser.getEmail());
+    Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
 
     return em.createQuery("from Sight sight where sight.active=true and sight.partner=:partner order by sight.id desc",
         Sight.class).setParameter("partner", partner).getResultList();

@@ -2,17 +2,15 @@ package pl.hellopoland.sight;
 
 import static java.util.stream.Collectors.toList;
 
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.lang.System.Logger;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
-import javax.imageio.ImageIO;
 import javax.inject.Inject;
+import javax.security.enterprise.SecurityContext;
 import pl.hellopoland.ServiceSuperclass;
 import pl.hellopoland.config.SightsPagedCollectionConfig;
 import pl.hellopoland.dto.Push;
@@ -20,7 +18,6 @@ import pl.hellopoland.image.Image;
 import pl.hellopoland.image.ImageService;
 import pl.hellopoland.partner.Partner;
 import pl.hellopoland.partner.PartnerService;
-import pl.hellopoland.security.dto.CurrentUser;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.HplMapper;
 import pl.hellopoland.util.PagedEntityCollection;
@@ -38,12 +35,9 @@ public class SightEventService extends ServiceSuperclass {
   @Inject
   private PartnerService partnerService;
 
-  @Inject
-  private CurrentUser currentUser;
-
   public PagedEntityCollection<SightEvent> getList(SightsPagedCollectionConfig config) {
     if (config.isCurrentPartner()) {
-      config.setPartner(partnerService.findByUserEmail(currentUser.getEmail()).getId());
+      config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
     }
 
     List<SightEvent> sightEvents = getQuery(config).getResultList()
@@ -75,7 +69,7 @@ public class SightEventService extends ServiceSuperclass {
   public void delete(Long id) {
     SightEvent bo = get(id);
 
-    Partner partner = partnerService.findByUserEmail(currentUser.getEmail());
+    Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
     helloTicket.deleteSightEvent(bo, partner.getHptToken());
@@ -85,7 +79,7 @@ public class SightEventService extends ServiceSuperclass {
 
   public SightEvent create(pl.hellopoland.dto.SightEvent dto, Partner partner) {
     if (partner == null) {
-      partner = partnerService.findByUserEmail(currentUser.getEmail());
+      partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
     }
     dto.generalAdmission = Boolean.TRUE.equals(dto.generalAdmission);
     Portal hpt = getPortal("Hello Ticket Cloud");
@@ -111,7 +105,7 @@ public class SightEventService extends ServiceSuperclass {
   public SightEvent update(Long id, pl.hellopoland.dto.SightEvent dto) {
     SightEvent bo = get(id);
     if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
-      Partner partner = partnerService.findByUserEmail(currentUser.getEmail());
+      Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
       Portal hpt = getPortal("Hello Ticket Cloud");
       HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
 
@@ -124,7 +118,7 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public List<SightEvent> getForPartner() {
-    Partner partner = partnerService.findByUserEmail(currentUser.getEmail());
+    Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
 
     return em.createQuery(
         "from SightEvent event where event.sight.partner=:partner order by event.id desc",
