@@ -1,7 +1,7 @@
 package pl.hellopoland.rest.market;
 
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
-import static pl.hellopoland.security.dto.UserAuthDTO.ofCurrentUser;
+import static pl.hellopoland.security.UserAuthDTO.ofCurrentUser;
 
 import javax.annotation.security.DeclareRoles;
 import javax.inject.Inject;
@@ -12,7 +12,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import pl.hellopoland.security.dto.CurrentUser;
+import pl.hellopoland.security.CurrentUser;
 
 @Path("/market")
 @Produces(MediaType.APPLICATION_JSON)

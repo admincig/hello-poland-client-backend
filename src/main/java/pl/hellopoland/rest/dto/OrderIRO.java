@@ -2,7 +2,7 @@ package pl.hellopoland.rest.dto;
 
 import java.util.Collection;
 import java.util.Date;
-import pl.hellopoland.order.OrderDetails;
+import pl.hellopoland.bo.OrderDetails;
 
 public class OrderIRO {
 

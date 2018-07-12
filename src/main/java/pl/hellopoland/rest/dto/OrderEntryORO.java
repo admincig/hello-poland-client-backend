@@ -1,7 +1,7 @@
 package pl.hellopoland.rest.dto;
 
 import java.util.List;
-import pl.hellopoland.order.OrderEntry;
+import pl.hellopoland.bo.OrderEntry;
 
 public class OrderEntryORO extends OrderEntryOnListingORO {
 

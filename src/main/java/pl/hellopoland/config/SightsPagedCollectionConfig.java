@@ -1,7 +1,6 @@
 package pl.hellopoland.config;
 
-import pl.hellopoland.partner.Partner;
-import pl.hellopoland.sight.SightEvent;
+import pl.hellopoland.bo.SightEvent;
 
 public class SightsPagedCollectionConfig extends PagedCollectionConfig<SightEvent> {
 

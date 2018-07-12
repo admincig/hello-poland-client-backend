@@ -1,6 +1,6 @@
 package pl.hellopoland.util;
 
-import pl.hellopoland.sight.Location;
+import pl.hellopoland.bo.Location;
 
 public interface Located {
 

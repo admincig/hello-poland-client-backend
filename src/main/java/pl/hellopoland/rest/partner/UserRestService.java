@@ -1,7 +1,6 @@
 package pl.hellopoland.rest.partner;
 
 import java.util.logging.Logger;
-import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -10,8 +9,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import pl.hellopoland.rest.dto.UserORO;
-import pl.hellopoland.security.dto.CurrentUser;
-import pl.hellopoland.user.UserService;
+import pl.hellopoland.security.CurrentUser;
+import pl.hellopoland.service.UserService;
 
 @Path("/partner/users")
 @RequestScoped
@@ -19,17 +18,13 @@ import pl.hellopoland.user.UserService;
 @Consumes(MediaType.APPLICATION_JSON)
 public class UserRestService {
 
-  Logger logger = Logger.getLogger(UserRestService.class.getName());
-
   @Inject
   private UserService userService;
-
-  @Inject
-  private CurrentUser currentUser;
 
   @GET
   @Path("/me")
   public UserORO me() {
-    return new UserORO(userService.me(currentUser));
+    return new UserORO(userService.me());
   }
+
 }

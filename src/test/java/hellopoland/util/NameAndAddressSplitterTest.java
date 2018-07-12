@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
-import pl.hellopoland.ConflictingException;
+import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.util.NameAndAddressSplitter;
 
 public class NameAndAddressSplitterTest {

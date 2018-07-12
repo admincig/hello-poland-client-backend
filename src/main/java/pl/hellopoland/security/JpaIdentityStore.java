@@ -12,9 +12,9 @@ import javax.security.enterprise.credential.UsernamePasswordCredential;
 import javax.security.enterprise.identitystore.CredentialValidationResult;
 import javax.security.enterprise.identitystore.IdentityStore;
 import pl.hellopoland.security.password.PasswordEncoder;
-import pl.hellopoland.user.User;
-import pl.hellopoland.user.UserRole;
-import pl.hellopoland.user.UserService;
+import pl.hellopoland.bo.User;
+import pl.hellopoland.bo.UserRole;
+import pl.hellopoland.service.UserService;
 
 @RequestScoped
 public class JpaIdentityStore implements IdentityStore {

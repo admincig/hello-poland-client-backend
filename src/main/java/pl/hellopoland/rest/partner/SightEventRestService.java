@@ -1,7 +1,6 @@
 package pl.hellopoland.rest.partner;
 
 import java.util.stream.Collectors;
-import javax.annotation.security.PermitAll;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -16,9 +15,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import pl.hellopoland.config.SightsPagedCollectionConfig;
 import pl.hellopoland.rest.dto.PagedCollection;
-import pl.hellopoland.sight.SightEvent;
-import pl.hellopoland.sight.SightEventService;
-import pl.hellopoland.util.HplMapper;
+import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.service.SightEventService;
+import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.PagedEntityCollection;
 
 @Path("/partner/sight-events")
@@ -37,13 +36,13 @@ public class SightEventRestService {
 
   @POST
   public Response create(pl.hellopoland.dto.SightEvent dto) {
-    return Response.ok(HplMapper.getDTO(sightEventService.create(dto, null))).build();
+    return Response.ok(DtoMapper.getDTO(sightEventService.create(dto, null))).build();
   }
 
   @PUT
   @Path("/{id}")
   public Response update(@PathParam("id") Long id, pl.hellopoland.dto.SightEvent dto) {
-    return Response.ok(HplMapper.getDTO(sightEventService.update(id, dto))).build();
+    return Response.ok(DtoMapper.getDTO(sightEventService.update(id, dto))).build();
   }
 
   @POST
@@ -53,14 +52,14 @@ public class SightEventRestService {
     config.onlyActive();
     PagedEntityCollection<SightEvent> plist = sightEventService.getList(config);
     return new PagedCollection(
-        plist.items.stream().map(HplMapper::getDTO).collect(Collectors.toList()),
+        plist.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList()),
         plist.config);
   }
 
   @GET
   @Path("/{id}")
   public pl.hellopoland.dto.SightEvent get(@PathParam("id") Long id) {
-    return HplMapper.getDTO(sightEventService.get(id));
+    return DtoMapper.getDTO(sightEventService.get(id));
   }
 
   @DELETE
@@ -73,6 +72,6 @@ public class SightEventRestService {
   @Path("/{id}/mainImage")
   @Consumes({"image/jpeg", "image/jpg"})
   public Response uploadIcon(@PathParam("id") Long id, byte[] icon){
-    return Response.ok(HplMapper.getDTO(sightEventService.uploadMainImage(id, icon))).build();
+    return Response.ok(DtoMapper.getDTO(sightEventService.uploadMainImage(id, icon))).build();
   }
 }

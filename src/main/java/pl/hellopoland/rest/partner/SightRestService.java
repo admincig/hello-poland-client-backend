@@ -17,9 +17,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import pl.hellopoland.rest.dto.PagedCollection;
-import pl.hellopoland.security.dto.CurrentUser;
-import pl.hellopoland.sight.SightService;
-import pl.hellopoland.util.HplMapper;
+import pl.hellopoland.service.SightService;
+import pl.hellopoland.util.DtoMapper;
 
 @Path("/partner/sights")
 @RequestScoped
@@ -33,25 +32,25 @@ public class SightRestService {
   @POST
   public Response add(pl.hellopoland.dto.Sight sight) throws URISyntaxException {
     return Response.created(new URI("/partner/sights/" + sight.id))
-        .entity(HplMapper.getFullDTO(sightService.create(sight, null))).build();
+        .entity(DtoMapper.getFullDTO(sightService.create(sight, null))).build();
   }
 
   @GET
   public Response getList() {
     return Response.ok(new PagedCollection(sightService.getActiveForPartner().stream()
-        .map(HplMapper::getDTO).collect(Collectors.toList()), null)).build();
+        .map(DtoMapper::getDTO).collect(Collectors.toList()), null)).build();
   }
 
   @GET
   @Path("/{id}")
   public Response get(@PathParam("id") Long id) {
-    return Response.ok(HplMapper.getFullDTO(sightService.get(id))).build();
+    return Response.ok(DtoMapper.getFullDTO(sightService.get(id))).build();
   }
 
   @PUT
   @Path("/{id}")
   public Response update(@PathParam("id") Long id, pl.hellopoland.dto.Sight sight) {
-    return Response.ok(HplMapper.getFullDTO(sightService.update(id, sight))).build();
+    return Response.ok(DtoMapper.getFullDTO(sightService.update(id, sight))).build();
   }
 
   @DELETE
@@ -65,6 +64,6 @@ public class SightRestService {
   @Path("/{id}/mainImage")
   @Consumes({"image/jpeg", "image/jpg"})
   public Response uploadIcon(@PathParam("id") Long id, byte[] icon){
-    return Response.ok(HplMapper.getDTO(sightService.uploadMainImage(id, icon))).build();
+    return Response.ok(DtoMapper.getDTO(sightService.uploadMainImage(id, icon))).build();
   }
 }

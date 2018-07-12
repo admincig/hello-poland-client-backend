@@ -14,7 +14,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import pl.hellopoland.image.ImageService;
+import pl.hellopoland.service.ImageService;
 
 @Path("/")
 @RequestScoped

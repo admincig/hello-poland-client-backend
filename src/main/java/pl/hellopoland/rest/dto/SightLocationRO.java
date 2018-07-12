@@ -1,6 +1,6 @@
 package pl.hellopoland.rest.dto;
 
-import pl.hellopoland.sight.Location;
+import pl.hellopoland.bo.Location;
 
 public class SightLocationRO {
 

@@ -3,7 +3,6 @@ package pl.hellopoland.exception;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import javax.enterprise.context.RequestScoped;
-import pl.hellopoland.config.Utf8ResourceBundleControl;
 
 @RequestScoped
 public class ExceptionMessagesService {
