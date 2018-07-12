@@ -10,7 +10,8 @@ import java.util.List;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import pl.hellopoland.config.SightsPagedCollectionConfig;
+import javax.interceptor.Interceptors;
+import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.Push;
 import pl.hellopoland.bo.Image;
 import pl.hellopoland.bo.Partner;
@@ -34,7 +35,7 @@ public class SightEventService extends ServiceSuperclass {
   @Inject
   private PartnerService partnerService;
 
-  public PagedEntityCollection<SightEvent> getList(SightsPagedCollectionConfig config) {
+  public PagedEntityCollection<SightEvent> getList(SightEventPagedCollectionConfig config) {
     if (config.isCurrentPartner()) {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
     }
@@ -101,8 +102,8 @@ public class SightEventService extends ServiceSuperclass {
     return bo;
   }
 
-  public SightEvent update(Long id, pl.hellopoland.dto.SightEvent dto) {
-    SightEvent bo = get(id);
+  public SightEvent updateForLoggedUser(pl.hellopoland.dto.SightEvent dto) {
+    SightEvent bo = getForLoggedUser(dto.id);
     if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
       Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
       Portal hpt = getPortal("Hello Ticket Cloud");
@@ -150,11 +151,22 @@ public class SightEventService extends ServiceSuperclass {
     };
   }
 
-  public SightEvent uploadMainImage(Long id, byte[] icon) {
+  public SightEvent uploadMainImageForLoggedUser(Long id, byte[] icon) {
     ByteArrayInputStream is = new ByteArrayInputStream(icon);
     Image image = iService.validateAndStoreImage(is, "jpeg", null);
     SightEvent bo = get(id);
     get(id).setMainImage(image);
     return bo;
+  }
+
+  public SightEvent getForLoggedUser(Long id) {
+    Partner partner = partnerService.getLoggedPartner();
+    return em
+        .createQuery("from SightEvent where id=:id and partner=:partner", SightEvent.class)
+        .setParameter("id", id).setParameter("partner", partner).getSingleResult();
+  }
+
+  public void deleteForLoggedUser(Long id) {
+    getForLoggedUser(id).setActive(false);
   }
 }

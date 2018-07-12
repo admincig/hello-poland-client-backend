@@ -9,7 +9,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import pl.hellopoland.config.SightsPagedCollectionConfig;
+import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.api.market.SightEventServiceMarketAPI;
 
@@ -24,12 +24,12 @@ public class MarketSightEventRestService {
 
   @GET
   public PagedCollection getList() {
-    return search(new SightsPagedCollectionConfig());
+    return search(new SightEventPagedCollectionConfig());
   }
 
   @POST
   @Path("/search")
-  public PagedCollection search(SightsPagedCollectionConfig config) {
+  public PagedCollection search(SightEventPagedCollectionConfig config) {
     config.onlyActive();
     return service.getList(config);
   }

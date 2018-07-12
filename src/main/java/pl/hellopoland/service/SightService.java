@@ -67,7 +67,8 @@ public class SightService extends ServiceSuperclass {
   public List<Sight> getActiveForPartner() {
     Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
 
-    return em.createQuery("from Sight sight where sight.active=true and sight.partner=:partner order by sight.id desc",
+    return em.createQuery(
+        "from Sight sight where sight.active=true and sight.partner=:partner order by sight.id desc",
         Sight.class).setParameter("partner", partner).getResultList();
   }
 
@@ -102,11 +103,27 @@ public class SightService extends ServiceSuperclass {
     sightEventService.create(sed, partner);
   }
 
-  public Sight uploadMainImage(Long id, byte[] icon) {
+  public Sight uploadMainImageForLoggedUser(Long id, byte[] icon) {
     ByteArrayInputStream is = new ByteArrayInputStream(icon);
     Image image = imageService.validateAndStoreImage(is, "jpeg", null);
-    Sight bo = get(id);
-    get(id).setMainImage(image);
+    Sight bo = getActiveForLoggedUser(id);
+    bo.setMainImage(image);
     return bo;
+  }
+
+  public Sight getActiveForLoggedUser(Long id) {
+    return em
+        .createQuery("from Sight where id=:id and active=true and partner=:partner", Sight.class)
+        .setParameter("id", id).setParameter("partner", getLoggedPartner()).getSingleResult();
+  }
+
+  public Sight updateForLoggedUser(pl.hellopoland.dto.Sight dto) {
+    Sight bo = getActiveForLoggedUser(dto.id);
+    DtoMapper.copy(dto, bo);
+    return getActiveForLoggedUser(dto.id);
+  }
+
+  public void deleteForLoggedUser(Long id) {
+    getActiveForLoggedUser(id).setActive(false);
   }
 }

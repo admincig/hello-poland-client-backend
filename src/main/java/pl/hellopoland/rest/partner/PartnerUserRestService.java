@@ -11,20 +11,21 @@ import javax.ws.rs.core.MediaType;
 import pl.hellopoland.rest.dto.UserORO;
 import pl.hellopoland.security.CurrentUser;
 import pl.hellopoland.service.UserService;
+import pl.hellopoland.service.api.partner.UserServicePartnerAPI;
 
 @Path("/partner/users")
 @RequestScoped
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class UserRestService {
+public class PartnerUserRestService {
 
   @Inject
-  private UserService userService;
+  private UserServicePartnerAPI service;
 
   @GET
   @Path("/me")
   public UserORO me() {
-    return new UserORO(userService.me());
+    return service.me();
   }
 
 }

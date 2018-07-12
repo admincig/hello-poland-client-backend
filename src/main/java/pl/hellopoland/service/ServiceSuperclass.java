@@ -7,18 +7,23 @@ import java.util.Collection;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
+import javax.interceptor.AroundInvoke;
+import javax.interceptor.InvocationContext;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.security.enterprise.SecurityContext;
 import pl.hellopoland.bo.ModelSuperclass;
+import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.config.PagedCollectionConfig;
 import pl.hellopoland.config.PagedCollectionConfig.Entry;
 import pl.hellopoland.bo.Portal;
+import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 
 
 public abstract class ServiceSuperclass {
@@ -120,4 +125,18 @@ public abstract class ServiceSuperclass {
       return null;
     }
   }
+
+  public Partner getLoggedPartner() {
+    return getLoggedUser().getPartner();
+  }
+
+  @AroundInvoke
+  public Object catchNoResultException(InvocationContext ctx) throws Exception {
+    try {
+      return ctx.proceed();
+    } catch (NoResultException e) {
+      throw new ResourceNotFoundException();
+    }
+  }
+
 }
