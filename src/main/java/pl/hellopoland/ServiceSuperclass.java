@@ -6,14 +6,14 @@ import java.lang.System.Logger;
 import java.util.Collection;
 import java.util.Properties;
 import java.util.stream.Collectors;
-import javax.annotation.Resource;
-import javax.ejb.SessionContext;
+import javax.inject.Inject;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
+import javax.security.enterprise.SecurityContext;
 import pl.hellopoland.config.PagedCollectionConfig;
 import pl.hellopoland.config.PagedCollectionConfig.Entry;
 import pl.hellopoland.sight.Portal;
@@ -43,8 +43,8 @@ public abstract class ServiceSuperclass {
   }
 
 
-  @Resource
-  protected SessionContext ctx;
+  @Inject
+  protected SecurityContext ctx;
   @PersistenceContext
   protected EntityManager em;
 

@@ -17,13 +17,11 @@ public class TicketService extends ServiceSuperclass {
   PartnerService partnerService;
   @Inject
   SightEventService sightEventService;
-  @Inject
-  CurrentUser currentUser;
 
 
   public Ticket create(TicketDefinition dto, Partner partner){
     if (partner == null) {
-      partner = partnerService.findByUserEmail(currentUser.getEmail());
+      partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
     }
     Portal hpt = super.getPortal("Hello Ticket Cloud");
     HelloTicket helloTicket = new HelloTicket(hpt.getUrl());

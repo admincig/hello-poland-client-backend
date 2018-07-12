@@ -30,9 +30,6 @@ public class SightRestService {
   @Inject
   private SightService sightService;
 
-  @Inject
-  private CurrentUser currentUser;
-
   @POST
   public Response add(pl.hellopoland.dto.Sight sight) throws URISyntaxException {
     return Response.created(new URI("/partner/sights/" + sight.id))
