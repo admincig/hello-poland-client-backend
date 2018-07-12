@@ -31,7 +31,6 @@ public class SightEventRestService {
   SightEventService sightEventService;
 
   @GET
-  @PermitAll
   public PagedCollection getList() {
     return search(new SightsPagedCollectionConfig());
   }

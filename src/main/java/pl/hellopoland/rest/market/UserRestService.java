@@ -29,7 +29,6 @@ public class UserRestService {
 
   @GET
   @Path("/me")
-  @RolesAllowed("user")
   public UserORO me() {
     return new UserORO(userService.me(currentUser));
   }
