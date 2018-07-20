@@ -51,9 +51,6 @@ public class ImageService extends ServiceSuperclass {
 		try {
 			createEmptyFileOnDisc(path + hash + "." + extension);
 			final File file = new File(path + hash + "." + extension);
-
-			scalImage(buffImage, extension);
-
 			ImageIO.write(buffImage, extension, file);
 			logger.log(Logger.Level.DEBUG, "Saved file of size" + size);
 		} catch (Exception ioe) {
@@ -69,6 +66,7 @@ public class ImageService extends ServiceSuperclass {
 		return image;
 	}
 
+	// TODO: discuss where and what exactly to do it:
 	private BufferedImage scalImage(BufferedImage buffImage, String extension) {
 		var width = 0;
 
