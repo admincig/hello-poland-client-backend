@@ -97,10 +97,12 @@ public class ImageService extends ServiceSuperclass {
 		}
 
 		var img = buffImage.getScaledInstance(width, -1, BufferedImage.SCALE_DEFAULT);
-		var bImg = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_RGB);
+		width = img.getWidth(null);
+		var height = img.getHeight(null);
+		var bImg = new BufferedImage(width, height, buffImage.getType());
 		var g2d = bImg.createGraphics();
 		g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-		g2d.drawImage(img, 0, 0, img.getWidth(null), img.getHeight(null), null);
+		g2d.drawImage(img, 0, 0, width, height, null);
 		g2d.dispose();
 		return bImg;
 	}
