@@ -1,11 +1,10 @@
-package pl.hellopoland.imagevariant;
+package pl.hellopoland.image;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
 import pl.hellopoland.ModelSuperclass;
-import pl.hellopoland.image.Image;
 
 /**
  * Entity implementation class for Entity: ImageVariant
