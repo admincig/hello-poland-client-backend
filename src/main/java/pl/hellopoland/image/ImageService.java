@@ -17,6 +17,7 @@ import javax.persistence.NoResultException;
 
 import pl.hellopoland.ConflictingException;
 import pl.hellopoland.ServiceSuperclass;
+import pl.hellopoland.image.ImageVariant.Variant;
 import pl.hellopoland.util.Imaged;
 
 @LocalBean
@@ -44,45 +45,29 @@ public class ImageService extends ServiceSuperclass {
 	private ImageCollector storeImageCollector(BufferedImage buffImage, String extension, String url) {
 		var collector = new ImageCollector();
 		collector.setImageURL(url);
-		for (ImageVariant.Variant v : ImageVariant.Variant.values()) {
-			switch (v) {
-			case QVGA:
-				collector.setQvga(storeImageVariant(scaleImage(buffImage, 320), extension));
-				break;
-			case VGA:
-				collector.setVga(storeImageVariant(scaleImage(buffImage, 640), extension));
-				break;
-			case XGA:
-				collector.setXga(storeImageVariant(scaleImage(buffImage, 1024), extension));
-				break;
-			case SXGA:
-				collector.setSxga(storeImageVariant(scaleImage(buffImage, 1280), extension));
-				break;
-			case HD:
-				collector.setHd(storeImageVariant(scaleImage(buffImage, 720), extension));
-				break;
-			case FHD:
-				collector.setFhd(storeImageVariant(scaleImage(buffImage, 1920), extension));
-				break;
-			case FOURK:
-				collector.setFourK(storeImageVariant(scaleImage(buffImage, 3840), extension));
-				break;
-			case ORIGINAL:
-				collector.setOrginal(storeImageVariant(buffImage, extension));
-				break;
-			default:
-				break;
-			}
-		}
+		em.persist(collector);
+		collector.setQvga(
+				storeImageVariant(scaleImage(buffImage, 320), extension, ImageVariant.Variant.QVGA, collector));
+		collector.setVga(storeImageVariant(scaleImage(buffImage, 640), extension, ImageVariant.Variant.VGA, collector));
+		collector
+				.setXga(storeImageVariant(scaleImage(buffImage, 1024), extension, ImageVariant.Variant.XGA, collector));
+		collector.setSxga(
+				storeImageVariant(scaleImage(buffImage, 1280), extension, ImageVariant.Variant.SXGA, collector));
+		collector.setHd(storeImageVariant(scaleImage(buffImage, 720), extension, ImageVariant.Variant.HD, collector));
+		collector
+				.setFhd(storeImageVariant(scaleImage(buffImage, 1920), extension, ImageVariant.Variant.FHD, collector));
+		collector.setFourK(
+				storeImageVariant(scaleImage(buffImage, 3840), extension, ImageVariant.Variant.FOURK, collector));
+		collector.setOrginal(storeImageVariant(buffImage, extension, ImageVariant.Variant.ORIGINAL, collector));
 		return collector;
 	}
 
-	private ImageVariant storeImageVariant(BufferedImage buffImage, String extension) {
+	private ImageVariant storeImageVariant(BufferedImage buffImage, String extension, Variant variant,
+			ImageCollector collector) {
 		String hash = UUID.randomUUID().toString().replace('-', 'x');
 		String path = properties.getProperty("dms.root.path") + File.separator + hash.substring(0, 1) + File.separator
 				+ hash.substring(1, 2) + File.separator;
 
-//		byte[] buf = new byte[10000];
 		int size = 0;
 		try {
 			createEmptyFileOnDisc(path + hash + "." + extension);
@@ -97,6 +82,8 @@ public class ImageService extends ServiceSuperclass {
 		image.setPath(path);
 		image.setHash(hash);
 		image.setExtension(extension);
+		image.setCollector(collector);
+		image.setVariant(variant);
 		em.persist(image);
 		return image;
 	}
