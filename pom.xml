@@ -16,6 +16,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<parent.basedir>.</parent.basedir>
 		<security.domain>hellopoland</security.domain>
+		<local.properties>etc/${user.name}.config.properties</local.properties>
 	</properties>
 
 	<dependencyManagement>
@@ -118,7 +119,7 @@
 							<files>
 								<file>etc/config.properties</file>
 								<file>etc/${user.name}.config.properties</file>
-								<!-- <file>${local.properties}</file> -->
+								<file>${local.properties}</file>
 							</files>
 							<encoding>UTF-8</encoding>
 						</configuration>
@@ -134,6 +135,27 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.liquibase</groupId>
+				<artifactId>liquibase-maven-plugin</artifactId>
+				<version>3.6.2</version>
+				<configuration>
+					<propertyFile>${local.properties}</propertyFile>
+				</configuration>
+				<executions>
+					<execution>
+						<id>db_install</id>
+						<phase>install</phase>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.postgresql</groupId>
+						<artifactId>postgresql</artifactId>
+						<version>42.2.4</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 		</plugins>
 		<resources>
