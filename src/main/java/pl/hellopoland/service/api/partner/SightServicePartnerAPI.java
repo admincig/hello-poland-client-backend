@@ -17,7 +17,7 @@ public class SightServicePartnerAPI {
   SightService service;
 
 
-  @RolesAllowed("user")
+  @RolesAllowed("partner")
   public pl.hellopoland.dto.Sight create(pl.hellopoland.dto.Sight dto) {
     Sight bo = service.create(dto, null);
     dto = DtoMapper.getFullDTO(bo);
