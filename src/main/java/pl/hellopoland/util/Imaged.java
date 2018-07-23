@@ -1,11 +1,11 @@
 package pl.hellopoland.util;
 
-import pl.hellopoland.bo.Image;
+import pl.hellopoland.bo.ImageCollector;
 
 public interface Imaged {
 
-  Image getMainImage();
+  ImageCollector getMainImage();
 
-  void setMainImage(Image image);
+  void setMainImage(ImageCollector image);
 
 }

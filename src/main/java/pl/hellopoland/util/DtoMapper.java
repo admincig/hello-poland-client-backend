@@ -2,7 +2,7 @@ package pl.hellopoland.util;
 
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
-import pl.hellopoland.bo.Image;
+import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.Location;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
@@ -96,12 +96,19 @@ public class DtoMapper {
     return dto;
   }
 
-  private static pl.hellopoland.dto.Image getDTO(Image bo) {
+  private static pl.hellopoland.dto.Image getDTO(ImageCollector bo) {
     if (bo == null) {
       return null;
     }
     pl.hellopoland.dto.Image dto = new pl.hellopoland.dto.Image();
-    dto.original = bo.getDownloadUrl();
+    dto.original = bo.getOrginal().getDownloadUrl();
+    dto.fhd = bo.getFhd().getDownloadUrl();
+    dto.fourK = bo.getFourK().getDownloadUrl();
+    dto.hd = bo.getHd().getDownloadUrl();
+    dto.qvg = bo.getQvga().getDownloadUrl();
+    dto.sxga = bo.getSxga().getDownloadUrl();
+    dto.vga = bo.getVga().getDownloadUrl();
+    dto.xga = bo.getXga().getDownloadUrl();
     return dto;
   }
 

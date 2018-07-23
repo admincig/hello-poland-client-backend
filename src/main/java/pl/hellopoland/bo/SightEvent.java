@@ -26,7 +26,7 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
   private Boolean generalAdmission;
 
   @ManyToOne
-  private Image mainImage;
+  private ImageCollector mainImage;
 
   @OneToMany(mappedBy = "sightEvent")
   private Collection<Ticket> tickets;
@@ -58,7 +58,7 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
   @ManyToOne
   private Portal portal;
 
-  @ManyToOne(fetch=FetchType.EAGER)
+  @ManyToOne(fetch = FetchType.EAGER)
   private Sight sight;
 
   @ManyToOne
@@ -78,12 +78,12 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
   }
 
   @Override
-  public Image getMainImage() {
+  public ImageCollector getMainImage() {
     return mainImage;
   }
 
   @Override
-  public void setMainImage(Image mainImage) {
+  public void setMainImage(ImageCollector mainImage) {
     this.mainImage = mainImage;
   }
 

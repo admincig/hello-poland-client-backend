@@ -1,5 +1,6 @@
 package pl.hellopoland.service;
 
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -12,24 +13,28 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.imageio.ImageIO;
 import javax.persistence.NoResultException;
+import pl.hellopoland.bo.ImageCollector;
+import pl.hellopoland.bo.ImageVariant;
+import pl.hellopoland.bo.ImageVariant.Variant;
 import pl.hellopoland.exception.conflict.ConflictingException;
-import pl.hellopoland.bo.Image;
 import pl.hellopoland.util.Imaged;
 
 @LocalBean
 @Stateless
 public class ImageService extends ServiceSuperclass {
 
-  public Image validateAndStoreImage(InputStream is, String extension, String url) {
+  public ImageCollector validateAndStoreImageCollector(InputStream is, String extension,
+      String url) {
     BufferedImage buffImage = validate(is);
-    return storeImage(buffImage, extension, url);
+    return storeImageCollector(buffImage, extension, url);
   }
 
   private BufferedImage validate(InputStream is) {
     try {
       BufferedImage imageIO = ImageIO.read(is);
-      logger.log(Level.INFO, "image width: " + imageIO.getWidth() + ", height: " + imageIO.getHeight());
-      if (imageIO.getWidth() < 2000){
+      logger.log(Level.INFO,
+          "image width: " + imageIO.getWidth() + ", height: " + imageIO.getHeight());
+      if (imageIO.getWidth() < 2000) {
         throw new ConflictingException("Image width must be a minimum of 2000px");
       }
       return imageIO;
@@ -38,12 +43,36 @@ public class ImageService extends ServiceSuperclass {
     }
   }
 
-  private Image storeImage(BufferedImage buffImage, String extension, String url) {
+  private ImageCollector storeImageCollector(BufferedImage buffImage, String extension,
+      String url) {
+    var collector = new ImageCollector();
+    collector.setImageURL(url);
+    em.persist(collector);
+    collector.setQvga(storeImageVariant(scaleImage(buffImage, 320), extension,
+        ImageVariant.Variant.QVGA, collector));
+    collector.setVga(storeImageVariant(scaleImage(buffImage, 640), extension,
+        ImageVariant.Variant.VGA, collector));
+    collector.setXga(storeImageVariant(scaleImage(buffImage, 1024), extension,
+        ImageVariant.Variant.XGA, collector));
+    collector.setSxga(storeImageVariant(scaleImage(buffImage, 1280), extension,
+        ImageVariant.Variant.SXGA, collector));
+    collector.setHd(storeImageVariant(scaleImage(buffImage, 720), extension,
+        ImageVariant.Variant.HD, collector));
+    collector.setFhd(storeImageVariant(scaleImage(buffImage, 1920), extension,
+        ImageVariant.Variant.FHD, collector));
+    collector.setFourK(storeImageVariant(scaleImage(buffImage, 3840), extension,
+        ImageVariant.Variant.FOURK, collector));
+    collector.setOrginal(
+        storeImageVariant(buffImage, extension, ImageVariant.Variant.ORIGINAL, collector));
+    return collector;
+  }
+
+  private ImageVariant storeImageVariant(BufferedImage buffImage, String extension, Variant variant,
+      ImageCollector collector) {
     String hash = UUID.randomUUID().toString().replace('-', 'x');
     String path = properties.getProperty("dms.root.path") + File.separator + hash.substring(0, 1)
         + File.separator + hash.substring(1, 2) + File.separator;
 
-    byte[] buf = new byte[10000];
     int size = 0;
     try {
       createEmptyFileOnDisc(path + hash + "." + extension);
@@ -54,13 +83,27 @@ public class ImageService extends ServiceSuperclass {
       throw new RuntimeException("File NOT stored", ioe);
     }
 
-    Image image = new Image();
+    ImageVariant image = new ImageVariant();
     image.setPath(path);
     image.setHash(hash);
     image.setExtension(extension);
-    image.setImageURL(url);
+    image.setCollector(collector);
+    image.setVariant(variant);
     em.persist(image);
     return image;
+  }
+
+  private BufferedImage scaleImage(BufferedImage buffImage, int width) {
+    var img = buffImage.getScaledInstance(width, -1, BufferedImage.SCALE_DEFAULT);
+    width = img.getWidth(null);
+    var height = img.getHeight(null);
+    var bImg = new BufferedImage(width, height, buffImage.getType());
+    var g2d = bImg.createGraphics();
+    g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+        RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+    g2d.drawImage(img, 0, 0, width, height, null);
+    g2d.dispose();
+    return bImg;
   }
 
   private void createEmptyFileOnDisc(String path) {
@@ -72,17 +115,19 @@ public class ImageService extends ServiceSuperclass {
   }
 
   public File getImage(String name) {
-    String path = em.createQuery("select path from Image where concat(hash, '.' ,extension)=:name",
-        String.class).setParameter("name", name).getSingleResult();
+    var path =
+        em.createQuery("select path from ImageVariant where concat(hash, '.' ,extension)=:name",
+            String.class).setParameter("name", name).getSingleResult();
     return new File(path + name);
   }
 
-  public Image downloadImage(String url) {
-    Image im = null;
+  public ImageCollector downloadImage(String url) {
+    ImageCollector im = null;
     if (url != null) {
       try {
         logger.log(Logger.Level.INFO, "Downloading image " + url);
-        im = validateAndStoreImage(new URL(url).openConnection().getInputStream(), "jpg", url);
+        im = validateAndStoreImageCollector(new URL(url).openConnection().getInputStream(), "jpg",
+            url);
       } catch (Exception e) {
         logger.log(Logger.Level.WARNING, e.getMessage());
       }
@@ -94,21 +139,23 @@ public class ImageService extends ServiceSuperclass {
     if (importUrl == null) {
       bo.setMainImage(null);
     } else {
-      Image boImage = bo.getMainImage();
-      Image image = getOrDownload(importUrl);
+      var boImage = bo.getMainImage();
+      var image = getOrDownload(importUrl);
       if (boImage == null || !boImage.getId().equals(image.getId())) {
         bo.setMainImage(image);
       }
     }
   }
 
-  private Image getOrDownload(String importUrl) {
+  private ImageCollector getOrDownload(String importUrl) {
     try {
       var parts = importUrl.split("\\/");
-      String name = parts[parts.length-1];
+      String name = parts[parts.length - 1];
       String hash = name.split("\\.")[0];
-      return em.createQuery("from Image where imageURL=:url or hash=:hash", Image.class)
-          .setParameter("url", importUrl).setParameter("hash", hash).getSingleResult();
+      return em.createQuery("from ImageCollector where imageURL=:url "
+          + "or orginal.hash=:hash or qvga.hash=:hash or vga.hash=:hash or hd.hash=:hash or xga.hash=:hash or sxga.hash=:hash or fhd.hash=:hash or fourK.hash=:hash",
+          ImageCollector.class).setParameter("url", importUrl).setParameter("hash", hash)
+          .getSingleResult();
     } catch (NoResultException e) {
       return downloadImage(importUrl);
     }

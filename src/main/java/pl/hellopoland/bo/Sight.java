@@ -22,7 +22,7 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
   private String description;
 
   @ManyToOne
-  private Image mainImage;
+  private ImageCollector mainImage;
 
   private String email;
 
@@ -66,12 +66,12 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
   }
 
   @Override
-  public Image getMainImage() {
+  public ImageCollector getMainImage() {
     return mainImage;
   }
 
   @Override
-  public void setMainImage(Image mainImage) {
+  public void setMainImage(ImageCollector mainImage) {
     this.mainImage = mainImage;
   }
 

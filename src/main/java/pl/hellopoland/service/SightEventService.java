@@ -1,7 +1,6 @@
 package pl.hellopoland.service;
 
 import static java.util.stream.Collectors.toList;
-
 import java.io.ByteArrayInputStream;
 import java.lang.System.Logger;
 import java.util.Comparator;
@@ -10,16 +9,15 @@ import java.util.List;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.interceptor.Interceptors;
-import pl.hellopoland.config.SightEventPagedCollectionConfig;
-import pl.hellopoland.dto.Push;
-import pl.hellopoland.bo.Image;
+import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
-import pl.hellopoland.util.HelloTicket;
+import pl.hellopoland.config.SightEventPagedCollectionConfig;
+import pl.hellopoland.dto.Push;
 import pl.hellopoland.util.DtoMapper;
+import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PagedEntityCollection;
 
 @LocalBean
@@ -40,10 +38,8 @@ public class SightEventService extends ServiceSuperclass {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
     }
 
-    List<SightEvent> sightEvents = getQuery(config).getResultList()
-        .stream()
-        .sorted(sightEventDatesComparator())
-        .collect(toList());
+    List<SightEvent> sightEvents = getQuery(config).getResultList().stream()
+        .sorted(sightEventDatesComparator()).collect(toList());
     return new PagedEntityCollection<>(sightEvents, config);
   }
 
@@ -153,7 +149,7 @@ public class SightEventService extends ServiceSuperclass {
 
   public SightEvent uploadMainImageForLoggedUser(Long id, byte[] icon) {
     ByteArrayInputStream is = new ByteArrayInputStream(icon);
-    Image image = iService.validateAndStoreImage(is, "jpeg", null);
+    ImageCollector image = iService.validateAndStoreImageCollector(is, "jpeg", null);
     SightEvent bo = get(id);
     get(id).setMainImage(image);
     return bo;
@@ -161,8 +157,7 @@ public class SightEventService extends ServiceSuperclass {
 
   public SightEvent getForLoggedUser(Long id) {
     Partner partner = partnerService.getLoggedPartner();
-    return em
-        .createQuery("from SightEvent where id=:id and partner=:partner", SightEvent.class)
+    return em.createQuery("from SightEvent where id=:id and partner=:partner", SightEvent.class)
         .setParameter("id", id).setParameter("partner", partner).getSingleResult();
   }
 

@@ -5,11 +5,11 @@ import java.util.List;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import pl.hellopoland.exception.ExceptionFactory;
-import pl.hellopoland.bo.Image;
+import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.exception.ExceptionFactory;
 import pl.hellopoland.util.DtoMapper;
 
 @LocalBean
@@ -105,7 +105,7 @@ public class SightService extends ServiceSuperclass {
 
   public Sight uploadMainImageForLoggedUser(Long id, byte[] icon) {
     ByteArrayInputStream is = new ByteArrayInputStream(icon);
-    Image image = imageService.validateAndStoreImage(is, "jpeg", null);
+    ImageCollector image = imageService.validateAndStoreImageCollector(is, "jpeg", null);
     Sight bo = getActiveForLoggedUser(id);
     bo.setMainImage(image);
     return bo;
