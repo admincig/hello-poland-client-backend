@@ -136,6 +136,27 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.liquibase</groupId>
+				<artifactId>liquibase-maven-plugin</artifactId>
+				<version>3.6.2</version>
+				<configuration>
+					<propertyFile>${local.properties}</propertyFile>
+				</configuration>
+				<executions>
+					<execution>
+						<id>db_install</id>
+						<phase>install</phase>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.postgresql</groupId>
+						<artifactId>postgresql</artifactId>
+						<version>42.2.4</version>
+					</dependency>
+				</dependencies>
+			</plugin>
 		</plugins>
 		<resources>
 			<resource>
