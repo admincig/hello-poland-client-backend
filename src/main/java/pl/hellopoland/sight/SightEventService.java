@@ -7,14 +7,14 @@ import java.lang.System.Logger;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.security.enterprise.SecurityContext;
+
 import pl.hellopoland.ServiceSuperclass;
 import pl.hellopoland.config.SightsPagedCollectionConfig;
 import pl.hellopoland.dto.Push;
-import pl.hellopoland.image.Image;
 import pl.hellopoland.image.ImageService;
 import pl.hellopoland.partner.Partner;
 import pl.hellopoland.partner.PartnerService;
@@ -26,136 +26,131 @@ import pl.hellopoland.util.PagedEntityCollection;
 @Stateless
 public class SightEventService extends ServiceSuperclass {
 
-  @Inject
-  private ImageService iService;
+	@Inject
+	private ImageService iService;
 
-  @Inject
-  private SightService sightService;
+	@Inject
+	private SightService sightService;
 
-  @Inject
-  private PartnerService partnerService;
+	@Inject
+	private PartnerService partnerService;
 
-  public PagedEntityCollection<SightEvent> getList(SightsPagedCollectionConfig config) {
-    if (config.isCurrentPartner()) {
-      config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
-    }
+	public PagedEntityCollection<SightEvent> getList(SightsPagedCollectionConfig config) {
+		if (config.isCurrentPartner()) {
+			config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
+		}
 
-    List<SightEvent> sightEvents = getQuery(config).getResultList()
-        .stream()
-        .sorted(sightEventDatesComparator())
-        .collect(toList());
-    return new PagedEntityCollection<>(sightEvents, config);
-  }
+		List<SightEvent> sightEvents = getQuery(config).getResultList().stream().sorted(sightEventDatesComparator())
+				.collect(toList());
+		return new PagedEntityCollection<>(sightEvents, config);
+	}
 
-  public SightEvent get(Long id) {
-    SightEvent s = em.find(SightEvent.class, id);
+	public SightEvent get(Long id) {
+		SightEvent s = em.find(SightEvent.class, id);
 
-    // fetch collections
-    s.getTickets().size();
-    s.getOpeningHours().size();
-    s.getAgreements().size();
+		// fetch collections
+		s.getTickets().size();
+		s.getOpeningHours().size();
+		s.getAgreements().size();
 
-    return s;
-  }
+		return s;
+	}
 
-  public void savePush(Push push) {
-    Partner partner = partnerService.findByToken(push.secret);
-    push.sightEvents.forEach(sdto -> {
-      create(sdto, partner);
-    });
-  }
+	public void savePush(Push push) {
+		Partner partner = partnerService.findByToken(push.secret);
+		push.sightEvents.forEach(sdto -> {
+			create(sdto, partner);
+		});
+	}
 
+	public void delete(Long id) {
+		SightEvent bo = get(id);
 
-  public void delete(Long id) {
-    SightEvent bo = get(id);
+		Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
+		Portal hpt = getPortal("Hello Ticket Cloud");
+		HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
+		helloTicket.deleteSightEvent(bo, partner.getHptToken());
 
-    Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
-    Portal hpt = getPortal("Hello Ticket Cloud");
-    HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
-    helloTicket.deleteSightEvent(bo, partner.getHptToken());
+		bo.setActive(false);
+	}
 
-    bo.setActive(false);
-  }
+	public SightEvent create(pl.hellopoland.dto.SightEvent dto, Partner partner) {
+		if (partner == null) {
+			partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
+		}
+		dto.generalAdmission = Boolean.TRUE.equals(dto.generalAdmission);
+		Portal hpt = getPortal("Hello Ticket Cloud");
+		HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
+		dto = helloTicket.addSightEvent(dto, partner.getHptToken());
+		SightEvent bo = new SightEvent();
+		HplMapper.copy(dto, bo);
+		iService.update(bo, dto.mainImage == null ? null : dto.mainImage.original);
+		bo.generateRandomScore();
+		bo.setPortal(hpt);
 
-  public SightEvent create(pl.hellopoland.dto.SightEvent dto, Partner partner) {
-    if (partner == null) {
-      partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
-    }
-    dto.generalAdmission = Boolean.TRUE.equals(dto.generalAdmission);
-    Portal hpt = getPortal("Hello Ticket Cloud");
-    HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
-    dto = helloTicket.addSightEvent(dto, partner.getHptToken());
-    SightEvent bo = new SightEvent();
-    HplMapper.copy(dto, bo);
-    iService.update(bo, dto.mainImage == null ? null : dto.mainImage.original);
-    bo.generateRandomScore();
-    bo.setPortal(hpt);
+		if (dto.sightId != null) {
+			Sight sight = sightService.get(dto.sightId);
+			bo.setSight(sight);
+		}
 
-    if (dto.sightId != null) {
-      Sight sight = sightService.get(dto.sightId);
-      bo.setSight(sight);
-    }
+		bo.setPartner(partner);
+		em.persist(bo);
+		logger.log(Logger.Level.INFO, "Saved new sight event: " + bo.getName());
+		return bo;
+	}
 
-    bo.setPartner(partner);
-    em.persist(bo);
-    logger.log(Logger.Level.INFO, "Saved new sight event: " + bo.getName());
-    return bo;
-  }
+	public SightEvent update(Long id, pl.hellopoland.dto.SightEvent dto) {
+		SightEvent bo = get(id);
+		if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
+			Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
+			Portal hpt = getPortal("Hello Ticket Cloud");
+			HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
 
-  public SightEvent update(Long id, pl.hellopoland.dto.SightEvent dto) {
-    SightEvent bo = get(id);
-    if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
-      Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
-      Portal hpt = getPortal("Hello Ticket Cloud");
-      HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
+			dto.id = bo.getHptId();
+			dto = helloTicket.updateSightEvent(dto, partner.getHptToken());
+		}
+		HplMapper.copy(dto, bo);
+		iService.update(bo, dto.mainImage == null ? null : dto.mainImage.original);
+		return bo;
+	}
 
-      dto.id = bo.getHptId();
-      dto = helloTicket.updateSightEvent(dto, partner.getHptToken());
-    }
-    HplMapper.copy(dto, bo);
-    iService.update(bo, dto.mainImage == null ? null : dto.mainImage.original);
-    return bo;
-  }
+	public List<SightEvent> getForPartner() {
+		Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
 
-  public List<SightEvent> getForPartner() {
-    Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
+		return em.createQuery("from SightEvent event where event.sight.partner=:partner order by event.id desc",
+				SightEvent.class).setParameter("partner", partner).getResultList();
+	}
 
-    return em.createQuery(
-        "from SightEvent event where event.sight.partner=:partner order by event.id desc",
-        SightEvent.class).setParameter("partner", partner).getResultList();
-  }
+	private Comparator<SightEvent> sightEventDatesComparator() {
+		return new Comparator<>() {
+			@Override
+			public int compare(SightEvent sightEvent1, SightEvent sightEvent2) {
+				Date current = new Date();
 
-  private Comparator<SightEvent> sightEventDatesComparator() {
-    return new Comparator<>() {
-      @Override
-      public int compare(SightEvent sightEvent1, SightEvent sightEvent2) {
-        Date current = new Date();
+				if (sightEvent1.getDate() == null) {
+					return -1;
+				}
+				if (sightEvent2.getDate() == null) {
+					return 1;
+				}
+				if (areAllUpToDate(sightEvent1, sightEvent2, current)) {
+					return sightEvent1.getDate().compareTo(sightEvent2.getDate());
+				} else {
+					return sightEvent1.getDate().compareTo(sightEvent2.getDate()) * -1;
+				}
+			}
 
-        if (sightEvent1.getDate() == null) {
-          return -1;
-        }
-        if (sightEvent2.getDate() == null) {
-          return 1;
-        }
-        if (areAllUpToDate(sightEvent1, sightEvent2, current)) {
-          return sightEvent1.getDate().compareTo(sightEvent2.getDate());
-        } else {
-          return sightEvent1.getDate().compareTo(sightEvent2.getDate()) * -1;
-        }
-      }
+			private boolean areAllUpToDate(SightEvent sightEvent1, SightEvent sightEvent2, Date current) {
+				return sightEvent1.getDate().compareTo(current) > 0 && sightEvent2.getDate().compareTo(current) > 0;
+			}
+		};
+	}
 
-      private boolean areAllUpToDate(SightEvent sightEvent1, SightEvent sightEvent2, Date current) {
-        return sightEvent1.getDate().compareTo(current) > 0
-            && sightEvent2.getDate().compareTo(current) > 0;
-      }
-    };
-  }
-
-  public SightEvent uploadMainImage(Long id, byte[] icon) {
-    ByteArrayInputStream is = new ByteArrayInputStream(icon);
-    Image image = iService.validateAndStoreImage(is, "jpeg", null);
-    SightEvent bo = get(id);
-    get(id).setMainImage(image);
-    return bo;
-  }
+	public SightEvent uploadMainImage(Long id, byte[] icon) {
+		ByteArrayInputStream is = new ByteArrayInputStream(icon);
+		var image = iService.validateAndStoreImageCollector(is, "jpeg", null);
+		SightEvent bo = get(id);
+		get(id).setMainImage(image);
+		return bo;
+	}
 }

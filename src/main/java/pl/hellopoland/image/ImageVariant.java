@@ -1,51 +1,79 @@
 package pl.hellopoland.image;
 
 import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
 import pl.hellopoland.ModelSuperclass;
 
-/**
- * Entity implementation class for Entity: ImageVariant
- *
- */
 @Entity
-
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = "hash", name = "image_hash_unique"))
 public class ImageVariant extends ModelSuperclass {
-	private static final long serialVersionUID = 1L;
+
+	private static final long serialVersionUID = -1655719974465476465L;
+
+	public enum Variant {
+		QVGA, VGA, XGA, SXGA, HD, FHD, FOURK, ORIGINAL
+	}
 
 	@NotNull
-	private String variant;
-
+	private Variant variant;
 	@NotNull
-	@ManyToOne
-	private Image image;
+	@OneToOne
+	private ImageCollector collector;
+	@NotNull
+	private String path;
+	@NotNull
+	private String hash;
+	@NotNull
+	private String extension;
 
-	private String variantURL;
-
-	public String getVariant() {
+	public Variant getVariant() {
 		return variant;
 	}
 
-	public void setVariant(String variant) {
+	public void setVariant(Variant variant) {
 		this.variant = variant;
 	}
 
-	public Image getImage() {
-		return image;
+	public ImageCollector getCollector() {
+		return collector;
 	}
 
-	public void setImage(Image image) {
-		this.image = image;
+	public void setCollector(ImageCollector collector) {
+		this.collector = collector;
 	}
 
-	public String getVariantURL() {
-		return variantURL;
+	public String getPath() {
+		return path;
 	}
 
-	public void setVariantURL(String variantURL) {
-		this.variantURL = variantURL;
+	public void setPath(String path) {
+		this.path = path;
+	}
+
+	public String getHash() {
+		return hash;
+	}
+
+	public void setHash(String hash) {
+		this.hash = hash;
+	}
+
+	public String getExtension() {
+		return extension;
+	}
+
+	public void setExtension(String extension) {
+		this.extension = extension;
+	}
+
+	@Transient
+	public String getDownloadUrl() {
+		return System.getProperty("base.url") + "/images/" + hash + "." + extension;
 	}
 
 }
