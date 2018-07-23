@@ -2,13 +2,12 @@ package pl.hellopoland.util;
 
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
-
-import pl.hellopoland.dto.DateType;
 import pl.hellopoland.bo.Image;
 import pl.hellopoland.bo.Location;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.Ticket;
+import pl.hellopoland.dto.DateType;
 
 public class DtoMapper {
 
@@ -63,7 +62,9 @@ public class DtoMapper {
 
   public static pl.hellopoland.dto.SightEvent getFullDTO(SightEvent bo) {
     pl.hellopoland.dto.SightEvent dto = getDTO(bo);
-    dto.tickets = bo.getTickets().stream().map(DtoMapper::getDTO).collect(toList());
+    if (bo.getTickets() != null && !bo.getTickets().isEmpty()) {
+      dto.tickets = bo.getTickets().stream().map(DtoMapper::getDTO).collect(toList());
+    }
     return dto;
   }
 
