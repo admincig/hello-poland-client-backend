@@ -1,6 +1,8 @@
 package pl.hellopoland.image;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -20,6 +22,7 @@ public class ImageVariant extends ModelSuperclass {
 	}
 
 	@NotNull
+	@Enumerated(EnumType.STRING)
 	private Variant variant;
 	@NotNull
 	@OneToOne
