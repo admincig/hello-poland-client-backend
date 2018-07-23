@@ -1,6 +1,6 @@
 package pl.hellopoland.rest.dto;
 
-import pl.hellopoland.user.UserLocation;
+import pl.hellopoland.bo.UserLocation;
 
 public class UserLocationRO {
 

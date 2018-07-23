@@ -1,6 +1,6 @@
 package pl.hellopoland.rest.dto;
 
-import pl.hellopoland.sight.Ticket;
+import pl.hellopoland.bo.Ticket;
 
 public class TicketRO {
 

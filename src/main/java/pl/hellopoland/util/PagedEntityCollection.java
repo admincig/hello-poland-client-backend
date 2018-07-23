@@ -1,7 +1,7 @@
 package pl.hellopoland.util;
 
 import java.util.Collection;
-import pl.hellopoland.ModelSuperclass;
+import pl.hellopoland.bo.ModelSuperclass;
 import pl.hellopoland.config.PagedCollectionConfig;
 
 public class PagedEntityCollection<E extends ModelSuperclass> {

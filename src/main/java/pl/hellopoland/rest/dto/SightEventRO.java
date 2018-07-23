@@ -2,7 +2,7 @@ package pl.hellopoland.rest.dto;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
-import pl.hellopoland.sight.SightEvent;
+import pl.hellopoland.bo.SightEvent;
 
 public class SightEventRO extends SightEventOnListingRO {
 

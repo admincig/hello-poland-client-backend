@@ -1,6 +1,6 @@
 package pl.hellopoland.rest.dto;
 
-import pl.hellopoland.order.Order;
+import pl.hellopoland.bo.Order;
 
 public class OrderORO {
 

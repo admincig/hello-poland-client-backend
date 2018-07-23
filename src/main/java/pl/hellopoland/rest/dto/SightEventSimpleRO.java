@@ -1,6 +1,6 @@
 package pl.hellopoland.rest.dto;
 
-import pl.hellopoland.sight.SightEvent;
+import pl.hellopoland.bo.SightEvent;
 
 public class SightEventSimpleRO {
 

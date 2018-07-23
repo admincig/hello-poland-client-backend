@@ -1,6 +1,6 @@
 package pl.hellopoland.rest.dto;
 
-import pl.hellopoland.sight.Agreement;
+import pl.hellopoland.bo.Agreement;
 
 public class AgreementRO {
 

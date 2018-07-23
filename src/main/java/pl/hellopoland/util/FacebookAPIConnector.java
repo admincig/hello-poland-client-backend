@@ -7,8 +7,8 @@ import java.net.URLConnection;
 import java.util.logging.Logger;
 import javax.json.Json;
 import javax.json.JsonObject;
-import pl.hellopoland.user.User;
-import pl.hellopoland.user.UserLocation;
+import pl.hellopoland.bo.User;
+import pl.hellopoland.bo.UserLocation;
 
 public class FacebookAPIConnector {
 

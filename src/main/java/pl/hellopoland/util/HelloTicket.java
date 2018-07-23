@@ -20,9 +20,9 @@ import javax.json.bind.JsonbBuilder;
 import pl.hellopoland.dto.booking.Booking;
 import pl.hellopoland.dto.booking.Ticket;
 import pl.hellopoland.exception.conflict.CannotDeleteSightEventFromExternalSystemException;
-import pl.hellopoland.order.OrderDetails;
-import pl.hellopoland.order.OrderEntry;
-import pl.hellopoland.sight.SightEvent;
+import pl.hellopoland.bo.OrderDetails;
+import pl.hellopoland.bo.OrderEntry;
+import pl.hellopoland.bo.SightEvent;
 
 public class HelloTicket {
 

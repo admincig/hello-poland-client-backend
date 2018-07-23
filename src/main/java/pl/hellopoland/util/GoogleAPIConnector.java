@@ -6,7 +6,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import java.lang.System.Logger;
 import java.util.List;
-import pl.hellopoland.user.User;
+import pl.hellopoland.bo.User;
 
 public class GoogleAPIConnector {
 

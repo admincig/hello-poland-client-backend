@@ -1,6 +1,6 @@
 package pl.hellopoland.rest.dto;
 
-import pl.hellopoland.sight.OpeningHours;
+import pl.hellopoland.bo.OpeningHours;
 
 public class OpeningHoursRO {
 

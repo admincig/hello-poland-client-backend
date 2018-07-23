@@ -5,7 +5,6 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
 import static javax.security.enterprise.AuthenticationStatus.SEND_FAILURE;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Optional;
@@ -25,16 +24,14 @@ import javax.security.enterprise.identitystore.IdentityStoreHandler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.HttpHeaders;
-import pl.hellopoland.security.dto.CurrentUser;
-import pl.hellopoland.security.dto.UserAuthDTO;
+import pl.hellopoland.bo.User;
+import pl.hellopoland.bo.UserRole;
 import pl.hellopoland.security.token.ExpiredTokenService;
 import pl.hellopoland.security.token.JwtCredential;
 import pl.hellopoland.security.token.TokenInExpiredTokensListException;
 import pl.hellopoland.security.token.TokenProvider;
 import pl.hellopoland.security.token.TokenType;
-import pl.hellopoland.user.User;
-import pl.hellopoland.user.UserRole;
-import pl.hellopoland.user.UserService;
+import pl.hellopoland.service.UserService;
 import pl.hellopoland.util.FacebookAPIConnector;
 import pl.hellopoland.util.GoogleAPIConnector;
 
@@ -81,8 +78,8 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
       String login = userAuthDTO.map(u -> u.login).orElse(null);
       String password = userAuthDTO.map(u -> u.password).orElse(null);
 
-      String socialMediaAuthenticationToken = userAuthDTO.map(u -> u.socialMediaAccessToken)
-          .orElse(null);
+      String socialMediaAuthenticationToken =
+          userAuthDTO.map(u -> u.socialMediaAccessToken).orElse(null);
 
       String accessToken = userAuthDTO.map(u -> u.accessToken).orElse(null);
       String refreshToken = userAuthDTO.map(u -> u.refreshToken).orElse(null);
@@ -99,6 +96,8 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
         authenticationStatus = validateRefreshToken(authorizationToken, context);
       } else if (isLogoutRequest(accessToken, refreshToken, request)) {
         authenticationStatus = logout(accessToken, refreshToken, context);
+      } else {
+        authenticationStatus = AuthenticationStatus.NOT_DONE;
       }
     } else if (authorizationToken != null) {
       authenticationStatus = validateAccessToken(authorizationToken, context);
@@ -308,20 +307,17 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
     return context.notifyContainerAboutLogin(result.getCallerPrincipal(), result.getCallerGroups());
   }
 
-  private AuthenticationStatus createToken(User user,
-      HttpMessageContext context) {
+  private AuthenticationStatus createToken(User user, HttpMessageContext context) {
 
     String principal = user.getEmail();
 
-    Set<String> authorities = user.getRoles().stream()
-        .map(UserRole::getRole)
-        .collect(toSet());
+    Set<String> authorities = user.getRoles().stream().map(UserRole::getRole).collect(toSet());
 
-    String accessToken = tokenProvider
-        .createToken(user.getEmail(), authorities, TokenType.ACCESS_TOKEN);
+    String accessToken =
+        tokenProvider.createToken(user.getEmail(), authorities, TokenType.ACCESS_TOKEN);
 
-    String refreshToken = tokenProvider
-        .createToken(user.getEmail(), authorities, TokenType.REFRESH_TOKEN);
+    String refreshToken =
+        tokenProvider.createToken(user.getEmail(), authorities, TokenType.REFRESH_TOKEN);
 
     var currentUserUser = new CurrentUser();
     currentUserUser.setEmail(user.getEmail());

@@ -1,6 +1,6 @@
 package pl.hellopoland.util;
 
-import pl.hellopoland.image.Image;
+import pl.hellopoland.bo.Image;
 
 public interface Imaged {
 

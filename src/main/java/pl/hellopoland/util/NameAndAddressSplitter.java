@@ -2,7 +2,7 @@ package pl.hellopoland.util;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import pl.hellopoland.ConflictingException;
+import pl.hellopoland.exception.conflict.ConflictingException;
 
 public class NameAndAddressSplitter {
 
