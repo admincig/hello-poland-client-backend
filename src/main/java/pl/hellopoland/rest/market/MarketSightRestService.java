@@ -25,7 +25,9 @@ public class MarketSightRestService {
 
   @GET
   public PagedCollection get() {
-    return service.listActive();
+    var config = new SightPagedCollectionConfig();
+    config.onlyActive();
+    return service.getList(config);
   }
 
   @GET
@@ -37,7 +39,7 @@ public class MarketSightRestService {
   @POST
   @Path("/search")
   public PagedCollection search(SightPagedCollectionConfig config) {
-    // config.onlyActive();
+    config.onlyActive();
     return service.getList(config);
   }
 

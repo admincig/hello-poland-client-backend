@@ -20,6 +20,10 @@ public class SightPagedCollectionConfig extends PagedCollectionConfig<Sight> {
     addCondition("name", name, "e.name=:name");
   }
 
+  public void setDescription(String description) {
+    addCondition("description", description, "e.description=:description");
+  }
+
   public void onlyActive() {
     addCondition("active", true, "e.active=:active");
   }
@@ -33,6 +37,7 @@ public class SightPagedCollectionConfig extends PagedCollectionConfig<Sight> {
   }
 
   public void setPartner(Long partnerId) {
-    addCondition("partner", partnerId, "e.sight.partner.id=:partner");
+    addCondition("partner", partnerId, "e.partner.id=:partner");
   }
+
 }

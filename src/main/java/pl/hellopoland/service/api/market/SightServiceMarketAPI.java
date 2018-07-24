@@ -1,6 +1,5 @@
 package pl.hellopoland.service.api.market;
 
-import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
@@ -24,13 +23,6 @@ public class SightServiceMarketAPI {
     PagedEntityCollection<Sight> bos = service.getList(config);
     var dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
     return new PagedCollection(dtos, bos.config);
-  }
-
-  @PermitAll
-  public PagedCollection listActive() {
-    List<Sight> bos = service.getActive();
-    var dtos = bos.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
-    return new PagedCollection(dtos, null);
   }
 
   @PermitAll

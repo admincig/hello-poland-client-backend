@@ -75,12 +75,6 @@ public class SightService extends ServiceSuperclass {
     return bo;
   }
 
-  public List<Sight> getActive() {
-    return em
-        .createQuery("from Sight sight where sight.active=true order by sight.id desc", Sight.class)
-        .getResultList();
-  }
-
   public List<Sight> getActiveForPartner() {
     Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
 
