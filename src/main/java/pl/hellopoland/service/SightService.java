@@ -39,7 +39,9 @@ public class SightService extends ServiceSuperclass {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
     }
     List<Sight> sight = getQuery(config).getResultList().stream()
-        .sorted(Comparator.nullsLast(Comparator.comparing(Sight::getName))).collect(toList());
+        .sorted(Comparator.nullsLast(Comparator
+            .comparing(Sight::getName, String.CASE_INSENSITIVE_ORDER).thenComparing(Sight::getId)))
+        .collect(toList());
     return new PagedEntityCollection<>(sight, config);
   }
 
