@@ -2,8 +2,10 @@ package pl.hellopoland.util;
 
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+import pl.hellopoland.bo.Agreement;
 import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.Location;
+import pl.hellopoland.bo.OpeningHours;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.Ticket;
@@ -47,15 +49,16 @@ public class DtoMapper {
 
     dto.id = bo.getId();
     dto.name = bo.getName();
-    dto.date = bo.getDate();
+    dto.lead = bo.getLead();
     dto.description = bo.getDescription();
-    dto.duration = bo.getDuration();
     dto.mainImage = bo.getMainImage() != null ? getDTO(bo.getMainImage()) : null;
     dto.email = bo.getEmail();
     dto.phone = bo.getPhone();
-    dto.sightId = bo.getSight().getId();
-    dto.generalAdmission = bo.getGeneralAdmission();
+    dto.duration = bo.getDuration();
     dto.location = ofNullable(bo.getLocation()).map(DtoMapper::getDTO).orElse(null);
+    dto.date = bo.getDate();
+    dto.generalAdmission = bo.getGeneralAdmission();
+    dto.sightId = bo.getSight().getId();
 
     return dto;
   }
@@ -65,6 +68,31 @@ public class DtoMapper {
     if (bo.getTickets() != null && !bo.getTickets().isEmpty()) {
       dto.tickets = bo.getTickets().stream().map(DtoMapper::getDTO).collect(toList());
     }
+    if (bo.getOpeningHours() != null && !bo.getOpeningHours().isEmpty()) {
+      dto.openingHours = bo.getOpeningHours().stream().map(DtoMapper::getDTO).collect(toList());
+    }
+    if (bo.getAgreements() != null && !bo.getAgreements().isEmpty()) {
+      dto.agreements = bo.getAgreements().stream().map(DtoMapper::getDTO).collect(toList());
+    }
+    return dto;
+  }
+
+  private static pl.hellopoland.dto.Agreement getDTO(Agreement bo) {
+    var dto = new pl.hellopoland.dto.Agreement();
+
+    dto.name = ofNullable(bo.getSightEvent()).map(SightEvent::getName).orElse(null);
+    dto.url = bo.getLinkUrl();
+
+    return dto;
+  }
+
+  private static pl.hellopoland.dto.OpeningHours getDTO(OpeningHours bo) {
+    var dto = new pl.hellopoland.dto.OpeningHours();
+
+    dto.day = bo.getDay();
+    dto.openTime = bo.getOpenTime();
+    dto.closeTime = bo.getCloseTime();
+
     return dto;
   }
 
