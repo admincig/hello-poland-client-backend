@@ -11,8 +11,7 @@ public class ExceptionFactory {
   private ExceptionMessagesService exceptionMessagesService;
 
   public SightHasAssignedSightEventsException sightHasAssignedSightEventsException() {
-    return new SightHasAssignedSightEventsException(
-        exceptionMessagesService
-            .getMessage(SightHasAssignedSightEventsException.class.getSimpleName()));
+    return new SightHasAssignedSightEventsException(exceptionMessagesService
+        .getMessage(SightHasAssignedSightEventsException.class.getSimpleName()));
   }
 }

@@ -14,7 +14,7 @@ public class TicketDefinitionServicePartnerAPI {
   TicketService service;
 
   @RolesAllowed("partner")
-  public pl.hellopoland.dto.TicketDefinition add(pl.hellopoland.dto.TicketDefinition dto){
+  public pl.hellopoland.dto.TicketDefinition add(pl.hellopoland.dto.TicketDefinition dto) {
     Ticket bo = service.create(dto, null);
     dto = DtoMapper.getDTO(bo);
     return dto;

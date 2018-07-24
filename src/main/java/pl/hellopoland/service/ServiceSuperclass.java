@@ -117,11 +117,12 @@ public abstract class ServiceSuperclass {
         .getSingleResult();
   }
 
-  public User getLoggedUser(){
+  public User getLoggedUser() {
     try {
       String login = ctx.getCallerPrincipal().getName();
-      return em.createQuery("from User where email=:email", User.class).setParameter("email", login).getSingleResult();
-    } catch (Exception e){
+      return em.createQuery("from User where email=:email", User.class).setParameter("email", login)
+          .getSingleResult();
+    } catch (Exception e) {
       return null;
     }
   }

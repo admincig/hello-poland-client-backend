@@ -1,7 +1,6 @@
 package pl.hellopoland.security.token;
 
 import static java.util.stream.Collectors.joining;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

@@ -19,7 +19,7 @@ public class TicketService extends ServiceSuperclass {
   SightEventService sightEventService;
 
 
-  public Ticket create(TicketDefinition dto, Partner partner){
+  public Ticket create(TicketDefinition dto, Partner partner) {
     if (partner == null) {
       partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
     }

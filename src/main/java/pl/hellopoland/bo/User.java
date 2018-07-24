@@ -2,7 +2,6 @@ package pl.hellopoland.bo;
 
 import static javax.persistence.CascadeType.PERSIST;
 import static javax.persistence.FetchType.EAGER;
-
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -14,7 +13,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
-//import javax.validation.constraints.Email;
+// import javax.validation.constraints.Email;
 
 @Entity
 @Table(name = "users",
@@ -23,8 +22,7 @@ public class User extends ModelSuperclass {
 
   private static final long serialVersionUID = -2816139938781126241L;
 
-  public User() {
-  }
+  public User() {}
 
   public User(String... roles) {
     for (String role : roles) {
@@ -33,7 +31,7 @@ public class User extends ModelSuperclass {
   }
 
   @NotNull
-//  @Email
+  // @Email
   private String email;
   private String name;
   private String password;

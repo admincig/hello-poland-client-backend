@@ -16,7 +16,7 @@ public class UserServicePartnerAPI {
   UserService service;
 
   @RolesAllowed("partner")
-  public UserORO me(){
+  public UserORO me() {
     User bo = service.me();
     var dto = new UserORO(bo);
     return dto;

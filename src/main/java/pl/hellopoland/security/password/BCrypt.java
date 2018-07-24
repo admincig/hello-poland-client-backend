@@ -328,7 +328,7 @@ public class BCrypt {
     int i, n, l = lr[off], r = lr[off + 1];
 
     l ^= P[0];
-    for (i = 0; i <= BLOWFISH_NUM_ROUNDS - 2; ) {
+    for (i = 0; i <= BLOWFISH_NUM_ROUNDS - 2;) {
       // Feistel substitution on left word
       n = S[(l >> 24) & 0xff];
       n += S[0x100 | ((l >> 16) & 0xff)];
@@ -558,7 +558,7 @@ public class BCrypt {
    * Generate a salt for use with the BCrypt.hashpw() method
    *
    * @param log_rounds the log2 of the number of rounds of hashing to apply - the work factor
-   * therefore increases as 2**log_rounds. Minimum 4, maximum 31.
+   *        therefore increases as 2**log_rounds. Minimum 4, maximum 31.
    * @param random an instance of SecureRandom to use
    * @return an encoded salt value
    */
@@ -585,7 +585,7 @@ public class BCrypt {
    * Generate a salt for use with the BCrypt.hashpw() method
    *
    * @param log_rounds the log2 of the number of rounds of hashing to apply - the work factor
-   * therefore increases as 2**log_rounds. Minimum 4, maximum 31.
+   *        therefore increases as 2**log_rounds. Minimum 4, maximum 31.
    * @return an encoded salt value
    */
   public static String gensalt(int log_rounds) {

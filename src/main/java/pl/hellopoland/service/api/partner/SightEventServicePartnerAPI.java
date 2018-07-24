@@ -21,10 +21,8 @@ public class SightEventServicePartnerAPI {
   public PagedCollection getList(SightEventPagedCollectionConfig config) {
     config.onlyCurrentPartner(true);
     config.onlyActive();
-    PagedEntityCollection<SightEvent> bos = service
-        .getList(config);
-    var dtos = bos.items.stream().map(DtoMapper::getDTO)
-        .collect(Collectors.toList());
+    PagedEntityCollection<SightEvent> bos = service.getList(config);
+    var dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
     return new PagedCollection(dtos, bos.config);
   }
 

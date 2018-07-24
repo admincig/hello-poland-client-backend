@@ -21,7 +21,8 @@ public class SightEventServiceMarketAPI {
   public PagedCollection getList(SightEventPagedCollectionConfig config) {
     PagedEntityCollection<SightEvent> bos = service.getList(config);
     var dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
-    return new PagedCollection(dtos, bos.config);  }
+    return new PagedCollection(dtos, bos.config);
+  }
 
   @PermitAll
   public pl.hellopoland.dto.SightEvent get(Long id) {

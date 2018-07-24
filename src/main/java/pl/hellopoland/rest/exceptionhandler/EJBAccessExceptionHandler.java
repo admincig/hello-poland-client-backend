@@ -24,13 +24,12 @@ public class EJBAccessExceptionHandler implements ExceptionMapper<EJBAccessExcep
   public Response toResponse(EJBAccessException exception) {
     if (ctx.getUserPrincipal() == null) {
       logger.log(Level.WARNING,
-          "401. Registered unauthenticated try to access protected resources: " + exception
-              .getMessage());
+          "401. Registered unauthenticated try to access protected resources: "
+              + exception.getMessage());
       return Response.status(Status.UNAUTHORIZED).build();
     }
-    logger.log(Level.WARNING,
-        "403. Registered unauthorized try to access protected resources: " + exception
-            .getMessage());
+    logger.log(Level.WARNING, "403. Registered unauthorized try to access protected resources: "
+        + exception.getMessage());
     return Response.status(Status.FORBIDDEN).build();
   }
 }

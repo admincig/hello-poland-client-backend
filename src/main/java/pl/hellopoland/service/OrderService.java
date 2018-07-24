@@ -3,7 +3,6 @@ package pl.hellopoland.service;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-
 import java.lang.System.Logger;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -177,10 +176,10 @@ public class OrderService extends ServiceSuperclass {
   }
 
   public OrderDateEntry getOrderDateEntryForLoggedUser(long id) {
-    String queryString = "from OrderDateEntry where deleted=false and id=:id and sightEntry.order.user=:user";
-    OrderDateEntry de =
-        em.createQuery(queryString, OrderDateEntry.class).setParameter("id", id)
-            .setParameter("user", getLoggedUser()).getSingleResult();
+    String queryString =
+        "from OrderDateEntry where deleted=false and id=:id and sightEntry.order.user=:user";
+    OrderDateEntry de = em.createQuery(queryString, OrderDateEntry.class).setParameter("id", id)
+        .setParameter("user", getLoggedUser()).getSingleResult();
 
     de.getEntries().forEach(e -> e.getNumbers().size());
     return de;

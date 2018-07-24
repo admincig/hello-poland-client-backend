@@ -41,7 +41,8 @@ public class PartnerSightEventRestService {
 
   @PUT
   @Path("/{id}")
-  public pl.hellopoland.dto.SightEvent update(@PathParam("id") Long id, pl.hellopoland.dto.SightEvent dto) {
+  public pl.hellopoland.dto.SightEvent update(@PathParam("id") Long id,
+      pl.hellopoland.dto.SightEvent dto) {
     dto.id = id;
     return service.update(dto);
   }
@@ -67,7 +68,7 @@ public class PartnerSightEventRestService {
   @PUT
   @Path("/{id}/mainImage")
   @Consumes({"image/jpeg", "image/jpg"})
-  public pl.hellopoland.dto.SightEvent uploadIcon(@PathParam("id") Long id, byte[] icon){
+  public pl.hellopoland.dto.SightEvent uploadIcon(@PathParam("id") Long id, byte[] icon) {
     return service.uploadMainImage(id, icon);
   }
 }

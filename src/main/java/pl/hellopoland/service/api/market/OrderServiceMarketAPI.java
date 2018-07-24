@@ -47,9 +47,7 @@ public class OrderServiceMarketAPI {
   @RolesAllowed("user")
   public List<OrderDateEntryOnListingORO> getTicketGroupsForLoggedUser() {
     List<OrderDateEntry> bos = service.getOrderSightDateEntriesForLoggedUser();
-    var dtos = bos.stream()
-        .map(OrderDateEntryOnListingORO::new)
-        .collect(Collectors.toList());
+    var dtos = bos.stream().map(OrderDateEntryOnListingORO::new).collect(Collectors.toList());
     return dtos;
   }
 

@@ -62,8 +62,8 @@ public class PartnerSightRestService {
   @PUT
   @Path("/{id}/mainImage")
   @Consumes({"image/jpeg", "image/jpg"})
-  public pl.hellopoland.dto.Sight uploadMainImage(@PathParam("id") Long id, byte[] icon){
+  public pl.hellopoland.dto.Sight uploadMainImage(@PathParam("id") Long id, byte[] icon) {
     return service.uploadMainImage(id, icon);
   }
-  
+
 }

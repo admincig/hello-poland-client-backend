@@ -1,7 +1,6 @@
 package pl.hellopoland.security;
 
 import static javax.security.enterprise.identitystore.CredentialValidationResult.NOT_VALIDATED_RESULT;
-
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,9 +31,8 @@ public class JpaIdentityStore implements IdentityStore {
 
       Optional<User> user = userDao.findByEmail(usernamePassword.getCaller());
 
-      if (user.isPresent() &&
-          passwordEncoder.matches(new String(usernamePassword.getPassword().getValue()),
-              user.get().getPassword())) {
+      if (user.isPresent() && passwordEncoder.matches(
+          new String(usernamePassword.getPassword().getValue()), user.get().getPassword())) {
         return new CredentialValidationResult(usernamePassword.getCaller(),
             user.get().getRoles().stream().map(UserRole::getRole).collect(Collectors.toSet()));
       }

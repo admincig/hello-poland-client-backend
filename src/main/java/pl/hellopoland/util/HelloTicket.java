@@ -1,7 +1,6 @@
 package pl.hellopoland.util;
 
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.System.Logger.Level;
@@ -60,7 +59,7 @@ public class HelloTicket {
           oe.getDateEntry().getSightEntry().setSerialNumber(serialNumber);
         }
         oe.getDateEntry().getSightEntry().setSerialNumber(serialNumber);
-        for (var iter = tickets.iterator(); iter.hasNext(); ) {
+        for (var iter = tickets.iterator(); iter.hasNext();) {
           JsonObject ticket = (JsonObject) iter.next();
           if (oe.getExternalDefinitionId().intValue() == ticket.getInt("definitionId")
               && oe.getDateEntry().getDate().compareTo(df.parse(ticket.getString("date"))) == 0) {
@@ -83,7 +82,7 @@ public class HelloTicket {
       var resp = put("/v1/bookings/buy/" + serialNumber, null, authToken);
       JsonArray tickets = resp.getJsonArray("tickets");
       for (var oe : orderEntries) {
-        for (var iter = tickets.iterator(); iter.hasNext(); ) {
+        for (var iter = tickets.iterator(); iter.hasNext();) {
           JsonObject ticket = (JsonObject) iter.next();
           Date date1 = df.parse(ticket.getString("date"));
           Date date2 = oe.getDateEntry().getDate();
