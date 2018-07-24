@@ -6,6 +6,7 @@ import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.Sight;
+import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.SightService;
 import pl.hellopoland.util.DtoMapper;
@@ -24,7 +25,7 @@ public class SightServiceMarketAPI {
   }
 
   @PermitAll
-  public pl.hellopoland.dto.Sight get(Long id) {
+  public SightDTO get(Long id) {
     Sight bo = service.get(id);
     var dto = DtoMapper.getFullDTO(bo);
     return dto;

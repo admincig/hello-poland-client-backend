@@ -16,12 +16,14 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.bind.JsonbBuilder;
-import pl.hellopoland.dto.booking.Booking;
-import pl.hellopoland.dto.booking.Ticket;
-import pl.hellopoland.exception.conflict.CannotDeleteSightEventFromExternalSystemException;
 import pl.hellopoland.bo.OrderDetails;
 import pl.hellopoland.bo.OrderEntry;
 import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.dto.SightEventDTO;
+import pl.hellopoland.dto.TicketDefinitionDTO;
+import pl.hellopoland.dto.booking.BookingDTO;
+import pl.hellopoland.dto.booking.TicketOrderDTO;
+import pl.hellopoland.exception.conflict.CannotDeleteSightEventFromExternalSystemException;
 
 public class HelloTicket {
 
@@ -35,11 +37,11 @@ public class HelloTicket {
   private DateFormat df;
 
   public JsonObject book(OrderDetails details, List<OrderEntry> orderEntries) {
-    Booking booking = new Booking();
+    BookingDTO booking = new BookingDTO();
     booking.customerEmail = details.getEmail();
     booking.customerName = details.getFirstName() + " " + details.getLastName();
-    List<Ticket> ticketBookings = orderEntries.stream().map(oe -> {
-      Ticket t = new Ticket();
+    List<TicketOrderDTO> ticketBookings = orderEntries.stream().map(oe -> {
+      TicketOrderDTO t = new TicketOrderDTO();
       t.ticketDefinitionId = oe.getExternalDefinitionId();
       t.numberOfTickets = oe.getQuantity().longValue();
       t.date = oe.getDateEntry().getDate();
@@ -99,14 +101,12 @@ public class HelloTicket {
     }
   }
 
-  public pl.hellopoland.dto.SightEvent addSightEvent(pl.hellopoland.dto.SightEvent dto,
-      String partnerAuthToken) {
+  public SightEventDTO addSightEvent(SightEventDTO dto, String partnerAuthToken) {
     String json = JsonbBuilder.create().toJson(dto);
 
     try {
       return JsonbBuilder.create().fromJson(
-          post("/v1/sight-events", json, partnerAuthToken).toString(),
-          pl.hellopoland.dto.SightEvent.class);
+          post("/v1/sight-events", json, partnerAuthToken).toString(), SightEventDTO.class);
     } catch (IOException e) {
       logger.log(Level.ERROR, e);
     }
@@ -114,14 +114,13 @@ public class HelloTicket {
     return null;
   }
 
-  public pl.hellopoland.dto.TicketDefinition addTicketDefinition(
-      pl.hellopoland.dto.TicketDefinition dto, String partnerAuthToken) {
+  public TicketDefinitionDTO addTicketDefinition(TicketDefinitionDTO dto, String partnerAuthToken) {
     String json = JsonbBuilder.create().toJson(dto);
 
     try {
       return JsonbBuilder.create().fromJson(
           post("/v1/ticket-definitions", json, partnerAuthToken).toString(),
-          pl.hellopoland.dto.TicketDefinition.class);
+          TicketDefinitionDTO.class);
     } catch (IOException e) {
       logger.log(Level.ERROR, e);
     }
@@ -137,14 +136,13 @@ public class HelloTicket {
     }
   }
 
-  public pl.hellopoland.dto.SightEvent updateSightEvent(pl.hellopoland.dto.SightEvent sightEvent,
-      String partnerAuthToken) {
+  public SightEventDTO updateSightEvent(SightEventDTO sightEvent, String partnerAuthToken) {
     String sightEventJson = JsonbBuilder.create().toJson(sightEvent);
 
     try {
       return JsonbBuilder.create().fromJson(
           put("/v1/sight-events/" + sightEvent.id, sightEventJson, partnerAuthToken).toString(),
-          pl.hellopoland.dto.SightEvent.class);
+          SightEventDTO.class);
     } catch (IOException e) {
       e.printStackTrace();
     }

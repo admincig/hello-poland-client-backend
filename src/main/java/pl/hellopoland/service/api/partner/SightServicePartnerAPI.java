@@ -6,6 +6,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.Sight;
+import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.SightService;
 import pl.hellopoland.util.DtoMapper;
@@ -18,7 +19,7 @@ public class SightServicePartnerAPI {
 
 
   @RolesAllowed("partner")
-  public pl.hellopoland.dto.Sight create(pl.hellopoland.dto.Sight dto) {
+  public SightDTO create(SightDTO dto) {
     Sight bo = service.create(dto, null);
     dto = DtoMapper.getFullDTO(bo);
     return dto;
@@ -32,14 +33,14 @@ public class SightServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
-  public pl.hellopoland.dto.Sight get(Long id) {
+  public SightDTO get(Long id) {
     Sight bo = service.getActiveForLoggedUser(id);
     var dto = DtoMapper.getFullDTO(bo);
     return dto;
   }
 
   @RolesAllowed("partner")
-  public pl.hellopoland.dto.Sight update(pl.hellopoland.dto.Sight dto) {
+  public SightDTO update(SightDTO dto) {
     Sight bo = service.updateForLoggedUser(dto);
     dto = DtoMapper.getFullDTO(bo);
     return dto;
@@ -52,7 +53,7 @@ public class SightServicePartnerAPI {
 
 
   @RolesAllowed("partner")
-  public pl.hellopoland.dto.Sight uploadMainImage(Long id, byte[] icon) {
+  public SightDTO uploadMainImage(Long id, byte[] icon) {
     Sight bo = service.uploadMainImageForLoggedUser(id, icon);
     var dto = DtoMapper.getFullDTO(bo);
     return dto;

@@ -5,9 +5,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.rest.dto.UserORO;
-import pl.hellopoland.service.TicketService;
 import pl.hellopoland.service.UserService;
-import pl.hellopoland.util.DtoMapper;
 
 @Stateless
 public class UserServicePartnerAPI {

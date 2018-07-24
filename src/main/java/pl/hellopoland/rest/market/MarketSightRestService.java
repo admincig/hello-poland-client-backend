@@ -8,6 +8,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.api.market.SightServiceMarketAPI;
 
@@ -27,7 +28,7 @@ public class MarketSightRestService {
 
   @GET
   @Path("/{id}")
-  public pl.hellopoland.dto.Sight get(@PathParam("id") Long id) {
+  public SightDTO get(@PathParam("id") Long id) {
     return service.get(id);
   }
 }

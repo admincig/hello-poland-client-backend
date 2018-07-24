@@ -4,9 +4,10 @@ import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import pl.hellopoland.config.SightEventPagedCollectionConfig;
-import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.config.SightEventPagedCollectionConfig;
+import pl.hellopoland.dto.SightEventDTO;
+import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.PagedEntityCollection;
@@ -25,7 +26,7 @@ public class SightEventServiceMarketAPI {
   }
 
   @PermitAll
-  public pl.hellopoland.dto.SightEvent get(Long id) {
+  public SightEventDTO get(Long id) {
     SightEvent bo = service.get(id);
     var dto = DtoMapper.getFullDTO(bo);
     return dto;

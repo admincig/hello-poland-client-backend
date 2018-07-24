@@ -16,6 +16,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.SightService;
 import pl.hellopoland.util.DtoMapper;
@@ -30,7 +31,7 @@ public class SightRestService {
   private SightService sightService;
 
   @POST
-  public Response add(pl.hellopoland.dto.Sight sight) throws URISyntaxException {
+  public Response add(SightDTO sight) throws URISyntaxException {
     return Response.created(new URI("/partner/sights/" + sight.id))
         .entity(DtoMapper.getFullDTO(sightService.create(sight, null))).build();
   }
@@ -49,7 +50,7 @@ public class SightRestService {
 
   @PUT
   @Path("/{id}")
-  public Response update(@PathParam("id") Long id, pl.hellopoland.dto.Sight sight) {
+  public Response update(@PathParam("id") Long id, SightDTO sight) {
     return Response.ok(DtoMapper.getFullDTO(sightService.update(id, sight))).build();
   }
 

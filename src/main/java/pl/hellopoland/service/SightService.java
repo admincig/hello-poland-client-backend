@@ -9,6 +9,8 @@ import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.dto.SightDTO;
+import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.exception.ExceptionFactory;
 import pl.hellopoland.util.DtoMapper;
 
@@ -28,7 +30,7 @@ public class SightService extends ServiceSuperclass {
   @Inject
   private ExceptionFactory exceptionFactory;
 
-  public Sight create(pl.hellopoland.dto.Sight dto, Partner partner) {
+  public Sight create(SightDTO dto, Partner partner) {
     Sight bo = new Sight();
     DtoMapper.copy(dto, bo);
     if (partner == null) {
@@ -72,7 +74,7 @@ public class SightService extends ServiceSuperclass {
         Sight.class).setParameter("partner", partner).getResultList();
   }
 
-  public Sight update(Long id, pl.hellopoland.dto.Sight dto) {
+  public Sight update(Long id, SightDTO dto) {
     Sight bo = get(id);
     DtoMapper.copy(dto, bo);
     return get(id);
@@ -99,7 +101,7 @@ public class SightService extends ServiceSuperclass {
   }
 
   private void createGeneralAdmissionSightEvent(Sight sight, Partner partner) {
-    pl.hellopoland.dto.SightEvent sed = DtoMapper.getGAEventDTO(sight);
+    SightEventDTO sed = DtoMapper.getGAEventDTO(sight);
     sightEventService.create(sed, partner);
   }
 
@@ -117,7 +119,7 @@ public class SightService extends ServiceSuperclass {
         .setParameter("id", id).setParameter("partner", getLoggedPartner()).getSingleResult();
   }
 
-  public Sight updateForLoggedUser(pl.hellopoland.dto.Sight dto) {
+  public Sight updateForLoggedUser(SightDTO dto) {
     Sight bo = getActiveForLoggedUser(dto.id);
     DtoMapper.copy(dto, bo);
     return getActiveForLoggedUser(dto.id);

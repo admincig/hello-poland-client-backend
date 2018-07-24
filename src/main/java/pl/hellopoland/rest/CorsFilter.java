@@ -1,8 +1,6 @@
 package pl.hellopoland.rest;
 
 import java.io.IOException;
-import javax.servlet.*;
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;

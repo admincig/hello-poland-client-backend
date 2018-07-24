@@ -6,6 +6,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
+import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.util.DtoMapper;
@@ -27,21 +28,21 @@ public class SightEventServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
-  public pl.hellopoland.dto.SightEvent create(pl.hellopoland.dto.SightEvent dto) {
+  public SightEventDTO create(SightEventDTO dto) {
     SightEvent bo = service.create(dto, null);
     dto = DtoMapper.getFullDTO(bo);
     return dto;
   }
 
   @RolesAllowed("partner")
-  public pl.hellopoland.dto.SightEvent update(pl.hellopoland.dto.SightEvent dto) {
+  public SightEventDTO update(SightEventDTO dto) {
     SightEvent bo = service.updateForLoggedUser(dto);
     dto = DtoMapper.getFullDTO(bo);
     return dto;
   }
 
   @RolesAllowed("partner")
-  public pl.hellopoland.dto.SightEvent get(Long id) {
+  public SightEventDTO get(Long id) {
     SightEvent bo = service.getForLoggedUser(id);
     var dto = DtoMapper.getFullDTO(bo);
     return dto;
@@ -53,7 +54,7 @@ public class SightEventServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
-  public pl.hellopoland.dto.SightEvent uploadMainImage(Long id, byte[] icon) {
+  public SightEventDTO uploadMainImage(Long id, byte[] icon) {
     SightEvent bo = service.uploadMainImageForLoggedUser(id, icon);
     var dto = DtoMapper.getFullDTO(bo);
     return dto;

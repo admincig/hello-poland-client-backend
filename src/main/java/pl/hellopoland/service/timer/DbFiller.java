@@ -7,17 +7,14 @@ import javax.ejb.DependsOn;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
-import pl.hellopoland.dto.Image;
-import pl.hellopoland.dto.Location;
 import pl.hellopoland.bo.Partner;
-import pl.hellopoland.security.password.PasswordEncoder;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.Portal.Type;
-import pl.hellopoland.service.ServiceSuperclass;
-import pl.hellopoland.service.SightEventService;
-import pl.hellopoland.service.SightService;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole;
+import pl.hellopoland.security.password.PasswordEncoder;
+import pl.hellopoland.service.ServiceSuperclass;
+import pl.hellopoland.service.SightEventService;
 
 @Startup
 @Singleton
@@ -30,9 +27,6 @@ public class DbFiller extends ServiceSuperclass {
   @Inject
   private PasswordEncoder passwordEncoder;
 
-  @Inject
-  private SightService sightService;
-
   @PostConstruct
   public void fillDb() {
     String hibernateStrategy = properties.get("hibernate.hbm2ddl.auto").toString();
@@ -43,11 +37,11 @@ public class DbFiller extends ServiceSuperclass {
     }
 
     createPortals();
-    // runImporter();
     createUsers();
     logger.log(Logger.Level.INFO, "dbfiller finished");
   }
 
+  @SuppressWarnings("unused")
   private void createUsers() {
     User userHelloPoland = createPartner("Hello Poland",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.");
@@ -58,52 +52,6 @@ public class DbFiller extends ServiceSuperclass {
     createPartner("Statek",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiIyODQyODcyRThEQ0EzMENFNkJBOTk5REMzQjBGODJFNUNFOTNFNzA5RTJEMjlGMEQ4NjFFOTU4QjMxQ0QwQzREIn0.");
 
-    createZooSight(userZoo);
-    createHelloPolandSight(userHelloPoland);
-  }
-
-  private void createZooSight(User user) {
-    Image image = new Image();
-    image.original = "https://www.wroclaw.pl/files/cmsdocuments/302431/630x350/1333630762.jpg";
-
-    Location location = new Location();
-    location.city = "Poznań";
-    location.country = "Polska";
-    location.street = "Poznańska 1";
-    location.zipCode = "10-100";
-
-    pl.hellopoland.dto.Sight sight = new pl.hellopoland.dto.Sight();
-
-    sight.name = "Zoo w Poznaniu";
-    sight.lead = "Poznańskie zoo lead";
-    sight.description = "Wrocławskie zoo zaprasza na zwiedzanie description";
-    sight.mainImage = image;
-    sight.location = location;
-    sight.generalAdmission = true;
-
-    sightService.create(sight, user.getPartner());
-  }
-
-  private void createHelloPolandSight(User user) {
-    Image image = new Image();
-    image.original = "https://hpl.fream.pl/head.jpg";
-
-    Location location = new Location();
-    location.city = "Wrocław";
-    location.country = "Polska";
-    location.street = "Wrocławska 1";
-    location.zipCode = "50-500";
-
-    pl.hellopoland.dto.Sight sight = new pl.hellopoland.dto.Sight();
-
-    sight.name = "Wycieczki Hello Poland";
-    sight.lead = "Wyvieczka Hello Poland lead";
-    sight.description = "Hello Poland zaprasza na wycieczki description";
-    sight.mainImage = image;
-    sight.location = location;
-    sight.generalAdmission = true;
-
-    sightService.create(sight, user.getPartner());
   }
 
   private User createPartner(String partnerName, String token) {

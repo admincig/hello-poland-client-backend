@@ -4,7 +4,6 @@ import java.util.Optional;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.persistence.NoResultException;
-import pl.hellopoland.security.CurrentUser;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserLocation;
 

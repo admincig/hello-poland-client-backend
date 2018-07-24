@@ -2,13 +2,10 @@ package pl.hellopoland.rest.exceptionhandler;
 
 import java.lang.System.Logger.Level;
 import javax.ejb.EJBAccessException;
-import javax.ejb.SessionContext;
-import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
