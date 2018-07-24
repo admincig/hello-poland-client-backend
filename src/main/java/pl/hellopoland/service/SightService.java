@@ -1,6 +1,8 @@
 package pl.hellopoland.service;
 
+import static java.util.stream.Collectors.toList;
 import java.io.ByteArrayInputStream;
+import java.util.Comparator;
 import java.util.List;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -9,10 +11,12 @@ import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.config.SightPagedCollectionConfig;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.exception.ExceptionFactory;
 import pl.hellopoland.util.DtoMapper;
+import pl.hellopoland.util.PagedEntityCollection;
 
 @LocalBean
 @Stateless
@@ -29,6 +33,15 @@ public class SightService extends ServiceSuperclass {
 
   @Inject
   private ExceptionFactory exceptionFactory;
+
+  public PagedEntityCollection<Sight> getList(SightPagedCollectionConfig config) {
+    if (config.isCurrentPartner()) {
+      config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
+    }
+    List<Sight> sight = getQuery(config).getResultList().stream()
+        .sorted(Comparator.nullsLast(Comparator.comparing(Sight::getName))).collect(toList());
+    return new PagedEntityCollection<>(sight, config);
+  }
 
   public Sight create(SightDTO dto, Partner partner) {
     Sight bo = new Sight();
