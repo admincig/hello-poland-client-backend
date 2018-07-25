@@ -38,6 +38,8 @@ public class SightService extends ServiceSuperclass {
     if (config.isCurrentPartner()) {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
     }
+    config.setOrderColumn("name");
+    config.setOrderDirection("asc");
     List<Sight> sight = getQuery(config).getResultList().stream()
         .sorted(Comparator.nullsLast(Comparator
             .comparing(Sight::getName, String.CASE_INSENSITIVE_ORDER).thenComparing(Sight::getId)))
