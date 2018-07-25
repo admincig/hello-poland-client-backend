@@ -15,12 +15,14 @@ import java.util.stream.Collectors;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonStructure;
 import javax.json.bind.JsonbBuilder;
 import pl.hellopoland.bo.OrderDetails;
 import pl.hellopoland.bo.OrderEntry;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
+import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.dto.booking.BookingDTO;
 import pl.hellopoland.dto.booking.TicketOrderDTO;
 import pl.hellopoland.exception.conflict.CannotDeleteSightEventFromExternalSystemException;
@@ -205,6 +207,38 @@ public class HelloTicket {
 
     if (responseCode != NO_CONTENT.getStatusCode()) {
       throw new CannotDeleteSightEventFromExternalSystemException();
+    }
+  }
+
+  private JsonStructure get(String path, String authToken) throws IOException {
+    URL url = new URL(this.url + path);
+    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+    logger.log(System.Logger.Level.INFO, "Sending GET request to url: " + url);
+    conn.setRequestMethod("GET");
+    conn.setRequestProperty("Authorization", "Bearer " + authToken);
+    conn.setDoOutput(true);
+    conn.connect();
+    var is = conn.getInputStream();
+    int responseCode = conn.getResponseCode();
+    logger.log(System.Logger.Level.INFO, "Server responded with code: " + responseCode);
+    JsonStructure poolDefinitions = Json.createReader(is).read();
+    is.close();
+    return poolDefinitions;
+  }
+
+  public List<TicketPoolDefinitionDTO> getTicketPoolDefinitions(String partnerAuthToken) {
+    try {
+      JsonStructure json = get("/v1/ticket-pool-definitions", partnerAuthToken);
+
+      @SuppressWarnings("unchecked")
+      Class<List<TicketPoolDefinitionDTO>> klass =
+          (Class<List<TicketPoolDefinitionDTO>>) (Class<?>) List.class;
+
+      return JsonbBuilder.create().fromJson(json.toString(), klass);
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      return null;
     }
   }
 }
