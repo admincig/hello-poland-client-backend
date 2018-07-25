@@ -9,10 +9,12 @@ import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.config.SightPagedCollectionConfig;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.exception.ExceptionFactory;
 import pl.hellopoland.util.DtoMapper;
+import pl.hellopoland.util.PagedEntityCollection;
 
 @LocalBean
 @Stateless
@@ -29,6 +31,16 @@ public class SightService extends ServiceSuperclass {
 
   @Inject
   private ExceptionFactory exceptionFactory;
+
+  public PagedEntityCollection<Sight> getList(SightPagedCollectionConfig config) {
+    if (config.isCurrentPartner()) {
+      config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
+    }
+    config.setOrderColumn("name");
+    config.setOrderDirection("asc");
+    List<Sight> sight = getQuery(config).getResultList();
+    return new PagedEntityCollection<>(sight, config);
+  }
 
   public Sight create(SightDTO dto, Partner partner) {
     Sight bo = new Sight();
@@ -58,12 +70,6 @@ public class SightService extends ServiceSuperclass {
       });
     }
     return bo;
-  }
-
-  public List<Sight> getActive() {
-    return em
-        .createQuery("from Sight sight where sight.active=true order by sight.id desc", Sight.class)
-        .getResultList();
   }
 
   public List<Sight> getActiveForPartner() {
