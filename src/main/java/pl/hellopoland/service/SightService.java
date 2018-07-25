@@ -1,8 +1,6 @@
 package pl.hellopoland.service;
 
-import static java.util.stream.Collectors.toList;
 import java.io.ByteArrayInputStream;
-import java.util.Comparator;
 import java.util.List;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -40,10 +38,7 @@ public class SightService extends ServiceSuperclass {
     }
     config.setOrderColumn("name");
     config.setOrderDirection("asc");
-    List<Sight> sight = getQuery(config).getResultList().stream()
-        .sorted(Comparator.nullsLast(Comparator
-            .comparing(Sight::getName, String.CASE_INSENSITIVE_ORDER).thenComparing(Sight::getId)))
-        .collect(toList());
+    List<Sight> sight = getQuery(config).getResultList();
     return new PagedEntityCollection<>(sight, config);
   }
 
