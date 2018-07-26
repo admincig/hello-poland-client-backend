@@ -9,6 +9,7 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonStructure;
+import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import pl.hellopoland.bo.OrderDetails;
 import pl.hellopoland.bo.OrderEntry;
@@ -229,13 +231,27 @@ public class HelloTicket {
 
   public List<TicketPoolDefinitionDTO> getTicketPoolDefinitions(String partnerAuthToken) {
     try {
+      final Jsonb jsonb = JsonbBuilder.create();
       JsonStructure json = get("/v1/ticket-pool-definitions", partnerAuthToken);
+      JsonArray jsonArray = (JsonArray) json;
+      List<TicketPoolDefinitionDTO> dtos = new ArrayList<>();
+      jsonArray.forEach(p -> {
+        var dto = jsonb.fromJson(p.toString(), TicketPoolDefinitionDTO.class);
+        dtos.add(dto);
+      });
+      return dtos;
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      return null;
+    }
+  }
 
-      @SuppressWarnings("unchecked")
-      Class<List<TicketPoolDefinitionDTO>> klass =
-          (Class<List<TicketPoolDefinitionDTO>>) (Class<?>) List.class;
-
-      return JsonbBuilder.create().fromJson(json.toString(), klass);
+  public TicketPoolDefinitionDTO addTicketPoolDefinition(TicketPoolDefinitionDTO dto,
+      String partnerAuthToken) {
+    try {
+      Jsonb jsonb = JsonbBuilder.create();
+      JsonObject json = post("/v1/ticket-pool-definitions", jsonb.toJson(dto), partnerAuthToken);
+      return jsonb.fromJson(json.toString(), TicketPoolDefinitionDTO.class);
     } catch (Exception e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
       return null;

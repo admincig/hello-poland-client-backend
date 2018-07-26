@@ -28,6 +28,7 @@ import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PagedEntityCollection;
+import pl.hellopoland.util.Triplet;
 
 @LocalBean
 @Stateless
@@ -185,8 +186,14 @@ public class SightEventService extends ServiceSuperclass {
             hpt.getTicketPoolDefinitions(partner.getHptToken());
         var poolDefinitionsGroupedBySightEventId =
             poolDefinitions.stream().collect(Collectors.groupingBy(pool -> pool.sightEventId));
-        sightEvents.forEach(dto -> {
-          dto.ticketPoolDefinitions = poolDefinitionsGroupedBySightEventId.get(dto.sightId);
+        for (var pair : sightEvents) {
+          pair.getRight().ticketPoolDefinitions =
+              poolDefinitionsGroupedBySightEventId.get(pair.getLeft());
+        }
+      });
+      dtos.forEach(dto -> {
+        dto.ticketPoolDefinitions.forEach(p -> {
+          p.sightEventId = dto.id;
         });
       });
     } else {
@@ -194,15 +201,15 @@ public class SightEventService extends ServiceSuperclass {
     }
   }
 
-  private Map<Partner, List<SightEventDTO>> groupByPartner(
-      List<Pair<SightEvent, SightEventDTO>> groupedById) {
-    var groupedByPartner = new HashMap<Partner, List<SightEventDTO>>();
-    groupedById.forEach(pair -> {
-      Partner partner = pair.getLeft().getPartner();
+  private Map<Partner, List<Pair<Long, SightEventDTO>>> groupByPartner(
+      List<Triplet<Long, SightEvent, SightEventDTO>> groupedById) {
+    var groupedByPartner = new HashMap<Partner, List<Pair<Long, SightEventDTO>>>();
+    groupedById.forEach(triplet -> {
+      Partner partner = triplet.second.getPartner();
       if (!groupedByPartner.containsKey(partner)) {
         groupedByPartner.put(partner, new ArrayList<>());
       }
-      groupedByPartner.get(partner).add(pair.getRight());
+      groupedByPartner.get(partner).add(new ImmutablePair<>(triplet.first, triplet.third));
     });
     return groupedByPartner;
   }
@@ -212,13 +219,13 @@ public class SightEventService extends ServiceSuperclass {
         .anyMatch(se -> se.getPortal().getType().equals(Portal.Type.HELLOTICKET_CLOUD_1));
   }
 
-  private List<Pair<SightEvent, SightEventDTO>> pairBosWithDtos(Collection<SightEvent> bos,
+  private List<Triplet<Long, SightEvent, SightEventDTO>> pairBosWithDtos(Collection<SightEvent> bos,
       List<SightEventDTO> dtos) {
-    var grouped = new ArrayList<Pair<SightEvent, SightEventDTO>>();
+    var grouped = new ArrayList<Triplet<Long, SightEvent, SightEventDTO>>();
     bos.forEach(bo -> {
       for (var dto : dtos) {
         if (bo.getId().equals(dto.id)) {
-          grouped.add(new ImmutablePair<>(bo, dto));
+          grouped.add(new Triplet<>(bo.getHptId(), bo, dto));
           break;
         }
       }
