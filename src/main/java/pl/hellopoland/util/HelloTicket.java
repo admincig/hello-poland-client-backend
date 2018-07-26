@@ -222,9 +222,9 @@ public class HelloTicket {
     var is = conn.getInputStream();
     int responseCode = conn.getResponseCode();
     logger.log(System.Logger.Level.INFO, "Server responded with code: " + responseCode);
-    JsonStructure poolDefinitions = Json.createReader(is).read();
+    JsonStructure response = Json.createReader(is).read();
     is.close();
-    return poolDefinitions;
+    return response;
   }
 
   public List<TicketPoolDefinitionDTO> getTicketPoolDefinitions(String partnerAuthToken) {

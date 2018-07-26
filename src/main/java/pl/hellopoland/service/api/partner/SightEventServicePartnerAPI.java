@@ -1,5 +1,6 @@
 package pl.hellopoland.service.api.partner;
 
+import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
@@ -24,6 +25,7 @@ public class SightEventServicePartnerAPI {
     config.onlyActive();
     PagedEntityCollection<SightEvent> bos = service.getList(config);
     var dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
+    service.fetchTicketPoolDefinitions(bos.items, dtos);
     return new PagedCollection(dtos, bos.config);
   }
 
@@ -45,6 +47,7 @@ public class SightEventServicePartnerAPI {
   public SightEventDTO get(Long id) {
     SightEvent bo = service.getForLoggedUser(id);
     var dto = DtoMapper.getFullDTO(bo);
+    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto));
     return dto;
   }
 
@@ -57,6 +60,7 @@ public class SightEventServicePartnerAPI {
   public SightEventDTO uploadMainImage(Long id, byte[] icon) {
     SightEvent bo = service.uploadMainImageForLoggedUser(id, icon);
     var dto = DtoMapper.getFullDTO(bo);
+    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto));
     return dto;
   }
 }
