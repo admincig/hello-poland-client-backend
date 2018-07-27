@@ -86,16 +86,6 @@ public class SightService extends ServiceSuperclass {
     return get(id);
   }
 
-  public void delete(Long sightId) {
-    Sight bo = get(sightId);
-
-    if (hasActiveSightEvents(bo.getSightEvents())) {
-      throw exceptionFactory.sightHasAssignedSightEventsException();
-    } else {
-      bo.setActive(false);
-    }
-  }
-
   private boolean hasActiveSightEvents(List<SightEvent> sightEvents) {
     for (SightEvent sightEvent : sightEvents) {
       if (sightEvent.isActive()) {
@@ -132,6 +122,11 @@ public class SightService extends ServiceSuperclass {
   }
 
   public void deleteForLoggedUser(Long id) {
-    getActiveForLoggedUser(id).setActive(false);
+    Sight bo = getActiveForLoggedUser(id);
+    if (hasActiveSightEvents(bo.getSightEvents())) {
+      throw exceptionFactory.sightHasAssignedSightEventsException();
+    } else {
+      bo.setActive(false);
+    }
   }
 }
