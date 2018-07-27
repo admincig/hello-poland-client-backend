@@ -192,9 +192,11 @@ public class SightEventService extends ServiceSuperclass {
         }
       });
       dtos.forEach(dto -> {
-        dto.ticketPoolDefinitions.forEach(p -> {
-          p.sightEventId = dto.id;
-        });
+        if (dto.ticketPoolDefinitions != null) {
+          dto.ticketPoolDefinitions.forEach(p -> {
+            p.sightEventId = dto.id;
+          });
+        }
       });
     } else {
       // TODO other portals
