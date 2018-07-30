@@ -148,7 +148,7 @@ public class HelloTicket {
           put("/v1/sight-events/" + sightEvent.id, sightEventJson, partnerAuthToken).toString(),
           SightEventDTO.class);
     } catch (IOException e) {
-      e.printStackTrace();
+      logger.log(Level.ERROR, e);
     }
 
     return null;
