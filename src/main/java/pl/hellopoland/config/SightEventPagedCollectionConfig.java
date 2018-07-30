@@ -1,5 +1,6 @@
 package pl.hellopoland.config;
 
+import java.sql.Date;
 import pl.hellopoland.bo.SightEvent;
 
 public class SightEventPagedCollectionConfig extends PagedCollectionConfig<SightEvent> {
@@ -17,7 +18,7 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
   }
 
   public void setName(String name) {
-    addCondition("name", name, "e.name=:name");
+    addCondition("name", name.toLowerCase(), "lower(e.name)=:name");
   }
 
   public void onlyActive() {
@@ -35,4 +36,16 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
   public void setPartner(Long partnerId) {
     addCondition("partner", partnerId, "e.sight.partner.id=:partner");
   }
+
+  public void setDate(Date date) {
+    var startDay = date.toLocalDate().atStartOfDay();
+    var endDay = startDay.plusDays(1);
+    addCondition("startDay", startDay, "e.date >= :startDay");
+    addCondition("endDay", endDay, "e.date < :endDay");
+  }
+
+  public void setCity(String city) {
+    addCondition("city", city, "e.location.city");
+  }
+
 }
