@@ -3,7 +3,6 @@ package pl.hellopoland.service;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-
 import java.lang.System.Logger;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -14,24 +13,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import javax.ejb.EJBAccessException;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.persistence.NoResultException;
 import javax.ws.rs.core.MediaType;
-import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.bo.Order;
 import pl.hellopoland.bo.Order.Status;
 import pl.hellopoland.bo.OrderDateEntry;
 import pl.hellopoland.bo.OrderDetails;
 import pl.hellopoland.bo.OrderEntry;
 import pl.hellopoland.bo.OrderSightEntry;
-import pl.hellopoland.security.CurrentUser;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.Ticket;
 import pl.hellopoland.bo.User;
+import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PaymentUtils;
 import pl.hellopoland.util.Triplet;
@@ -177,10 +173,10 @@ public class OrderService extends ServiceSuperclass {
   }
 
   public OrderDateEntry getOrderDateEntryForLoggedUser(long id) {
-    String queryString = "from OrderDateEntry where deleted=false and id=:id and sightEntry.order.user=:user";
-    OrderDateEntry de =
-        em.createQuery(queryString, OrderDateEntry.class).setParameter("id", id)
-            .setParameter("user", getLoggedUser()).getSingleResult();
+    String queryString =
+        "from OrderDateEntry where deleted=false and id=:id and sightEntry.order.user=:user";
+    OrderDateEntry de = em.createQuery(queryString, OrderDateEntry.class).setParameter("id", id)
+        .setParameter("user", getLoggedUser()).getSingleResult();
 
     de.getEntries().forEach(e -> e.getNumbers().size());
     return de;

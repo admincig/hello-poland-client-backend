@@ -15,7 +15,8 @@ import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
-import pl.hellopoland.dto.Push;
+import pl.hellopoland.dto.PushDTO;
+import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PagedEntityCollection;
@@ -54,7 +55,7 @@ public class SightEventService extends ServiceSuperclass {
     return s;
   }
 
-  public void savePush(Push push) {
+  public void savePush(PushDTO push) {
     Partner partner = partnerService.findByToken(push.secret);
     push.sightEvents.forEach(sdto -> {
       create(sdto, partner);
@@ -73,7 +74,7 @@ public class SightEventService extends ServiceSuperclass {
     bo.setActive(false);
   }
 
-  public SightEvent create(pl.hellopoland.dto.SightEvent dto, Partner partner) {
+  public SightEvent create(SightEventDTO dto, Partner partner) {
     if (partner == null) {
       partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
     }
@@ -98,7 +99,7 @@ public class SightEventService extends ServiceSuperclass {
     return bo;
   }
 
-  public SightEvent updateForLoggedUser(pl.hellopoland.dto.SightEvent dto) {
+  public SightEvent updateForLoggedUser(SightEventDTO dto) {
     SightEvent bo = getForLoggedUser(dto.id);
     if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
       Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());

@@ -9,8 +9,12 @@ import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.config.SightPagedCollectionConfig;
+import pl.hellopoland.dto.SightDTO;
+import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.exception.ExceptionFactory;
 import pl.hellopoland.util.DtoMapper;
+import pl.hellopoland.util.PagedEntityCollection;
 
 @LocalBean
 @Stateless
@@ -28,7 +32,17 @@ public class SightService extends ServiceSuperclass {
   @Inject
   private ExceptionFactory exceptionFactory;
 
-  public Sight create(pl.hellopoland.dto.Sight dto, Partner partner) {
+  public PagedEntityCollection<Sight> getList(SightPagedCollectionConfig config) {
+    if (config.isCurrentPartner()) {
+      config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
+    }
+    config.setOrderColumn("name");
+    config.setOrderDirection("asc");
+    List<Sight> sight = getQuery(config).getResultList();
+    return new PagedEntityCollection<>(sight, config);
+  }
+
+  public Sight create(SightDTO dto, Partner partner) {
     Sight bo = new Sight();
     DtoMapper.copy(dto, bo);
     if (partner == null) {
@@ -58,12 +72,6 @@ public class SightService extends ServiceSuperclass {
     return bo;
   }
 
-  public List<Sight> getActive() {
-    return em
-        .createQuery("from Sight sight where sight.active=true order by sight.id desc", Sight.class)
-        .getResultList();
-  }
-
   public List<Sight> getActiveForPartner() {
     Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
 
@@ -72,7 +80,7 @@ public class SightService extends ServiceSuperclass {
         Sight.class).setParameter("partner", partner).getResultList();
   }
 
-  public Sight update(Long id, pl.hellopoland.dto.Sight dto) {
+  public Sight update(Long id, SightDTO dto) {
     Sight bo = get(id);
     DtoMapper.copy(dto, bo);
     return get(id);
@@ -99,7 +107,7 @@ public class SightService extends ServiceSuperclass {
   }
 
   private void createGeneralAdmissionSightEvent(Sight sight, Partner partner) {
-    pl.hellopoland.dto.SightEvent sed = DtoMapper.getGAEventDTO(sight);
+    SightEventDTO sed = DtoMapper.getGAEventDTO(sight);
     sightEventService.create(sed, partner);
   }
 
@@ -117,7 +125,7 @@ public class SightService extends ServiceSuperclass {
         .setParameter("id", id).setParameter("partner", getLoggedPartner()).getSingleResult();
   }
 
-  public Sight updateForLoggedUser(pl.hellopoland.dto.Sight dto) {
+  public Sight updateForLoggedUser(SightDTO dto) {
     Sight bo = getActiveForLoggedUser(dto.id);
     DtoMapper.copy(dto, bo);
     return getActiveForLoggedUser(dto.id);

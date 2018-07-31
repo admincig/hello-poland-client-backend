@@ -1,7 +1,6 @@
 package pl.hellopoland.security;
 
 import static java.util.Arrays.asList;
-
 import java.util.HashSet;
 import java.util.Set;
 

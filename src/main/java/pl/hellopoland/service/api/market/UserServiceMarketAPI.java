@@ -14,7 +14,7 @@ public class UserServiceMarketAPI {
   UserService service;
 
   @RolesAllowed("user")
-  public UserORO me(){
+  public UserORO me() {
     User bo = service.me();
     var dto = new UserORO(bo);
     return dto;

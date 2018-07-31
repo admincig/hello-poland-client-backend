@@ -1,9 +1,5 @@
 package pl.hellopoland.rest.partner;
 
-import static javax.ws.rs.core.Response.noContent;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.stream.Collectors;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -15,11 +11,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.rest.dto.PagedCollection;
-import pl.hellopoland.service.SightService;
 import pl.hellopoland.service.api.partner.SightServicePartnerAPI;
-import pl.hellopoland.util.DtoMapper;
 
 @Path("/partner/sights")
 @RequestScoped
@@ -31,7 +25,7 @@ public class PartnerSightRestService {
   private SightServicePartnerAPI service;
 
   @POST
-  public pl.hellopoland.dto.Sight add(pl.hellopoland.dto.Sight dto) {
+  public SightDTO add(SightDTO dto) {
     return service.create(dto);
   }
 
@@ -42,13 +36,13 @@ public class PartnerSightRestService {
 
   @GET
   @Path("/{id}")
-  public pl.hellopoland.dto.Sight get(@PathParam("id") Long id) {
+  public SightDTO get(@PathParam("id") Long id) {
     return service.get(id);
   }
 
   @PUT
   @Path("/{id}")
-  public pl.hellopoland.dto.Sight update(@PathParam("id") Long id, pl.hellopoland.dto.Sight dto) {
+  public SightDTO update(@PathParam("id") Long id, SightDTO dto) {
     dto.id = id;
     return service.update(dto);
   }
@@ -62,8 +56,8 @@ public class PartnerSightRestService {
   @PUT
   @Path("/{id}/mainImage")
   @Consumes({"image/jpeg", "image/jpg"})
-  public pl.hellopoland.dto.Sight uploadMainImage(@PathParam("id") Long id, byte[] icon){
+  public SightDTO uploadMainImage(@PathParam("id") Long id, byte[] icon) {
     return service.uploadMainImage(id, icon);
   }
-  
+
 }

@@ -2,7 +2,6 @@ package pl.hellopoland.rest.market;
 
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 import static pl.hellopoland.security.UserAuthDTO.ofCurrentUser;
-
 import javax.annotation.security.DeclareRoles;
 import javax.inject.Inject;
 import javax.security.enterprise.SecurityContext;
@@ -40,8 +39,7 @@ public class MarketAuthenticationRestService {
   @Path("/refresh")
   public Response refresh() {
     if (securityContext.getCallerPrincipal() != null) {
-      return Response.ok(ofCurrentUser(currentUser))
-          .build();
+      return Response.ok(ofCurrentUser(currentUser)).build();
     }
 
     return Response.status(UNAUTHORIZED).build();

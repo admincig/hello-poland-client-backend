@@ -10,6 +10,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
+import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.api.market.SightEventServiceMarketAPI;
 
@@ -36,7 +37,7 @@ public class MarketSightEventRestService {
 
   @GET
   @Path("/{id}")
-  public pl.hellopoland.dto.SightEvent get(@PathParam("id") Long id) {
+  public SightEventDTO get(@PathParam("id") Long id) {
     return service.get(id);
   }
 }

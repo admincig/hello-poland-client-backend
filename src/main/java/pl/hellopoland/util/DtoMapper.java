@@ -7,11 +7,16 @@ import pl.hellopoland.bo.Location;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.Ticket;
-import pl.hellopoland.dto.DateType;
+import pl.hellopoland.dto.DateTypeDTO;
+import pl.hellopoland.dto.ImageDTO;
+import pl.hellopoland.dto.LocationDTO;
+import pl.hellopoland.dto.SightDTO;
+import pl.hellopoland.dto.SightEventDTO;
+import pl.hellopoland.dto.TicketDefinitionDTO;
 
 public class DtoMapper {
 
-  public static void copy(pl.hellopoland.dto.Sight source, Sight target) {
+  public static void copy(SightDTO source, Sight target) {
     target.setName(source.name);
     target.setLead(source.lead);
     target.setDescription(source.description);
@@ -21,8 +26,8 @@ public class DtoMapper {
     copyLocation(source.location, target);
   }
 
-  public static pl.hellopoland.dto.Sight getDTO(Sight bo) {
-    pl.hellopoland.dto.Sight dto = new pl.hellopoland.dto.Sight();
+  public static SightDTO getDTO(Sight bo) {
+    SightDTO dto = new SightDTO();
 
     dto.id = bo.getId();
     dto.name = bo.getName();
@@ -34,42 +39,68 @@ public class DtoMapper {
     return dto;
   }
 
-  public static pl.hellopoland.dto.Sight getFullDTO(Sight bo) {
-    pl.hellopoland.dto.Sight dto = getDTO(bo);
+  public static SightDTO getFullDTO(Sight bo) {
+    SightDTO dto = getDTO(bo);
     if (bo.getSightEvents() != null) {
       dto.sightEvents = bo.getSightEvents().stream().map(DtoMapper::getFullDTO).collect(toList());
     }
     return dto;
   }
 
-  public static pl.hellopoland.dto.SightEvent getDTO(SightEvent bo) {
-    pl.hellopoland.dto.SightEvent dto = new pl.hellopoland.dto.SightEvent();
+  public static SightEventDTO getDTO(SightEvent bo) {
+    SightEventDTO dto = new SightEventDTO();
 
     dto.id = bo.getId();
     dto.name = bo.getName();
-    dto.date = bo.getDate();
+    dto.lead = bo.getLead();
     dto.description = bo.getDescription();
-    dto.duration = bo.getDuration();
     dto.mainImage = bo.getMainImage() != null ? getDTO(bo.getMainImage()) : null;
     dto.email = bo.getEmail();
     dto.phone = bo.getPhone();
-    dto.sightId = bo.getSight().getId();
-    dto.generalAdmission = bo.getGeneralAdmission();
+    dto.duration = bo.getDuration();
     dto.location = ofNullable(bo.getLocation()).map(DtoMapper::getDTO).orElse(null);
+    // dto.date = bo.getDate();
+    dto.generalAdmission = bo.getGeneralAdmission();
+    dto.sightId = bo.getSight().getId();
 
     return dto;
   }
 
-  public static pl.hellopoland.dto.SightEvent getFullDTO(SightEvent bo) {
-    pl.hellopoland.dto.SightEvent dto = getDTO(bo);
+  public static SightEventDTO getFullDTO(SightEvent bo) {
+    SightEventDTO dto = getDTO(bo);
     if (bo.getTickets() != null && !bo.getTickets().isEmpty()) {
-      dto.tickets = bo.getTickets().stream().map(DtoMapper::getDTO).collect(toList());
+      dto.ticketDefinitions = bo.getTickets().stream().map(DtoMapper::getDTO).collect(toList());
     }
+    // if (bo.getOpeningHours() != null && !bo.getOpeningHours().isEmpty()) {
+    // dto.openingHours = bo.getOpeningHours().stream().map(DtoMapper::getDTO).collect(toList());
+    // }
+    // if (bo.getAgreements() != null && !bo.getAgreements().isEmpty()) {
+    // dto.agreements = bo.getAgreements().stream().map(DtoMapper::getDTO).collect(toList());
+    // }
     return dto;
   }
 
-  private static pl.hellopoland.dto.Location getDTO(Location bo) {
-    pl.hellopoland.dto.Location dto = new pl.hellopoland.dto.Location();
+  // private static AgreementDTO getDTO(Agreement bo) {
+  // var dto = new AgreementDTO();
+  //
+  // dto.name = ofNullable(bo.getSightEvent()).map(SightEvent::getName).orElse(null);
+  // dto.url = bo.getLinkUrl();
+  //
+  // return dto;
+  // }
+  //
+  // private static pl.hellopoland.dto.OpeningHours getDTO(OpeningHours bo) {
+  // var dto = new pl.hellopoland.dto.OpeningHours();
+  //
+  // dto.day = bo.getDay();
+  // dto.openTime = bo.getOpenTime();
+  // dto.closeTime = bo.getCloseTime();
+  //
+  // return dto;
+  // }
+
+  private static LocationDTO getDTO(Location bo) {
+    LocationDTO dto = new LocationDTO();
 
     dto.latitude = bo.getLatitude();
     dto.longitude = bo.getLongitude();
@@ -81,26 +112,26 @@ public class DtoMapper {
     return dto;
   }
 
-  public static pl.hellopoland.dto.TicketDefinition getDTO(Ticket bo) {
-    pl.hellopoland.dto.TicketDefinition dto = new pl.hellopoland.dto.TicketDefinition();
+  public static TicketDefinitionDTO getDTO(Ticket bo) {
+    TicketDefinitionDTO dto = new TicketDefinitionDTO();
 
     dto.id = bo.getId();
     dto.name = bo.getName();
     dto.price = bo.getPrice();
-    dto.predefinedDate = bo.isPredefinedDate();
-    dto.date = bo.getDate();
-    dto.dateType = DateType.valueOf(bo.getDateType().name());
-    dto.sightEventId = bo.getSightEvent().getId();
+    // dto.predefinedDate = bo.isPredefinedDate();
+    // dto.date = bo.getDate();
+    dto.dateType = DateTypeDTO.valueOf(bo.getDateType().name());
+    // dto.sightEventId = bo.getSightEvent().getId();
     dto.availableTicketsNumber = bo.getAvailableTicketsNumber();
 
     return dto;
   }
 
-  private static pl.hellopoland.dto.Image getDTO(ImageCollector bo) {
+  private static ImageDTO getDTO(ImageCollector bo) {
     if (bo == null) {
       return null;
     }
-    pl.hellopoland.dto.Image dto = new pl.hellopoland.dto.Image();
+    ImageDTO dto = new ImageDTO();
     dto.original = bo.getOrginal().getDownloadUrl();
     dto.fhd = bo.getFhd().getDownloadUrl();
     dto.fourK = bo.getFourK().getDownloadUrl();
@@ -112,7 +143,7 @@ public class DtoMapper {
     return dto;
   }
 
-  private static void copyLocation(pl.hellopoland.dto.Location source, Located target) {
+  private static void copyLocation(LocationDTO source, Located target) {
     Location location = target.getLocation();
 
     if (source != null) {
@@ -132,8 +163,8 @@ public class DtoMapper {
     }
   }
 
-  public static pl.hellopoland.dto.SightEvent getGAEventDTO(Sight bo) {
-    pl.hellopoland.dto.SightEvent dto = new pl.hellopoland.dto.SightEvent();
+  public static SightEventDTO getGAEventDTO(Sight bo) {
+    SightEventDTO dto = new SightEventDTO();
     dto.sightId = bo.getId();
     dto.name = bo.getName();
     dto.description = bo.getDescription();
@@ -145,9 +176,9 @@ public class DtoMapper {
     return dto;
   }
 
-  public static void copy(pl.hellopoland.dto.SightEvent source, SightEvent target) {
+  public static void copy(SightEventDTO source, SightEvent target) {
     target.setName(source.name);
-    target.setDate(source.date);
+    // target.setDate(source.date);
     target.setLead(source.lead);
     target.setDescription(source.description);
     target.setEmail(source.email);
@@ -158,12 +189,12 @@ public class DtoMapper {
     copyLocation(source.location, target);
   }
 
-  public static void copy(pl.hellopoland.dto.TicketDefinition source, Ticket target) {
-    target.setDate(source.date);
+  public static void copy(TicketDefinitionDTO source, Ticket target) {
+    // target.setDate(source.date);
     target.setDateType(pl.hellopoland.bo.DateType.valueOf(source.dateType.name()));
     target.setExternalId(source.id);
     target.setName(source.name);
-    target.setPredefinedDate(source.predefinedDate);
+    // target.setPredefinedDate(source.predefinedDate);
     target.setPrice(source.price);
     target.setAvailableTicketsNumber(source.availableTicketsNumber);
   }
