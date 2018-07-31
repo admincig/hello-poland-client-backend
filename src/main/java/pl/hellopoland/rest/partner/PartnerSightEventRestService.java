@@ -66,4 +66,5 @@ public class PartnerSightEventRestService {
   public SightEventDTO uploadIcon(@PathParam("id") Long id, byte[] icon) {
     return service.uploadMainImage(id, icon);
   }
+
 }
