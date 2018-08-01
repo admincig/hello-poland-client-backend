@@ -194,6 +194,7 @@ public class DtoMapper {
     target.setDateType(pl.hellopoland.bo.DateType.valueOf(source.dateType.name()));
     target.setExternalId(source.id);
     target.setName(source.name);
+    target.setPoolId(source.ticketPoolId);
     // target.setPredefinedDate(source.predefinedDate);
     target.setPrice(source.price);
     target.setAvailableTicketsNumber(source.availableTicketsNumber);

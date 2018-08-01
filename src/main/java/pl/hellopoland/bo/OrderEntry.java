@@ -23,6 +23,7 @@ public class OrderEntry extends ModelSuperclass {
   private String name;
   private Long externalId;
   private Long externalDefinitionId;
+  private Long poolId;
   @ElementCollection
   private List<String> numbers;
 
@@ -65,6 +66,14 @@ public class OrderEntry extends ModelSuperclass {
 
   public void setExternalId(Long externalId) {
     this.externalId = externalId;
+  }
+
+  public Long getPoolId() {
+    return poolId;
+  }
+
+  public void setPoolId(Long poolId) {
+    this.poolId = poolId;
   }
 
   public OrderDateEntry getDateEntry() {
