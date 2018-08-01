@@ -10,7 +10,7 @@ public class JsonbConfig implements ContextResolver<Jsonb> {
 
   @Override
   public Jsonb getContext(Class<?> type) {
-    var config = new javax.json.bind.JsonbConfig().withDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", null);
+    var config = new javax.json.bind.JsonbConfig().withDateFormat("yyyy-MM-dd'T'HH:mm:ssxxx", null);
     return JsonbBuilder.create(config);
   }
 
