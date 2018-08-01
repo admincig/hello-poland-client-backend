@@ -175,6 +175,7 @@ public class DtoMapper {
     dto.mainImage = getDTO(bo.getMainImage());
     dto.email = bo.getEmail();
     dto.phone = bo.getPhone();
+    dto.lead = bo.getLead();
     dto.location = ofNullable(bo.getLocation()).map(DtoMapper::getDTO).orElse(null);
     dto.generalAdmission = true;
     return dto;
