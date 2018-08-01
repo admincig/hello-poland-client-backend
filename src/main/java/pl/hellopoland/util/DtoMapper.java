@@ -6,7 +6,7 @@ import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.Location;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
-import pl.hellopoland.bo.TicketDefinition;
+import pl.hellopoland.bo.Ticket;
 import pl.hellopoland.dto.DateTypeDTO;
 import pl.hellopoland.dto.ImageDTO;
 import pl.hellopoland.dto.LocationDTO;
@@ -112,7 +112,7 @@ public class DtoMapper {
     return dto;
   }
 
-  public static TicketDefinitionDTO getDTO(TicketDefinition bo) {
+  public static TicketDefinitionDTO getDTO(Ticket bo) {
     TicketDefinitionDTO dto = new TicketDefinitionDTO();
 
     dto.id = bo.getId();
@@ -189,7 +189,7 @@ public class DtoMapper {
     copyLocation(source.location, target);
   }
 
-  public static void copy(TicketDefinitionDTO source, TicketDefinition target) {
+  public static void copy(TicketDefinitionDTO source, Ticket target) {
     // target.setDate(source.date);
     target.setDateType(pl.hellopoland.bo.DateType.valueOf(source.dateType.name()));
     target.setExternalId(source.id);

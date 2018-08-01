@@ -5,7 +5,7 @@ import javax.inject.Inject;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.SightEvent;
-import pl.hellopoland.bo.TicketDefinition;
+import pl.hellopoland.bo.Ticket;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.util.HelloTicket;
 
@@ -27,7 +27,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     dto = hpt.addTicketPoolDefinition(dto, partner.getHptToken());
     dto.sightEventId = sightEventId;
     dto.ticketDefinitions.forEach(td -> {
-      TicketDefinition tBo = ticketService.create(td, sightEventId, partner);
+      Ticket tBo = ticketService.create(td, sightEventId, partner);
       td.id = tBo.getId();
     });
     return dto;

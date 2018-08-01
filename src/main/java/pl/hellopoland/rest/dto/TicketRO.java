@@ -1,6 +1,6 @@
 package pl.hellopoland.rest.dto;
 
-import pl.hellopoland.bo.TicketDefinition;
+import pl.hellopoland.bo.Ticket;
 
 public class TicketRO {
 
@@ -10,7 +10,7 @@ public class TicketRO {
   public Boolean predefinedDate;
   public String date;
 
-  public TicketRO(TicketDefinition t) {
+  public TicketRO(Ticket t) {
     this.id = t.getId();
     this.name = t.getName();
     this.price = t.getPrice();

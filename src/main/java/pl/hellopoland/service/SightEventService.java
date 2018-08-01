@@ -21,7 +21,7 @@ import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
-import pl.hellopoland.bo.TicketDefinition;
+import pl.hellopoland.bo.Ticket;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.PushDTO;
 import pl.hellopoland.dto.SightEventDTO;
@@ -181,7 +181,7 @@ public class SightEventService extends ServiceSuperclass {
       var pairedByIds = pairBosWithDtos(bos, sightEventDtos);
       var groupedByPartner = groupByPartner(pairedByIds);
       HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
-      Map<Long, TicketDefinition> externalIdToTicket = null;
+      Map<Long, Ticket> externalIdToTicket = null;
       for (var entry : groupedByPartner.entrySet()) {
         Partner partner = entry.getKey();
         List<Pair<Long, SightEventDTO>> sightEvents = entry.getValue();
@@ -189,10 +189,10 @@ public class SightEventService extends ServiceSuperclass {
             hpt.getTicketPoolDefinitions(partner.getHptToken());
         List<TicketDefinitionDTO> ticketDefinitions = new ArrayList<>();
         poolDefinitions.forEach(p -> ticketDefinitions.addAll(p.ticketDefinitions));
-        List<TicketDefinition> ticketBos = ticketService.getTicketsByExternalIds(
+        List<Ticket> ticketBos = ticketService.getTicketsByExternalIds(
             ticketDefinitions.stream().map(t -> t.id).collect(Collectors.toList()));
         externalIdToTicket =
-            ticketBos.stream().collect(Collectors.toMap(TicketDefinition::getExternalId, t -> t));
+            ticketBos.stream().collect(Collectors.toMap(Ticket::getExternalId, t -> t));
         var poolDefinitionsGroupedBySightEventId =
             poolDefinitions.stream().collect(Collectors.groupingBy(pool -> pool.sightEventId));
         for (var pair : sightEvents) {
