@@ -35,6 +35,9 @@ public class DtoMapper {
     dto.description = bo.getDescription();
     dto.mainImage = bo.getMainImage() != null ? getDTO(bo.getMainImage()) : null;
     dto.location = ofNullable(bo.getLocation()).map(DtoMapper::getDTO).orElse(null);
+    dto.email = bo.getEmail();
+    dto.phone = bo.getPhone();
+    dto.score = bo.getScore();
 
     return dto;
   }
@@ -61,6 +64,7 @@ public class DtoMapper {
     dto.location = ofNullable(bo.getLocation()).map(DtoMapper::getDTO).orElse(null);
     // dto.date = bo.getDate();
     dto.generalAdmission = bo.getGeneralAdmission();
+    dto.score = bo.getScore();
     dto.sightId = bo.getSight().getId();
 
     return dto;

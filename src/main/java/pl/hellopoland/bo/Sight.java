@@ -1,6 +1,7 @@
 package pl.hellopoland.bo;
 
 import java.util.List;
+import java.util.Random;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -20,6 +21,8 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
   private String lead;
 
   private String description;
+
+  private Float score;
 
   @ManyToOne
   private ImageCollector mainImage;
@@ -124,5 +127,17 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
 
   public void setSightEvents(List<SightEvent> sightEvents) {
     this.sightEvents = sightEvents;
+  }
+
+  public Float getScore() {
+    return score;
+  }
+
+  public void setScore(Float score) {
+    this.score = score;
+  }
+
+  public void generateRandomScore() {
+    this.setScore((float) (4.8 + new Random().nextDouble() / 5));
   }
 }
