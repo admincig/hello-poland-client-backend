@@ -57,6 +57,7 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
     this.lead = lead;
   }
 
+  @Column(columnDefinition = "varchar")
   public String getDescription() {
     return description;
   }
