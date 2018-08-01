@@ -38,6 +38,12 @@ public class DbFiller extends ServiceSuperclass {
 
     createPortals();
     createUsers();
+
+
+
+    // createSights();
+
+
     logger.log(Logger.Level.INFO, "dbfiller finished");
   }
 
@@ -90,5 +96,29 @@ public class DbFiller extends ServiceSuperclass {
     portal.setType(Type.HELLOTICKET_CLOUD_1);
     em.persist(portal);
   }
+
+  // private void createSights() {
+  // createSight();
+  // }
+  //
+  // private void createSight() {
+  // var bo = new Sight();
+  // bo.setName("Wycieczki Hello Poland we Wrocławiu");
+  // bo.setLead("Kupuj taniej, zwiedzaj łatwiej!");
+  // bo.setDescription(
+  // "Specjalizujemy się w obsłudze zorganizowanych grup turystycznych oraz biznesowych z kraju i
+  // zagranicy.");
+  //
+  // }
+  //
+  // private void createSightEvent() {
+  // var bo = new SightEvent();
+  // bo.setName("Wieczorne zwiedzanie Afrykarium");
+  // bo.setLead("Kupuj taniej, zwiedzaj łatwiej!");
+  // bo.setDescription(
+  // "Specjalizujemy się w obsłudze zorganizowanych grup turystycznych oraz biznesowych z kraju i
+  // zagranicy.");
+
+  // }
 
 }
