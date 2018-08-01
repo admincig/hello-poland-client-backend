@@ -9,18 +9,22 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonStructure;
+import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import pl.hellopoland.bo.OrderDetails;
 import pl.hellopoland.bo.OrderEntry;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
+import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.dto.booking.BookingDTO;
 import pl.hellopoland.dto.booking.TicketOrderDTO;
 import pl.hellopoland.exception.conflict.CannotDeleteSightEventFromExternalSystemException;
@@ -144,7 +148,7 @@ public class HelloTicket {
           put("/v1/sight-events/" + sightEvent.id, sightEventJson, partnerAuthToken).toString(),
           SightEventDTO.class);
     } catch (IOException e) {
-      e.printStackTrace();
+      logger.log(Level.ERROR, e);
     }
 
     return null;
@@ -205,6 +209,52 @@ public class HelloTicket {
 
     if (responseCode != NO_CONTENT.getStatusCode()) {
       throw new CannotDeleteSightEventFromExternalSystemException();
+    }
+  }
+
+  private JsonStructure get(String path, String authToken) throws IOException {
+    URL url = new URL(this.url + path);
+    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+    logger.log(System.Logger.Level.INFO, "Sending GET request to url: " + url);
+    conn.setRequestMethod("GET");
+    conn.setRequestProperty("Authorization", "Bearer " + authToken);
+    conn.setDoOutput(true);
+    conn.connect();
+    var is = conn.getInputStream();
+    int responseCode = conn.getResponseCode();
+    logger.log(System.Logger.Level.INFO, "Server responded with code: " + responseCode);
+    JsonStructure response = Json.createReader(is).read();
+    is.close();
+    return response;
+  }
+
+  public List<TicketPoolDefinitionDTO> getTicketPoolDefinitions(String partnerAuthToken) {
+    try {
+      final Jsonb jsonb = JsonbBuilder.create();
+      JsonStructure json = get("/v1/ticket-pool-definitions", partnerAuthToken);
+      JsonArray jsonArray = (JsonArray) json;
+      List<TicketPoolDefinitionDTO> dtos = new ArrayList<>();
+      jsonArray.forEach(p -> {
+        var dto = jsonb.fromJson(p.toString(), TicketPoolDefinitionDTO.class);
+        dtos.add(dto);
+      });
+      return dtos;
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      return null;
+    }
+  }
+
+  public TicketPoolDefinitionDTO addTicketPoolDefinition(TicketPoolDefinitionDTO dto,
+      String partnerAuthToken) {
+    try {
+      Jsonb jsonb = JsonbBuilder.create();
+      JsonObject json = post("/v1/ticket-pool-definitions", jsonb.toJson(dto), partnerAuthToken);
+      return jsonb.fromJson(json.toString(), TicketPoolDefinitionDTO.class);
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      return null;
     }
   }
 }

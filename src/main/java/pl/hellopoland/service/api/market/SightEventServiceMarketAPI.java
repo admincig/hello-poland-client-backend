@@ -1,5 +1,6 @@
 package pl.hellopoland.service.api.market;
 
+import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
@@ -21,7 +22,8 @@ public class SightEventServiceMarketAPI {
   @PermitAll
   public PagedCollection getList(SightEventPagedCollectionConfig config) {
     PagedEntityCollection<SightEvent> bos = service.getList(config);
-    var dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
+    List<SightEventDTO> dtos =
+        bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
     return new PagedCollection(dtos, bos.config);
   }
 
@@ -29,6 +31,7 @@ public class SightEventServiceMarketAPI {
   public SightEventDTO get(Long id) {
     SightEvent bo = service.get(id);
     var dto = DtoMapper.getFullDTO(bo);
+    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto));
     return dto;
   }
 

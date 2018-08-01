@@ -3,23 +3,34 @@ package pl.hellopoland.service;
 import static java.util.stream.Collectors.toList;
 import java.io.ByteArrayInputStream;
 import java.lang.System.Logger;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.bo.Ticket;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.PushDTO;
 import pl.hellopoland.dto.SightEventDTO;
+import pl.hellopoland.dto.TicketDefinitionDTO;
+import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PagedEntityCollection;
+import pl.hellopoland.util.Triplet;
 
 @LocalBean
 @Stateless
@@ -34,6 +45,9 @@ public class SightEventService extends ServiceSuperclass {
   @Inject
   private PartnerService partnerService;
 
+  @Inject
+  private TicketService ticketService;
+
   public PagedEntityCollection<SightEvent> getList(SightEventPagedCollectionConfig config) {
     if (config.isCurrentPartner()) {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
@@ -45,14 +59,7 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public SightEvent get(Long id) {
-    SightEvent s = em.find(SightEvent.class, id);
-
-    // fetch collections
-    s.getTickets().size();
-    s.getOpeningHours().size();
-    s.getAgreements().size();
-
-    return s;
+    return em.find(SightEvent.class, id);
   }
 
   public void savePush(PushDTO push) {
@@ -165,4 +172,79 @@ public class SightEventService extends ServiceSuperclass {
   public void deleteForLoggedUser(Long id) {
     getForLoggedUser(id).setActive(false);
   }
+
+
+  public void fetchTicketPoolDefinitions(Collection<SightEvent> bos,
+      List<SightEventDTO> sightEventDtos) {
+
+    if (hasAnyHptCloudEvent(bos)) {
+      var pairedByIds = pairBosWithDtos(bos, sightEventDtos);
+      var groupedByPartner = groupByPartner(pairedByIds);
+      HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
+      Map<Long, Ticket> externalIdToTicket = null;
+      for (var entry : groupedByPartner.entrySet()) {
+        Partner partner = entry.getKey();
+        List<Pair<Long, SightEventDTO>> sightEvents = entry.getValue();
+        List<TicketPoolDefinitionDTO> poolDefinitions =
+            hpt.getTicketPoolDefinitions(partner.getHptToken());
+        List<TicketDefinitionDTO> ticketDefinitions = new ArrayList<>();
+        poolDefinitions.forEach(p -> ticketDefinitions.addAll(p.ticketDefinitions));
+        List<Ticket> ticketBos = ticketService.getTicketsByExternalIds(
+            ticketDefinitions.stream().map(t -> t.id).collect(Collectors.toList()));
+        externalIdToTicket =
+            ticketBos.stream().collect(Collectors.toMap(Ticket::getExternalId, t -> t));
+        var poolDefinitionsGroupedBySightEventId =
+            poolDefinitions.stream().collect(Collectors.groupingBy(pool -> pool.sightEventId));
+        for (var pair : sightEvents) {
+          pair.getRight().ticketPoolDefinitions =
+              poolDefinitionsGroupedBySightEventId.get(pair.getLeft());
+        }
+      }
+      for (var sightEventDto : sightEventDtos) {
+        if (sightEventDto.ticketPoolDefinitions != null) {
+          for (var poolDefinitionDto : sightEventDto.ticketPoolDefinitions) {
+            poolDefinitionDto.sightEventId = sightEventDto.id;
+            for (var t : poolDefinitionDto.ticketDefinitions) {
+              t.id = externalIdToTicket.get(t.id).getId();
+            }
+          }
+        }
+      }
+    } else {
+      // TODO other portals
+    }
+  }
+
+  private Map<Partner, List<Pair<Long, SightEventDTO>>> groupByPartner(
+      List<Triplet<Long, SightEvent, SightEventDTO>> groupedById) {
+    var groupedByPartner = new HashMap<Partner, List<Pair<Long, SightEventDTO>>>();
+    groupedById.forEach(triplet -> {
+      Partner partner = triplet.second.getPartner();
+      if (!groupedByPartner.containsKey(partner)) {
+        groupedByPartner.put(partner, new ArrayList<>());
+      }
+      groupedByPartner.get(partner).add(new ImmutablePair<>(triplet.first, triplet.third));
+    });
+    return groupedByPartner;
+  }
+
+  private boolean hasAnyHptCloudEvent(Collection<SightEvent> bos) {
+    return bos.stream()
+        .anyMatch(se -> se.getPortal().getType().equals(Portal.Type.HELLOTICKET_CLOUD_1));
+  }
+
+  private List<Triplet<Long, SightEvent, SightEventDTO>> pairBosWithDtos(Collection<SightEvent> bos,
+      List<SightEventDTO> dtos) {
+    var grouped = new ArrayList<Triplet<Long, SightEvent, SightEventDTO>>();
+    bos.forEach(bo -> {
+      for (var dto : dtos) {
+        if (bo.getId().equals(dto.id)) {
+          grouped.add(new Triplet<>(bo.getHptId(), bo, dto));
+          break;
+        }
+      }
+    });
+    return grouped;
+  }
+
 }

@@ -28,6 +28,7 @@ import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.Ticket;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.exception.conflict.ConflictingException;
+import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PaymentUtils;
 import pl.hellopoland.util.Triplet;
@@ -51,9 +52,12 @@ public class OrderService extends ServiceSuperclass {
     Map<Long, List<Triplet<Long, Date, Integer>>> tripletsGroupedByTicketId =
         triplets.stream().collect(groupingBy(t -> t.first));
     Set<Long> ticketsIds = tripletsGroupedByTicketId.keySet();
-    List<Ticket> tickets =
-        em.createQuery("from Ticket t join fetch t.sight s where t.id in (:ids) order by s.id asc",
-            Ticket.class).setParameter("ids", ticketsIds).getResultList();
+    List<Ticket> tickets = em.createQuery(
+        "from Ticket t join fetch t.sightEvent s where t.id in (:ids) order by s.id asc",
+        Ticket.class).setParameter("ids", ticketsIds).getResultList();
+    if (tickets.size() < ticketsIds.size()) {
+      throw new ResourceNotFoundException();
+    }
     Map<SightEvent, List<Ticket>> ticketsGroupedBySight =
         tickets.stream().collect(groupingBy(Ticket::getSightEvent));
     Map<Long, Ticket> ticketIdToObject = tickets.stream().collect(toMap(Ticket::getId, t -> t));

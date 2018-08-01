@@ -68,9 +68,9 @@ public class DtoMapper {
 
   public static SightEventDTO getFullDTO(SightEvent bo) {
     SightEventDTO dto = getDTO(bo);
-    if (bo.getTickets() != null && !bo.getTickets().isEmpty()) {
-      dto.ticketDefinitions = bo.getTickets().stream().map(DtoMapper::getDTO).collect(toList());
-    }
+    // if (bo.getTickets() != null && !bo.getTickets().isEmpty()) {
+    // dto.ticketDefinitions = bo.getTickets().stream().map(DtoMapper::getDTO).collect(toList());
+    // }
     // if (bo.getOpeningHours() != null && !bo.getOpeningHours().isEmpty()) {
     // dto.openingHours = bo.getOpeningHours().stream().map(DtoMapper::getDTO).collect(toList());
     // }
