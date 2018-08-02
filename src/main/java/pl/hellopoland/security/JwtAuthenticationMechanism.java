@@ -99,12 +99,12 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
       } else {
         authenticationStatus = AuthenticationStatus.NOT_DONE;
       }
+    } else if (!context.isProtected()) {
+      authenticationStatus = context.doNothing();
     } else if (authorizationToken != null) {
       authenticationStatus = validateAccessToken(authorizationToken, context);
-    } else if (context.isProtected()) {
-      authenticationStatus = context.responseUnauthorized();
     } else {
-      authenticationStatus = context.doNothing();
+      authenticationStatus = context.responseUnauthorized();
     }
 
     return authenticationStatus;
