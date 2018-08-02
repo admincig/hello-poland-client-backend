@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.lang.System.Logger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import javax.annotation.PostConstruct;
 import javax.ejb.DependsOn;
@@ -18,11 +19,15 @@ import pl.hellopoland.bo.Portal.Type;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole;
+import pl.hellopoland.dto.DateTypeDTO;
 import pl.hellopoland.dto.SightEventDTO;
+import pl.hellopoland.dto.TicketDefinitionDTO;
+import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.security.password.PasswordEncoder;
 import pl.hellopoland.service.ImageService;
 import pl.hellopoland.service.ServiceSuperclass;
 import pl.hellopoland.service.SightEventService;
+import pl.hellopoland.service.TicketPoolDefinitionService;
 import pl.hellopoland.util.DtoMapper;
 
 @Startup
@@ -37,7 +42,7 @@ public class DbFiller extends ServiceSuperclass {
   ImageService imgService;
 
   @Inject
-  SightEventService sEService;
+  TicketPoolDefinitionService tpdService;
 
   @Inject
   private PasswordEncoder passwordEncoder;
@@ -220,7 +225,7 @@ public class DbFiller extends ServiceSuperclass {
             + "Największymi gwiazdami współczesnej reprezentacji Czech są występujący w linii pomocy Antonin Barak z Udinese Calcio, oraz napastnik Romy Patrick Schick. Pierwszy z wymienionych piłkarzy to jeden z najlepszych strzelców drużyny z Udine. Urodzony w Pribramie zawodnik w bieżącej kampanii ligowej zdobył dla swojej drużyny sześć goli. Natomiast Patrick Schick zdobył dla klubu ze stolicy Włoch jedną bramkę w aktualnych rozgrywkach Serie A.\n"
             + "\n"
             + "Czechy w dotychczasowej historii zagrały zaledwie raz na Mistrzostwach Świata. Drużyna z takimi piłkarzami w składzie jak Jan Koller, Pavel Nedved, czy Petr Cech, wystąpiła na turnieju w Niemczech w 2006 roku. Zespół prowadzony przez Karela Brucknera, odpadł z turnieju już po fazie grupowej. Czesi zwyciężyli jedynie w pierwszym meczu ze Stanami Zjednoczonymi 3:0, natomiast w kolejnych przegrali dwukrotnie 0:2 z Ghaną i Włochami.",
-        getDate("2018-11-15"), userStadionGd.getPartner());
+        getDate("15.11.2018"), userStadionGd.getPartner());
     createSightEvent(kol1, "Zwiedzanie Kolejkowa",
         "Czynne 365 dni w roku, również w niedziele i święta w godzinach 10:00–18:00.", null,
         userKolejkowo.getPartner());
@@ -247,7 +252,66 @@ public class DbFiller extends ServiceSuperclass {
     dto.mainImage = DtoMapper.getDTO(mainImage);
     dto.description = description;
     dto.generalAdmission = true;
-    sEService.create(dto, partner);
+    sService.create(dto, partner);
+  }
+
+  private void createTicketPoolDefinitions() {
+    createTicketPoolDefinition("Wieczorne zwiedzanie Afrykarium", 25, false, getDate("29.09.2018"),
+        getDate("29.09.2018"), DateTypeDTO.DATE,
+        createTicketDefinition("Normalny", 25, 79, DateTypeDTO.DATE));
+    createTicketPoolDefinition("Park Szczytnicki", 15, false, getDate("09.08.2018"),
+        getDate("09.08.2018"), DateTypeDTO.DATE,
+        createTicketDefinition("Normalny", 15, 29, DateTypeDTO.DATE));
+    createTicketPoolDefinition("Zwiedzanie ZOO", null, true, null, null, DateTypeDTO.UNDEFINED,
+        createTicketDefinition("Normalny", null, 45, DateTypeDTO.UNDEFINED),
+        createTicketDefinition("Ulgowy", null, 35, DateTypeDTO.UNDEFINED),
+        createTicketDefinition("Dzieci", null, 0, DateTypeDTO.UNDEFINED),
+        createTicketDefinition("Studencki", null, 40, DateTypeDTO.UNDEFINED),
+        createTicketDefinition("Rodzinny (dwoje dorosłych i max 3 dzieci)", null, 150,
+            DateTypeDTO.UNDEFINED));
+    createTicketPoolDefinition("Zwiedzanie stadionu", null, true, null, null, DateTypeDTO.UNDEFINED,
+        createTicketDefinition("Normalny", null, 17, DateTypeDTO.UNDEFINED),
+        createTicketDefinition("Ulgowy", null, 12, DateTypeDTO.UNDEFINED),
+        createTicketDefinition("Rodzinny (2+2)", null, 36, DateTypeDTO.UNDEFINED));
+    createTicketPoolDefinition("Mecz towarzyski Polska-Czechy", 50, false, getDate("15.11.2018"),
+        getDate("15.11.2018"), DateTypeDTO.DATE,
+        createTicketDefinition("Normalny", 40, 125, DateTypeDTO.DATE),
+        createTicketDefinition("VIP", 10, 240, DateTypeDTO.DATE));
+    createTicketPoolDefinition("Zwiedzanie Kolejkowa", null, true, null, null,
+        DateTypeDTO.UNDEFINED, createTicketDefinition("Normalny", null, 19, DateTypeDTO.UNDEFINED),
+        createTicketDefinition("Ulgowy", null, 15, DateTypeDTO.UNDEFINED));
+
+
+
+  }
+
+  private void createTicketPoolDefinition(String name, Integer availableTicketsNumber,
+      boolean cyclicalPool, Date startDate, Date endDate, DateTypeDTO dateType,
+      TicketDefinitionDTO... ticketDefinitions) {
+    var dto = new TicketPoolDefinitionDTO();
+    dto.name = name;
+    dto.availableTicketsNumber = availableTicketsNumber;
+    dto.cyclicalPool = cyclicalPool;
+    // dto.frequencyData =
+    dto.startDate = startDate;
+    dto.endDate = endDate;
+    dto.dateType = dateType;
+    // dto.predefinedDate = ;
+    // dto.date = ;
+    // dto.sightEventId = ;
+    dto.ticketDefinitions = Arrays.asList(ticketDefinitions);
+    tpdService.add(dto);
+  }
+
+  private TicketDefinitionDTO createTicketDefinition(String name, Integer availableTicketsNumber,
+      int price, DateTypeDTO dateType) {
+    var dto = new TicketDefinitionDTO();
+    dto.name = name;
+    dto.availableTicketsNumber = availableTicketsNumber;
+    dto.price = price;
+    dto.dateType = dateType;
+    // dto.predefinedDate = ;
+    return dto;
   }
 
   private Date getDate(String date) {
