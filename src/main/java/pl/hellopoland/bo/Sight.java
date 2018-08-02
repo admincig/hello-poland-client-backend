@@ -1,5 +1,7 @@
 package pl.hellopoland.bo;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Random;
 import javax.persistence.Column;
@@ -138,6 +140,7 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
   }
 
   public void generateRandomScore() {
-    this.setScore((float) (4.8 + new Random().nextDouble() / 5));
+    float score = (float) (4.8 + new Random().nextDouble() / 5);
+    this.score = new BigDecimal(score).setScale(1, RoundingMode.HALF_UP).floatValue();
   }
 }

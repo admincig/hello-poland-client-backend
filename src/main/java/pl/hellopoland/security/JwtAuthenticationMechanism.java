@@ -99,8 +99,6 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
       } else {
         authenticationStatus = AuthenticationStatus.NOT_DONE;
       }
-    } else if (!context.isProtected()) {
-      authenticationStatus = context.doNothing();
     } else if (authorizationToken != null) {
       authenticationStatus = validateAccessToken(authorizationToken, context);
     } else {
@@ -147,7 +145,7 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
           context.notifyContainerAboutLogin(credential.getPrincipal(), credential.getAuthorities());
 
     } catch (Exception e) {
-      authenticationStatus = context.responseUnauthorized();
+      authenticationStatus = context.doNothing();
     }
 
     return authenticationStatus;
