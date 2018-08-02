@@ -127,7 +127,7 @@ public class DtoMapper {
     return dto;
   }
 
-  private static ImageDTO getDTO(ImageCollector bo) {
+  public static ImageDTO getDTO(ImageCollector bo) {
     if (bo == null) {
       return null;
     }
