@@ -195,6 +195,7 @@ public class DbFiller extends ServiceSuperclass {
     bo.setLead(lead);
     bo.setDescription(description);
     bo.setPartner(partner);
+    bo.generateRandomScore();
     em.persist(bo);
     return bo;
   }
@@ -274,32 +275,33 @@ public class DbFiller extends ServiceSuperclass {
     createTicketPoolDefinition("Wieczorne zwiedzanie Afrykarium", 25, false,
         getDate("2018-09-29T19:00:00+0200"), getDate("2018-09-29T23:59:59+0200"), DateTypeDTO.DATE,
         afrEvent.getId(), userHelloPoland.getPartner(),
-        createTicketDefinition("Normalny", 25, 79, DateTypeDTO.DATE));
+        createTicketDefinition("Normalny", 25, 7900, DateTypeDTO.DATE));
     createTicketPoolDefinition("Park Szczytnicki", 15, false, getDate("2018-08-09T17:30:00+0200"),
         getDate("2018-08-09T20:30:00+0200"), DateTypeDTO.DATE, parkSzczEvent.getId(),
-        userHelloPoland.getPartner(), createTicketDefinition("Normalny", 15, 29, DateTypeDTO.DATE));
+        userHelloPoland.getPartner(),
+        createTicketDefinition("Normalny", 15, 2900, DateTypeDTO.DATE));
     createTicketPoolDefinition("Zwiedzanie ZOO", null, true, new Date(), null,
         DateTypeDTO.UNDEFINED, zwZooEvent.getId(), userZoo.getPartner(),
-        createTicketDefinition("Normalny", null, 45, DateTypeDTO.UNDEFINED),
-        createTicketDefinition("Ulgowy", null, 35, DateTypeDTO.UNDEFINED),
+        createTicketDefinition("Normalny", null, 4500, DateTypeDTO.UNDEFINED),
+        createTicketDefinition("Ulgowy", null, 3500, DateTypeDTO.UNDEFINED),
         createTicketDefinition("Dzieci", null, 0, DateTypeDTO.UNDEFINED),
-        createTicketDefinition("Studencki", null, 40, DateTypeDTO.UNDEFINED),
-        createTicketDefinition("Rodzinny (dwoje dorosłych i max 3 dzieci)", null, 150,
+        createTicketDefinition("Studencki", null, 4000, DateTypeDTO.UNDEFINED),
+        createTicketDefinition("Rodzinny (dwoje dorosłych i max 3 dzieci)", null, 15000,
             DateTypeDTO.UNDEFINED));
     createTicketPoolDefinition("Zwiedzanie stadionu", null, true, new Date(), null,
         DateTypeDTO.UNDEFINED, zwStadEvent.getId(), userStadionGd.getPartner(),
-        createTicketDefinition("Normalny", null, 17, DateTypeDTO.UNDEFINED),
-        createTicketDefinition("Ulgowy", null, 12, DateTypeDTO.UNDEFINED),
-        createTicketDefinition("Rodzinny (2+2)", null, 36, DateTypeDTO.UNDEFINED));
+        createTicketDefinition("Normalny", null, 1700, DateTypeDTO.UNDEFINED),
+        createTicketDefinition("Ulgowy", null, 1200, DateTypeDTO.UNDEFINED),
+        createTicketDefinition("Rodzinny (2+2)", null, 3600, DateTypeDTO.UNDEFINED));
     createTicketPoolDefinition("Mecz towarzyski Polska-Czechy", 50, false,
         getDate("2018-11-15T19:00:00+0200"), getDate("2018-11-15T21:00:00+0200"), DateTypeDTO.DATE,
         meczPCEvent.getId(), userStadionGd.getPartner(),
-        createTicketDefinition("Normalny", 40, 125, DateTypeDTO.DATE),
-        createTicketDefinition("VIP", 10, 240, DateTypeDTO.DATE));
+        createTicketDefinition("Normalny", 40, 12500, DateTypeDTO.DATE),
+        createTicketDefinition("VIP", 10, 24000, DateTypeDTO.DATE));
     createTicketPoolDefinition("Zwiedzanie Kolejkowa", null, true, new Date(), null,
         DateTypeDTO.UNDEFINED, kolEvent.getId(), userKolejkowo.getPartner(),
-        createTicketDefinition("Normalny", null, 19, DateTypeDTO.UNDEFINED),
-        createTicketDefinition("Ulgowy", null, 15, DateTypeDTO.UNDEFINED));
+        createTicketDefinition("Normalny", null, 1900, DateTypeDTO.UNDEFINED),
+        createTicketDefinition("Ulgowy", null, 1500, DateTypeDTO.UNDEFINED));
   }
 
 
