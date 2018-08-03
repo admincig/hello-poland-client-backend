@@ -18,12 +18,11 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
   TicketService ticketService;
 
   public TicketPoolDefinitionDTO add(TicketPoolDefinitionDTO dto) {
-    return add(dto, null);
+    return add(dto, getLoggedPartner());
   }
 
-  public TicketPoolDefinitionDTO add(TicketPoolDefinitionDTO dto, Partner partnerArg) {
+  public TicketPoolDefinitionDTO add(TicketPoolDefinitionDTO dto, Partner partner) {
     final Long sightEventId = dto.sightEventId;
-    Partner partner = partnerArg == null ? getLoggedPartner() : partnerArg;
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     SightEvent se = sightEventService.get(dto.sightEventId);

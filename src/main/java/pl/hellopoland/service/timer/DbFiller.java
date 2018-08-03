@@ -81,14 +81,10 @@ public class DbFiller extends ServiceSuperclass {
     }
     createPortals();
     createUsers();
-
-
     createImageCollectors();
     createSights();
     createSightEvents();
     createTicketPoolDefinitions();
-
-
     logger.log(Logger.Level.INFO, "dbfiller finished");
   }
 
@@ -192,6 +188,7 @@ public class DbFiller extends ServiceSuperclass {
     bo.setLead(lead);
     bo.setDescription(description);
     bo.setPartner(partner);
+    em.persist(bo);
   }
 
   private void createSightEvents() {
@@ -272,16 +269,16 @@ public class DbFiller extends ServiceSuperclass {
     createTicketPoolDefinition("Park Szczytnicki", 15, false, getDate("2018-08-09T17:30:00"),
         getDate("2018-08-09T20:30:00"), DateTypeDTO.DATE, parkSzczEvent.getId(),
         userHelloPoland.getPartner(), createTicketDefinition("Normalny", 15, 29, DateTypeDTO.DATE));
-    createTicketPoolDefinition("Zwiedzanie ZOO", null, true, null, null, DateTypeDTO.UNDEFINED,
-        zwZooEvent.getId(), userZoo.getPartner(),
+    createTicketPoolDefinition("Zwiedzanie ZOO", null, true, new Date(), null,
+        DateTypeDTO.UNDEFINED, zwZooEvent.getId(), userZoo.getPartner(),
         createTicketDefinition("Normalny", null, 45, DateTypeDTO.UNDEFINED),
         createTicketDefinition("Ulgowy", null, 35, DateTypeDTO.UNDEFINED),
         createTicketDefinition("Dzieci", null, 0, DateTypeDTO.UNDEFINED),
         createTicketDefinition("Studencki", null, 40, DateTypeDTO.UNDEFINED),
         createTicketDefinition("Rodzinny (dwoje dorosłych i max 3 dzieci)", null, 150,
             DateTypeDTO.UNDEFINED));
-    createTicketPoolDefinition("Zwiedzanie stadionu", null, true, null, null, DateTypeDTO.UNDEFINED,
-        zwStadEvent.getId(), userStadionGd.getPartner(),
+    createTicketPoolDefinition("Zwiedzanie stadionu", null, true, new Date(), null,
+        DateTypeDTO.UNDEFINED, zwStadEvent.getId(), userStadionGd.getPartner(),
         createTicketDefinition("Normalny", null, 17, DateTypeDTO.UNDEFINED),
         createTicketDefinition("Ulgowy", null, 12, DateTypeDTO.UNDEFINED),
         createTicketDefinition("Rodzinny (2+2)", null, 36, DateTypeDTO.UNDEFINED));
@@ -290,7 +287,7 @@ public class DbFiller extends ServiceSuperclass {
         meczPCEvent.getId(), userStadionGd.getPartner(),
         createTicketDefinition("Normalny", 40, 125, DateTypeDTO.DATE),
         createTicketDefinition("VIP", 10, 240, DateTypeDTO.DATE));
-    createTicketPoolDefinition("Zwiedzanie Kolejkowa", null, true, null, null,
+    createTicketPoolDefinition("Zwiedzanie Kolejkowa", null, true, new Date(), null,
         DateTypeDTO.UNDEFINED, kolEvent.getId(), userKolejkowo.getPartner(),
         createTicketDefinition("Normalny", null, 19, DateTypeDTO.UNDEFINED),
         createTicketDefinition("Ulgowy", null, 15, DateTypeDTO.UNDEFINED));
@@ -306,6 +303,7 @@ public class DbFiller extends ServiceSuperclass {
     dto.startDate = startDate;
     dto.endDate = endDate;
     dto.dateType = dateType;
+    dto.predefinedDate = false;
     dto.sightEventId = sightEventId;
     dto.ticketDefinitions = Arrays.asList(ticketDefinitions);
     tpdService.add(dto, partner);

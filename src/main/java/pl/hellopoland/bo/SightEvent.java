@@ -103,6 +103,7 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
     this.agreements = agreements;
   }
 
+  @Column(columnDefinition = "varchar")
   public String getDescription() {
     return description;
   }
