@@ -36,7 +36,7 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
 
   private String lead;
 
-  @Column(columnDefinition = "text")
+  @Column(columnDefinition = "varchar")
   private String description;
 
   private Integer duration;
@@ -103,7 +103,6 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
     this.agreements = agreements;
   }
 
-  @Column(columnDefinition = "varchar")
   public String getDescription() {
     return description;
   }

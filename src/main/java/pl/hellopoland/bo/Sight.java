@@ -19,6 +19,7 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
 
   private String lead;
 
+  @Column(columnDefinition = "varchar")
   private String description;
 
   @ManyToOne
@@ -57,7 +58,6 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
     this.lead = lead;
   }
 
-  @Column(columnDefinition = "varchar")
   public String getDescription() {
     return description;
   }
