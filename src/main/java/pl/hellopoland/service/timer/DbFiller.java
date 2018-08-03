@@ -266,7 +266,7 @@ public class DbFiller extends ServiceSuperclass {
     dto.name = name;
     dto.mainImage = DtoMapper.getDTO(mainImage);
     dto.description = description;
-    dto.generalAdmission = true;
+    dto.generalAdmission = generalAdmission;
     dto.sightId = sightId;
     return sService.create(dto, partner);
   }
