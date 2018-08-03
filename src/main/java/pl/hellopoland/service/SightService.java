@@ -48,6 +48,7 @@ public class SightService extends ServiceSuperclass {
     if (partner == null) {
       partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
     }
+    bo.generateRandomScore();
     bo.setPartner(partner);
     imageService.update(bo, dto.mainImage == null ? null : dto.mainImage.original);
     em.persist(bo);

@@ -1,6 +1,9 @@
 package pl.hellopoland.bo;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
+import java.util.Random;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -21,6 +24,8 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
 
   @Column(columnDefinition = "varchar")
   private String description;
+
+  private Float score;
 
   @ManyToOne
   private ImageCollector mainImage;
@@ -124,5 +129,18 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
 
   public void setSightEvents(List<SightEvent> sightEvents) {
     this.sightEvents = sightEvents;
+  }
+
+  public Float getScore() {
+    return score;
+  }
+
+  public void setScore(Float score) {
+    this.score = score;
+  }
+
+  public void generateRandomScore() {
+    float score = (float) (4.8 + new Random().nextDouble() / 5);
+    this.score = new BigDecimal(score).setScale(1, RoundingMode.HALF_UP).floatValue();
   }
 }

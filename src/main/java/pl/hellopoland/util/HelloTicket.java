@@ -6,9 +6,7 @@ import java.io.PrintWriter;
 import java.lang.System.Logger.Level;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,12 +31,10 @@ public class HelloTicket {
 
   public HelloTicket(String url) {
     this.url = url;
-    this.df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
   }
 
   private System.Logger logger = System.getLogger(HelloTicket.class.getName());
   private String url;
-  private DateFormat df;
 
   public JsonObject book(OrderDetails details, List<OrderEntry> orderEntries) {
     BookingDTO booking = new BookingDTO();
@@ -68,8 +64,9 @@ public class HelloTicket {
         oe.getDateEntry().getSightEntry().setSerialNumber(serialNumber);
         for (var iter = tickets.iterator(); iter.hasNext();) {
           JsonObject ticket = (JsonObject) iter.next();
-          if (oe.getExternalDefinitionId().intValue() == ticket.getInt("definitionId")
-              && oe.getDateEntry().getDate().compareTo(df.parse(ticket.getString("date"))) == 0) {
+          if (oe.getExternalDefinitionId().intValue() == ticket.getInt("ticketDefinitionId")
+              && oe.getDateEntry().getDate().compareTo(
+                  JsonbConfig.SIMPLE_DATE_TIME_FORMAT.parse(ticket.getString("date"))) == 0) {
             oe.setExternalId((long) ticket.getInt("id"));
             break;
           }
@@ -91,7 +88,7 @@ public class HelloTicket {
       for (var oe : orderEntries) {
         for (var iter = tickets.iterator(); iter.hasNext();) {
           JsonObject ticket = (JsonObject) iter.next();
-          Date date1 = df.parse(ticket.getString("date"));
+          Date date1 = JsonbConfig.SIMPLE_DATE_TIME_FORMAT.parse(ticket.getString("date"));
           Date date2 = oe.getDateEntry().getDate();
           if (date2.compareTo(date1) == 0
               && oe.getExternalDefinitionId().intValue() == ticket.getInt("definitionId")) {
