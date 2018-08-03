@@ -65,8 +65,8 @@ public class HelloTicket {
         for (var iter = tickets.iterator(); iter.hasNext();) {
           JsonObject ticket = (JsonObject) iter.next();
           if (oe.getExternalDefinitionId().intValue() == ticket.getInt("ticketDefinitionId")
-              && oe.getDateEntry().getDate()
-                  .compareTo(JsonbConfig.DATE_TIME_FORMAT.parse(ticket.getString("date"))) == 0) {
+              && oe.getDateEntry().getDate().compareTo(
+                  JsonbConfig.SIMPLE_DATE_TIME_FORMAT.parse(ticket.getString("date"))) == 0) {
             oe.setExternalId((long) ticket.getInt("id"));
             break;
           }
@@ -88,7 +88,7 @@ public class HelloTicket {
       for (var oe : orderEntries) {
         for (var iter = tickets.iterator(); iter.hasNext();) {
           JsonObject ticket = (JsonObject) iter.next();
-          Date date1 = JsonbConfig.DATE_TIME_FORMAT.parse(ticket.getString("date"));
+          Date date1 = JsonbConfig.SIMPLE_DATE_TIME_FORMAT.parse(ticket.getString("date"));
           Date date2 = oe.getDateEntry().getDate();
           if (date2.compareTo(date1) == 0
               && oe.getExternalDefinitionId().intValue() == ticket.getInt("definitionId")) {
