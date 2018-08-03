@@ -35,6 +35,9 @@ public class DtoMapper {
     dto.description = bo.getDescription();
     dto.mainImage = bo.getMainImage() != null ? getDTO(bo.getMainImage()) : null;
     dto.location = ofNullable(bo.getLocation()).map(DtoMapper::getDTO).orElse(null);
+    dto.email = bo.getEmail();
+    dto.phone = bo.getPhone();
+    dto.score = bo.getScore();
 
     return dto;
   }
@@ -61,6 +64,7 @@ public class DtoMapper {
     dto.location = ofNullable(bo.getLocation()).map(DtoMapper::getDTO).orElse(null);
     // dto.date = bo.getDate();
     dto.generalAdmission = bo.getGeneralAdmission();
+    dto.score = bo.getScore();
     dto.sightId = bo.getSight().getId();
 
     return dto;
@@ -99,7 +103,7 @@ public class DtoMapper {
   // return dto;
   // }
 
-  private static LocationDTO getDTO(Location bo) {
+  public static LocationDTO getDTO(Location bo) {
     LocationDTO dto = new LocationDTO();
 
     dto.latitude = bo.getLatitude();
@@ -127,7 +131,7 @@ public class DtoMapper {
     return dto;
   }
 
-  private static ImageDTO getDTO(ImageCollector bo) {
+  public static ImageDTO getDTO(ImageCollector bo) {
     if (bo == null) {
       return null;
     }
@@ -171,6 +175,7 @@ public class DtoMapper {
     dto.mainImage = getDTO(bo.getMainImage());
     dto.email = bo.getEmail();
     dto.phone = bo.getPhone();
+    dto.lead = bo.getLead();
     dto.location = ofNullable(bo.getLocation()).map(DtoMapper::getDTO).orElse(null);
     dto.generalAdmission = true;
     return dto;
@@ -194,6 +199,7 @@ public class DtoMapper {
     target.setDateType(pl.hellopoland.bo.DateType.valueOf(source.dateType.name()));
     target.setExternalId(source.id);
     target.setName(source.name);
+    target.setPoolId(source.ticketPoolId);
     // target.setPredefinedDate(source.predefinedDate);
     target.setPrice(source.price);
     target.setAvailableTicketsNumber(source.availableTicketsNumber);

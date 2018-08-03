@@ -22,6 +22,8 @@ public class Ticket extends ModelSuperclass {
   @NotNull
   private boolean predefinedDate;
 
+  private Long poolId;
+
   private Date date;
 
   private DateType dateType;
@@ -44,6 +46,14 @@ public class Ticket extends ModelSuperclass {
 
   public void setPrice(Integer price) {
     this.price = price;
+  }
+
+  public Long getPoolId() {
+    return poolId;
+  }
+
+  public void setPoolId(Long poolId) {
+    this.poolId = poolId;
   }
 
   public SightEvent getSightEvent() {

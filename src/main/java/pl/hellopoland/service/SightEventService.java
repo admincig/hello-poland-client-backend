@@ -193,6 +193,8 @@ public class SightEventService extends ServiceSuperclass {
             ticketDefinitions.stream().map(t -> t.id).collect(Collectors.toList()));
         externalIdToTicket =
             ticketBos.stream().collect(Collectors.toMap(Ticket::getExternalId, t -> t));
+
+
         var poolDefinitionsGroupedBySightEventId =
             poolDefinitions.stream().collect(Collectors.groupingBy(pool -> pool.sightEventId));
         for (var pair : sightEvents) {
@@ -202,12 +204,15 @@ public class SightEventService extends ServiceSuperclass {
       }
       for (var sightEventDto : sightEventDtos) {
         if (sightEventDto.ticketPoolDefinitions != null) {
+          int minPrice = Integer.MAX_VALUE;
           for (var poolDefinitionDto : sightEventDto.ticketPoolDefinitions) {
             poolDefinitionDto.sightEventId = sightEventDto.id;
             for (var t : poolDefinitionDto.ticketDefinitions) {
               t.id = externalIdToTicket.get(t.id).getId();
+              minPrice = Math.min(minPrice, t.price);
             }
           }
+          sightEventDto.minPrice = minPrice;
         }
       }
     } else {

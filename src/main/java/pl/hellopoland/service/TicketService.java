@@ -23,11 +23,15 @@ public class TicketService extends ServiceSuperclass {
     if (partner == null) {
       partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
     }
-    Ticket bo = new Ticket();
-    DtoMapper.copy(dto, bo);
-    SightEvent se = sightEventService.get(sightEventId);
-    bo.setSightEvent(se);
-    em.persist(bo);
+    Ticket bo = null;
+    for (Long poolId : dto.ticketPoolDefinitionIds) {
+      dto.ticketPoolId = poolId;
+      bo = new Ticket();
+      DtoMapper.copy(dto, bo);
+      SightEvent se = sightEventService.get(sightEventId);
+      bo.setSightEvent(se);
+      em.persist(bo);
+    }
     return bo;
   }
 
