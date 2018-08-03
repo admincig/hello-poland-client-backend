@@ -103,7 +103,7 @@ public class DtoMapper {
   // return dto;
   // }
 
-  private static LocationDTO getDTO(Location bo) {
+  public static LocationDTO getDTO(Location bo) {
     LocationDTO dto = new LocationDTO();
 
     dto.latitude = bo.getLatitude();

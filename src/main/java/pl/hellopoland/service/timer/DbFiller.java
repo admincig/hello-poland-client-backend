@@ -13,6 +13,7 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
 import pl.hellopoland.bo.ImageCollector;
+import pl.hellopoland.bo.Location;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.Portal.Type;
@@ -64,6 +65,11 @@ public class DbFiller extends ServiceSuperclass {
   private ImageCollector zooImg;
   private ImageCollector zwStadImg;
   private ImageCollector zwZooImg;
+  private Location hpLocation;
+  private Location zooWroLocation;
+  private Location stadGdLocation;
+  private Location kolLocation;
+  private Location parkSzczLocation;
   private Sight hp;
   private Sight zooWro;
   private Sight stadGd;
@@ -86,6 +92,7 @@ public class DbFiller extends ServiceSuperclass {
     createPortals();
     createUsers();
     createImageCollectors();
+    createLocations();
     createSights();
     createSightEvents();
     createTicketPoolDefinitions();
@@ -166,29 +173,53 @@ public class DbFiller extends ServiceSuperclass {
     return imgService.validateAndStoreImageCollector(is, "jpg", null);
   }
 
+  private void createLocations() {
+    hpLocation = createLocation(51.111746, 17.0240973, "Świętego Mikołaja 19", "50-128", "Wrocław",
+        "Polska");
+    zooWroLocation =
+        createLocation(51.1041258, 17.0720083, "Wróblewskiego 1-5", "51-618", "Wrocław", "Polska");
+    stadGdLocation = createLocation(54.3900786, 18.6371082, "Pokoleń Lechii Gdańsk 1", "80-560",
+        "Gdańsk", "Polska");
+    kolLocation = createLocation(51.108029, 17.0180163, "plac Orląt Lwowskich 20B", "53-605",
+        "Wrocław", "Polska");
+    parkSzczLocation = createLocation(51.1114018, 17.0799816, "", "50-001", "Wrocław", "Polska");
+  }
+
+  private Location createLocation(Double latitude, Double longitude, String street, String zipCode,
+      String city, String country) {
+    var location = new Location();
+    location.setLatitude(latitude);
+    location.setLongitude(longitude);
+    location.setStreet(street);
+    location.setZipCode(zipCode);
+    location.setCity(city);
+    location.setCountry(country);
+    return location;
+  }
+
   private void createSights() {
     hp = createSight(hpImg, "Wycieczki Hello Poland we Wrocławiu",
         "Kupuj taniej, zwiedzaj łatwiej!",
         "Specjalizujemy się w obsłudze zorganizowanych grup turystycznych oraz biznesowych z kraju i zagranicy.",
-        userHelloPoland.getPartner());
+        userHelloPoland.getPartner(), hpLocation);
     zooWro = createSight(zooImg, "ZOO we Wrocławiu", "Ogród Zoologiczny we Wrocławiu",
         "Ogród Zoologiczny we Wrocławiu – ogród zoologiczny znajdujący się przy ul. Wróblewskiego 1–5 we Wrocławiu, otwarty 10 lipca 1865. Jest najstarszym na obecnych ziemiach polskich ogrodem zoologicznym w Polsce. Powierzchnia ogrodu to 33 hektary.",
-        userZoo.getPartner());
+        userZoo.getPartner(), zooWroLocation);
     stadGd = createSight(stadGdImg, "Stadion w Gdańsku", "Stadion Energa Gdańsk",
         "Stadionowe atrakcje skupione są przede wszystkim w FUN ARENIE – stworzonym na ponad 9 tysiącach metrów kwadratowych na Stadionie Energa Gdańsk, tworzącym największy park rozrywki w Trójmieście, który rozszerza ofertę jednej z najpiękniejszych aren w Europie.\n"
             + "\n"
             + "Oprócz tego stadion zapewnia całą gamę dodatkowych atrakcji – zarówno płatnych jak i bezpłatnych. Multifunkcjonalność gdańskiego obiektu potwierdza nasza oferta przygotowana zarówno dla dzieci, młodzieży, rodzin jak i seniorów.",
-        userStadionGd.getPartner());
+        userStadionGd.getPartner(), stadGdLocation);
     kol = createSight(kol2Img, "Kolejkowo",
         "Odwiedź Kolejkowo i przeżyj z nami niezapomnianą przygodę!",
         "W Kolejkowie zabierzemy Cię w podróż przez miniaturowy świat. Twórcy Kolejkowa stworzyli ogromną makietę, atrakcję tętniącą życiem i przedstawiającą wspaniały Dolny Śląsk. Dołożyli wszelkich starań, aby jak najdokładniej odwzorować rzeczywistość i przedstawić życie miniaturowych mieszkańców Kolejkowa, ukazując ich w przeróżnych sytuacjach dnia codziennego. W Kolejkowie zobaczymy życie na wsi, potowarzyszymy turystom podczas górskich wypraw, weźmiemy udział w akcji ratunkowej, wcielimy się w leśniczych, narciarzy, kupców, pracowników budowlanych, cyrkowców czy plażowiczów.\n"
             + "\n"
             + "Atrakcja Kolejkowo mieści się na terenie jednego z najstarszych dworców kolejowych we Wrocławiu. Dworzec Świebodzki zlokalizowany jest w ścisłym centrum Wrocławia przy Placu Orląt Lwowskich, niespełna 800 m od wrocławskiego rynku. Odwiedzając miniaturowy świat, w tym wspaniałym późnoklasycystycznym obiekcie, zobaczyć można m.in. makiety obiektów z Wrocławia oraz całego Dolnego Śląska. Swoje miejsce znalazły tam takie perełki architektoniczne jak: Dworzec Świebodzki,  kamienice wrocławskiego rynku, obserwatorium meteorologiczne na Śnieżce, Karkonoskie Tajemnice w Karpaczu, schronisko Szwajcarka w Sudetach Zachodnich.",
-        userKolejkowo.getPartner());
+        userKolejkowo.getPartner(), kolLocation);
   }
 
   private Sight createSight(ImageCollector mainImage, String name, String lead, String description,
-      Partner partner) {
+      Partner partner, Location location) {
     var bo = new Sight();
     bo.setMainImage(mainImage);
     bo.setName(name);
@@ -196,6 +227,7 @@ public class DbFiller extends ServiceSuperclass {
     bo.setDescription(description);
     bo.setPartner(partner);
     bo.generateRandomScore();
+    bo.setLocation(location);
     em.persist(bo);
     return bo;
   }
@@ -211,13 +243,13 @@ public class DbFiller extends ServiceSuperclass {
             + "– wejście do Afrykarium po godzinach otwarcia obiektu,\n"
             + "– zwiedzanie Afrykarium z przewodnikiem,\n"
             + "– poczęstunek w Laguna Bistro & Cafe\n" + "Dzieci do lat 3 – wstęp wolny.",
-        false, hp.getId(), userHelloPoland.getPartner());
+        false, hp.getId(), zooWroLocation, userHelloPoland.getPartner());
     parkSzczEvent = createSightEvent(parkSzcz2Img,
         "Park Szczytnicki – najstarszy z wrocławskich parków",
         "Park Szczytnicki to największy i najstarszy z wrocławskich parków, najcenniejszy pod względem składu botanicznego, związany nierozerwalnie od XVIII wieku z losami miasta, jego ambicjami i tragediami. Znają go chyba wszyscy mieszkańcy Wrocławia, ale czy na pewno…? Przekonacie się podczas wycieczki w czwartek, 2 sierpnia o 17:30.\n"
             + "\n"
             + "Na terenie parku można odnaleźć wiele niezwykłych miejsc, zaskakujących budowli i wyjątkowych okazów roślin. Zapraszamy na spacer przez te „zielone płuca miasta”, a po drodze zobaczymy ponad 100 letnie alpinarium, przeprawimy się przez modernistyczny „wgłębnik”, odwiedzimy drewniany kościół skrywający mroczne tajemnice, poszukamy willi twórcy Hali Stulecia, dowiemy się do czego służą pneumatofory i spróbujemy zapolować na brytyjską wiewiórkę, oczywiście bezkrwawo.",
-        false, hp.getId(), userHelloPoland.getPartner());
+        false, hp.getId(), parkSzczLocation, userHelloPoland.getPartner());
     zwZooEvent = createSightEvent(zwZooImg, "Zwiedzanie ZOO",
         "Zakupiony bilet oraz karta roczna uprawniają do zwiedzania całego ZOO, w tym AFRYKARIUM. Wszystkie bilety uprawniają do jednorazowego wstępu.\n"
             + "\n" + "Bilet ulgowy, jednorazowy przysługuje:\n" + "\n"
@@ -230,7 +262,7 @@ public class DbFiller extends ServiceSuperclass {
             + " warunkiem skorzystania z ulgi jest okazanie ważnej legitymacji, a w przypadku emerytów i rencistów dodatkowo dowodu osobistego lub Legitymacji Osoby Niepełnosprawnej\n"
             + "\n" + "Bilet rodzinny:\n"
             + "Do skorzystania z biletu rodzinnego uprawnione są dwie osoby dorosłe wraz z maksymalnie trójką podopiecznych (przysługują dzieciom, młodzieży szkolnej oraz osobom uczącym się w szkołach ponadgimnazjalnych do ukończenia 21 roku życia jak i  osobom studiującym do ukończenia 26 roku życia pod warunkiem, że przynajmniej jeden z opiekunów jest rodzicem studenta - podopiecznego).",
-        true, zooWro.getId(), userZoo.getPartner());
+        true, zooWro.getId(), zooWroLocation, userZoo.getPartner());
     zwStadEvent = createSightEvent(zwStadImg, "Zwiedzanie stadionu",
         "Trasa zwiedzania obejmuje zakątki i lokalizacje, których nie zobaczymy przychodząc na mecz. Po zobaczeniu emocjonujących atrakcji FUN ARENY wycieczki poprowadzone zostaną do: szatni zawodników, sali konferencyjnej w której przed i po meczach występują trenerzy drużyn, kaplicy stadionowej, strefy mixed zone, czyli miejsca z którego zawodnicy wychodzą na boisko.\n"
             + "\n"
@@ -241,7 +273,7 @@ public class DbFiller extends ServiceSuperclass {
             + "Zwiedzanie stadionu z Arenką - maskotką FUN ARENY to gwarancja dobrej zabawy. Będzie towarzyszyła ona przewodnikowi podczas oprowadzania. Nasza maskotka przeprowadzi także rozgrzewkę w salce treningowej i na obrzeżach murawy, gdzie dzieci będą mogły zrobić wspólne zdjęcie z Arenką. Gwarantujemy dużo radości i śmiechu.\n"
             + "Czas trwania: 1 h. Wiek - minimum 4 lata.\n"
             + "Cena: 15 zł od dziecka, jeden opiekun na 10 podopiecznych: gratis.Oferta skierowana do grup powyżej 15 osób.",
-        true, stadGd.getId(), userStadionGd.getPartner());
+        true, stadGd.getId(), stadGdLocation, userStadionGd.getPartner());
     meczPCEvent = createSightEvent(meczPCImg, "Mecz towarzyski Polska-Czechy",
         "Zapadła decyzja o organizacji jesiennych meczy towarzyskich Reprezentacji Polski. Biało-Czerwoni zmierzą się na Stadionie Energa Gdańsk z reprezentacją Czech 15 listopada 2018 r.\n"
             + "\n"
@@ -254,20 +286,21 @@ public class DbFiller extends ServiceSuperclass {
             + "Największymi gwiazdami współczesnej reprezentacji Czech są występujący w linii pomocy Antonin Barak z Udinese Calcio, oraz napastnik Romy Patrick Schick. Pierwszy z wymienionych piłkarzy to jeden z najlepszych strzelców drużyny z Udine. Urodzony w Pribramie zawodnik w bieżącej kampanii ligowej zdobył dla swojej drużyny sześć goli. Natomiast Patrick Schick zdobył dla klubu ze stolicy Włoch jedną bramkę w aktualnych rozgrywkach Serie A.\n"
             + "\n"
             + "Czechy w dotychczasowej historii zagrały zaledwie raz na Mistrzostwach Świata. Drużyna z takimi piłkarzami w składzie jak Jan Koller, Pavel Nedved, czy Petr Cech, wystąpiła na turnieju w Niemczech w 2006 roku. Zespół prowadzony przez Karela Brucknera, odpadł z turnieju już po fazie grupowej. Czesi zwyciężyli jedynie w pierwszym meczu ze Stanami Zjednoczonymi 3:0, natomiast w kolejnych przegrali dwukrotnie 0:2 z Ghaną i Włochami.",
-        false, stadGd.getId(), userStadionGd.getPartner());
+        false, stadGd.getId(), stadGdLocation, userStadionGd.getPartner());
     kolEvent = createSightEvent(kol1Img, "Zwiedzanie Kolejkowa",
         "Czynne 365 dni w roku, również w niedziele i święta w godzinach 10:00–18:00.", true,
-        kol.getId(), userKolejkowo.getPartner());
+        kol.getId(), kolLocation, userKolejkowo.getPartner());
   }
 
   private SightEvent createSightEvent(ImageCollector mainImage, String name, String description,
-      Boolean generalAdmission, Long sightId, Partner partner) {
+      Boolean generalAdmission, Long sightId, Location location, Partner partner) {
     var dto = new SightEventDTO();
     dto.name = name;
     dto.mainImage = DtoMapper.getDTO(mainImage);
     dto.description = description;
     dto.generalAdmission = generalAdmission;
     dto.sightId = sightId;
+    dto.location = DtoMapper.getDTO(location);
     return sService.create(dto, partner);
   }
 
@@ -303,8 +336,6 @@ public class DbFiller extends ServiceSuperclass {
         createTicketDefinition("Normalny", null, 1900, DateTypeDTO.UNDEFINED),
         createTicketDefinition("Ulgowy", null, 1500, DateTypeDTO.UNDEFINED));
   }
-
-
 
   private void createTicketPoolDefinition(String name, Integer availableTicketsNumber,
       boolean cyclicalPool, Date startDate, Date endDate, DateTypeDTO dateType, Long sightEventId,
