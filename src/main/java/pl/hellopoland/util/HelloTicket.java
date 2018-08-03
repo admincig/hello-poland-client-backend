@@ -68,7 +68,7 @@ public class HelloTicket {
         oe.getDateEntry().getSightEntry().setSerialNumber(serialNumber);
         for (var iter = tickets.iterator(); iter.hasNext();) {
           JsonObject ticket = (JsonObject) iter.next();
-          if (oe.getExternalDefinitionId().intValue() == ticket.getInt("definitionId")
+          if (oe.getExternalDefinitionId().intValue() == ticket.getInt("ticketDefinitionId")
               && oe.getDateEntry().getDate().compareTo(df.parse(ticket.getString("date"))) == 0) {
             oe.setExternalId((long) ticket.getInt("id"));
             break;
