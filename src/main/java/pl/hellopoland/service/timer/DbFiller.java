@@ -337,7 +337,6 @@ public class DbFiller extends ServiceSuperclass {
       return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").parse(date);
     } catch (ParseException e) {
       logger.log(Logger.Level.ERROR, "error during parsing the date: " + date);
-      e.printStackTrace();
     }
     return new Date(); // maybe some other one ??
   }
