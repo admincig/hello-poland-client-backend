@@ -22,6 +22,8 @@ import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole;
 import pl.hellopoland.dto.DateTypeDTO;
+import pl.hellopoland.dto.FrequencyDataDTO;
+import pl.hellopoland.dto.FrequencyTypeDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
@@ -99,7 +101,6 @@ public class DbFiller extends ServiceSuperclass {
     logger.log(Logger.Level.INFO, "dbfiller finished");
   }
 
-  @SuppressWarnings("unused")
   private void createUsers() {
     userHelloPoland = createPartner("Hello Poland",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.");
@@ -141,7 +142,7 @@ public class DbFiller extends ServiceSuperclass {
   private void createHelloTicketCloud() {
     Portal portal = new Portal();
     portal.setName("Hello Ticket Cloud");
-    // portal.setUrl("http://localhost:9080/helloticket");
+    // portal.setUrl("http://localhost:8080/helloticket");
     portal.setUrl("https://hpt.fream.pl/api");
     portal.setType(Type.HELLOTICKET_CLOUD_1);
     em.persist(portal);
@@ -344,6 +345,11 @@ public class DbFiller extends ServiceSuperclass {
     dto.name = name;
     dto.availableTicketsNumber = availableTicketsNumber;
     dto.cyclicalPool = cyclicalPool;
+    if (cyclicalPool) {
+      dto.frequencyData = new FrequencyDataDTO();
+      dto.frequencyData.frequencyType = FrequencyTypeDTO.DAILY;
+      dto.frequencyData.frequency = 1;
+    }
     dto.startDate = startDate;
     dto.endDate = endDate;
     dto.dateType = dateType;
