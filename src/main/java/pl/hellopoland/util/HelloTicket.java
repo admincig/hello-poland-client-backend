@@ -88,7 +88,7 @@ public class HelloTicket {
       for (var oe : orderEntries) {
         for (var iter = tickets.iterator(); iter.hasNext();) {
           JsonObject ticket = (JsonObject) iter.next();
-          Date date1 = JsonbConfig.SIMPLE_DATE_TIME_FORMAT.parse(ticket.getString("date"));
+          Date date1 = JsonbConfig.getInstance().fromJson(ticket.getString("date"), Date.class);
           Date date2 = oe.getDateEntry().getDate();
           if (date2.compareTo(date1) == 0
               && oe.getExternalDefinitionId().intValue() == ticket.getInt("definitionId")) {
@@ -97,7 +97,7 @@ public class HelloTicket {
         }
       }
       return resp;
-    } catch (IOException | ParseException e) {
+    } catch (IOException e) {
       logger.log(System.Logger.Level.WARNING, e);
       return null;
     }
