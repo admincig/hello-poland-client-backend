@@ -22,6 +22,8 @@ import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole;
 import pl.hellopoland.dto.DateTypeDTO;
+import pl.hellopoland.dto.FrequencyDataDTO;
+import pl.hellopoland.dto.FrequencyTypeDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
@@ -99,7 +101,6 @@ public class DbFiller extends ServiceSuperclass {
     logger.log(Logger.Level.INFO, "dbfiller finished");
   }
 
-  @SuppressWarnings("unused")
   private void createUsers() {
     userHelloPoland = createPartner("Hello Poland",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.");
@@ -141,7 +142,7 @@ public class DbFiller extends ServiceSuperclass {
   private void createHelloTicketCloud() {
     Portal portal = new Portal();
     portal.setName("Hello Ticket Cloud");
-    // portal.setUrl("http://localhost:9080/helloticket");
+    // portal.setUrl("http://localhost:8080/helloticket");
     portal.setUrl("https://hpt.fream.pl/api");
     portal.setType(Type.HELLOTICKET_CLOUD_1);
     em.persist(portal);
@@ -305,15 +306,23 @@ public class DbFiller extends ServiceSuperclass {
   }
 
   private void createTicketPoolDefinitions() {
-    createTicketPoolDefinition("Wieczorne zwiedzanie Afrykarium", 25, false,
-        getDate("2018-09-29T19:00:00+0200"), getDate("2018-09-29T23:59:59+0200"), DateTypeDTO.DATE,
-        afrEvent.getId(), userHelloPoland.getPartner(),
+    Date todayMidnight = new Date();
+    todayMidnight.setSeconds(0);
+    todayMidnight.setMinutes(0);
+    todayMidnight.setHours(0);
+
+    Date todaySecondToTommorow = new Date();
+    todaySecondToTommorow.setHours(23);
+    todaySecondToTommorow.setMinutes(59);
+    todaySecondToTommorow.setSeconds(59);
+
+    createTicketPoolDefinition("Wieczorne zwiedzanie Afrykarium", 25, false, todayMidnight,
+        todaySecondToTommorow, DateTypeDTO.DATE, afrEvent.getId(), userHelloPoland.getPartner(),
         createTicketDefinition("Normalny", 25, 7900, DateTypeDTO.DATE));
-    createTicketPoolDefinition("Park Szczytnicki", 15, false, getDate("2018-08-09T17:30:00+0200"),
-        getDate("2018-08-09T20:30:00+0200"), DateTypeDTO.DATE, parkSzczEvent.getId(),
-        userHelloPoland.getPartner(),
+    createTicketPoolDefinition("Park Szczytnicki", 15, false, todayMidnight, todaySecondToTommorow,
+        DateTypeDTO.DATE, parkSzczEvent.getId(), userHelloPoland.getPartner(),
         createTicketDefinition("Normalny", 15, 2900, DateTypeDTO.DATE));
-    createTicketPoolDefinition("Zwiedzanie ZOO", null, true, new Date(), null,
+    createTicketPoolDefinition("Zwiedzanie ZOO", null, true, todayMidnight, todaySecondToTommorow,
         DateTypeDTO.UNDEFINED, zwZooEvent.getId(), userZoo.getPartner(),
         createTicketDefinition("Normalny", null, 4500, DateTypeDTO.UNDEFINED),
         createTicketDefinition("Ulgowy", null, 3500, DateTypeDTO.UNDEFINED),
@@ -321,18 +330,18 @@ public class DbFiller extends ServiceSuperclass {
         createTicketDefinition("Studencki", null, 4000, DateTypeDTO.UNDEFINED),
         createTicketDefinition("Rodzinny (dwoje dorosłych i max 3 dzieci)", null, 15000,
             DateTypeDTO.UNDEFINED));
-    createTicketPoolDefinition("Zwiedzanie stadionu", null, true, new Date(), null,
-        DateTypeDTO.UNDEFINED, zwStadEvent.getId(), userStadionGd.getPartner(),
+    createTicketPoolDefinition("Zwiedzanie stadionu", null, true, todayMidnight,
+        todaySecondToTommorow, DateTypeDTO.UNDEFINED, zwStadEvent.getId(),
+        userStadionGd.getPartner(),
         createTicketDefinition("Normalny", null, 1700, DateTypeDTO.UNDEFINED),
         createTicketDefinition("Ulgowy", null, 1200, DateTypeDTO.UNDEFINED),
         createTicketDefinition("Rodzinny (2+2)", null, 3600, DateTypeDTO.UNDEFINED));
-    createTicketPoolDefinition("Mecz towarzyski Polska-Czechy", 50, false,
-        getDate("2018-11-15T19:00:00+0200"), getDate("2018-11-15T21:00:00+0200"), DateTypeDTO.DATE,
-        meczPCEvent.getId(), userStadionGd.getPartner(),
+    createTicketPoolDefinition("Mecz towarzyski Polska-Czechy", 50, false, todayMidnight,
+        todaySecondToTommorow, DateTypeDTO.DATE, meczPCEvent.getId(), userStadionGd.getPartner(),
         createTicketDefinition("Normalny", 40, 12500, DateTypeDTO.DATE),
         createTicketDefinition("VIP", 10, 24000, DateTypeDTO.DATE));
-    createTicketPoolDefinition("Zwiedzanie Kolejkowa", null, true, new Date(), null,
-        DateTypeDTO.UNDEFINED, kolEvent.getId(), userKolejkowo.getPartner(),
+    createTicketPoolDefinition("Zwiedzanie Kolejkowa", null, true, todayMidnight,
+        todaySecondToTommorow, DateTypeDTO.UNDEFINED, kolEvent.getId(), userKolejkowo.getPartner(),
         createTicketDefinition("Normalny", null, 1900, DateTypeDTO.UNDEFINED),
         createTicketDefinition("Ulgowy", null, 1500, DateTypeDTO.UNDEFINED));
   }
@@ -344,6 +353,11 @@ public class DbFiller extends ServiceSuperclass {
     dto.name = name;
     dto.availableTicketsNumber = availableTicketsNumber;
     dto.cyclicalPool = cyclicalPool;
+    if (cyclicalPool) {
+      dto.frequencyData = new FrequencyDataDTO();
+      dto.frequencyData.frequencyType = FrequencyTypeDTO.DAILY;
+      dto.frequencyData.frequency = 1;
+    }
     dto.startDate = startDate;
     dto.endDate = endDate;
     dto.dateType = dateType;
