@@ -23,6 +23,7 @@ import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.dto.booking.BookingDTO;
+import pl.hellopoland.dto.booking.TicketDTO;
 import pl.hellopoland.dto.booking.TicketOrderDTO;
 import pl.hellopoland.exception.conflict.CannotDeleteSightEventFromExternalSystemException;
 import pl.hellopoland.rest.JsonbConfig;
@@ -84,15 +85,15 @@ public class HelloTicket {
       String authToken =
           "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.";
       var resp = put("/v1/bookings/buy/" + serialNumber, null, authToken);
-      JsonArray tickets = resp.getJsonArray("tickets");
+      BookingDTO booking = JsonbConfig.getInstance().fromJson(resp.toString(), BookingDTO.class);
       for (var oe : orderEntries) {
-        for (var iter = tickets.iterator(); iter.hasNext();) {
-          JsonObject ticket = (JsonObject) iter.next();
-          Date date1 = JsonbConfig.getInstance().fromJson(ticket.getString("date"), Date.class);
+        for (var iter = booking.tickets.iterator(); iter.hasNext();) {
+          TicketDTO ticket = iter.next();
+          Date date1 = ticket.date;
           Date date2 = oe.getDateEntry().getDate();
           if (date2.compareTo(date1) == 0
-              && oe.getExternalDefinitionId().intValue() == ticket.getInt("definitionId")) {
-            oe.addNumber(ticket.getString("serialNumber"));
+              && oe.getExternalDefinitionId().intValue() == ticket.ticketDefinitionId) {
+            oe.addNumber(ticket.serialNumber);
           }
         }
       }
