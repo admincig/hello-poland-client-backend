@@ -6,7 +6,6 @@ import java.io.PrintWriter;
 import java.lang.System.Logger.Level;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -55,26 +54,25 @@ public class HelloTicket {
       String authToken =
           "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.";
       var resp = post("/v1/bookings", json, authToken);
-      String serialNumber = resp.getString("serialNumber");
+      booking = JsonbConfig.getInstance().fromJson(resp.toString(), BookingDTO.class);
+
       boolean serialNumberSetAlready = false;
-      JsonArray tickets = resp.getJsonArray("tickets");
       for (var oe : orderEntries) {
         if (!serialNumberSetAlready) {
-          oe.getDateEntry().getSightEntry().setSerialNumber(serialNumber);
+          oe.getDateEntry().getSightEntry().setSerialNumber(booking.serialNumber);
         }
-        oe.getDateEntry().getSightEntry().setSerialNumber(serialNumber);
-        for (var iter = tickets.iterator(); iter.hasNext();) {
-          JsonObject ticket = (JsonObject) iter.next();
-          if (oe.getExternalDefinitionId().intValue() == ticket.getInt("ticketDefinitionId")
-              && oe.getDateEntry().getDate().compareTo(
-                  JsonbConfig.SIMPLE_DATE_TIME_FORMAT.parse(ticket.getString("date"))) == 0) {
-            oe.setExternalId((long) ticket.getInt("id"));
+        oe.getDateEntry().getSightEntry().setSerialNumber(booking.serialNumber);
+        for (var iter = booking.tickets.iterator(); iter.hasNext();) {
+          TicketDTO ticket = iter.next();
+          if (oe.getExternalDefinitionId().intValue() == ticket.ticketDefinitionId
+              && oe.getDateEntry().getDate().compareTo(ticket.date) == 0) {
+            oe.setExternalId((long) ticket.id);
             break;
           }
         }
       }
       return resp;
-    } catch (IOException | ParseException e) {
+    } catch (IOException e) {
       logger.log(System.Logger.Level.WARNING, e);
       return null;
     }
