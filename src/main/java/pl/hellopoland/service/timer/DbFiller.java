@@ -142,8 +142,7 @@ public class DbFiller extends ServiceSuperclass {
   private void createHelloTicketCloud() {
     Portal portal = new Portal();
     portal.setName("Hello Ticket Cloud");
-    // portal.setUrl("http://localhost:8080/helloticket");
-    portal.setUrl("https://hpt.fream.pl/api");
+    portal.setUrl(properties.getProperty("hpt.cloud.url"));
     portal.setType(Type.HELLOTICKET_CLOUD_1);
     em.persist(portal);
   }
