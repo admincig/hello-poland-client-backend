@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
+import pl.hellopoland.dto.booking.TicketDTO;
 
 @Entity
 public class OrderEntry extends ModelSuperclass {
@@ -103,4 +104,9 @@ public class OrderEntry extends ModelSuperclass {
     this.numbers.add(number);
   }
 
+  public boolean matches(TicketDTO dto) {
+    return this.externalDefinitionId == dto.ticketDefinitionId
+        && this.dateEntry.getDate().compareTo(dto.date) == 0 && this.unitPrice == dto.price
+        && this.name.equals(dto.name);
+  }
 }

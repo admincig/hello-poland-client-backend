@@ -7,7 +7,6 @@ import java.lang.System.Logger.Level;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.json.Json;
@@ -56,16 +55,11 @@ public class HelloTicket {
       var resp = post("/v1/bookings", json, authToken);
       booking = JsonbConfig.getInstance().fromJson(resp.toString(), BookingDTO.class);
 
-      boolean serialNumberSetAlready = false;
       for (var oe : orderEntries) {
-        if (!serialNumberSetAlready) {
-          oe.getDateEntry().getSightEntry().setSerialNumber(booking.serialNumber);
-        }
         oe.getDateEntry().getSightEntry().setSerialNumber(booking.serialNumber);
         for (var iter = booking.tickets.iterator(); iter.hasNext();) {
           TicketDTO ticket = iter.next();
-          if (oe.getExternalDefinitionId().intValue() == ticket.ticketDefinitionId
-              && oe.getDateEntry().getDate().compareTo(ticket.date) == 0) {
+          if (oe.matches(ticket)) {
             oe.setExternalId((long) ticket.id);
             break;
           }
@@ -87,10 +81,7 @@ public class HelloTicket {
       for (var oe : orderEntries) {
         for (var iter = booking.tickets.iterator(); iter.hasNext();) {
           TicketDTO ticket = iter.next();
-          Date date1 = ticket.date;
-          Date date2 = oe.getDateEntry().getDate();
-          if (date2.compareTo(date1) == 0
-              && oe.getExternalDefinitionId().intValue() == ticket.ticketDefinitionId) {
+          if (oe.matches(ticket)) {
             oe.addNumber(ticket.serialNumber);
           }
         }
