@@ -14,7 +14,7 @@ public class JsonbConfig implements ContextResolver<Jsonb> {
   public static final String SIMPLE_DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ssZ";
   public static final DateFormat SIMPLE_DATE_TIME_FORMAT =
       new SimpleDateFormat(SIMPLE_DATE_TIME_FORMAT_STRING);
-  public static final String EXTENDED_DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss.SSSZZZ";
+  public static final String EXTENDED_DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
   private static Jsonb instance;
 
