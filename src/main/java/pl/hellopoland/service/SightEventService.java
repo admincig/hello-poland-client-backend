@@ -156,11 +156,20 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public SightEvent uploadMainImageForLoggedUser(Long id, byte[] icon) {
-    ByteArrayInputStream is = new ByteArrayInputStream(icon);
-    ImageCollector image = iService.validateAndStoreImageCollector(is, "jpeg", null);
     SightEvent bo = get(id);
-    get(id).setMainImage(image);
+    bo.setMainImage(uploadImageForLoggedUser(id, icon));
     return bo;
+  }
+
+  public SightEvent addImageToSightEventGallery(Long id, byte[] img) {
+    SightEvent bo = get(id);
+    bo.addImage(uploadImageForLoggedUser(id, img));
+    return bo;
+  }
+
+  private ImageCollector uploadImageForLoggedUser(Long id, byte[] img) {
+    var is = new ByteArrayInputStream(img);
+    return iService.validateAndStoreImageCollector(is, "jpeg", null);
   }
 
   public SightEvent getForLoggedUser(Long id) {

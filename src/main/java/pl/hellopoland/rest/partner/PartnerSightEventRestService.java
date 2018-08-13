@@ -67,4 +67,10 @@ public class PartnerSightEventRestService {
     return service.uploadMainImage(id, icon);
   }
 
+  @PUT
+  @Path("/{id}/image")
+  @Consumes({"image/jpeg", "image/jpg"})
+  public SightEventDTO uploadImage(@PathParam("id") Long id, byte[] img) {
+    return service.uploadImage(id, img);
+  }
 }

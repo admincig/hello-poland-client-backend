@@ -2,6 +2,7 @@ package pl.hellopoland.bo;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Random;
@@ -29,6 +30,8 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
 
   @ManyToOne
   private ImageCollector mainImage;
+
+  private Collection<ImageCollector> images;
 
   @OneToMany(mappedBy = "sightEvent")
   private Collection<Ticket> tickets;
@@ -238,5 +241,20 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
 
   public void setGeneralAdmission(Boolean generalAdmission) {
     this.generalAdmission = generalAdmission;
+  }
+
+  public Collection<ImageCollector> getImages() {
+    return images;
+  }
+
+  public void setImages(Collection<ImageCollector> images) {
+    this.images = images;
+  }
+
+  public void addImage(ImageCollector img) {
+    if (images == null) {
+      images = new ArrayList<>();
+    }
+    images.add(img);
   }
 }

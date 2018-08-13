@@ -2,6 +2,8 @@ package pl.hellopoland.bo;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import javax.persistence.Column;
@@ -29,6 +31,8 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
 
   @ManyToOne
   private ImageCollector mainImage;
+
+  private Collection<ImageCollector> images;
 
   private String email;
 
@@ -142,5 +146,20 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
   public void generateRandomScore() {
     float score = (float) (4.8 + new Random().nextDouble() / 5);
     this.score = new BigDecimal(score).setScale(1, RoundingMode.HALF_UP).floatValue();
+  }
+
+  public Collection<ImageCollector> getImages() {
+    return images;
+  }
+
+  public void setImages(Collection<ImageCollector> images) {
+    this.images = images;
+  }
+
+  public void addImage(ImageCollector img) {
+    if (images == null) {
+      images = new ArrayList<>();
+    }
+    images.add(img);
   }
 }

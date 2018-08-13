@@ -51,10 +51,16 @@ public class SightServicePartnerAPI {
     service.deleteForLoggedUser(id);
   }
 
-
   @RolesAllowed("partner")
   public SightDTO uploadMainImage(Long id, byte[] icon) {
     Sight bo = service.uploadMainImageForLoggedUser(id, icon);
+    var dto = DtoMapper.getFullDTO(bo);
+    return dto;
+  }
+
+  @RolesAllowed("partner")
+  public SightDTO uploadImage(Long id, byte[] icon) {
+    Sight bo = service.addImageToSightGallery(id, icon);
     var dto = DtoMapper.getFullDTO(bo);
     return dto;
   }
