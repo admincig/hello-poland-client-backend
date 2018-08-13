@@ -183,7 +183,6 @@ public class DtoMapper {
 
   public static void copy(SightEventDTO source, SightEvent target) {
     target.setName(source.name);
-    // target.setDate(source.date);
     target.setLead(source.lead);
     target.setDescription(source.description);
     target.setEmail(source.email);
