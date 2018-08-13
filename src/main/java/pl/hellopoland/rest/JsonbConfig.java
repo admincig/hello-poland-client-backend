@@ -1,7 +1,5 @@
 package pl.hellopoland.rest;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.logging.Logger;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
@@ -11,10 +9,7 @@ import javax.ws.rs.ext.Provider;
 @Provider
 public class JsonbConfig implements ContextResolver<Jsonb> {
 
-  public static final String SIMPLE_DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ssZ";
-  public static final DateFormat SIMPLE_DATE_TIME_FORMAT =
-      new SimpleDateFormat(SIMPLE_DATE_TIME_FORMAT_STRING);
-  public static final String EXTENDED_DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
+  public static final String EXTENDED_DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mmXXX";
 
   private static Jsonb instance;
 
