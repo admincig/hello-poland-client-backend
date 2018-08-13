@@ -3,6 +3,7 @@ package pl.hellopoland.rest.partner;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -22,6 +23,11 @@ public class PartnerTicketPoolDefinitionRestService {
   @POST
   public TicketPoolDefinitionDTO add(TicketPoolDefinitionDTO dto) {
     return service.add(dto);
+  }
+
+  @GET
+  public TicketPoolDefinitionDTO get(Long id) {
+    return service.get(id);
   }
 
 }

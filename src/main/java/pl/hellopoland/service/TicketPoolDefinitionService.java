@@ -38,4 +38,10 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     return dto;
   }
 
+  public TicketPoolDefinitionDTO get(Long id) {
+    Portal portal = getPortal("Hello Ticket Cloud");
+    HelloTicket hpt = new HelloTicket(portal.getUrl());
+    return hpt.getTicketPoolDefinition(getLoggedPartner().getHptToken(), id);
+  }
+
 }

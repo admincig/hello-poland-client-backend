@@ -14,6 +14,7 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonStructure;
 import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbException;
 import pl.hellopoland.bo.OrderDetails;
 import pl.hellopoland.bo.OrderEntry;
 import pl.hellopoland.bo.SightEvent;
@@ -241,6 +242,17 @@ public class HelloTicket {
       JsonObject json = post("/v1/ticket-pool-definitions", jsonb.toJson(dto), partnerAuthToken);
       return jsonb.fromJson(json.toString(), TicketPoolDefinitionDTO.class);
     } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      return null;
+    }
+  }
+
+  public TicketPoolDefinitionDTO getTicketPoolDefinition(String hptToken, Long id) {
+    try {
+      return JsonbConfig.getInstance().fromJson(
+          get("/v1/ticket-pool-definitions/" + id, hptToken).toString(),
+          TicketPoolDefinitionDTO.class);
+    } catch (JsonbException | IOException e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
       return null;
     }
