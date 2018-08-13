@@ -29,10 +29,12 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     dto.sightEventId = se.getHptId();
     dto = hpt.addTicketPoolDefinition(dto, partner.getHptToken());
     dto.sightEventId = sightEventId;
-    dto.ticketDefinitions.forEach(td -> {
-      Ticket tBo = ticketService.create(td, sightEventId, partner);
-      td.id = tBo.getId();
-    });
+    if (dto.ticketDefinitions != null) {
+      dto.ticketDefinitions.forEach(td -> {
+        Ticket tBo = ticketService.create(td, sightEventId, partner);
+        td.id = tBo.getId();
+      });
+    }
     return dto;
   }
 
