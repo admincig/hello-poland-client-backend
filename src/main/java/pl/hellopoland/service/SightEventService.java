@@ -117,7 +117,6 @@ public class SightEventService extends ServiceSuperclass {
       dto = helloTicket.updateSightEvent(dto, partner.getHptToken());
     }
     DtoMapper.copy(dto, bo);
-    iService.update(bo, dto.mainImage == null ? null : dto.mainImage.original);
     return bo;
   }
 
