@@ -71,4 +71,11 @@ public class SightEventServicePartnerAPI {
     service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto));
     return dto;
   }
+
+  @RolesAllowed("partner")
+  public SightEventDTO removeImageFromGallery(Long id, Long imgId) {
+    SightEvent bo = service.removeImageFromGallery(id, imgId);
+    var dto = DtoMapper.getFullDTO(bo);
+    return dto;
+  }
 }

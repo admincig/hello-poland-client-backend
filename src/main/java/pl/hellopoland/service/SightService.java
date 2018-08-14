@@ -119,6 +119,13 @@ public class SightService extends ServiceSuperclass {
     return imageService.validateAndStoreImageCollector(is, "jpeg", null);
   }
 
+  public Sight removeImageFromGallery(Long id, Long imgId) {
+    Sight bo = get(id);
+    ImageCollector img = imageService.get(imgId);
+    bo.removeImage(img);
+    return bo;
+  }
+
   public Sight getActiveForLoggedUser(Long id) {
     return em
         .createQuery("from Sight where id=:id and active=true and partner=:partner", Sight.class)

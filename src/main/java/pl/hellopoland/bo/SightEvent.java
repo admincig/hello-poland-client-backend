@@ -257,4 +257,10 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
     }
     images.add(img);
   }
+
+  public void removeImage(ImageCollector img) {
+    if (images != null) {
+      images.remove(img);
+    }
+  }
 }

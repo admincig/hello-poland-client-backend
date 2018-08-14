@@ -171,6 +171,13 @@ public class SightEventService extends ServiceSuperclass {
     return iService.validateAndStoreImageCollector(is, "jpeg", null);
   }
 
+  public SightEvent removeImageFromGallery(Long id, Long imgId) {
+    SightEvent bo = get(id);
+    ImageCollector img = iService.get(imgId);
+    bo.removeImage(img);
+    return bo;
+  }
+
   public SightEvent getForLoggedUser(Long id) {
     Partner partner = partnerService.getLoggedPartner();
     return em.createQuery("from SightEvent where id=:id and partner=:partner", SightEvent.class)

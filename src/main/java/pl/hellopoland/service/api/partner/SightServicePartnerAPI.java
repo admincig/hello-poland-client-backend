@@ -64,4 +64,11 @@ public class SightServicePartnerAPI {
     var dto = DtoMapper.getFullDTO(bo);
     return dto;
   }
+
+  @RolesAllowed("partner")
+  public SightDTO removeImageFromGallery(Long id, Long imgId) {
+    Sight bo = service.removeImageFromGallery(id, imgId);
+    var dto = DtoMapper.getFullDTO(bo);
+    return dto;
+  }
 }
