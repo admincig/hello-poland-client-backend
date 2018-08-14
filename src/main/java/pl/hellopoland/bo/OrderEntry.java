@@ -106,7 +106,7 @@ public class OrderEntry extends ModelSuperclass {
 
   public boolean matches(TicketDTO dto) {
     return this.externalDefinitionId == dto.ticketDefinitionId
-        && this.dateEntry.getDate().compareTo(dto.date) == 0 && this.unitPrice == dto.price
+        && this.dateEntry.getDate().compareTo(dto.date) == 0 && this.unitPrice.equals(dto.price)
         && this.name.equals(dto.name);
   }
 }

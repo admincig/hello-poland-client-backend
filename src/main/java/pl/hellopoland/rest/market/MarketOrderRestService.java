@@ -33,4 +33,11 @@ public class MarketOrderRestService {
     service.ack(hash, ack);
   }
 
+  @POST
+  @Path("/{hash}/sudoAckPayment")
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+  public void sudoAckPayment(@PathParam("hash") String hash) throws Exception {
+    service.sudoAck(hash);
+  }
+
 }
