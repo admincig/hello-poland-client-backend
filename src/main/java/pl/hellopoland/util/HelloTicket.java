@@ -9,9 +9,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.json.Json;
 import javax.json.JsonArray;
-import javax.json.JsonObject;
 import javax.json.JsonStructure;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbException;
@@ -36,7 +34,7 @@ public class HelloTicket {
   private System.Logger logger = System.getLogger(HelloTicket.class.getName());
   private String url;
 
-  public JsonObject book(OrderDetails details, List<OrderEntry> orderEntries) {
+  public JsonStructure book(OrderDetails details, List<OrderEntry> orderEntries) {
     BookingDTO booking = new BookingDTO();
     booking.customerEmail = details.getEmail();
     booking.customerName = details.getFirstName() + " " + details.getLastName();
@@ -73,7 +71,7 @@ public class HelloTicket {
     }
   }
 
-  public JsonObject confirm(String serialNumber, List<OrderEntry> orderEntries) {
+  public JsonStructure confirm(String serialNumber, List<OrderEntry> orderEntries) {
     try {
       String authToken =
           "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.";
@@ -143,7 +141,7 @@ public class HelloTicket {
     return null;
   }
 
-  private JsonObject post(String path, String json, String authToken) throws IOException {
+  private JsonStructure post(String path, String json, String authToken) throws IOException {
     URL url = new URL(this.url + path);
     var conn = url.openConnection();
     conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
@@ -156,12 +154,12 @@ public class HelloTicket {
     printWriter.append(json);
     printWriter.close();
     var is = conn.getInputStream();
-    var resp = Json.createReader(is).readObject();
+    var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
     logger.log(System.Logger.Level.INFO, "Server responded with body: " + resp);
     return resp;
   }
 
-  private JsonObject put(String path, String json, String authToken) throws IOException {
+  private JsonStructure put(String path, String json, String authToken) throws IOException {
     URL url = new URL(this.url + path);
     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
     conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
@@ -177,7 +175,7 @@ public class HelloTicket {
       printWriter.close();
     }
     var is = conn.getInputStream();
-    var resp = Json.createReader(is).readObject();
+    var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
     logger.log(System.Logger.Level.INFO, "Server responded with body: " + resp);
     return resp;
   }
@@ -213,9 +211,9 @@ public class HelloTicket {
     var is = conn.getInputStream();
     int responseCode = conn.getResponseCode();
     logger.log(System.Logger.Level.INFO, "Server responded with code: " + responseCode);
-    JsonStructure response = Json.createReader(is).read();
+    var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
     is.close();
-    return response;
+    return resp;
   }
 
   public List<TicketPoolDefinitionDTO> getTicketPoolDefinitions(String partnerAuthToken) {
@@ -239,7 +237,7 @@ public class HelloTicket {
       String partnerAuthToken) {
     try {
       Jsonb jsonb = JsonbConfig.getInstance();
-      JsonObject json = post("/v1/ticket-pool-definitions", jsonb.toJson(dto), partnerAuthToken);
+      JsonStructure json = post("/v1/ticket-pool-definitions", jsonb.toJson(dto), partnerAuthToken);
       return jsonb.fromJson(json.toString(), TicketPoolDefinitionDTO.class);
     } catch (Exception e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);

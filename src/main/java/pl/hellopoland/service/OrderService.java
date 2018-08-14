@@ -16,6 +16,7 @@ import java.util.Set;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.json.JsonObject;
 import javax.ws.rs.core.MediaType;
 import pl.hellopoland.bo.Order;
 import pl.hellopoland.bo.Order.Status;
@@ -153,7 +154,7 @@ public class OrderService extends ServiceSuperclass {
     List<OrderEntry> orderEntries = gatherOrderEntries(entry.getValue());
 
     HelloTicket hpt = new HelloTicket(portal.getUrl());
-    var resp = hpt.book(details, orderEntries);
+    JsonObject resp = (JsonObject) hpt.book(details, orderEntries);
     Integer externalOrderId = resp.getInt("id");
     entry.getValue().forEach(ose -> ose.setExternalId(externalOrderId.longValue()));
   }
