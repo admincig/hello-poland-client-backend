@@ -7,9 +7,9 @@ public class OrderORO {
 
   public OrderORO(Order o) {
     this.hash = o.getHash();
-    this.paymentsByP24PartnerId = o.getSumBillsByP24PartnerId();
+    this.sumBillsByP24PartnerId = o.getSumBillsByP24PartnerId();
   }
 
   public String hash;
-  public Map<String, Integer> paymentsByP24PartnerId;
+  public Map<String, Integer> sumBillsByP24PartnerId;
 }

@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -63,21 +62,9 @@ public class OrderService extends ServiceSuperclass {
     Map<SightEvent, List<Ticket>> ticketsGroupedBySight =
         tickets.stream().collect(groupingBy(Ticket::getSightEvent));
     Map<Long, Ticket> ticketIdToObject = tickets.stream().collect(toMap(Ticket::getId, t -> t));
-
-
-    var sumBillsByP24PartnerId = new HashMap<String, Integer>();
-
+    Map<String, Integer> sumBillsByP24PartnerId = new HashMap<>();
 
     for (Map.Entry<SightEvent, List<Ticket>> entry : ticketsGroupedBySight.entrySet()) {
-
-
-      String p24PartnerId = entry.getKey().getPartner().getP24Id();
-      Integer summaryPrice =
-          entry.getValue().stream().collect(Collectors.summingInt(Ticket::getPrice));
-      sumBillsByP24PartnerId.put(p24PartnerId, summaryPrice);
-
-
-
       OrderSightEntry ose = new OrderSightEntry();
       ose.setOrder(o);
       ose.setSightEvent(entry.getKey());
@@ -86,6 +73,7 @@ public class OrderService extends ServiceSuperclass {
       List<Long> ticketsOfSight = entry.getValue().stream().map(Ticket::getId).collect(toList());
       Map<Date, List<Triplet<Long, Date, Integer>>> inSightGroupedByDate = triplets.stream()
           .filter(trip -> ticketsOfSight.contains(trip.first)).collect(groupingBy(t -> t.second));
+      String p24PartnerId = entry.getKey().getPartner().getP24Id();
       for (Map.Entry<Date, List<Triplet<Long, Date, Integer>>> inSightOnDate : inSightGroupedByDate
           .entrySet()) {
         if (!inSightOnDate.getValue().isEmpty()) {
@@ -103,16 +91,15 @@ public class OrderService extends ServiceSuperclass {
             oe.setDateEntry(dateEntry);
             oe.setExternalDefinitionId(ticket.getExternalId());
             oe.setPoolId(ticket.getPoolId());
-
             em.persist(oe);
+            sumBillsByP24PartnerId.compute(p24PartnerId,
+                (k, v) -> (v != null) ? (v + (ticket.getPrice() * trip.third))
+                    : (ticket.getPrice() * trip.third));
           }
         }
       }
     }
-
-
     o.setSumBillsByP24PartnerId(sumBillsByP24PartnerId);
-
     try {
       placeInExternalAPI(o);
     } catch (Exception e) {
