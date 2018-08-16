@@ -65,7 +65,7 @@ public class OrderService extends ServiceSuperclass {
     Map<Long, Ticket> ticketIdToObject = tickets.stream().collect(toMap(Ticket::getId, t -> t));
 
 
-    var paymentsByP24PartnerId = new HashMap<String, Integer>();
+    var sumBillsByP24PartnerId = new HashMap<String, Integer>();
 
 
     for (Map.Entry<SightEvent, List<Ticket>> entry : ticketsGroupedBySight.entrySet()) {
@@ -74,7 +74,7 @@ public class OrderService extends ServiceSuperclass {
       String p24PartnerId = entry.getKey().getPartner().getP24Id();
       Integer summaryPrice =
           entry.getValue().stream().collect(Collectors.summingInt(Ticket::getPrice));
-      paymentsByP24PartnerId.put(p24PartnerId, summaryPrice);
+      sumBillsByP24PartnerId.put(p24PartnerId, summaryPrice);
 
 
 
@@ -109,6 +109,10 @@ public class OrderService extends ServiceSuperclass {
         }
       }
     }
+
+
+    o.setSumBillsByP24PartnerId(sumBillsByP24PartnerId);
+
     try {
       placeInExternalAPI(o);
     } catch (Exception e) {

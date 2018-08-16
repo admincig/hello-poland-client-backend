@@ -3,14 +3,17 @@ package pl.hellopoland.bo;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
+import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -38,15 +41,17 @@ public class Order extends ModelSuperclass {
   private Status status = Status.NEW;
   @NotNull
   private Date date = new Date();
-  // private Map<String, Integer> paymentsByP24PartnerId;
-  //
-  // public Map<String, Integer> getPaymentsByP24PartnerId() {
-  // return paymentsByP24PartnerId;
-  // }
-  //
-  // public void setPaymentsByP24PartnerId(Map<String, Integer> paymentsByP24PartnerId) {
-  // this.paymentsByP24PartnerId = paymentsByP24PartnerId;
-  // }
+  @ElementCollection
+  @MapKeyColumn(name = "P24PartnerId")
+  private Map<String, Integer> sumBillsByP24PartnerId;
+
+  public Map<String, Integer> getSumBillsByP24PartnerId() {
+    return sumBillsByP24PartnerId;
+  }
+
+  public void setSumBillsByP24PartnerId(Map<String, Integer> sumBillsByP24PartnerId) {
+    this.sumBillsByP24PartnerId = sumBillsByP24PartnerId;
+  }
 
   public Collection<OrderSightEntry> getEntries() {
     return entries;
