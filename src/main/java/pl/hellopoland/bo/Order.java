@@ -38,6 +38,15 @@ public class Order extends ModelSuperclass {
   private Status status = Status.NEW;
   @NotNull
   private Date date = new Date();
+  // private Map<String, Integer> paymentsByP24PartnerId;
+  //
+  // public Map<String, Integer> getPaymentsByP24PartnerId() {
+  // return paymentsByP24PartnerId;
+  // }
+  //
+  // public void setPaymentsByP24PartnerId(Map<String, Integer> paymentsByP24PartnerId) {
+  // this.paymentsByP24PartnerId = paymentsByP24PartnerId;
+  // }
 
   public Collection<OrderSightEntry> getEntries() {
     return entries;

@@ -9,10 +9,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -60,16 +62,28 @@ public class OrderService extends ServiceSuperclass {
     }
     Map<SightEvent, List<Ticket>> ticketsGroupedBySight =
         tickets.stream().collect(groupingBy(Ticket::getSightEvent));
-    Map<Long, Ticket> ticketIdToObject =
-        tickets.stream().collect(toMap(Ticket::getId, t -> t));
+    Map<Long, Ticket> ticketIdToObject = tickets.stream().collect(toMap(Ticket::getId, t -> t));
+
+
+    var paymentsByP24PartnerId = new HashMap<String, Integer>();
+
+
     for (Map.Entry<SightEvent, List<Ticket>> entry : ticketsGroupedBySight.entrySet()) {
+
+
+      String p24PartnerId = entry.getKey().getPartner().getP24Id();
+      Integer summaryPrice =
+          entry.getValue().stream().collect(Collectors.summingInt(Ticket::getPrice));
+      paymentsByP24PartnerId.put(p24PartnerId, summaryPrice);
+
+
+
       OrderSightEntry ose = new OrderSightEntry();
       ose.setOrder(o);
       ose.setSightEvent(entry.getKey());
       em.persist(ose);
 
-      List<Long> ticketsOfSight =
-          entry.getValue().stream().map(Ticket::getId).collect(toList());
+      List<Long> ticketsOfSight = entry.getValue().stream().map(Ticket::getId).collect(toList());
       Map<Date, List<Triplet<Long, Date, Integer>>> inSightGroupedByDate = triplets.stream()
           .filter(trip -> ticketsOfSight.contains(trip.first)).collect(groupingBy(t -> t.second));
       for (Map.Entry<Date, List<Triplet<Long, Date, Integer>>> inSightOnDate : inSightGroupedByDate
