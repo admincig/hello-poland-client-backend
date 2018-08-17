@@ -3,19 +3,18 @@ package pl.hellopoland.bo;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Map;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
-import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
-import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 @Entity
@@ -41,16 +40,22 @@ public class Order extends ModelSuperclass {
   private Status status = Status.NEW;
   @NotNull
   private Date date = new Date();
-  @ElementCollection
-  @MapKeyColumn(name = "P24PartnerId")
-  private Map<String, Integer> sumBillsByP24PartnerId;
+  @Transient
+  private List<P24PassageCartEntry> p24PassageCartEntries;
 
-  public Map<String, Integer> getSumBillsByP24PartnerId() {
-    return sumBillsByP24PartnerId;
+  public List<P24PassageCartEntry> getP24PassageCartEntries() {
+    return p24PassageCartEntries;
   }
 
-  public void setSumBillsByP24PartnerId(Map<String, Integer> sumBillsByP24PartnerId) {
-    this.sumBillsByP24PartnerId = sumBillsByP24PartnerId;
+  public void setP24PassageCartEntries(List<P24PassageCartEntry> p24PassageCartEntries) {
+    this.p24PassageCartEntries = p24PassageCartEntries;
+  }
+
+  public void addP24PassageCartEntry(P24PassageCartEntry entry) {
+    if (this.getP24PassageCartEntries() == null) {
+      this.setP24PassageCartEntries(new ArrayList<>());
+    }
+    this.getP24PassageCartEntries().add(entry);
   }
 
   public Collection<OrderSightEntry> getEntries() {

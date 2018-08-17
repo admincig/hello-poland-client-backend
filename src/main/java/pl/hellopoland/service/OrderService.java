@@ -24,6 +24,7 @@ import pl.hellopoland.bo.OrderDateEntry;
 import pl.hellopoland.bo.OrderDetails;
 import pl.hellopoland.bo.OrderEntry;
 import pl.hellopoland.bo.OrderSightEntry;
+import pl.hellopoland.bo.P24PassageCartEntry;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.Ticket;
@@ -62,8 +63,7 @@ public class OrderService extends ServiceSuperclass {
     Map<SightEvent, List<Ticket>> ticketsGroupedBySight =
         tickets.stream().collect(groupingBy(Ticket::getSightEvent));
     Map<Long, Ticket> ticketIdToObject = tickets.stream().collect(toMap(Ticket::getId, t -> t));
-    Map<String, Integer> sumBillsByP24PartnerId = new HashMap<>();
-
+    var sumBillsByP24PartnerId = new HashMap<String, Integer>();
     for (Map.Entry<SightEvent, List<Ticket>> entry : ticketsGroupedBySight.entrySet()) {
       OrderSightEntry ose = new OrderSightEntry();
       ose.setOrder(o);
@@ -99,7 +99,8 @@ public class OrderService extends ServiceSuperclass {
         }
       }
     }
-    o.setSumBillsByP24PartnerId(sumBillsByP24PartnerId);
+    sumBillsByP24PartnerId
+        .forEach((k, v) -> o.addP24PassageCartEntry(new P24PassageCartEntry(k, v)));
     try {
       placeInExternalAPI(o);
     } catch (Exception e) {

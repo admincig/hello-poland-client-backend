@@ -1,15 +1,16 @@
 package pl.hellopoland.rest.dto;
 
-import java.util.Map;
+import java.util.List;
 import pl.hellopoland.bo.Order;
+import pl.hellopoland.bo.P24PassageCartEntry;
 
 public class OrderORO {
 
   public OrderORO(Order o) {
     this.hash = o.getHash();
-    this.sumBillsByP24PartnerId = o.getSumBillsByP24PartnerId();
+    this.p24PassageCartEntries = o.getP24PassageCartEntries();
   }
 
   public String hash;
-  public Map<String, Integer> sumBillsByP24PartnerId;
+  public List<P24PassageCartEntry> p24PassageCartEntries;
 }
