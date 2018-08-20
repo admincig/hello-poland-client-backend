@@ -63,4 +63,9 @@ public class OrderServiceMarketAPI {
   public void deleteTicketGroup(Long id) {
     service.deleteOrderDateEntryForLoggedUser(id);
   }
+
+  @PermitAll
+  public void sudoAck(String hash) {
+    service.sudoAck(hash);
+  }
 }

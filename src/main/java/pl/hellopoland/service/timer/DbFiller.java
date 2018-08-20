@@ -3,9 +3,8 @@ package pl.hellopoland.service.timer;
 import static java.util.Collections.singletonList;
 import java.io.InputStream;
 import java.lang.System.Logger;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import javax.annotation.PostConstruct;
 import javax.ejb.DependsOn;
@@ -21,7 +20,6 @@ import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole;
-import pl.hellopoland.dto.DateTypeDTO;
 import pl.hellopoland.dto.FrequencyDataDTO;
 import pl.hellopoland.dto.FrequencyTypeDTO;
 import pl.hellopoland.dto.SightEventDTO;
@@ -321,73 +319,64 @@ public class DbFiller extends ServiceSuperclass {
     todaySecondToTommorow.setSeconds(59);
 
     createTicketPoolDefinition("Wieczorne zwiedzanie Afrykarium", 25, false, todayMidnight,
-        todaySecondToTommorow, DateTypeDTO.DATE, afrEvent.getId(), userHelloPoland.getPartner(),
-        createTicketDefinition("Normalny", 25, 7900, DateTypeDTO.DATE));
+        todaySecondToTommorow, afrEvent.getId(), userHelloPoland.getPartner(),
+        createTicketDefinition("Normalny", 25, 7900));
     createTicketPoolDefinition("Park Szczytnicki", 15, false, todayMidnight, todaySecondToTommorow,
-        DateTypeDTO.DATE, parkSzczEvent.getId(), userHelloPoland.getPartner(),
-        createTicketDefinition("Normalny", 15, 2900, DateTypeDTO.DATE));
+        parkSzczEvent.getId(), userHelloPoland.getPartner(),
+        createTicketDefinition("Normalny", 15, 2900));
     createTicketPoolDefinition("Zwiedzanie ZOO", null, true, todayMidnight, todaySecondToTommorow,
-        DateTypeDTO.UNDEFINED, zwZooEvent.getId(), userZoo.getPartner(),
-        createTicketDefinition("Normalny", null, 4500, DateTypeDTO.UNDEFINED),
-        createTicketDefinition("Ulgowy", null, 3500, DateTypeDTO.UNDEFINED),
-        createTicketDefinition("Dzieci", null, 0, DateTypeDTO.UNDEFINED),
-        createTicketDefinition("Studencki", null, 4000, DateTypeDTO.UNDEFINED),
-        createTicketDefinition("Rodzinny (dwoje dorosłych i max 3 dzieci)", null, 15000,
-            DateTypeDTO.UNDEFINED));
+        zwZooEvent.getId(), userZoo.getPartner(), createTicketDefinition("Normalny", null, 4500),
+        createTicketDefinition("Ulgowy", null, 3500), createTicketDefinition("Dzieci", null, 0),
+        createTicketDefinition("Studencki", null, 4000),
+        createTicketDefinition("Rodzinny (dwoje dorosłych i max 3 dzieci)", null, 15000));
     createTicketPoolDefinition("Zwiedzanie stadionu", null, true, todayMidnight,
-        todaySecondToTommorow, DateTypeDTO.UNDEFINED, zwStadEvent.getId(),
-        userStadionGd.getPartner(),
-        createTicketDefinition("Normalny", null, 1700, DateTypeDTO.UNDEFINED),
-        createTicketDefinition("Ulgowy", null, 1200, DateTypeDTO.UNDEFINED),
-        createTicketDefinition("Rodzinny (2+2)", null, 3600, DateTypeDTO.UNDEFINED));
-    createTicketPoolDefinition("Mecz towarzyski Polska-Czechy", 50, false, todayMidnight,
-        todaySecondToTommorow, DateTypeDTO.DATE, meczPCEvent.getId(), userStadionGd.getPartner(),
-        createTicketDefinition("Normalny", 40, 12500, DateTypeDTO.DATE),
-        createTicketDefinition("VIP", 10, 24000, DateTypeDTO.DATE));
+        todaySecondToTommorow, zwStadEvent.getId(), userStadionGd.getPartner(),
+        createTicketDefinition("Normalny", null, 1700),
+        createTicketDefinition("Ulgowy", null, 1200),
+        createTicketDefinition("Rodzinny (2+2)", null, 3600));
+    Date match = new Date();
+    match.setHours(19);
+    match.setMinutes(00);
+    match.setSeconds(00);
+    createTicketPoolDefinition("Mecz towarzyski Polska-Czechy", 50, false, match, match,
+        meczPCEvent.getId(), userStadionGd.getPartner(),
+        createTicketDefinition("Normalny", 40, 12500), createTicketDefinition("VIP", 10, 24000));
     createTicketPoolDefinition("Zwiedzanie Kolejkowa", null, true, todayMidnight,
-        todaySecondToTommorow, DateTypeDTO.UNDEFINED, kolEvent.getId(), userKolejkowo.getPartner(),
-        createTicketDefinition("Normalny", null, 1900, DateTypeDTO.UNDEFINED),
-        createTicketDefinition("Ulgowy", null, 1500, DateTypeDTO.UNDEFINED));
+        todaySecondToTommorow, kolEvent.getId(), userKolejkowo.getPartner(),
+        createTicketDefinition("Normalny", null, 1900),
+        createTicketDefinition("Ulgowy", null, 1500));
   }
 
   private void createTicketPoolDefinition(String name, Integer availableTicketsNumber,
-      boolean cyclicalPool, Date startDate, Date endDate, DateTypeDTO dateType, Long sightEventId,
-      Partner partner, TicketDefinitionDTO... ticketDefinitions) {
+      boolean cyclicalPool, Date startDate, Date endDate, Long sightEventId, Partner partner,
+      TicketDefinitionDTO... ticketDefinitions) {
     var dto = new TicketPoolDefinitionDTO();
     dto.name = name;
     dto.availableTicketsNumber = availableTicketsNumber;
-    dto.cyclicalPool = cyclicalPool;
+    dto.isCyclic = cyclicalPool;
     if (cyclicalPool) {
       dto.frequencyData = new FrequencyDataDTO();
       dto.frequencyData.frequencyType = FrequencyTypeDTO.DAILY;
       dto.frequencyData.frequency = 1;
+      dto.frequencyData.startDate = startDate;
+      Calendar cal = Calendar.getInstance();
+      cal.set(Calendar.DAY_OF_YEAR, 365);
+      dto.frequencyData.endDate = cal.getTime();
     }
     dto.startDate = startDate;
     dto.endDate = endDate;
-    dto.dateType = dateType;
-    dto.predefinedDate = false;
     dto.sightEventId = sightEventId;
     dto.ticketDefinitions = Arrays.asList(ticketDefinitions);
     tpdService.add(dto, partner);
   }
 
   private TicketDefinitionDTO createTicketDefinition(String name, Integer availableTicketsNumber,
-      int price, DateTypeDTO dateType) {
+      int price) {
     var dto = new TicketDefinitionDTO();
     dto.name = name;
     dto.availableTicketsNumber = availableTicketsNumber;
     dto.price = price;
-    dto.dateType = dateType;
     return dto;
-  }
-
-  private Date getDate(String date) {
-    try {
-      return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").parse(date);
-    } catch (ParseException e) {
-      logger.log(Logger.Level.ERROR, "error during parsing the date: " + date);
-    }
-    return new Date(); // maybe some other one ??
   }
 
 }
