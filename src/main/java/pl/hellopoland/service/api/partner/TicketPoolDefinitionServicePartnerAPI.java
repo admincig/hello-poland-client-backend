@@ -17,4 +17,9 @@ public class TicketPoolDefinitionServicePartnerAPI {
     return service.add(dto);
   }
 
+  @RolesAllowed("partner")
+  public TicketPoolDefinitionDTO get(Long id) {
+    return service.get(id);
+  }
+
 }
