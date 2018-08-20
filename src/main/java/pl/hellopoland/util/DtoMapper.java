@@ -7,7 +7,6 @@ import pl.hellopoland.bo.Location;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.Ticket;
-import pl.hellopoland.dto.DateTypeDTO;
 import pl.hellopoland.dto.ImageDTO;
 import pl.hellopoland.dto.LocationDTO;
 import pl.hellopoland.dto.SightDTO;
@@ -128,9 +127,6 @@ public class DtoMapper {
     dto.id = bo.getId();
     dto.name = bo.getName();
     dto.price = bo.getPrice();
-    // dto.predefinedDate = bo.isPredefinedDate();
-    // dto.date = bo.getDate();
-    dto.dateType = DateTypeDTO.valueOf(bo.getDateType().name());
     // dto.sightEventId = bo.getSightEvent().getId();
     dto.availableTicketsNumber = bo.getAvailableTicketsNumber();
 
@@ -200,12 +196,9 @@ public class DtoMapper {
   }
 
   public static void copy(TicketDefinitionDTO source, Ticket target) {
-    // target.setDate(source.date);
-    target.setDateType(pl.hellopoland.bo.DateType.valueOf(source.dateType.name()));
     target.setExternalId(source.id);
     target.setName(source.name);
-    target.setPoolId(source.ticketPoolId);
-    // target.setPredefinedDate(source.predefinedDate);
+    target.setPoolId(source.poolId);
     target.setPrice(source.price);
     target.setAvailableTicketsNumber(source.availableTicketsNumber);
   }
