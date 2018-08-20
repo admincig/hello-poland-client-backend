@@ -3,7 +3,6 @@ package pl.hellopoland.bo;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
@@ -14,7 +13,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 @Entity
@@ -40,23 +38,6 @@ public class Order extends ModelSuperclass {
   private Status status = Status.NEW;
   @NotNull
   private Date date = new Date();
-  @Transient
-  private List<P24PassageCartEntry> p24PassageCartEntries;
-
-  public List<P24PassageCartEntry> getP24PassageCartEntries() {
-    return p24PassageCartEntries;
-  }
-
-  public void setP24PassageCartEntries(List<P24PassageCartEntry> p24PassageCartEntries) {
-    this.p24PassageCartEntries = p24PassageCartEntries;
-  }
-
-  public void addP24PassageCartEntry(P24PassageCartEntry entry) {
-    if (this.getP24PassageCartEntries() == null) {
-      this.setP24PassageCartEntries(new ArrayList<>());
-    }
-    this.getP24PassageCartEntries().add(entry);
-  }
 
   public Collection<OrderSightEntry> getEntries() {
     return entries;

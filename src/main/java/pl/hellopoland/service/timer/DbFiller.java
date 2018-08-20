@@ -104,19 +104,19 @@ public class DbFiller extends ServiceSuperclass {
   private void createUsers() {
     userHelloPoland = createPartner("Hello Poland",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.",
-        "71852");
+        Integer.valueOf(properties.getProperty("przelewy24.merchantId")));
     userZoo = createPartner("Zoo",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiJDOTU1NTI0MDk2REU0MjlEQjBGODM1NTA1RUI5MzAxNzkzQzE4NEJBQzM2NTFBNzI2MDFCRDNGMUFEQTkyQzAzIn0.",
-        "71852");
+        Integer.valueOf(properties.getProperty("przelewy24.merchantId")));
     userKolejkowo = createPartner("Kolejkowo",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiI0MDc5MTkyRkI2NTQyQTYyRjc3QTcwNDZDRDU1QkJGNUM5NDAzNkE0MjRFRDI4RTM0MEYwODNCRDE1MDRFODZBIn0.",
-        "71852");
+        Integer.valueOf(properties.getProperty("przelewy24.merchantId")));
     userStadionGd = createPartner("Stadion Gdański",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiIyODQyODcyRThEQ0EzMENFNkJBOTk5REMzQjBGODJFNUNFOTNFNzA5RTJEMjlGMEQ4NjFFOTU4QjMxQ0QwQzREIn0.",
-        "71852");
+        Integer.valueOf(properties.getProperty("przelewy24.merchantId")));
   }
 
-  private User createPartner(String partnerName, String token, String p24Id) {
+  private User createPartner(String partnerName, String token, Integer p24Id) {
     Partner helloPolandPartner = new Partner();
     helloPolandPartner.setName(partnerName + " Partner");
     helloPolandPartner.setHptToken(token);

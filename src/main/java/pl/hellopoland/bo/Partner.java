@@ -13,7 +13,7 @@ public class Partner extends ModelSuperclass {
 
   // @NotNull
   // @Column(nullable = false)
-  private String p24Id;
+  private Integer p24Id;
 
   @NotNull
   @Column(nullable = false)
@@ -32,11 +32,11 @@ public class Partner extends ModelSuperclass {
   @OneToMany(mappedBy = "partner")
   private List<SightEvent> sightEvents;
 
-  public String getP24Id() {
+  public Integer getP24Id() {
     return p24Id;
   }
 
-  public void setP24Id(String p24Id) {
+  public void setP24Id(Integer p24Id) {
     this.p24Id = p24Id;
   }
 
