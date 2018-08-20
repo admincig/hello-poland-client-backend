@@ -9,6 +9,18 @@ public class P24PassageCartEntry {
   private Integer targetAmount;
   private Integer targetPosId;
 
+  public P24PassageCartEntry() {}
+
+  public P24PassageCartEntry(OrderEntry oe) {
+    // this.description = description;
+    this.name = oe.getName();
+    this.number = oe.getExternalId();
+    this.price = oe.getUnitPrice();
+    this.quantity = oe.getQuantity();
+    this.targetAmount = oe.getUnitPrice() * oe.getQuantity();
+    this.targetPosId = oe.getDateEntry().getSightEntry().getSightEvent().getPartner().getP24Id();
+  }
+
   public String getDescription() {
     return description;
   }

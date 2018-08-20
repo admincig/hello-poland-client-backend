@@ -20,6 +20,22 @@ public class P24PassageTransactionParams {
   private String zip;
   private Collection<P24PassageCartEntry> passageCart;
 
+  public P24PassageTransactionParams() {}
+
+  public P24PassageTransactionParams(Order o) {
+    OrderDetails od = o.getDetails();
+    this.address = "";
+    this.city = od.getCity();
+    this.client = od.getFirstName() + " " + od.getLastName();
+    this.country = od.getCountry();
+    this.currency = "PLN";
+    this.email = od.getEmail();
+    this.language = "pl";
+    this.phone = od.getPhone();
+    this.sessionId = o.getHash();
+    this.zip = "";
+  }
+
   public String getAddress() {
     return address;
   }

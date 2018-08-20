@@ -108,49 +108,31 @@ public class OrderService extends ServiceSuperclass {
   }
 
   private P24PassageOrder getP24PassageOrder(Order o) {
-
     var passageCart = new ArrayList<P24PassageCartEntry>();
-
-
-    // List<OrderEntry> orderEntries =
     gatherOrderEntries(o.getEntries().stream().collect(Collectors.toList())).forEach(oe -> {
-      var p24CartEntry = new P24PassageCartEntry();
-      // p24CartEntry.setDescription(description);
-      p24CartEntry.setName(oe.getName());
-      p24CartEntry.setNumber(oe.getExternalId());
-      p24CartEntry.setPrice(oe.getUnitPrice());
-      p24CartEntry.setQuantity(oe.getQuantity());
-      p24CartEntry.setTargetAmount(oe.getUnitPrice() * oe.getQuantity());
-      p24CartEntry.setTargetPosId(
-          oe.getDateEntry().getSightEntry().getSightEvent().getPartner().getP24Id());
-      passageCart.add(p24CartEntry);
+      var cartEntry = new P24PassageCartEntry(oe);
+      cartEntry.setDescription("Hello Poland, " + o.getHash());
+      passageCart.add(cartEntry);
     });
-
-
-    var p24Params = new P24PassageTransactionParams();
-    p24Params.setCity(o.getDetails().getCity());
-    p24Params.setCountry(o.getDetails().getCountry());
-    p24Params.setPhone(o.getDetails().getPhone());
-    p24Params.setAddress("");
+    var p24Params = new P24PassageTransactionParams(o);
     p24Params.setAmount(
         passageCart.stream().collect(Collectors.summingInt(P24PassageCartEntry::getTargetAmount)));
-    p24Params.setClient(o.getDetails().getFirstName() + o.getDetails().getLastName());
     p24Params.setCrc(properties.getProperty("przelewy24.crc"));
-    p24Params.setCurrency("PLN");
-    // p24Params.setDescription(description);
-    p24Params.setEmail(o.getDetails().getEmail());
-    p24Params.setLanguage("pl");
+    p24Params.setDescription("Market App, " + o.getHash());
     p24Params.setMerchantId(Integer.valueOf(properties.getProperty("przelewy24.merchantId")));
-    p24Params.setSessionId(o.getHash());
-    p24Params.setUrlStatus("/v1/market/orders/" + o.getHash() + "/ackPayment");
-    p24Params.setZip("");
+    p24Params.setUrlStatus(getAckPaymentURL(o));
     p24Params.setPassageCart(passageCart);
-
-    var p24Order = new P24PassageOrder();
-    // p24Order.setSandbox(isSandbox);
-    p24Order.setTransactionParams(p24Params);
-
+    var p24Order = new P24PassageOrder(
+        Boolean.parseBoolean(properties.getProperty("przelewy24.isSandbox")), p24Params);
     return p24Order;
+  }
+
+  private String getAckPaymentURL(Order o) {
+    var url = properties.getProperty("base.url");
+    if (!url.endsWith("/")) {
+      url = url.concat("/");
+    }
+    return url.concat("market/orders/" + o.getHash() + "/ackPayment");
   }
 
   // em.refreshes are because of strange NPEs
