@@ -19,10 +19,10 @@ import javax.persistence.TypedQuery;
 import javax.security.enterprise.SecurityContext;
 import pl.hellopoland.bo.ModelSuperclass;
 import pl.hellopoland.bo.Partner;
+import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.config.PagedCollectionConfig;
 import pl.hellopoland.config.PagedCollectionConfig.Entry;
-import pl.hellopoland.bo.Portal;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 
 
@@ -42,7 +42,7 @@ public abstract class ServiceSuperclass {
 
     try {
       InputStream input = ServiceSuperclass.class.getResourceAsStream("/config.properties");
-      properties = new Properties();
+      properties = System.getProperties();
       properties.load(input);
     } catch (IOException e) {
       staticLogger.log(Logger.Level.WARNING, "Failed to load properties", e);

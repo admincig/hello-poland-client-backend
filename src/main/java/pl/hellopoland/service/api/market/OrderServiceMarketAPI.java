@@ -9,12 +9,14 @@ import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import pl.hellopoland.bo.Order;
 import pl.hellopoland.bo.OrderDateEntry;
 import pl.hellopoland.dto.P24PassageCartDTO;
 import pl.hellopoland.rest.dto.OrderDateEntryORO;
 import pl.hellopoland.rest.dto.OrderDateEntryOnListingORO;
 import pl.hellopoland.rest.dto.OrderIRO;
 import pl.hellopoland.service.OrderService;
+import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.Triplet;
 
 @Stateless
@@ -29,7 +31,8 @@ public class OrderServiceMarketAPI {
   public P24PassageCartDTO create(OrderIRO iro) {
     Collection<Triplet<Long, Date, Integer>> tickets = iro.entries.stream()
         .map(e -> new Triplet<>(e.id, e.date, e.quantity)).collect(Collectors.toList());
-    return service.create(tickets, iro.details);
+    Order bo = service.create(tickets, iro.details);
+    return DtoMapper.getP24PassageCartDTO(bo);
   }
 
   @PermitAll

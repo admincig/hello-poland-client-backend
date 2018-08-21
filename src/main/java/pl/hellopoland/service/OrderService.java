@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -29,11 +28,8 @@ import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.Ticket;
 import pl.hellopoland.bo.User;
-import pl.hellopoland.dto.P24PassageCartDTO;
-import pl.hellopoland.dto.P24PassageCartEntryDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
-import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PaymentUtils;
 import pl.hellopoland.util.Triplet;
@@ -45,8 +41,7 @@ public class OrderService extends ServiceSuperclass {
   @Inject
   UserService uService;
 
-  public P24PassageCartDTO create(Collection<Triplet<Long, Date, Integer>> triplets,
-      OrderDetails details) {
+  public Order create(Collection<Triplet<Long, Date, Integer>> triplets, OrderDetails details) {
     User user = getLoggedUser();
 
     Order o = new Order();
@@ -104,33 +99,7 @@ public class OrderService extends ServiceSuperclass {
     } catch (Exception e) {
       throw new ConflictingException("Nie udało się złożyć zamówienia w zewnętrznym systemie", e);
     }
-    return getP24PassageCartDTO(o);
-  }
-
-  private P24PassageCartDTO getP24PassageCartDTO(Order o) {
-    var passageCart = new ArrayList<P24PassageCartEntryDTO>();
-    gatherOrderEntries(o.getEntries().stream().collect(Collectors.toList())).forEach(oe -> {
-      var cartEntry = DtoMapper.getP24PassageCartEntryDTO(oe);
-      cartEntry.description = "Hello Poland, " + o.getHash();
-      passageCart.add(cartEntry);
-    });
-    var p24Params = DtoMapper.getP24PassageTransactionParamsDTO(o);
-    p24Params.amount = passageCart.stream().collect(Collectors.summingInt(f -> f.targetAmount));
-    p24Params.crc = properties.getProperty("przelewy24.crc");
-    p24Params.description = "Market App, " + o.getHash();
-    p24Params.merchantId = Integer.valueOf(properties.getProperty("przelewy24.merchantId"));
-    p24Params.urlStatus = getAckPaymentURL(o);
-    p24Params.passageCart = passageCart;
-    return DtoMapper.getP24PassageCartDTO(
-        Boolean.parseBoolean(properties.getProperty("przelewy24.isSandbox")), p24Params);
-  }
-
-  private String getAckPaymentURL(Order o) {
-    var url = properties.getProperty("base.url");
-    if (!url.endsWith("/")) {
-      url = url.concat("/");
-    }
-    return url.concat("market/orders/" + o.getHash() + "/ackPayment");
+    return o;
   }
 
   // em.refreshes are because of strange NPEs
@@ -188,6 +157,7 @@ public class OrderService extends ServiceSuperclass {
     JsonObject resp = (JsonObject) hpt.book(details, orderEntries);
     Integer externalOrderId = resp.getInt("id");
     entry.getValue().forEach(ose -> ose.setExternalId(externalOrderId.longValue()));
+    em.flush();
   }
 
   private List<OrderEntry> gatherOrderEntries(List<OrderSightEntry> list) {
