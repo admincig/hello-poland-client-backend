@@ -4,11 +4,17 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.Location;
+import pl.hellopoland.bo.Order;
+import pl.hellopoland.bo.OrderDetails;
+import pl.hellopoland.bo.OrderEntry;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.Ticket;
 import pl.hellopoland.dto.ImageDTO;
 import pl.hellopoland.dto.LocationDTO;
+import pl.hellopoland.dto.P24PassageCartDTO;
+import pl.hellopoland.dto.P24PassageCartEntryDTO;
+import pl.hellopoland.dto.P24PassageTransactionParamsDTO;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
@@ -195,5 +201,40 @@ public class DtoMapper {
     target.setPoolId(source.poolId);
     target.setPrice(source.price);
     target.setAvailableTicketsNumber(source.availableTicketsNumber);
+  }
+
+  public static P24PassageCartEntryDTO getP24PassageCartEntryDTO(OrderEntry oe) {
+    var dto = new P24PassageCartEntryDTO();
+    dto.name = oe.getName();
+    dto.number = oe.getExternalId();
+    dto.price = oe.getUnitPrice();
+    dto.quantity = oe.getQuantity();
+    dto.targetAmount = oe.getUnitPrice() * oe.getQuantity();
+    dto.targetPosId = oe.getDateEntry().getSightEntry().getSightEvent().getPartner().getP24Id();
+    return dto;
+  }
+
+  public static P24PassageTransactionParamsDTO getP24PassageTransactionParamsDTO(Order o) {
+    var dto = new P24PassageTransactionParamsDTO();
+    OrderDetails od = o.getDetails();
+    dto.address = "";
+    dto.city = od.getCity();
+    dto.client = od.getFirstName() + " " + od.getLastName();
+    dto.country = od.getCountry();
+    dto.currency = "PLN";
+    dto.email = od.getEmail();
+    dto.language = "pl";
+    dto.phone = od.getPhone();
+    dto.sessionId = o.getHash();
+    dto.zip = "";
+    return dto;
+  }
+
+  public static P24PassageCartDTO getP24PassageCartDTO(boolean isSandbox,
+      P24PassageTransactionParamsDTO p24Params) {
+    var dto = new P24PassageCartDTO();
+    dto.isSandbox = isSandbox;
+    dto.transactionParams = p24Params;
+    return dto;
   }
 }

@@ -25,15 +25,15 @@ import pl.hellopoland.bo.OrderDateEntry;
 import pl.hellopoland.bo.OrderDetails;
 import pl.hellopoland.bo.OrderEntry;
 import pl.hellopoland.bo.OrderSightEntry;
-import pl.hellopoland.bo.P24PassageCartEntry;
-import pl.hellopoland.bo.P24PassageOrder;
-import pl.hellopoland.bo.P24PassageTransactionParams;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.Ticket;
 import pl.hellopoland.bo.User;
+import pl.hellopoland.dto.P24PassageCartDTO;
+import pl.hellopoland.dto.P24PassageCartEntryDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
+import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PaymentUtils;
 import pl.hellopoland.util.Triplet;
@@ -45,7 +45,7 @@ public class OrderService extends ServiceSuperclass {
   @Inject
   UserService uService;
 
-  public P24PassageOrder create(Collection<Triplet<Long, Date, Integer>> triplets,
+  public P24PassageCartDTO create(Collection<Triplet<Long, Date, Integer>> triplets,
       OrderDetails details) {
     User user = getLoggedUser();
 
@@ -104,27 +104,25 @@ public class OrderService extends ServiceSuperclass {
     } catch (Exception e) {
       throw new ConflictingException("Nie udało się złożyć zamówienia w zewnętrznym systemie", e);
     }
-    return getP24PassageOrder(o);
+    return getP24PassageCartDTO(o);
   }
 
-  private P24PassageOrder getP24PassageOrder(Order o) {
-    var passageCart = new ArrayList<P24PassageCartEntry>();
+  private P24PassageCartDTO getP24PassageCartDTO(Order o) {
+    var passageCart = new ArrayList<P24PassageCartEntryDTO>();
     gatherOrderEntries(o.getEntries().stream().collect(Collectors.toList())).forEach(oe -> {
-      var cartEntry = new P24PassageCartEntry(oe);
-      cartEntry.setDescription("Hello Poland, " + o.getHash());
+      var cartEntry = DtoMapper.getP24PassageCartEntryDTO(oe);
+      cartEntry.description = "Hello Poland, " + o.getHash();
       passageCart.add(cartEntry);
     });
-    var p24Params = new P24PassageTransactionParams(o);
-    p24Params.setAmount(
-        passageCart.stream().collect(Collectors.summingInt(P24PassageCartEntry::getTargetAmount)));
-    p24Params.setCrc(properties.getProperty("przelewy24.crc"));
-    p24Params.setDescription("Market App, " + o.getHash());
-    p24Params.setMerchantId(Integer.valueOf(properties.getProperty("przelewy24.merchantId")));
-    p24Params.setUrlStatus(getAckPaymentURL(o));
-    p24Params.setPassageCart(passageCart);
-    var p24Order = new P24PassageOrder(
+    var p24Params = DtoMapper.getP24PassageTransactionParamsDTO(o);
+    p24Params.amount = passageCart.stream().collect(Collectors.summingInt(f -> f.targetAmount));
+    p24Params.crc = properties.getProperty("przelewy24.crc");
+    p24Params.description = "Market App, " + o.getHash();
+    p24Params.merchantId = Integer.valueOf(properties.getProperty("przelewy24.merchantId"));
+    p24Params.urlStatus = getAckPaymentURL(o);
+    p24Params.passageCart = passageCart;
+    return DtoMapper.getP24PassageCartDTO(
         Boolean.parseBoolean(properties.getProperty("przelewy24.isSandbox")), p24Params);
-    return p24Order;
   }
 
   private String getAckPaymentURL(Order o) {
