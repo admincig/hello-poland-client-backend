@@ -7,14 +7,12 @@ import java.lang.System.Logger.Level;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.json.Json;
 import javax.json.JsonArray;
-import javax.json.JsonObject;
 import javax.json.JsonStructure;
 import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbException;
 import pl.hellopoland.bo.OrderDetails;
 import pl.hellopoland.bo.OrderEntry;
 import pl.hellopoland.bo.SightEvent;
@@ -36,7 +34,7 @@ public class HelloTicket {
   private System.Logger logger = System.getLogger(HelloTicket.class.getName());
   private String url;
 
-  public JsonObject book(OrderDetails details, List<OrderEntry> orderEntries) {
+  public JsonStructure book(OrderDetails details, List<OrderEntry> orderEntries) {
     BookingDTO booking = new BookingDTO();
     booking.customerEmail = details.getEmail();
     booking.customerName = details.getFirstName() + " " + details.getLastName();
@@ -56,16 +54,11 @@ public class HelloTicket {
       var resp = post("/v1/bookings", json, authToken);
       booking = JsonbConfig.getInstance().fromJson(resp.toString(), BookingDTO.class);
 
-      boolean serialNumberSetAlready = false;
       for (var oe : orderEntries) {
-        if (!serialNumberSetAlready) {
-          oe.getDateEntry().getSightEntry().setSerialNumber(booking.serialNumber);
-        }
         oe.getDateEntry().getSightEntry().setSerialNumber(booking.serialNumber);
         for (var iter = booking.tickets.iterator(); iter.hasNext();) {
           TicketDTO ticket = iter.next();
-          if (oe.getExternalDefinitionId().intValue() == ticket.ticketDefinitionId
-              && oe.getDateEntry().getDate().compareTo(ticket.date) == 0) {
+          if (oe.matches(ticket)) {
             oe.setExternalId((long) ticket.id);
             break;
           }
@@ -78,7 +71,7 @@ public class HelloTicket {
     }
   }
 
-  public JsonObject confirm(String serialNumber, List<OrderEntry> orderEntries) {
+  public JsonStructure confirm(String serialNumber, List<OrderEntry> orderEntries) {
     try {
       String authToken =
           "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.";
@@ -87,10 +80,7 @@ public class HelloTicket {
       for (var oe : orderEntries) {
         for (var iter = booking.tickets.iterator(); iter.hasNext();) {
           TicketDTO ticket = iter.next();
-          Date date1 = ticket.date;
-          Date date2 = oe.getDateEntry().getDate();
-          if (date2.compareTo(date1) == 0
-              && oe.getExternalDefinitionId().intValue() == ticket.ticketDefinitionId) {
+          if (oe.matches(ticket)) {
             oe.addNumber(ticket.serialNumber);
           }
         }
@@ -151,7 +141,7 @@ public class HelloTicket {
     return null;
   }
 
-  private JsonObject post(String path, String json, String authToken) throws IOException {
+  private JsonStructure post(String path, String json, String authToken) throws IOException {
     URL url = new URL(this.url + path);
     var conn = url.openConnection();
     conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
@@ -164,12 +154,12 @@ public class HelloTicket {
     printWriter.append(json);
     printWriter.close();
     var is = conn.getInputStream();
-    var resp = Json.createReader(is).readObject();
+    var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
     logger.log(System.Logger.Level.INFO, "Server responded with body: " + resp);
     return resp;
   }
 
-  private JsonObject put(String path, String json, String authToken) throws IOException {
+  private JsonStructure put(String path, String json, String authToken) throws IOException {
     URL url = new URL(this.url + path);
     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
     conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
@@ -185,7 +175,7 @@ public class HelloTicket {
       printWriter.close();
     }
     var is = conn.getInputStream();
-    var resp = Json.createReader(is).readObject();
+    var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
     logger.log(System.Logger.Level.INFO, "Server responded with body: " + resp);
     return resp;
   }
@@ -221,9 +211,9 @@ public class HelloTicket {
     var is = conn.getInputStream();
     int responseCode = conn.getResponseCode();
     logger.log(System.Logger.Level.INFO, "Server responded with code: " + responseCode);
-    JsonStructure response = Json.createReader(is).read();
+    var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
     is.close();
-    return response;
+    return resp;
   }
 
   public List<TicketPoolDefinitionDTO> getTicketPoolDefinitions(String partnerAuthToken) {
@@ -247,9 +237,20 @@ public class HelloTicket {
       String partnerAuthToken) {
     try {
       Jsonb jsonb = JsonbConfig.getInstance();
-      JsonObject json = post("/v1/ticket-pool-definitions", jsonb.toJson(dto), partnerAuthToken);
+      JsonStructure json = post("/v1/ticket-pool-definitions", jsonb.toJson(dto), partnerAuthToken);
       return jsonb.fromJson(json.toString(), TicketPoolDefinitionDTO.class);
     } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      return null;
+    }
+  }
+
+  public TicketPoolDefinitionDTO getTicketPoolDefinition(String hptToken, Long id) {
+    try {
+      return JsonbConfig.getInstance().fromJson(
+          get("/v1/ticket-pool-definitions/" + id, hptToken).toString(),
+          TicketPoolDefinitionDTO.class);
+    } catch (JsonbException | IOException e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
       return null;
     }
