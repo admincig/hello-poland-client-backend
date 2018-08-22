@@ -2,6 +2,7 @@ package pl.hellopoland.bo;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Random;
@@ -9,6 +10,8 @@ import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
@@ -29,6 +32,13 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
 
   @ManyToOne
   private ImageCollector mainImage;
+
+  @OneToMany
+  @JoinTable(name = "sight_images",
+      joinColumns = {@JoinColumn(name = "sight_id", referencedColumnName = "id")},
+      inverseJoinColumns = {
+          @JoinColumn(name = "imagecollector_id", referencedColumnName = "id", unique = true)})
+  private Collection<ImageCollector> images;
 
   @OneToMany(mappedBy = "sightEvent")
   private Collection<Ticket> tickets;
@@ -238,5 +248,26 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
 
   public void setGeneralAdmission(Boolean generalAdmission) {
     this.generalAdmission = generalAdmission;
+  }
+
+  public Collection<ImageCollector> getImages() {
+    return images;
+  }
+
+  public void setImages(Collection<ImageCollector> images) {
+    this.images = images;
+  }
+
+  public void addImage(ImageCollector img) {
+    if (images == null) {
+      images = new ArrayList<>();
+    }
+    images.add(img);
+  }
+
+  public void removeImage(ImageCollector img) {
+    if (images != null) {
+      images.remove(img);
+    }
   }
 }
