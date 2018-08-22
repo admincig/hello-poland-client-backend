@@ -1,11 +1,11 @@
 package pl.hellopoland.util;
 
+import java.lang.System.Logger;
+import java.util.List;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import java.lang.System.Logger;
-import java.util.List;
 import pl.hellopoland.bo.User;
 
 public class GoogleAPIConnector {
@@ -29,7 +29,7 @@ public class GoogleAPIConnector {
                     "319066854009-a8v305sfvacpkdqq7t63v9fvcij3r8ts.apps.googleusercontent.com",
                     "319066854009-vd6lt8aj3373igh6tf9qu78n8krmenme.apps.googleusercontent.com",
                     "319066854009-shv7nogo8kuqa602kp62jhfe74jdkrv2.apps.googleusercontent.com"))
-            .setIssuer("https://accounts.google.com").build();
+            .setIssuers(List.of("https://accounts.google.com", "accounts.google.com")).build();
     logger.log(Logger.Level.INFO, "verifying idToken=" + idToken);
     GoogleIdToken token = verifier.verify(idToken);
     GoogleIdToken.Payload payload = token.getPayload();
