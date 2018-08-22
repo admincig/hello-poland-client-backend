@@ -104,19 +104,16 @@ public class SightService extends ServiceSuperclass {
 
   public Sight uploadMainImageForLoggedUser(Long id, byte[] icon) {
     Sight bo = getActiveForLoggedUser(id);
-    bo.setMainImage(uploadImageForLoggedUser(icon));
+    bo.setMainImage(
+        imageService.validateAndStoreImageCollector(new ByteArrayInputStream(icon), "jpeg", null));
     return bo;
   }
 
   public Sight addImageToSightGallery(Long id, byte[] img) {
     Sight bo = getActiveForLoggedUser(id);
-    bo.addImage(uploadImageForLoggedUser(img));
+    bo.addImage(
+        imageService.validateAndStoreImageCollector(new ByteArrayInputStream(img), "jpeg", null));
     return bo;
-  }
-
-  private ImageCollector uploadImageForLoggedUser(byte[] img) {
-    var is = new ByteArrayInputStream(img);
-    return imageService.validateAndStoreImageCollector(is, "jpeg", null);
   }
 
   public Sight removeImageFromGallery(Long id, Long imgId) {
