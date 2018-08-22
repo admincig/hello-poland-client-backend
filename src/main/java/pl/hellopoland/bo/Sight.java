@@ -9,6 +9,8 @@ import java.util.Random;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import pl.hellopoland.util.Imaged;
@@ -32,6 +34,11 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
   @ManyToOne
   private ImageCollector mainImage;
 
+  @OneToMany
+  @JoinTable(name = "sight_images",
+      joinColumns = {@JoinColumn(name = "sight_id", referencedColumnName = "id")},
+      inverseJoinColumns = {
+          @JoinColumn(name = "imagecollector_id", referencedColumnName = "id", unique = true)})
   private Collection<ImageCollector> images;
 
   private String email;

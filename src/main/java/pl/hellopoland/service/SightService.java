@@ -109,7 +109,7 @@ public class SightService extends ServiceSuperclass {
   }
 
   public Sight addImageToSightGallery(Long id, byte[] img) {
-    Sight bo = get(id);
+    Sight bo = getActiveForLoggedUser(id);
     bo.addImage(uploadImageForLoggedUser(id, img));
     return bo;
   }
@@ -120,7 +120,7 @@ public class SightService extends ServiceSuperclass {
   }
 
   public Sight removeImageFromGallery(Long id, Long imgId) {
-    Sight bo = get(id);
+    Sight bo = getActiveForLoggedUser(id);
     ImageCollector img = imageService.get(imgId);
     bo.removeImage(img);
     return bo;

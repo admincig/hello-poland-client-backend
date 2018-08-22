@@ -10,6 +10,8 @@ import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
@@ -31,6 +33,11 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
   @ManyToOne
   private ImageCollector mainImage;
 
+  @OneToMany
+  @JoinTable(name = "sight_images",
+      joinColumns = {@JoinColumn(name = "sight_id", referencedColumnName = "id")},
+      inverseJoinColumns = {
+          @JoinColumn(name = "imagecollector_id", referencedColumnName = "id", unique = true)})
   private Collection<ImageCollector> images;
 
   @OneToMany(mappedBy = "sightEvent")

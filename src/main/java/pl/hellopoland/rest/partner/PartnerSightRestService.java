@@ -60,7 +60,7 @@ public class PartnerSightRestService {
     return service.uploadMainImage(id, icon);
   }
 
-  @PUT
+  @POST
   @Path("/{id}/image")
   @Consumes({"image/jpeg", "image/jpg"})
   public SightDTO uploadImage(@PathParam("id") Long id, byte[] img) {
@@ -68,7 +68,7 @@ public class PartnerSightRestService {
   }
 
   @DELETE
-  @Path("/{id}/image/{imgId}")
+  @Path("/{id}/images/{imgId}")
   public SightDTO uploadImage(@PathParam("id") Long id, @PathParam("imgId") Long imgId) {
     return service.removeImageFromGallery(id, imgId);
   }
