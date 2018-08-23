@@ -220,10 +220,6 @@ public class DtoMapper {
     });
     var p24Params = getP24PassageTransactionParamsDTO(o);
     p24Params.amount = passageCart.stream().collect(Collectors.summingInt(f -> f.targetAmount));
-    p24Params.crc = PROPERTIES.getProperty("przelewy24.crc");
-    p24Params.description = "Market App, " + o.getHash();
-    p24Params.merchantId = Integer.valueOf(PROPERTIES.getProperty("przelewy24.merchantId"));
-    p24Params.urlStatus = getAckPaymentURL(o);
     p24Params.passageCart = passageCart;
     var dto = new P24PassageCartDTO();
     dto.isSandbox = Boolean.parseBoolean(PROPERTIES.getProperty("przelewy24.isSandbox"));
@@ -255,6 +251,9 @@ public class DtoMapper {
     dto.phone = od.getPhone();
     dto.sessionId = o.getHash();
     dto.zip = "";
+    dto.description = "Market App, " + o.getHash();
+    dto.merchantId = Integer.valueOf(PROPERTIES.getProperty("przelewy24.merchantId"));
+    dto.urlStatus = getAckPaymentURL(o);
     return dto;
   }
 
