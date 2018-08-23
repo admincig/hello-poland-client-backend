@@ -60,6 +60,9 @@ public class DtoMapper {
     if (bo.getSightEvents() != null) {
       dto.sightEvents = bo.getSightEvents().stream().map(DtoMapper::getFullDTO).collect(toList());
     }
+    if (bo.getImages() != null && !bo.getImages().isEmpty()) {
+      dto.images = bo.getImages().stream().map(DtoMapper::getDTO).collect(toList());
+    }
     return dto;
   }
 
@@ -85,6 +88,9 @@ public class DtoMapper {
 
   public static SightEventDTO getFullDTO(SightEvent bo) {
     SightEventDTO dto = getDTO(bo);
+    if (bo.getImages() != null && !bo.getImages().isEmpty()) {
+      dto.images = bo.getImages().stream().map(DtoMapper::getDTO).collect(toList());
+    }
     // if (bo.getTickets() != null && !bo.getTickets().isEmpty()) {
     // dto.ticketDefinitions = bo.getTickets().stream().map(DtoMapper::getDTO).collect(toList());
     // }
