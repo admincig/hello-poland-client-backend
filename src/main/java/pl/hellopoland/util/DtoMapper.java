@@ -227,6 +227,7 @@ public class DtoMapper {
     var p24Params = getP24PassageTransactionParamsDTO(o);
     p24Params.amount = passageCart.stream().collect(Collectors.summingInt(f -> f.targetAmount));
     p24Params.passageCart = passageCart;
+    p24Params.sign = getP24Sign(p24Params);
     var dto = new P24PassageCartDTO();
     dto.isSandbox = Boolean.parseBoolean(PROPERTIES.getProperty("przelewy24.isSandbox"));
     dto.transactionParams = p24Params;
@@ -261,6 +262,17 @@ public class DtoMapper {
     dto.merchantId = Integer.valueOf(PROPERTIES.getProperty("przelewy24.merchantId"));
     dto.urlStatus = getAckPaymentURL(o);
     return dto;
+  }
+
+  private static String getP24Sign(P24PassageTransactionParamsDTO dto) {
+    var delimiter = "|";
+    var signBuilder = new StringBuilder();
+    signBuilder.append(dto.sessionId).append(delimiter);
+    signBuilder.append(dto.merchantId).append(delimiter);
+    signBuilder.append(dto.amount).append(delimiter);
+    signBuilder.append(dto.currency).append(delimiter);
+    signBuilder.append(PROPERTIES.getProperty("przelewy24.crc"));
+    return PaymentUtils.MD5(signBuilder.toString());
   }
 
   private static List<OrderEntry> gatherOrderEntries(List<OrderSightEntry> list) {
