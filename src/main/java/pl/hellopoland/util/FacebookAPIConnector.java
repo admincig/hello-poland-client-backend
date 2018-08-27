@@ -47,4 +47,9 @@ public class FacebookAPIConnector {
     return Json.createReader(is).readObject();
   }
 
+
+
+  public static void main(String... strings) {
+    FacebookFanPagePostReader.getInstance().readPosts();
+  }
 }
