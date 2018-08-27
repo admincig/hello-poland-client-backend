@@ -5,10 +5,10 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.logging.Logger;
-import javax.json.Json;
 import javax.json.JsonObject;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserLocation;
+import pl.hellopoland.rest.JsonbConfig;
 
 public class FacebookAPIConnector {
 
@@ -32,10 +32,10 @@ public class FacebookAPIConnector {
         location.setCity(NameAndAddressSplitter.getCity(jsonLocation.getString("name")));
         location.setCountry(NameAndAddressSplitter.getCountry(jsonLocation.getString("name")));
         user.setLocation(location);
-
       }
       return user;
     } catch (Exception e) {
+      logger.warning("Failed to get user from facebook: " + e.getMessage());
       return null;
     }
   }
@@ -44,7 +44,7 @@ public class FacebookAPIConnector {
     URL url = new URL(FACEBOOK_API_HOST + token);
     URLConnection conn = url.openConnection();
     InputStream is = conn.getInputStream();
-    return Json.createReader(is).readObject();
+    return JsonbConfig.getInstance().fromJson(is, JsonObject.class);
   }
 
 }
