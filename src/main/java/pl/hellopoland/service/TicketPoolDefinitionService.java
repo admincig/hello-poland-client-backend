@@ -44,4 +44,10 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     return hpt.getTicketPoolDefinition(getLoggedPartner().getHptToken(), id);
   }
 
+  public void delete(Long id) {
+    Portal portal = getPortal("Hello Ticket Cloud");
+    HelloTicket hpt = new HelloTicket(portal.getUrl());
+    hpt.deleteTicketPoolDefinition(getLoggedPartner().getHptToken(), id);
+  }
+
 }
