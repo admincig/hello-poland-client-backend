@@ -12,6 +12,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
+import pl.hellopoland.exception.conflict.ConflictingException;
+import pl.hellopoland.rest.exceptionhandler.ConflictingExceptionMapper;
 import pl.hellopoland.service.api.partner.TicketPoolDefinitionServicePartnerAPI;
 
 @Path("/partner/ticket-pool-definitions")
@@ -37,7 +39,8 @@ public class PartnerTicketPoolDefinitionRestService {
   @DELETE
   @Path("/{id}")
   public Response deleteTicketPoolDef(@PathParam("id") Long id) {
-    return service.delete(id) ? Response.noContent().build() : Response.notModified().build();
+    return service.delete(id) ? Response.noContent().build()
+        : new ConflictingExceptionMapper().toResponse(new ConflictingException(""));
   }
 
 }

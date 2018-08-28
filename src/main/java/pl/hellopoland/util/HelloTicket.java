@@ -23,6 +23,7 @@ import pl.hellopoland.dto.booking.BookingDTO;
 import pl.hellopoland.dto.booking.TicketDTO;
 import pl.hellopoland.dto.booking.TicketOrderDTO;
 import pl.hellopoland.exception.conflict.CannotDeleteSightEventFromExternalSystemException;
+import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.JsonbConfig;
 
 public class HelloTicket {
@@ -259,12 +260,10 @@ public class HelloTicket {
 
   public boolean deleteTicketPoolDefinition(String hptToken, Long id) {
     try {
-      return delete("/v1/ticket-pool-definitions/" + id, hptToken) == NO_CONTENT.getStatusCode()
-          ? true
-          : false;
+      return delete("/v1/ticket-pool-definitions/" + id, hptToken) == NO_CONTENT.getStatusCode();
     } catch (Exception e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      throw new ConflictingException(
+          "Cannot delete TicketPoolDefinition [id=" + id + "] from external system.");
     }
-    return false;
   }
 }
