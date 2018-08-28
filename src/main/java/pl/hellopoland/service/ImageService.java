@@ -161,4 +161,9 @@ public class ImageService extends ServiceSuperclass {
     }
 
   }
+
+  public ImageCollector get(Long id) {
+    return em.createQuery("from ImageCollector where id=:id", ImageCollector.class)
+        .setParameter("id", id).getSingleResult();
+  }
 }
