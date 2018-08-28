@@ -23,8 +23,8 @@ public class TicketPoolDefinitionServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
-  public boolean delete(Long id) {
-    return service.delete(id);
+  public void delete(Long id) {
+    service.delete(id);
   }
 
 }

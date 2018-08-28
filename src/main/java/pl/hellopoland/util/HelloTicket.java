@@ -258,9 +258,9 @@ public class HelloTicket {
     }
   }
 
-  public boolean deleteTicketPoolDefinition(String hptToken, Long id) {
+  public void deleteTicketPoolDefinition(String hptToken, Long id) {
     try {
-      return delete("/v1/ticket-pool-definitions/" + id, hptToken) == NO_CONTENT.getStatusCode();
+      delete("/v1/ticket-pool-definitions/" + id, hptToken);
     } catch (Exception e) {
       throw new ConflictingException(
           "Cannot delete TicketPoolDefinition [id=" + id + "] from external system.");
