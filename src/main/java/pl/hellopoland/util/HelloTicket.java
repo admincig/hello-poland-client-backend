@@ -180,7 +180,7 @@ public class HelloTicket {
     return resp;
   }
 
-  private void delete(String path, String authToken) throws IOException {
+  private int delete(String path, String authToken) throws IOException {
     URL url = new URL(this.url + path);
     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
     conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
@@ -197,6 +197,7 @@ public class HelloTicket {
     if (responseCode != NO_CONTENT.getStatusCode()) {
       throw new CannotDeleteSightEventFromExternalSystemException();
     }
+    return responseCode;
   }
 
   private JsonStructure get(String path, String authToken) throws IOException {
@@ -254,5 +255,16 @@ public class HelloTicket {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
       return null;
     }
+  }
+
+  public boolean deleteTicketPoolDefinition(String hptToken, Long id) {
+    try {
+      return delete("/v1/ticket-pool-definitions/" + id, hptToken) == NO_CONTENT.getStatusCode()
+          ? true
+          : false;
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+    }
+    return false;
   }
 }
