@@ -56,6 +56,9 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
   @OneToMany(mappedBy = "sight")
   private List<SightEvent> sightEvents;
 
+  @OneToMany(mappedBy = "sight")
+  private Collection<OpeningHours> openingHours;
+
   public Sight() {}
 
   public String getName() {
@@ -174,5 +177,13 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
     if (images != null) {
       images.remove(img);
     }
+  }
+
+  public Collection<OpeningHours> getOpeningHours() {
+    return openingHours;
+  }
+
+  public void setOpeningHours(Collection<OpeningHours> openingHours) {
+    this.openingHours = openingHours;
   }
 }

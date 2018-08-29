@@ -26,6 +26,25 @@ public class PartnerSightRestService {
 
   @POST
   public SightDTO add(SightDTO dto) {
+
+    // OpeningHours oHours = new OpeningHours();
+    // oHours.setCloseTime(LocalTime.now());
+    // oHours.setDay(1);
+    // oHours.setOpenTime(LocalTime.now());
+
+
+    // OpeningHours oHours = JsonbConfig.getInstance()
+    // .fromJson("{\"day\":1,\"openTime\":\"15:00\",\"closeTime\":\"16:00\"}", OpeningHours.class);
+
+
+    // Sight oHours = JsonbConfig.getInstance().fromJson(
+    // "{\"name\":\"test1\",\"openingHours\":{[{\"day\":1,\"openTime\":\"15:00\",\"closeTime\":\"16:00\"},{\"day\":3,\"openTime\":\"14:30\",\"closeTime\":\"17:00\"}]}}",
+    // Sight.class);
+    //
+    // String jString = JsonbConfig.getInstance().toJson(oHours);
+    //
+    // jString = jString + "";
+
     return service.create(dto);
   }
 

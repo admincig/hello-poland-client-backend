@@ -1,11 +1,15 @@
 package pl.hellopoland.service;
 
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.ImageCollector;
+import pl.hellopoland.bo.OpeningHours;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
@@ -52,6 +56,7 @@ public class SightService extends ServiceSuperclass {
     bo.setPartner(partner);
     imageService.update(bo, dto.mainImage == null ? null : dto.mainImage.original);
     em.persist(bo);
+    bo.setOpeningHours(getOpeningHoursCollectionFromDTO(dto));
     if (Boolean.TRUE.equals(dto.generalAdmission)) {
       createGeneralAdmissionSightEvent(bo, partner);
     }
@@ -132,7 +137,15 @@ public class SightService extends ServiceSuperclass {
   public Sight updateForLoggedUser(SightDTO dto) {
     Sight bo = getActiveForLoggedUser(dto.id);
     DtoMapper.copy(dto, bo);
+    bo.setOpeningHours(getOpeningHoursCollectionFromDTO(dto));
     return getActiveForLoggedUser(dto.id);
+  }
+
+  private ArrayList<OpeningHours> getOpeningHoursCollectionFromDTO(SightDTO dto) {
+    return Optional.ofNullable(dto.openingHours)
+        .map(l -> l.stream().map(oh -> DtoMapper.copy(oh, new OpeningHours()))
+            .collect(Collectors.toCollection(ArrayList::new)))
+        .orElse(null);
   }
 
   public void deleteForLoggedUser(Long id) {
@@ -143,4 +156,5 @@ public class SightService extends ServiceSuperclass {
       bo.setActive(false);
     }
   }
+
 }
