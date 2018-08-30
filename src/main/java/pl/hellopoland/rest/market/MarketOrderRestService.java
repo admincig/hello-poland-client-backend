@@ -8,8 +8,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import pl.hellopoland.dto.P24PassageCartDTO;
 import pl.hellopoland.rest.dto.OrderIRO;
-import pl.hellopoland.rest.dto.OrderORO;
 import pl.hellopoland.service.api.market.OrderServiceMarketAPI;
 
 @Path("/market/orders")
@@ -22,7 +22,7 @@ public class MarketOrderRestService {
   OrderServiceMarketAPI service;
 
   @POST
-  public OrderORO create(OrderIRO iro) {
+  public P24PassageCartDTO create(OrderIRO iro) {
     return service.create(iro);
   }
 
