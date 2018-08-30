@@ -6,12 +6,12 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.SightEvent;
-import pl.hellopoland.bo.Ticket;
+import pl.hellopoland.bo.TicketDefinition;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.util.DtoMapper;
 
 @Stateless
-public class TicketService extends ServiceSuperclass {
+public class TicketDefinitionService extends ServiceSuperclass {
 
   @Inject
   PartnerService partnerService;
@@ -19,11 +19,11 @@ public class TicketService extends ServiceSuperclass {
   SightEventService sightEventService;
 
 
-  public Ticket create(TicketDefinitionDTO dto, Long sightEventId, Partner partner) {
+  public TicketDefinition create(TicketDefinitionDTO dto, Long sightEventId, Partner partner) {
     if (partner == null) {
       partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
     }
-    Ticket bo = new Ticket();
+    TicketDefinition bo = new TicketDefinition();
     DtoMapper.copy(dto, bo);
     SightEvent se = sightEventService.get(sightEventId);
     bo.setSightEvent(se);
@@ -32,11 +32,11 @@ public class TicketService extends ServiceSuperclass {
   }
 
 
-  public List<Ticket> getTicketsByExternalIds(List<Long> externalIds) {
+  public List<TicketDefinition> getTicketsByExternalIds(List<Long> externalIds) {
     if (externalIds.isEmpty()) {
       return Collections.emptyList();
     }
-    return em.createQuery("from Ticket t where t.externalId in (:ids)", Ticket.class)
+    return em.createQuery("from Ticket t where t.externalId in (:ids)", TicketDefinition.class)
         .setParameter("ids", externalIds).getResultList();
   }
 }

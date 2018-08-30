@@ -18,7 +18,7 @@ import pl.hellopoland.service.api.market.OrderServiceMarketAPI;
 @RequestScoped
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class MarketTicketRestService {
+public class MarketTicketDefinitionRestService {
 
   @Inject
   OrderServiceMarketAPI service;
