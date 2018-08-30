@@ -284,4 +284,8 @@ public class OrderService extends ServiceSuperclass {
     confirm(order);
   }
 
+  public boolean checkConfirmation(String hash) {
+    return findByHash(hash).getStatus().equals(Status.CONFIRMED);
+  }
+
 }

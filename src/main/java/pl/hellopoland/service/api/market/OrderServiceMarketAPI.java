@@ -67,4 +67,9 @@ public class OrderServiceMarketAPI {
   public void sudoAck(String hash) {
     service.sudoAck(hash);
   }
+
+  @PermitAll
+  public boolean checkConfirmation(String hash) {
+    return service.checkConfirmation(hash);
+  }
 }
