@@ -17,7 +17,7 @@ public class JsonbConfig implements ContextResolver<Jsonb> {
     if (instance == null) {
       var config =
           new javax.json.bind.JsonbConfig().withDateFormat(EXTENDED_DATE_TIME_FORMAT_STRING, null)
-              .withAdapters(new OpeningHoursAdapter(), new SightAdapter());
+              .withAdapters(new LocalTimeCustomAdapter());
       config.setProperty("jsonb.fail-on-unknown-properties", false);
       Logger.getLogger("JsonbConfig").info(config.getAsMap().toString());
       instance = JsonbBuilder.create(config);
