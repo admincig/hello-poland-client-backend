@@ -56,7 +56,15 @@ public class SightService extends ServiceSuperclass {
     bo.setPartner(partner);
     imageService.update(bo, dto.mainImage == null ? null : dto.mainImage.original);
     em.persist(bo);
-    bo.setOpeningHours(getOpeningHoursCollectionFromDTO(dto));
+
+    ArrayList<OpeningHours> oHoursList = getOpeningHoursCollectionFromDTO(dto);
+    if (oHoursList != null && !oHoursList.isEmpty()) {
+      oHoursList.stream().forEach(oh -> {
+        oh.setSight(bo);
+        em.persist(oh);
+      });
+      bo.setOpeningHours(oHoursList);
+    }
     if (Boolean.TRUE.equals(dto.generalAdmission)) {
       createGeneralAdmissionSightEvent(bo, partner);
     }
