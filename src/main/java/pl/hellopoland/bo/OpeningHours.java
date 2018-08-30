@@ -1,6 +1,7 @@
 package pl.hellopoland.bo;
 
 import java.time.LocalTime;
+import javax.json.bind.annotation.JsonbDateFormat;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
@@ -17,8 +18,10 @@ public class OpeningHours extends ModelSuperclass {
   @NotNull
   private Integer day;
   @NotNull
+  @JsonbDateFormat("HH:mm")
   private LocalTime openTime;
   @NotNull
+  @JsonbDateFormat("HH:mm")
   private LocalTime closeTime;
 
 

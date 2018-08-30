@@ -57,7 +57,7 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
   private List<SightEvent> sightEvents;
 
   @OneToMany(mappedBy = "sight")
-  private Collection<OpeningHours> openingHours;
+  private List<OpeningHours> openingHours;
 
   public Sight() {}
 
@@ -179,11 +179,11 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
     }
   }
 
-  public Collection<OpeningHours> getOpeningHours() {
+  public List<OpeningHours> getOpeningHours() {
     return openingHours;
   }
 
-  public void setOpeningHours(Collection<OpeningHours> openingHours) {
+  public void setOpeningHours(List<OpeningHours> openingHours) {
     this.openingHours = openingHours;
   }
 }
