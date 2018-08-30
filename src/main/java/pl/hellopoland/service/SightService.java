@@ -100,6 +100,16 @@ public class SightService extends ServiceSuperclass {
   public Sight update(Long id, SightDTO dto) {
     Sight bo = get(id);
     DtoMapper.copy(dto, bo);
+    oHoursService.remove(bo.getOpeningHours());
+    ArrayList<OpeningHours> oHoursList = getOpeningHoursCollectionFromDTO(dto);
+    if (oHoursList != null && !oHoursList.isEmpty()) {
+      oHoursList.stream().forEach(oh -> {
+        oh.setSight(bo);
+        em.persist(oh);
+      });
+    }
+    bo.setOpeningHours(null);
+    bo.setOpeningHours(oHoursList);
     return get(id);
   }
 
@@ -148,7 +158,7 @@ public class SightService extends ServiceSuperclass {
   public Sight updateForLoggedUser(SightDTO dto) {
     Sight bo = getActiveForLoggedUser(dto.id);
     DtoMapper.copy(dto, bo);
-
+    oHoursService.remove(bo.getOpeningHours());
     ArrayList<OpeningHours> oHoursList = getOpeningHoursCollectionFromDTO(dto);
     if (oHoursList != null && !oHoursList.isEmpty()) {
       oHoursList.stream().forEach(oh -> {
@@ -156,11 +166,7 @@ public class SightService extends ServiceSuperclass {
         em.persist(oh);
       });
     }
-
-    oHoursService.remove(bo.getOpeningHours());
-
-
-    // bo.setOpeningHours(null);
+    bo.setOpeningHours(null);
     bo.setOpeningHours(oHoursList);
     return getActiveForLoggedUser(dto.id);
   }
