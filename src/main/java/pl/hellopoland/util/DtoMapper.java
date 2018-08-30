@@ -2,20 +2,34 @@ package pl.hellopoland.util;
 
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.stream.Collectors;
 import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.Location;
 import pl.hellopoland.bo.OpeningHours;
+import pl.hellopoland.bo.Order;
+import pl.hellopoland.bo.OrderDateEntry;
+import pl.hellopoland.bo.OrderDetails;
+import pl.hellopoland.bo.OrderEntry;
+import pl.hellopoland.bo.OrderSightEntry;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.Ticket;
 import pl.hellopoland.dto.ImageDTO;
 import pl.hellopoland.dto.LocationDTO;
 import pl.hellopoland.dto.OpeningHoursDTO;
+import pl.hellopoland.dto.P24PassageCartDTO;
+import pl.hellopoland.dto.P24PassageCartEntryDTO;
+import pl.hellopoland.dto.P24PassageTransactionParamsDTO;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 
 public class DtoMapper {
+
+  private static final Properties PROPERTIES = System.getProperties();
 
   public static void copy(SightDTO source, Sight target) {
     target.setName(source.name);
@@ -213,6 +227,82 @@ public class DtoMapper {
     target.setPoolId(source.poolId);
     target.setPrice(source.price);
     target.setAvailableTicketsNumber(source.availableTicketsNumber);
+  }
+
+  public static P24PassageCartDTO getP24PassageCartDTO(Order o) {
+    var passageCart = new ArrayList<P24PassageCartEntryDTO>();
+    gatherOrderEntries(o.getEntries().stream().collect(Collectors.toList())).forEach(oe -> {
+      var cartEntry = getP24PassageCartEntryDTO(oe);
+      cartEntry.description = "Hello Poland, " + o.getHash();
+      passageCart.add(cartEntry);
+    });
+    var p24Params = getP24PassageTransactionParamsDTO(o);
+    p24Params.amount = passageCart.stream().collect(Collectors.summingInt(f -> f.targetAmount));
+    p24Params.passageCart = passageCart;
+    p24Params.sign = getP24Sign(p24Params);
+    var dto = new P24PassageCartDTO();
+    dto.isSandbox = Boolean.parseBoolean(PROPERTIES.getProperty("przelewy24.isSandbox"));
+    dto.transactionParams = p24Params;
+    return dto;
+  }
+
+  public static P24PassageCartEntryDTO getP24PassageCartEntryDTO(OrderEntry oe) {
+    var dto = new P24PassageCartEntryDTO();
+    dto.name = oe.getName();
+    dto.number = oe.getExternalId();
+    dto.price = oe.getUnitPrice();
+    dto.quantity = oe.getQuantity();
+    dto.targetAmount = oe.getUnitPrice() * oe.getQuantity();
+    dto.targetPosId = oe.getDateEntry().getSightEntry().getSightEvent().getPartner().getP24Id();
+    return dto;
+  }
+
+  public static P24PassageTransactionParamsDTO getP24PassageTransactionParamsDTO(Order o) {
+    var dto = new P24PassageTransactionParamsDTO();
+    OrderDetails od = o.getDetails();
+    dto.address = "";
+    dto.city = od.getCity();
+    dto.client = od.getFirstName() + " " + od.getLastName();
+    dto.country = od.getCountry();
+    dto.currency = "PLN";
+    dto.email = od.getEmail();
+    dto.language = "pl";
+    dto.phone = od.getPhone();
+    dto.sessionId = o.getHash();
+    dto.zip = "";
+    dto.description = "Market App, " + o.getHash();
+    dto.merchantId = Integer.valueOf(PROPERTIES.getProperty("przelewy24.merchantId"));
+    dto.urlStatus = getAckPaymentURL(o);
+    return dto;
+  }
+
+  private static String getP24Sign(P24PassageTransactionParamsDTO dto) {
+    var delimiter = "|";
+    var signBuilder = new StringBuilder();
+    signBuilder.append(dto.sessionId).append(delimiter);
+    signBuilder.append(dto.merchantId).append(delimiter);
+    signBuilder.append(dto.amount).append(delimiter);
+    signBuilder.append(dto.currency).append(delimiter);
+    signBuilder.append(PROPERTIES.getProperty("przelewy24.crc"));
+    return PaymentUtils.MD5(signBuilder.toString());
+  }
+
+  private static List<OrderEntry> gatherOrderEntries(List<OrderSightEntry> list) {
+    List<OrderEntry> returnList = new ArrayList<>();
+    for (OrderSightEntry se : list) {
+      for (OrderDateEntry de : se.getEntries()) {
+        returnList.addAll(de.getEntries());
+      }
+    }
+    return returnList;
+  }
+
+  private static String getAckPaymentURL(Order o) {
+    var url = PROPERTIES.getProperty("base.url");
+    if (!url.endsWith("/")) {
+      url = url.concat("/");
+    }
+    return url.concat("market/orders/" + o.getHash() + "/ackPayment");
   }
 
 }

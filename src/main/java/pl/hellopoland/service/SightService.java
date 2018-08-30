@@ -36,6 +36,9 @@ public class SightService extends ServiceSuperclass {
   @Inject
   private ExceptionFactory exceptionFactory;
 
+  @Inject
+  private OpeningHoursService oHoursService;
+
   public PagedEntityCollection<Sight> getList(SightPagedCollectionConfig config) {
     if (config.isCurrentPartner()) {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
@@ -61,7 +64,7 @@ public class SightService extends ServiceSuperclass {
     if (oHoursList != null && !oHoursList.isEmpty()) {
       oHoursList.stream().forEach(oh -> {
         oh.setSight(bo);
-        em.persist(oh);
+        oHoursService.persist(oh);
       });
       bo.setOpeningHours(oHoursList);
     }
@@ -145,7 +148,20 @@ public class SightService extends ServiceSuperclass {
   public Sight updateForLoggedUser(SightDTO dto) {
     Sight bo = getActiveForLoggedUser(dto.id);
     DtoMapper.copy(dto, bo);
-    bo.setOpeningHours(getOpeningHoursCollectionFromDTO(dto));
+
+    ArrayList<OpeningHours> oHoursList = getOpeningHoursCollectionFromDTO(dto);
+    if (oHoursList != null && !oHoursList.isEmpty()) {
+      oHoursList.stream().forEach(oh -> {
+        oh.setSight(bo);
+        em.persist(oh);
+      });
+    }
+
+    oHoursService.remove(bo.getOpeningHours());
+
+
+    // bo.setOpeningHours(null);
+    bo.setOpeningHours(oHoursList);
     return getActiveForLoggedUser(dto.id);
   }
 
