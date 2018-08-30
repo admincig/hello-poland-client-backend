@@ -44,10 +44,10 @@ public class MarketOrderRestService {
   }
 
   @GET
-  @Path("/confirmation/{hash}")
-  public Response checkConfirmation(@PathParam("hash") String hash) {
-    return Response
-        .ok(Json.createObjectBuilder().add("confirmed", service.checkConfirmation(hash)).build())
+  @Path("/status/{hash}")
+  public Response checkStatus(@PathParam("hash") String hash) {
+    return Response.ok(
+        Json.createObjectBuilder().add("order_status", service.checkStatus(hash).name()).build())
         .build();
   }
 
