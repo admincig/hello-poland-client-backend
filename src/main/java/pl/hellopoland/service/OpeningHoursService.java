@@ -1,6 +1,6 @@
 package pl.hellopoland.service;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -14,7 +14,7 @@ public class OpeningHoursService extends ServiceSuperclass {
     em.persist(openingHours);
   }
 
-  public void remove(List<OpeningHours> openingHours) {
+  public void remove(Collection<OpeningHours> openingHours) {
     Optional.ofNullable(openingHours).ifPresent(list -> list.stream().forEach(oh -> em.remove(oh)));
   }
 
