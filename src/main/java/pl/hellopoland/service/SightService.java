@@ -105,7 +105,7 @@ public class SightService extends ServiceSuperclass {
     if (oHoursList != null && !oHoursList.isEmpty()) {
       oHoursList.stream().forEach(oh -> {
         oh.setSight(bo);
-        em.persist(oh);
+        oHoursService.persist(oh);
       });
     }
     bo.setOpeningHours(null);
@@ -163,7 +163,7 @@ public class SightService extends ServiceSuperclass {
     if (oHoursList != null && !oHoursList.isEmpty()) {
       oHoursList.stream().forEach(oh -> {
         oh.setSight(bo);
-        em.persist(oh);
+        oHoursService.persist(oh);
       });
     }
     bo.setOpeningHours(null);

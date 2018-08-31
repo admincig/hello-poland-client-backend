@@ -93,7 +93,7 @@ public class DtoMapper {
     // dto.date = bo.getDate();
     dto.generalAdmission = bo.getGeneralAdmission();
     dto.score = bo.getScore();
-    dto.sightId = bo.getSight().getId();
+    dto.sightId = bo.getSight() != null ? bo.getSight().getId() : null;
 
     return dto;
   }
