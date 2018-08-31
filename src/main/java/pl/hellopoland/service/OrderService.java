@@ -71,6 +71,7 @@ public class OrderService extends ServiceSuperclass {
       List<Long> ticketsOfSight = entry.getValue().stream().map(TicketDefinition::getId).collect(toList());
       Map<Date, List<Triplet<Long, Date, Integer>>> inSightGroupedByDate = triplets.stream()
           .filter(trip -> ticketsOfSight.contains(trip.first)).collect(groupingBy(t -> t.second));
+
       for (Map.Entry<Date, List<Triplet<Long, Date, Integer>>> inSightOnDate : inSightGroupedByDate
           .entrySet()) {
         if (!inSightOnDate.getValue().isEmpty()) {
@@ -88,7 +89,6 @@ public class OrderService extends ServiceSuperclass {
             oe.setDateEntry(dateEntry);
             oe.setExternalDefinitionId(ticket.getExternalId());
             oe.setPoolId(ticket.getPoolId());
-
             em.persist(oe);
           }
         }
@@ -157,6 +157,7 @@ public class OrderService extends ServiceSuperclass {
     JsonObject resp = (JsonObject) hpt.book(details, orderEntries);
     Integer externalOrderId = resp.getInt("id");
     entry.getValue().forEach(ose -> ose.setExternalId(externalOrderId.longValue()));
+    em.flush();
   }
 
   private List<OrderEntry> gatherOrderEntries(List<OrderSightEntry> list) {
