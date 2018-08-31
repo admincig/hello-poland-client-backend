@@ -10,7 +10,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.rest.dto.OrderDateEntryORO;
 import pl.hellopoland.rest.dto.OrderDateEntryOnListingORO;
 import pl.hellopoland.service.api.market.OrderServiceMarketAPI;
@@ -41,9 +40,4 @@ public class MarketTicketDefinitionRestService {
     service.deleteTicketGroup(id);
   }
 
-  @GET
-  @Path("/definitions")
-  public List<TicketDefinitionDTO> ticketDefinitions() {
-    return service.getTicketDefinitionsForLoggedUser();
-  }
 }

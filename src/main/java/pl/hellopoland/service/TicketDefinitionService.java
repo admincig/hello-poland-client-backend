@@ -5,10 +5,12 @@ import java.util.List;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.Partner;
+import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.TicketDefinition;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.util.DtoMapper;
+import pl.hellopoland.util.HelloTicket;
 
 @Stateless
 public class TicketDefinitionService extends ServiceSuperclass {
@@ -39,4 +41,11 @@ public class TicketDefinitionService extends ServiceSuperclass {
     return em.createQuery("from Ticket t where t.externalId in (:ids)", TicketDefinition.class)
         .setParameter("ids", externalIds).getResultList();
   }
+
+  public List<TicketDefinitionDTO> getTicketDefinitionsForLoggedUser() {
+    Portal portal = getPortal("Hello Ticket Cloud");
+    HelloTicket hpt = new HelloTicket(portal.getUrl());
+    return hpt.getTicketDefinitions(getLoggedPartner().getHptToken());
+  }
+
 }
