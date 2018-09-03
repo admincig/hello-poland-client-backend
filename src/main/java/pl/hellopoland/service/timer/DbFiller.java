@@ -309,11 +309,13 @@ public class DbFiller extends ServiceSuperclass {
 
   private void createTicketPoolDefinitions() {
     Date todayMidnight = new Date();
+    todayMidnight.setMonth(todayMidnight.getMonth() + 1);
     todayMidnight.setSeconds(0);
     todayMidnight.setMinutes(0);
     todayMidnight.setHours(0);
 
     Date todaySecondToTommorow = new Date();
+    todaySecondToTommorow.setMonth(todayMidnight.getMonth() + 1);
     todaySecondToTommorow.setHours(23);
     todaySecondToTommorow.setMinutes(59);
     todaySecondToTommorow.setSeconds(59);

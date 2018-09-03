@@ -8,6 +8,7 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.Location;
+import pl.hellopoland.bo.OpeningHours;
 import pl.hellopoland.bo.Order;
 import pl.hellopoland.bo.OrderDateEntry;
 import pl.hellopoland.bo.OrderDetails;
@@ -18,6 +19,7 @@ import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.TicketDefinition;
 import pl.hellopoland.dto.ImageDTO;
 import pl.hellopoland.dto.LocationDTO;
+import pl.hellopoland.dto.OpeningHoursDTO;
 import pl.hellopoland.dto.P24PassageCartDTO;
 import pl.hellopoland.dto.P24PassageCartEntryDTO;
 import pl.hellopoland.dto.P24PassageTransactionParamsDTO;
@@ -37,6 +39,13 @@ public class DtoMapper {
     target.setPhone(source.phone);
 
     copyLocation(source.location, target);
+  }
+
+  public static OpeningHours copy(OpeningHoursDTO source, OpeningHours target) {
+    target.setCloseTime(source.closeTime);
+    target.setDay(source.day);
+    target.setOpenTime(source.openTime);
+    return target;
   }
 
   public static SightDTO getDTO(Sight bo) {
@@ -63,6 +72,9 @@ public class DtoMapper {
     if (bo.getImages() != null && !bo.getImages().isEmpty()) {
       dto.images = bo.getImages().stream().map(DtoMapper::getDTO).collect(toList());
     }
+    if (bo.getOpeningHours() != null && !bo.getOpeningHours().isEmpty()) {
+      dto.openingHours = bo.getOpeningHours().stream().map(DtoMapper::getDTO).collect(toList());
+    }
     return dto;
   }
 
@@ -81,7 +93,7 @@ public class DtoMapper {
     // dto.date = bo.getDate();
     dto.generalAdmission = bo.getGeneralAdmission();
     dto.score = bo.getScore();
-    dto.sightId = bo.getSight().getId();
+    dto.sightId = bo.getSight() != null ? bo.getSight().getId() : null;
 
     return dto;
   }
@@ -94,9 +106,9 @@ public class DtoMapper {
     // if (bo.getTickets() != null && !bo.getTickets().isEmpty()) {
     // dto.ticketDefinitions = bo.getTickets().stream().map(DtoMapper::getDTO).collect(toList());
     // }
-    // if (bo.getOpeningHours() != null && !bo.getOpeningHours().isEmpty()) {
-    // dto.openingHours = bo.getOpeningHours().stream().map(DtoMapper::getDTO).collect(toList());
-    // }
+    if (bo.getOpeningHours() != null && !bo.getOpeningHours().isEmpty()) {
+      dto.openingHours = bo.getOpeningHours().stream().map(DtoMapper::getDTO).collect(toList());
+    }
     // if (bo.getAgreements() != null && !bo.getAgreements().isEmpty()) {
     // dto.agreements = bo.getAgreements().stream().map(DtoMapper::getDTO).collect(toList());
     // }
@@ -111,16 +123,16 @@ public class DtoMapper {
   //
   // return dto;
   // }
-  //
-  // private static pl.hellopoland.dto.OpeningHours getDTO(OpeningHours bo) {
-  // var dto = new pl.hellopoland.dto.OpeningHours();
-  //
-  // dto.day = bo.getDay();
-  // dto.openTime = bo.getOpenTime();
-  // dto.closeTime = bo.getCloseTime();
-  //
-  // return dto;
-  // }
+
+  private static OpeningHoursDTO getDTO(OpeningHours bo) {
+    var dto = new OpeningHoursDTO();
+    dto.sight = ofNullable(bo.getSight()).map(DtoMapper::getDTO).orElse(null);
+    dto.sightEvent = ofNullable(bo.getSightEvent()).map(DtoMapper::getDTO).orElse(null);
+    dto.day = bo.getDay();
+    dto.openTime = bo.getOpenTime();
+    dto.closeTime = bo.getCloseTime();
+    return dto;
+  }
 
   public static LocationDTO getDTO(Location bo) {
     LocationDTO dto = new LocationDTO();
