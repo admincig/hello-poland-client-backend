@@ -6,7 +6,7 @@ import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
 @Entity
-public class Ticket extends ModelSuperclass {
+public class TicketDefinition extends ModelSuperclass {
 
   private static final long serialVersionUID = 574062027966116452L;
 
