@@ -17,7 +17,7 @@ public class TicketDefinitionServicePartnerAPI {
 
   @RolesAllowed("partner")
   public TicketDefinitionDTO add(TicketDefinitionDTO dto) {
-    return DtoMapper.getDTO(service.add(dto));
+    return service.add(dto);
   }
 
   @RolesAllowed("partner")
