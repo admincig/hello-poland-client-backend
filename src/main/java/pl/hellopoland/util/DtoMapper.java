@@ -141,7 +141,7 @@ public class DtoMapper {
     dto.id = bo.getId();
     dto.name = bo.getName();
     dto.price = bo.getPrice();
-    // dto.sightEventId = bo.getSightEvent().getId();
+    dto.sightEventId = bo.getSightEvent().getId();
     dto.availableTicketsNumber = bo.getAvailableTicketsNumber();
 
     return dto;

@@ -55,4 +55,13 @@ public class TicketDefinitionService extends ServiceSuperclass {
     return getTicketsByExternalIds(externalIds);
   }
 
+  public TicketDefinition add(TicketDefinitionDTO dto) {
+    var sightEventId = dto.sightEventId;
+    Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
+    Portal portal = getPortal("Hello Ticket Cloud");
+    HelloTicket hpt = new HelloTicket(portal.getUrl());
+    dto = hpt.addTicketDefinition(dto, partner.getHptToken());
+    return create(dto, sightEventId, partner);
+  }
+
 }

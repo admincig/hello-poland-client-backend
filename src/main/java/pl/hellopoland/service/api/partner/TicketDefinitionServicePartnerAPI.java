@@ -16,6 +16,11 @@ public class TicketDefinitionServicePartnerAPI {
   TicketDefinitionService service;
 
   @RolesAllowed("partner")
+  public TicketDefinitionDTO add(TicketDefinitionDTO dto) {
+    return DtoMapper.getDTO(service.add(dto));
+  }
+
+  @RolesAllowed("partner")
   public List<TicketDefinitionDTO> getTicketDefinitionsForLoggedUser() {
     return service.getTicketDefinitionsForLoggedUser().stream().map(DtoMapper::getDTO)
         .collect(Collectors.toList());
