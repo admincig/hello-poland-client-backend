@@ -38,7 +38,8 @@ public class TicketDefinitionService extends ServiceSuperclass {
     if (externalIds.isEmpty()) {
       return Collections.emptyList();
     }
-    return em.createQuery("from Ticket t where t.externalId in (:ids)", TicketDefinition.class)
+    return em
+        .createQuery("from TicketDefinition t where t.externalId in (:ids)", TicketDefinition.class)
         .setParameter("ids", externalIds).getResultList();
   }
 

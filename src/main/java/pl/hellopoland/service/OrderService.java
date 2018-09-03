@@ -54,21 +54,23 @@ public class OrderService extends ServiceSuperclass {
         triplets.stream().collect(groupingBy(t -> t.first));
     Set<Long> ticketsIds = tripletsGroupedByTicketId.keySet();
     List<TicketDefinition> tickets = em.createQuery(
-        "from Ticket t join fetch t.sightEvent s where t.id in (:ids) order by s.id asc",
+        "from TicketDefinition t join fetch t.sightEvent s where t.id in (:ids) order by s.id asc",
         TicketDefinition.class).setParameter("ids", ticketsIds).getResultList();
     if (tickets.size() < ticketsIds.size()) {
       throw new ResourceNotFoundException();
     }
     Map<SightEvent, List<TicketDefinition>> ticketsGroupedBySight =
         tickets.stream().collect(groupingBy(TicketDefinition::getSightEvent));
-    Map<Long, TicketDefinition> ticketIdToObject = tickets.stream().collect(toMap(TicketDefinition::getId, t -> t));
+    Map<Long, TicketDefinition> ticketIdToObject =
+        tickets.stream().collect(toMap(TicketDefinition::getId, t -> t));
     for (Map.Entry<SightEvent, List<TicketDefinition>> entry : ticketsGroupedBySight.entrySet()) {
       OrderSightEntry ose = new OrderSightEntry();
       ose.setOrder(o);
       ose.setSightEvent(entry.getKey());
       em.persist(ose);
 
-      List<Long> ticketsOfSight = entry.getValue().stream().map(TicketDefinition::getId).collect(toList());
+      List<Long> ticketsOfSight =
+          entry.getValue().stream().map(TicketDefinition::getId).collect(toList());
       Map<Date, List<Triplet<Long, Date, Integer>>> inSightGroupedByDate = triplets.stream()
           .filter(trip -> ticketsOfSight.contains(trip.first)).collect(groupingBy(t -> t.second));
       for (Map.Entry<Date, List<Triplet<Long, Date, Integer>>> inSightOnDate : inSightGroupedByDate
