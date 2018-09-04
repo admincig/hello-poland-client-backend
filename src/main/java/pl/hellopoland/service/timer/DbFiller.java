@@ -363,6 +363,10 @@ public class DbFiller extends ServiceSuperclass {
       cal.set(Calendar.DAY_OF_YEAR, 365);
       dto.frequencyData.endDate = cal.getTime();
     }
+    if (!cyclicalPool) {
+      startDate.setMonth(startDate.getMonth() + 1);
+      endDate.setMonth(endDate.getMonth() + 1);
+    }
     dto.startDate = startDate;
     dto.endDate = endDate;
     dto.sightEventId = sightEventId;
