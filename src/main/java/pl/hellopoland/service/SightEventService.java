@@ -23,7 +23,7 @@ import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
-import pl.hellopoland.bo.Ticket;
+import pl.hellopoland.bo.TicketDefinition;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.PushDTO;
 import pl.hellopoland.dto.SightEventDTO;
@@ -48,7 +48,7 @@ public class SightEventService extends ServiceSuperclass {
   private PartnerService partnerService;
 
   @Inject
-  private TicketService ticketService;
+  private TicketDefinitionService ticketService;
 
   @Inject
   private OpeningHoursService oHoursService;
@@ -225,7 +225,7 @@ public class SightEventService extends ServiceSuperclass {
       var pairedByIds = pairBosWithDtos(bos, sightEventDtos);
       var groupedByPartner = groupByPartner(pairedByIds);
       HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
-      Map<Long, Ticket> externalIdToTicket = null;
+      Map<Long, TicketDefinition> externalIdToTicket = null;
       for (var entry : groupedByPartner.entrySet()) {
         Partner partner = entry.getKey();
         List<Pair<Long, SightEventDTO>> sightEvents = entry.getValue();
@@ -233,10 +233,10 @@ public class SightEventService extends ServiceSuperclass {
             hpt.getTicketPoolDefinitions(partner.getHptToken());
         List<TicketDefinitionDTO> ticketDefinitions = new ArrayList<>();
         poolDefinitions.forEach(p -> ticketDefinitions.addAll(p.ticketDefinitions));
-        List<Ticket> ticketBos = ticketService.getTicketsByExternalIds(
+        List<TicketDefinition> ticketBos = ticketService.getTicketsByExternalIds(
             ticketDefinitions.stream().map(t -> t.id).collect(Collectors.toList()));
         externalIdToTicket =
-            ticketBos.stream().collect(Collectors.toMap(Ticket::getExternalId, t -> t));
+            ticketBos.stream().collect(Collectors.toMap(TicketDefinition::getExternalId, t -> t));
 
 
         var poolDefinitionsGroupedBySightEventId =

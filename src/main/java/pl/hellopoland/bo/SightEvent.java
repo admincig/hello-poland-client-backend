@@ -41,7 +41,7 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
   private Collection<ImageCollector> images;
 
   @OneToMany(mappedBy = "sightEvent")
-  private Collection<Ticket> tickets;
+  private Collection<TicketDefinition> tickets;
 
   @OneToMany(mappedBy = "sightEvent")
   private Collection<Agreement> agreements;
@@ -99,11 +99,11 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
     this.mainImage = mainImage;
   }
 
-  public Collection<Ticket> getTickets() {
+  public Collection<TicketDefinition> getTickets() {
     return tickets;
   }
 
-  public void setTickets(Collection<Ticket> tickets) {
+  public void setTickets(Collection<TicketDefinition> tickets) {
     this.tickets = tickets;
   }
 

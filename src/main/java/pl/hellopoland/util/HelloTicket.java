@@ -266,4 +266,22 @@ public class HelloTicket {
           "Cannot delete TicketPoolDefinition [id=" + id + "] from external system.");
     }
   }
+
+  public List<TicketDefinitionDTO> getTicketDefinitions(String partnerAuthToken) {
+    try {
+      final Jsonb jsonb = JsonbConfig.getInstance();
+      JsonStructure json = get("/v1/ticket-definitions", partnerAuthToken);
+      JsonArray jsonArray = (JsonArray) json;
+      List<TicketDefinitionDTO> dtos = new ArrayList<>();
+      jsonArray.forEach(p -> {
+        var dto = jsonb.fromJson(p.toString(), TicketDefinitionDTO.class);
+        dtos.add(dto);
+      });
+      return dtos;
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      return null;
+    }
+  }
+
 }
