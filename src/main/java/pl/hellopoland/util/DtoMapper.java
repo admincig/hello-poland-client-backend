@@ -261,13 +261,14 @@ public class DtoMapper {
     var dto = new P24PassageTransactionParamsDTO();
     OrderDetails od = o.getDetails();
     dto.address = "";
-    dto.city = od.getCity();
-    dto.client = od.getFirstName() + " " + od.getLastName();
-    dto.country = od.getCountry();
+    dto.city = od.getCity() != null ? od.getCity() : "";
+    dto.client = (od.getFirstName() == null && od.getLastName() == null) ? ""
+        : od.getFirstName() + " " + od.getLastName();
+    dto.country = od.getCountry() != null ? od.getCountry() : "";
     dto.currency = "PLN";
-    dto.email = od.getEmail();
+    dto.email = od.getEmail() != null ? od.getEmail() : "";
     dto.language = "pl";
-    dto.phone = od.getPhone();
+    dto.phone = od.getPhone() != null ? od.getPhone() : "";
     dto.sessionId = o.getHash();
     dto.zip = "";
     dto.description = "Market App, " + o.getHash();
