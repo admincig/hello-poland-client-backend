@@ -23,6 +23,7 @@ import pl.hellopoland.dto.booking.BookingDTO;
 import pl.hellopoland.dto.booking.TicketDTO;
 import pl.hellopoland.dto.booking.TicketOrderDTO;
 import pl.hellopoland.exception.conflict.CannotDeleteSightEventFromExternalSystemException;
+import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.JsonbConfig;
 
 public class HelloTicket {
@@ -180,7 +181,7 @@ public class HelloTicket {
     return resp;
   }
 
-  private void delete(String path, String authToken) throws IOException {
+  private int delete(String path, String authToken) throws IOException {
     URL url = new URL(this.url + path);
     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
     conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
@@ -197,6 +198,7 @@ public class HelloTicket {
     if (responseCode != NO_CONTENT.getStatusCode()) {
       throw new CannotDeleteSightEventFromExternalSystemException();
     }
+    return responseCode;
   }
 
   private JsonStructure get(String path, String authToken) throws IOException {
@@ -255,4 +257,31 @@ public class HelloTicket {
       return null;
     }
   }
+
+  public void deleteTicketPoolDefinition(String hptToken, Long id) {
+    try {
+      delete("/v1/ticket-pool-definitions/" + id, hptToken);
+    } catch (Exception e) {
+      throw new ConflictingException(
+          "Cannot delete TicketPoolDefinition [id=" + id + "] from external system.");
+    }
+  }
+
+  public List<TicketDefinitionDTO> getTicketDefinitions(String partnerAuthToken) {
+    try {
+      final Jsonb jsonb = JsonbConfig.getInstance();
+      JsonStructure json = get("/v1/ticket-definitions", partnerAuthToken);
+      JsonArray jsonArray = (JsonArray) json;
+      List<TicketDefinitionDTO> dtos = new ArrayList<>();
+      jsonArray.forEach(p -> {
+        var dto = jsonb.fromJson(p.toString(), TicketDefinitionDTO.class);
+        dtos.add(dto);
+      });
+      return dtos;
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      return null;
+    }
+  }
+
 }

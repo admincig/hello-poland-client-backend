@@ -5,7 +5,7 @@ import javax.inject.Inject;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.SightEvent;
-import pl.hellopoland.bo.Ticket;
+import pl.hellopoland.bo.TicketDefinition;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.util.HelloTicket;
 
@@ -15,7 +15,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
   @Inject
   SightEventService sightEventService;
   @Inject
-  TicketService ticketService;
+  TicketDefinitionService ticketService;
 
   public TicketPoolDefinitionDTO add(TicketPoolDefinitionDTO dto) {
     return add(dto, getLoggedPartner());
@@ -31,7 +31,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     dto.sightEventId = sightEventId;
     if (dto.ticketDefinitions != null) {
       dto.ticketDefinitions.forEach(td -> {
-        Ticket tBo = ticketService.create(td, sightEventId, partner);
+        TicketDefinition tBo = ticketService.create(td, sightEventId, partner);
         td.id = tBo.getId();
       });
     }
@@ -42,6 +42,12 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     return hpt.getTicketPoolDefinition(getLoggedPartner().getHptToken(), id);
+  }
+
+  public void delete(Long id) {
+    Portal portal = getPortal("Hello Ticket Cloud");
+    HelloTicket hpt = new HelloTicket(portal.getUrl());
+    hpt.deleteTicketPoolDefinition(getLoggedPartner().getHptToken(), id);
   }
 
 }

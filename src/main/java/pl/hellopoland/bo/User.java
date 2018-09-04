@@ -11,9 +11,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
-
-// import javax.validation.constraints.Email;
 
 @Entity
 @Table(name = "users",
@@ -31,7 +30,7 @@ public class User extends ModelSuperclass {
   }
 
   @NotNull
-  // @Email
+  @Email
   private String email;
   private String name;
   private String password;

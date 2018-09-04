@@ -26,7 +26,7 @@ import pl.hellopoland.bo.OrderEntry;
 import pl.hellopoland.bo.OrderSightEntry;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.SightEvent;
-import pl.hellopoland.bo.Ticket;
+import pl.hellopoland.bo.TicketDefinition;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
@@ -53,24 +53,27 @@ public class OrderService extends ServiceSuperclass {
     Map<Long, List<Triplet<Long, Date, Integer>>> tripletsGroupedByTicketId =
         triplets.stream().collect(groupingBy(t -> t.first));
     Set<Long> ticketsIds = tripletsGroupedByTicketId.keySet();
-    List<Ticket> tickets = em.createQuery(
-        "from Ticket t join fetch t.sightEvent s where t.id in (:ids) order by s.id asc",
-        Ticket.class).setParameter("ids", ticketsIds).getResultList();
+    List<TicketDefinition> tickets = em.createQuery(
+        "from TicketDefinition t join fetch t.sightEvent s where t.id in (:ids) order by s.id asc",
+        TicketDefinition.class).setParameter("ids", ticketsIds).getResultList();
     if (tickets.size() < ticketsIds.size()) {
       throw new ResourceNotFoundException();
     }
-    Map<SightEvent, List<Ticket>> ticketsGroupedBySight =
-        tickets.stream().collect(groupingBy(Ticket::getSightEvent));
-    Map<Long, Ticket> ticketIdToObject = tickets.stream().collect(toMap(Ticket::getId, t -> t));
-    for (Map.Entry<SightEvent, List<Ticket>> entry : ticketsGroupedBySight.entrySet()) {
+    Map<SightEvent, List<TicketDefinition>> ticketsGroupedBySight =
+        tickets.stream().collect(groupingBy(TicketDefinition::getSightEvent));
+    Map<Long, TicketDefinition> ticketIdToObject =
+        tickets.stream().collect(toMap(TicketDefinition::getId, t -> t));
+    for (Map.Entry<SightEvent, List<TicketDefinition>> entry : ticketsGroupedBySight.entrySet()) {
       OrderSightEntry ose = new OrderSightEntry();
       ose.setOrder(o);
       ose.setSightEvent(entry.getKey());
       em.persist(ose);
 
-      List<Long> ticketsOfSight = entry.getValue().stream().map(Ticket::getId).collect(toList());
+      List<Long> ticketsOfSight =
+          entry.getValue().stream().map(TicketDefinition::getId).collect(toList());
       Map<Date, List<Triplet<Long, Date, Integer>>> inSightGroupedByDate = triplets.stream()
           .filter(trip -> ticketsOfSight.contains(trip.first)).collect(groupingBy(t -> t.second));
+
       for (Map.Entry<Date, List<Triplet<Long, Date, Integer>>> inSightOnDate : inSightGroupedByDate
           .entrySet()) {
         if (!inSightOnDate.getValue().isEmpty()) {
@@ -80,7 +83,7 @@ public class OrderService extends ServiceSuperclass {
           em.persist(dateEntry);
 
           for (Triplet<Long, Date, Integer> trip : inSightOnDate.getValue()) {
-            Ticket ticket = ticketIdToObject.get(trip.first);
+            TicketDefinition ticket = ticketIdToObject.get(trip.first);
             OrderEntry oe = new OrderEntry();
             oe.setName(ticket.getName());
             oe.setQuantity(trip.third);
@@ -88,7 +91,6 @@ public class OrderService extends ServiceSuperclass {
             oe.setDateEntry(dateEntry);
             oe.setExternalDefinitionId(ticket.getExternalId());
             oe.setPoolId(ticket.getPoolId());
-
             em.persist(oe);
           }
         }
@@ -157,6 +159,7 @@ public class OrderService extends ServiceSuperclass {
     JsonObject resp = (JsonObject) hpt.book(details, orderEntries);
     Integer externalOrderId = resp.getInt("id");
     entry.getValue().forEach(ose -> ose.setExternalId(externalOrderId.longValue()));
+    em.flush();
   }
 
   private List<OrderEntry> gatherOrderEntries(List<OrderSightEntry> list) {

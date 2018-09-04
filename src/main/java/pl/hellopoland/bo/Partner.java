@@ -11,6 +11,10 @@ public class Partner extends ModelSuperclass {
 
   private static final long serialVersionUID = 6118414827783500940L;
 
+  // @NotNull
+  // @Column(nullable = false)
+  private Integer p24Id;
+
   @NotNull
   @Column(nullable = false)
   private String name;
@@ -27,6 +31,14 @@ public class Partner extends ModelSuperclass {
 
   @OneToMany(mappedBy = "partner")
   private List<SightEvent> sightEvents;
+
+  public Integer getP24Id() {
+    return p24Id;
+  }
+
+  public void setP24Id(Integer p24Id) {
+    this.p24Id = p24Id;
+  }
 
   public String getName() {
     return name;

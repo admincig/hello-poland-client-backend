@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -17,11 +18,12 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import pl.hellopoland.bo.ImageCollector;
+import pl.hellopoland.bo.OpeningHours;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
-import pl.hellopoland.bo.Ticket;
+import pl.hellopoland.bo.TicketDefinition;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.PushDTO;
 import pl.hellopoland.dto.SightEventDTO;
@@ -46,7 +48,10 @@ public class SightEventService extends ServiceSuperclass {
   private PartnerService partnerService;
 
   @Inject
-  private TicketService ticketService;
+  private TicketDefinitionService ticketService;
+
+  @Inject
+  private OpeningHoursService oHoursService;
 
   public PagedEntityCollection<SightEvent> getList(SightEventPagedCollectionConfig config) {
     if (config.isCurrentPartner()) {
@@ -102,8 +107,25 @@ public class SightEventService extends ServiceSuperclass {
 
     bo.setPartner(partner);
     em.persist(bo);
+
+    ArrayList<OpeningHours> oHoursList = getOpeningHoursCollectionFromDTO(dto);
+    if (oHoursList != null && !oHoursList.isEmpty()) {
+      oHoursList.stream().forEach(oh -> {
+        oh.setSightEvent(bo);
+        oHoursService.persist(oh);
+      });
+      bo.setOpeningHours(oHoursList);
+    }
+
     logger.log(Logger.Level.INFO, "Saved new sight event: " + bo.getName());
     return bo;
+  }
+
+  private ArrayList<OpeningHours> getOpeningHoursCollectionFromDTO(SightEventDTO dto) {
+    return Optional.ofNullable(dto.openingHours)
+        .map(l -> l.stream().map(oh -> DtoMapper.copy(oh, new OpeningHours()))
+            .collect(Collectors.toCollection(ArrayList::new)))
+        .orElse(null);
   }
 
   public SightEvent updateForLoggedUser(SightEventDTO dto) {
@@ -117,6 +139,16 @@ public class SightEventService extends ServiceSuperclass {
       dto = helloTicket.updateSightEvent(dto, partner.getHptToken());
     }
     DtoMapper.copy(dto, bo);
+    oHoursService.remove(bo.getOpeningHours());
+    ArrayList<OpeningHours> oHoursList = getOpeningHoursCollectionFromDTO(dto);
+    if (oHoursList != null && !oHoursList.isEmpty()) {
+      oHoursList.stream().forEach(oh -> {
+        oh.setSightEvent(bo);
+        oHoursService.persist(oh);
+      });
+    }
+    bo.setOpeningHours(null);
+    bo.setOpeningHours(oHoursList);
     return bo;
   }
 
@@ -193,7 +225,7 @@ public class SightEventService extends ServiceSuperclass {
       var pairedByIds = pairBosWithDtos(bos, sightEventDtos);
       var groupedByPartner = groupByPartner(pairedByIds);
       HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
-      Map<Long, Ticket> externalIdToTicket = null;
+      Map<Long, TicketDefinition> externalIdToTicket = null;
       for (var entry : groupedByPartner.entrySet()) {
         Partner partner = entry.getKey();
         List<Pair<Long, SightEventDTO>> sightEvents = entry.getValue();
@@ -201,10 +233,10 @@ public class SightEventService extends ServiceSuperclass {
             hpt.getTicketPoolDefinitions(partner.getHptToken());
         List<TicketDefinitionDTO> ticketDefinitions = new ArrayList<>();
         poolDefinitions.forEach(p -> ticketDefinitions.addAll(p.ticketDefinitions));
-        List<Ticket> ticketBos = ticketService.getTicketsByExternalIds(
+        List<TicketDefinition> ticketBos = ticketService.getTicketsByExternalIds(
             ticketDefinitions.stream().map(t -> t.id).collect(Collectors.toList()));
         externalIdToTicket =
-            ticketBos.stream().collect(Collectors.toMap(Ticket::getExternalId, t -> t));
+            ticketBos.stream().collect(Collectors.toMap(TicketDefinition::getExternalId, t -> t));
 
 
         var poolDefinitionsGroupedBySightEventId =
