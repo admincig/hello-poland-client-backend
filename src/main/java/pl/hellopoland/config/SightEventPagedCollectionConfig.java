@@ -1,8 +1,5 @@
 package pl.hellopoland.config;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 import pl.hellopoland.bo.SightEvent;
 
 public class SightEventPagedCollectionConfig extends PagedCollectionConfig<SightEvent> {
@@ -37,13 +34,6 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
 
   public void setPartner(Long partnerId) {
     addCondition("partner", partnerId, "e.sight.partner.id=:partner");
-  }
-
-  public void setDate(Date date) {
-    var startDay = LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault()).atStartOfDay();
-    var endDay = startDay.plusDays(1);
-    addCondition("startDay", startDay, "e.date >= :startDay");
-    addCondition("endDay", endDay, "e.date < :endDay");
   }
 
   public void setCity(String city) {
