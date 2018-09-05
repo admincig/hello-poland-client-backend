@@ -2,8 +2,6 @@ package pl.hellopoland.service;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.Partner;
@@ -45,14 +43,10 @@ public class TicketDefinitionService extends ServiceSuperclass {
         .setParameter("ids", externalIds).getResultList();
   }
 
-  public List<TicketDefinition> getTicketDefinitionsForLoggedUser() {
+  public List<TicketDefinitionDTO> getTicketDefinitionsForLoggedUser() {
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
-    List<Long> externalIds =
-        Optional.ofNullable(hpt.getTicketDefinitions(getLoggedPartner().getHptToken()))
-            .map(dtos -> dtos.stream().map(dto -> dto.id).collect(Collectors.toList()))
-            .orElse(Collections.emptyList());
-    return getTicketsByExternalIds(externalIds);
+    return hpt.getTicketDefinitions(getLoggedPartner().getHptToken());
   }
 
   public TicketDefinitionDTO add(TicketDefinitionDTO dto) {
