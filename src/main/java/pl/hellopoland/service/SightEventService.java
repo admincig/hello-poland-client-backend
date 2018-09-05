@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -17,6 +18,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import pl.hellopoland.bo.ImageCollector;
+import pl.hellopoland.bo.OpeningHours;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.Sight;
@@ -47,6 +49,9 @@ public class SightEventService extends ServiceSuperclass {
 
   @Inject
   private TicketDefinitionService ticketService;
+
+  @Inject
+  private OpeningHoursService oHoursService;
 
   public PagedEntityCollection<SightEvent> getList(SightEventPagedCollectionConfig config) {
     if (config.isCurrentPartner()) {
@@ -102,8 +107,25 @@ public class SightEventService extends ServiceSuperclass {
 
     bo.setPartner(partner);
     em.persist(bo);
+
+    ArrayList<OpeningHours> oHoursList = getOpeningHoursCollectionFromDTO(dto);
+    if (oHoursList != null && !oHoursList.isEmpty()) {
+      oHoursList.stream().forEach(oh -> {
+        oh.setSightEvent(bo);
+        oHoursService.persist(oh);
+      });
+      bo.setOpeningHours(oHoursList);
+    }
+
     logger.log(Logger.Level.INFO, "Saved new sight event: " + bo.getName());
     return bo;
+  }
+
+  private ArrayList<OpeningHours> getOpeningHoursCollectionFromDTO(SightEventDTO dto) {
+    return Optional.ofNullable(dto.openingHours)
+        .map(l -> l.stream().map(oh -> DtoMapper.copy(oh, new OpeningHours()))
+            .collect(Collectors.toCollection(ArrayList::new)))
+        .orElse(null);
   }
 
   public SightEvent updateForLoggedUser(SightEventDTO dto) {
@@ -117,6 +139,16 @@ public class SightEventService extends ServiceSuperclass {
       dto = helloTicket.updateSightEvent(dto, partner.getHptToken());
     }
     DtoMapper.copy(dto, bo);
+    oHoursService.remove(bo.getOpeningHours());
+    ArrayList<OpeningHours> oHoursList = getOpeningHoursCollectionFromDTO(dto);
+    if (oHoursList != null && !oHoursList.isEmpty()) {
+      oHoursList.stream().forEach(oh -> {
+        oh.setSightEvent(bo);
+        oHoursService.persist(oh);
+      });
+    }
+    bo.setOpeningHours(null);
+    bo.setOpeningHours(oHoursList);
     return bo;
   }
 

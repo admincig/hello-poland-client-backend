@@ -309,13 +309,11 @@ public class DbFiller extends ServiceSuperclass {
 
   private void createTicketPoolDefinitions() {
     Date todayMidnight = new Date();
-    todayMidnight.setMonth(todayMidnight.getMonth() + 1);
     todayMidnight.setSeconds(0);
     todayMidnight.setMinutes(0);
     todayMidnight.setHours(0);
 
     Date todaySecondToTommorow = new Date();
-    todaySecondToTommorow.setMonth(todayMidnight.getMonth() + 1);
     todaySecondToTommorow.setHours(23);
     todaySecondToTommorow.setMinutes(59);
     todaySecondToTommorow.setSeconds(59);
@@ -364,6 +362,10 @@ public class DbFiller extends ServiceSuperclass {
       Calendar cal = Calendar.getInstance();
       cal.set(Calendar.DAY_OF_YEAR, 365);
       dto.frequencyData.endDate = cal.getTime();
+    }
+    if (!cyclicalPool) {
+      startDate.setMonth(startDate.getMonth() + 1);
+      endDate.setMonth(endDate.getMonth() + 1);
     }
     dto.startDate = startDate;
     dto.endDate = endDate;

@@ -17,7 +17,7 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
   }
 
   public void setName(String name) {
-    addCondition("name", name, "e.name=:name");
+    addCondition("name", name.toLowerCase(), "lower(e.name)=:name");
   }
 
   public void onlyActive() {
@@ -35,4 +35,9 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
   public void setPartner(Long partnerId) {
     addCondition("partner", partnerId, "e.sight.partner.id=:partner");
   }
+
+  public void setCity(String city) {
+    addCondition("city", city, "e.location.city");
+  }
+
 }
