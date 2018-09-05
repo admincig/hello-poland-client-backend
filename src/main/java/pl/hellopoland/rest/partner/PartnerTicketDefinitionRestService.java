@@ -23,7 +23,7 @@ public class PartnerTicketDefinitionRestService {
 
   @POST
   public TicketDefinitionDTO add(TicketDefinitionDTO ticketDefinitionDTO) {
-    return service.add(ticketDefinitionDTO);
+    return service.add(ticketDefinitionDTO, null);
   }
 
   @GET

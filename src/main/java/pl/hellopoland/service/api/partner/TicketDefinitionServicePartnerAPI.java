@@ -4,6 +4,7 @@ import java.util.List;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import pl.hellopoland.bo.Partner;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.service.TicketDefinitionService;
 
@@ -14,8 +15,8 @@ public class TicketDefinitionServicePartnerAPI {
   TicketDefinitionService service;
 
   @RolesAllowed("partner")
-  public TicketDefinitionDTO add(TicketDefinitionDTO dto) {
-    return service.add(dto);
+  public TicketDefinitionDTO add(TicketDefinitionDTO dto, Partner partner) {
+    return service.add(dto, null);
   }
 
   @RolesAllowed("partner")

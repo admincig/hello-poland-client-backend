@@ -49,8 +49,9 @@ public class TicketDefinitionService extends ServiceSuperclass {
     return hpt.getTicketDefinitions(getLoggedPartner().getHptToken());
   }
 
-  public TicketDefinitionDTO add(TicketDefinitionDTO dto) {
-    Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
+  public TicketDefinitionDTO add(TicketDefinitionDTO dto, Partner partner) {
+    partner = partner == null ? partnerService.findByUserEmail(ctx.getCallerPrincipal().getName())
+        : partner;
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     return hpt.addTicketDefinition(dto, partner.getHptToken());
