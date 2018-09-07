@@ -27,8 +27,12 @@ public class SightEventServiceMarketAPI {
     List<SightEventDTO> dtos =
         bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
     service.fetchTicketPoolDefinitions(bos.items, dtos);
-    return new PagedCollection(
-        dtos.stream().filter(dto -> isAvailable(dto)).collect(Collectors.toList()), bos.config);
+    List<SightEventDTO> list =
+        dtos.stream().filter(dto -> isAvailable(dto)).collect(Collectors.toList());
+    for (SightEventDTO sightEventDTO : list) {
+      sightEventDTO.ticketPoolDefinitions = null;
+    }
+    return new PagedCollection(list, bos.config);
   }
 
   @PermitAll
