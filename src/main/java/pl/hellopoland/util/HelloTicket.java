@@ -16,9 +16,9 @@ import javax.json.bind.JsonbException;
 import pl.hellopoland.bo.OrderDetails;
 import pl.hellopoland.bo.OrderEntry;
 import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.dto.AvailableTicketNumberAssociationDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
-import pl.hellopoland.dto.TicketPoolDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.dto.booking.BookingDTO;
 import pl.hellopoland.dto.booking.TicketDTO;
@@ -284,12 +284,18 @@ public class HelloTicket {
     }
   }
 
-  public TicketPoolDTO checkAvailabilityOfTicketsForTicketPoolDefinition(
+  public List<AvailableTicketNumberAssociationDTO> checkAvailabilityOfTicketsForTicketPoolDefinition(
       Long ticketPoolDefinitionId) {
     try {
-      return JsonbConfig.getInstance()
-          .fromJson(get("/v1/available-ticket-number-associations/?ticketPoolDefinitionId="
-              + ticketPoolDefinitionId, AUTH_TOKEN).toString(), TicketPoolDTO.class);
+      JsonStructure json = get("/v1/available-ticket-number-associations/?ticketPoolDefinitionId="
+          + ticketPoolDefinitionId, AUTH_TOKEN);
+      JsonArray jsonArray = (JsonArray) json;
+      var dtos = new ArrayList<AvailableTicketNumberAssociationDTO>();
+      final Jsonb jsonb = JsonbConfig.getInstance();
+      jsonArray.forEach(p -> {
+        dtos.add(jsonb.fromJson(p.toString(), AvailableTicketNumberAssociationDTO.class));
+      });
+      return dtos;
     } catch (JsonbException | IOException e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
       return null;

@@ -7,8 +7,8 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
+import pl.hellopoland.dto.AvailableTicketNumberAssociationDTO;
 import pl.hellopoland.dto.SightEventDTO;
-import pl.hellopoland.dto.TicketPoolDTO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.util.DtoMapper;
@@ -37,7 +37,7 @@ public class SightEventServiceMarketAPI {
   }
 
   @PermitAll
-  public TicketPoolDTO checkAvailability(Long ticketPoolDefinitionId) {
+  public List<AvailableTicketNumberAssociationDTO> checkAvailability(Long ticketPoolDefinitionId) {
     return service.checkAvailability(ticketPoolDefinitionId);
   }
 

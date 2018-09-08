@@ -1,5 +1,6 @@
 package pl.hellopoland.rest.market;
 
+import java.util.List;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -10,8 +11,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
+import pl.hellopoland.dto.AvailableTicketNumberAssociationDTO;
 import pl.hellopoland.dto.SightEventDTO;
-import pl.hellopoland.dto.TicketPoolDTO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.api.market.SightEventServiceMarketAPI;
 
@@ -44,7 +45,7 @@ public class MarketSightEventRestService {
 
   @GET
   @Path("/checkAvailability/ticket-pool-definition/{id}")
-  public TicketPoolDTO checkAvailability(@PathParam("id") Long id) {
+  public List<AvailableTicketNumberAssociationDTO> checkAvailability(@PathParam("id") Long id) {
     return service.checkAvailability(id);
   }
 
