@@ -28,6 +28,7 @@ import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.PushDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
+import pl.hellopoland.dto.TicketPoolDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
@@ -294,6 +295,11 @@ public class SightEventService extends ServiceSuperclass {
       }
     });
     return grouped;
+  }
+
+  public TicketPoolDTO checkAvailability(Long ticketPoolDefinitionId) {
+    HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
+    return hpt.checkAvailabilityOfTicketsForTicketPoolDefinition(ticketPoolDefinitionId);
   }
 
 }
