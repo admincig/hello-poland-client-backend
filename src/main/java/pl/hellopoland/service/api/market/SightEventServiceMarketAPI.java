@@ -1,5 +1,6 @@
 package pl.hellopoland.service.api.market;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
@@ -37,8 +38,9 @@ public class SightEventServiceMarketAPI {
   }
 
   @PermitAll
-  public List<AvailableTicketNumberAssociationDTO> checkAvailability(Long ticketPoolDefinitionId) {
-    return service.checkAvailability(ticketPoolDefinitionId);
+  public List<AvailableTicketNumberAssociationDTO> checkAvailability(Long ticketPoolDefinitionId,
+      Date date) {
+    return service.checkAvailability(ticketPoolDefinitionId, date);
   }
 
 }

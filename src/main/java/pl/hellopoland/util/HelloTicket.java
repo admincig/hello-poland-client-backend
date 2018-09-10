@@ -7,6 +7,7 @@ import java.lang.System.Logger.Level;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.json.JsonArray;
@@ -285,10 +286,10 @@ public class HelloTicket {
   }
 
   public List<AvailableTicketNumberAssociationDTO> checkAvailabilityOfTicketsForTicketPoolDefinition(
-      Long ticketPoolDefinitionId) {
+      Long ticketPoolDefinitionId, Date date) {
     try {
       JsonStructure json = get("/v1/available-ticket-number-associations/?ticketPoolDefinitionId="
-          + ticketPoolDefinitionId, AUTH_TOKEN);
+          + ticketPoolDefinitionId + "&date=" + date, AUTH_TOKEN);
       JsonArray jsonArray = (JsonArray) json;
       var dtos = new ArrayList<AvailableTicketNumberAssociationDTO>();
       final Jsonb jsonb = JsonbConfig.getInstance();
