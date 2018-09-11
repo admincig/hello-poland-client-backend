@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.lang.System.Logger.Level;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -288,8 +289,11 @@ public class HelloTicket {
   public List<AvailableTicketNumberAssociationDTO> checkAvailabilityOfTicketsForTicketPoolDefinition(
       Long ticketPoolDefinitionId, Date date) {
     try {
-      JsonStructure json = get("/v1/available-ticket-number-associations/?ticketPoolDefinitionId="
-          + ticketPoolDefinitionId + "&date=" + date, AUTH_TOKEN);
+      String dateString = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmXXX").format(date);
+      JsonStructure json = get(
+          "/v1/available-ticket-number-associations/?ticketPoolDefinitionId="
+              + ticketPoolDefinitionId + "&date=" + dateString.replaceAll("\\+", "%2B"),
+          AUTH_TOKEN);
       JsonArray jsonArray = (JsonArray) json;
       var dtos = new ArrayList<AvailableTicketNumberAssociationDTO>();
       final Jsonb jsonb = JsonbConfig.getInstance();
