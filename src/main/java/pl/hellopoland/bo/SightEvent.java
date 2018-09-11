@@ -34,8 +34,8 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
   private ImageCollector mainImage;
 
   @OneToMany
-  @JoinTable(name = "sight_images",
-      joinColumns = {@JoinColumn(name = "sight_id", referencedColumnName = "id")},
+  @JoinTable(name = "sight_event_images",
+      joinColumns = {@JoinColumn(name = "sight_event_id", referencedColumnName = "id")},
       inverseJoinColumns = {
           @JoinColumn(name = "imagecollector_id", referencedColumnName = "id", unique = true)})
   private Collection<ImageCollector> images;
