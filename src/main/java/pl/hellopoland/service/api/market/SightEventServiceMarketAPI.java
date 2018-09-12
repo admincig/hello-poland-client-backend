@@ -12,6 +12,7 @@ import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.SightEventService;
+import pl.hellopoland.service.TicketPoolDefinitionService;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.PagedEntityCollection;
 
@@ -20,6 +21,9 @@ public class SightEventServiceMarketAPI {
 
   @Inject
   SightEventService service;
+
+  @Inject
+  TicketPoolDefinitionService tpdService;
 
   @PermitAll
   public PagedCollection getList(SightEventPagedCollectionConfig config) {
