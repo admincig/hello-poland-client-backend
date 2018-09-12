@@ -46,10 +46,19 @@ public class SightEventServiceMarketAPI {
   private boolean isAvailable(SightEventDTO dto) {
     List<TicketPoolDefinitionDTO> tpds = dto.ticketPoolDefinitions;
     if (tpds != null && !tpds.isEmpty()) {
-      return !tpds.stream().filter(tpd -> tpd.deleted == false)
-          .filter(tpd -> new Date().before(tpd.startDate)).collect(Collectors.toList()).isEmpty();
+      return !tpds.stream().filter(tpd -> tpd.deleted == false).filter(tpd -> isDateOK(tpd))
+          .collect(Collectors.toList()).isEmpty();
     }
     return false;
+  }
+
+  private boolean isDateOK(TicketPoolDefinitionDTO tpd) {
+    var now = new Date();
+    var tpdStartDate = tpd.startDate;
+    if (tpd.isCyclic) {
+      return now.before(tpdStartDate) || now.before(tpd.frequencyData.endDate);
+    }
+    return now.before(tpdStartDate);
   }
 
 }
