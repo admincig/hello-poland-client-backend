@@ -29,6 +29,7 @@ import pl.hellopoland.security.password.PasswordEncoder;
 import pl.hellopoland.service.ImageService;
 import pl.hellopoland.service.ServiceSuperclass;
 import pl.hellopoland.service.SightEventService;
+import pl.hellopoland.service.TicketDefinitionService;
 import pl.hellopoland.service.TicketPoolDefinitionService;
 import pl.hellopoland.util.DtoMapper;
 
@@ -45,6 +46,9 @@ public class DbFiller extends ServiceSuperclass {
 
   @Inject
   TicketPoolDefinitionService tpdService;
+
+  @Inject
+  TicketDefinitionService tdService;
 
   @Inject
   private PasswordEncoder passwordEncoder;
@@ -320,31 +324,35 @@ public class DbFiller extends ServiceSuperclass {
 
     createTicketPoolDefinition("Wieczorne zwiedzanie Afrykarium", 25, false, todayMidnight,
         todaySecondToTommorow, afrEvent.getId(), userHelloPoland.getPartner(),
-        createTicketDefinition("Normalny", 25, 7900));
+        createTicketDefinition("Normalny", 25, 7900, userHelloPoland.getPartner()));
     createTicketPoolDefinition("Park Szczytnicki", 15, false, todayMidnight, todaySecondToTommorow,
         parkSzczEvent.getId(), userHelloPoland.getPartner(),
-        createTicketDefinition("Normalny", 15, 2900));
+        createTicketDefinition("Normalny", 15, 2900, userHelloPoland.getPartner()));
     createTicketPoolDefinition("Zwiedzanie ZOO", null, true, todayMidnight, todaySecondToTommorow,
-        zwZooEvent.getId(), userZoo.getPartner(), createTicketDefinition("Normalny", null, 4500),
-        createTicketDefinition("Ulgowy", null, 3500), createTicketDefinition("Dzieci", null, 0),
-        createTicketDefinition("Studencki", null, 4000),
-        createTicketDefinition("Rodzinny (dwoje dorosłych i max 3 dzieci)", null, 15000));
+        zwZooEvent.getId(), userZoo.getPartner(),
+        createTicketDefinition("Normalny", null, 4500, userZoo.getPartner()),
+        createTicketDefinition("Ulgowy", null, 3500, userZoo.getPartner()),
+        createTicketDefinition("Dzieci", null, 0, userZoo.getPartner()),
+        createTicketDefinition("Studencki", null, 4000, userZoo.getPartner()),
+        createTicketDefinition("Rodzinny (dwoje dorosłych i max 3 dzieci)", null, 15000,
+            userZoo.getPartner()));
     createTicketPoolDefinition("Zwiedzanie stadionu", null, true, todayMidnight,
         todaySecondToTommorow, zwStadEvent.getId(), userStadionGd.getPartner(),
-        createTicketDefinition("Normalny", null, 1700),
-        createTicketDefinition("Ulgowy", null, 1200),
-        createTicketDefinition("Rodzinny (2+2)", null, 3600));
+        createTicketDefinition("Normalny", null, 1700, userStadionGd.getPartner()),
+        createTicketDefinition("Ulgowy", null, 1200, userStadionGd.getPartner()),
+        createTicketDefinition("Rodzinny (2+2)", null, 3600, userStadionGd.getPartner()));
     Date match = new Date();
     match.setHours(19);
     match.setMinutes(00);
     match.setSeconds(00);
     createTicketPoolDefinition("Mecz towarzyski Polska-Czechy", 50, false, match, match,
         meczPCEvent.getId(), userStadionGd.getPartner(),
-        createTicketDefinition("Normalny", 40, 12500), createTicketDefinition("VIP", 10, 24000));
+        createTicketDefinition("Normalny", 40, 12500, userStadionGd.getPartner()),
+        createTicketDefinition("VIP", 10, 24000, userStadionGd.getPartner()));
     createTicketPoolDefinition("Zwiedzanie Kolejkowa", null, true, todayMidnight,
         todaySecondToTommorow, kolEvent.getId(), userKolejkowo.getPartner(),
-        createTicketDefinition("Normalny", null, 1900),
-        createTicketDefinition("Ulgowy", null, 1500));
+        createTicketDefinition("Normalny", null, 1900, userKolejkowo.getPartner()),
+        createTicketDefinition("Ulgowy", null, 1500, userKolejkowo.getPartner()));
   }
 
   private void createTicketPoolDefinition(String name, Integer availableTicketsNumber,
@@ -375,12 +383,12 @@ public class DbFiller extends ServiceSuperclass {
   }
 
   private TicketDefinitionDTO createTicketDefinition(String name, Integer availableTicketsNumber,
-      int price) {
+      int price, Partner partner) {
     var dto = new TicketDefinitionDTO();
     dto.name = name;
     dto.availableTicketsNumber = availableTicketsNumber;
     dto.price = price;
-    return dto;
+    return tdService.add(dto, partner);
   }
 
 }

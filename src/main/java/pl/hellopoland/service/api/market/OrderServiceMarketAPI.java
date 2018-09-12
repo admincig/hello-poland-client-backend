@@ -10,6 +10,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.Order;
+import pl.hellopoland.bo.Order.Status;
 import pl.hellopoland.bo.OrderDateEntry;
 import pl.hellopoland.dto.P24PassageCartDTO;
 import pl.hellopoland.rest.dto.OrderDateEntryORO;
@@ -66,5 +67,10 @@ public class OrderServiceMarketAPI {
   @PermitAll
   public void sudoAck(String hash) {
     service.sudoAck(hash);
+  }
+
+  @PermitAll
+  public Status checkStatus(String hash) {
+    return service.getStatus(hash);
   }
 }
