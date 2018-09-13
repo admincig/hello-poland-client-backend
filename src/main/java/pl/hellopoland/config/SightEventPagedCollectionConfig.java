@@ -13,7 +13,11 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
 
   public void setSearchQuery(String searchQuery) {
     addCondition("searchQuery", "%" + searchQuery.toLowerCase() + "%",
-        "(lower(e.name) like :searchQuery) or (lower(e.lead) like :searchQuery) or (lower(e.location.city) like :searchQuery)");
+        "(lower(e.name) like :searchQuery)" + " or (unaccent(lower(e.name)) like :searchQuery)"
+            + " or (lower(e.lead) like :searchQuery)"
+            + " or (unaccent(lower(e.lead)) like :searchQuery)"
+            + " or (lower(e.location.city) like :searchQuery)"
+            + " or (unaccent(lower(e.location.city)) like :searchQuery)");
   }
 
   public void setName(String name) {
