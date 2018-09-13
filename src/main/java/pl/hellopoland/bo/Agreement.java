@@ -13,6 +13,7 @@ public class Agreement extends ModelSuperclass {
   private String linkText = "regulamin";
   private String linkUrl;
   private String text = "Akceptuję {link} obiektu";
+  private boolean obligatory;
 
 
   public SightEvent getSightEvent() {
@@ -47,5 +48,12 @@ public class Agreement extends ModelSuperclass {
     this.text = text;
   }
 
+  public boolean isObligatory() {
+    return obligatory;
+  }
+
+  public void setObligatory(boolean obligatory) {
+    this.obligatory = obligatory;
+  }
 
 }
