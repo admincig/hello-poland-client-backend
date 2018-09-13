@@ -286,14 +286,12 @@ public class HelloTicket {
     }
   }
 
-  public List<AvailableTicketNumberAssociationDTO> checkAvailabilityOfTicketsForTicketPoolDefinition(
-      Long ticketPoolDefinitionId, Date date) {
+  public List<AvailableTicketNumberAssociationDTO> checkAvailabilityOfTicketsForSightEvent(
+      SightEvent sightEvent, Date date) {
     try {
       String dateString = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmXXX").format(date);
-      JsonStructure json = get(
-          "/v1/available-ticket-number-associations/?ticketPoolDefinitionId="
-              + ticketPoolDefinitionId + "&date=" + dateString.replaceAll("\\+", "%2B"),
-          AUTH_TOKEN);
+      JsonStructure json = get("/v1/available-ticket-number-associations/?sightEventId="
+          + sightEvent.getHptId() + "&date=" + dateString.replaceAll("\\+", "%2B"), AUTH_TOKEN);
       JsonArray jsonArray = (JsonArray) json;
       var dtos = new ArrayList<AvailableTicketNumberAssociationDTO>();
       final Jsonb jsonb = JsonbConfig.getInstance();
