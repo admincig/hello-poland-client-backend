@@ -8,6 +8,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import pl.hellopoland.config.SightPagedCollectionConfig;
 import pl.hellopoland.dto.FiltersContainerDTO;
@@ -29,9 +30,10 @@ public class MarketSightRestService {
   private FilterMarketAPI filterService;
 
   @GET
-  public PagedCollection get() {
+  public PagedCollection get(@QueryParam("city") String city) {
     var config = new SightPagedCollectionConfig();
     config.onlyActive();
+    config.setCity(city);
     return service.getList(config);
   }
 

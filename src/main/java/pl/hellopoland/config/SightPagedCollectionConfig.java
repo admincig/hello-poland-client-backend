@@ -12,12 +12,16 @@ public class SightPagedCollectionConfig extends PagedCollectionConfig<Sight> {
   }
 
   public void setSearchQuery(String searchQuery) {
-    addCondition("searchQuery", "%" + searchQuery.toLowerCase() + "%",
-        "lower(e.name) like :searchQuery");
+    if (searchQuery != null) {
+      addCondition("searchQuery", "%" + searchQuery.toLowerCase() + "%",
+          "lower(e.name) like :searchQuery");
+    }
   }
 
   public void setName(String name) {
-    addCondition("name", name.toLowerCase(), "lower(e.name)=:name");
+    if (name != null) {
+      addCondition("name", name.toLowerCase(), "lower(e.name)=:name");
+    }
   }
 
   public void setDescription(String description) {
@@ -41,7 +45,9 @@ public class SightPagedCollectionConfig extends PagedCollectionConfig<Sight> {
   }
 
   public void setCity(String city) {
-    addCondition("city", city, "e.location.city");
+    if (city != null) {
+      addCondition("city", city.toLowerCase(), "lower(e.location.city)=:city");
+    }
   }
 
 }
