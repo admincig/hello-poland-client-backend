@@ -18,6 +18,7 @@ import pl.hellopoland.bo.OrderSightEntry;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.TicketDefinition;
+import pl.hellopoland.dto.AgreementDTO;
 import pl.hellopoland.dto.ImageDTO;
 import pl.hellopoland.dto.LocationDTO;
 import pl.hellopoland.dto.OpeningHoursDTO;
@@ -312,6 +313,15 @@ public class DtoMapper {
       url = url.concat("/");
     }
     return url.concat("market/orders/" + o.getHash() + "/ackPayment");
+  }
+
+  public static AgreementDTO getDTO(Agreement bo) {
+    var dto = new AgreementDTO();
+    dto.id = bo.getId();
+    dto.linkUrl = bo.getLinkUrl();
+    dto.obligatory = bo.isObligatory();
+    dto.text = bo.getText();
+    return dto;
   }
 
 }

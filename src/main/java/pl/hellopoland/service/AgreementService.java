@@ -3,6 +3,7 @@ package pl.hellopoland.service;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import pl.hellopoland.bo.Agreement;
+import pl.hellopoland.dto.AgreementDTO;
 import pl.hellopoland.util.DtoMapper;
 
 @LocalBean
@@ -20,6 +21,12 @@ public class AgreementService extends ServiceSuperclass {
     DtoMapper.copy(dto, bo);
     em.persist(bo);
     return bo;
+  }
+
+  public void deleteForLoggedUser(Long id) {
+    // em.remove(entity);
+    // ("from Agreement where id=:id and partner=:partner", Agreement.class)
+    // .setParameter("id", id).setParameter("partner", getLoggedPartner());
   }
 
 }

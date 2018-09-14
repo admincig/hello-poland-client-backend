@@ -3,7 +3,7 @@ package pl.hellopoland.service.api.partner;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import pl.hellopoland.rest.partner.AgreementDTO;
+import pl.hellopoland.dto.AgreementDTO;
 import pl.hellopoland.service.AgreementService;
 import pl.hellopoland.util.DtoMapper;
 
@@ -22,4 +22,10 @@ public class AgreementServicePartnerAPI {
   public AgreementDTO create(AgreementDTO dto) {
     return DtoMapper.getDTO(service.create(dto));
   }
+
+  @RolesAllowed("partner")
+  public void delete(Long id) {
+    service.deleteForLoggedUser(id);
+  }
+
 }
