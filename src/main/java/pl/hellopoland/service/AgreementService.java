@@ -1,0 +1,25 @@
+package pl.hellopoland.service;
+
+import javax.ejb.LocalBean;
+import javax.ejb.Stateless;
+import pl.hellopoland.bo.Agreement;
+import pl.hellopoland.util.DtoMapper;
+
+@LocalBean
+@Stateless
+public class AgreementService extends ServiceSuperclass {
+
+  public Agreement getForLoggedUser(Long id) {
+    return em.createQuery("from Agreement where id=:id and partner=:partner", Agreement.class)
+        .setParameter("id", id).setParameter("partner", getLoggedPartner()).getSingleResult();
+  }
+
+  public Agreement create(AgreementDTO dto) {
+    Agreement bo = new Agreement();
+    bo.setPartner(getLoggedPartner());
+    DtoMapper.copy(dto, bo);
+    em.persist(bo);
+    return bo;
+  }
+
+}

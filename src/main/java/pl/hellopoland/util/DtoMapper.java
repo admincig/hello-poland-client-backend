@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
+import pl.hellopoland.bo.Agreement;
 import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.Location;
 import pl.hellopoland.bo.OpeningHours;
@@ -45,6 +46,13 @@ public class DtoMapper {
     target.setCloseTime(source.closeTime);
     target.setDay(source.day);
     target.setOpenTime(source.openTime);
+    return target;
+  }
+
+  public static Agreement copy(AgreementDTO source, Agreement target) {
+    target.setLinkUrl(source.linkUrl);
+    target.setObligatory(source.obligatory);
+    target.setText(source.text);
     return target;
   }
 

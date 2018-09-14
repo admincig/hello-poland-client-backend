@@ -2,19 +2,29 @@ package pl.hellopoland.bo;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.NotBlank;
 
 @Entity
 public class Agreement extends ModelSuperclass {
 
   private static final long serialVersionUID = -3524491821261836536L;
 
-  @ManyToOne(optional = false)
-  private SightEvent sightEvent;
-  private String linkText = "regulamin";
-  private String linkUrl;
-  private String text = "Akceptuję {link} obiektu";
-  private boolean obligatory;
+  @ManyToOne
+  private Sight sight;
 
+  @ManyToOne
+  private SightEvent sightEvent;
+
+  @ManyToOne(optional = false)
+  private Partner partner;
+
+  @NotBlank
+  private String linkUrl;
+
+  @NotBlank
+  private String text;
+
+  private boolean obligatory;
 
   public SightEvent getSightEvent() {
     return sightEvent;
@@ -22,14 +32,6 @@ public class Agreement extends ModelSuperclass {
 
   public void setSightEvent(SightEvent sightEvent) {
     this.sightEvent = sightEvent;
-  }
-
-  public String getLinkText() {
-    return linkText;
-  }
-
-  public void setLinkText(String linkText) {
-    this.linkText = linkText;
   }
 
   public String getLinkUrl() {
@@ -54,6 +56,22 @@ public class Agreement extends ModelSuperclass {
 
   public void setObligatory(boolean obligatory) {
     this.obligatory = obligatory;
+  }
+
+  public Sight getSight() {
+    return sight;
+  }
+
+  public void setSight(Sight sight) {
+    this.sight = sight;
+  }
+
+  public Partner getPartner() {
+    return partner;
+  }
+
+  public void setPartner(Partner partner) {
+    this.partner = partner;
   }
 
 }
