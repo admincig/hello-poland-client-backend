@@ -29,8 +29,11 @@ public class MarketSightEventRestService {
   SightEventServiceMarketAPI service;
 
   @GET
-  public PagedCollection getList() {
-    return search(new SightEventPagedCollectionConfig());
+  public PagedCollection getList(@QueryParam("city") String city) {
+    var config = new SightEventPagedCollectionConfig();
+    config.onlyActive();
+    config.setCity(city);
+    return service.getList(config);
   }
 
   @POST

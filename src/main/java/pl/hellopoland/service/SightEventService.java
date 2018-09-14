@@ -216,6 +216,7 @@ public class SightEventService extends ServiceSuperclass {
 
   public void deleteForLoggedUser(Long id) {
     getForLoggedUser(id).setActive(false);
+    delete(id);
   }
 
 
