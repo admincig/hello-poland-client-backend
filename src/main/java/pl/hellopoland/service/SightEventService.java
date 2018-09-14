@@ -25,6 +25,7 @@ import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.TicketDefinition;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
+import pl.hellopoland.dto.AvailableTicketNumberAssociationDTO;
 import pl.hellopoland.dto.PushDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
@@ -295,6 +296,11 @@ public class SightEventService extends ServiceSuperclass {
       }
     });
     return grouped;
+  }
+
+  public List<AvailableTicketNumberAssociationDTO> checkAvailability(Long sightEventId, Date date) {
+    HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
+    return hpt.checkAvailabilityOfTicketsForSightEvent(get(sightEventId), date);
   }
 
 }
