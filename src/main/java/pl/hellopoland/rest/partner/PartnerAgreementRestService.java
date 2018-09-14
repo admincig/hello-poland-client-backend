@@ -25,14 +25,14 @@ public class PartnerAgreementRestService {
   private AgreementServicePartnerAPI service;
 
   @GET
-  public List<AgreementDTO> me() {
-    return service.me();
+  public List<AgreementDTO> getForPartner() {
+    return service.getForPartner();
   }
 
   @GET
   @Path("/{id}")
   public AgreementDTO get(@PathParam("id") Long id) {
-    return service.getForLoggedUser(id);
+    return service.getForPartner(id);
   }
 
   @POST
@@ -42,11 +42,11 @@ public class PartnerAgreementRestService {
 
   @DELETE
   public void delete(@PathParam("id") Long id) {
-    return service.delete(id);
+    service.delete(id);
   }
 
   @PUT
-  public void update(AgreementDTO dto) {
+  public AgreementDTO update(AgreementDTO dto) {
     return service.update(dto);
   }
 
