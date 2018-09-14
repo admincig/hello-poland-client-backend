@@ -4,7 +4,6 @@ import java.util.List;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import pl.hellopoland.bo.Agreement;
-import pl.hellopoland.bo.Sight;
 import pl.hellopoland.dto.AgreementDTO;
 import pl.hellopoland.util.DtoMapper;
 
@@ -34,9 +33,10 @@ public class AgreementService extends ServiceSuperclass {
     em.remove(getForLoggedUser(id));
   }
 
-  public Sight update(AgreementDTO dto) {
-    // TODO Auto-generated method stub
-    return null;
+  public Agreement updateForLoggedUser(AgreementDTO dto) {
+    var bo = getForLoggedUser(dto.id);
+    DtoMapper.copy(dto, bo);
+    return getForLoggedUser(dto.id);
   }
 
 }

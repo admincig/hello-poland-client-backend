@@ -37,7 +37,7 @@ public class AgreementServicePartnerAPI {
   }
 
   public AgreementDTO update(AgreementDTO dto) {
-    return DtoMapper.getDTO(service.update(dto));
+    return DtoMapper.getDTO(service.updateForLoggedUser(dto));
   }
 
 }
