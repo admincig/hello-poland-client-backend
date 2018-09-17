@@ -286,19 +286,14 @@ public class HelloTicket {
     }
   }
 
-  public List<AvailableTicketNumberAssociationDTO> checkAvailabilityOfTicketsForSightEvent(
+  public AvailableTicketNumberAssociationDTO checkAvailabilityOfTicketsForSightEvent(
       SightEvent sightEvent, Date date) {
     try {
       String dateString = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmXXX").format(date);
-      JsonStructure json = get("/v1/available-ticket-number-associations/?sightEventId="
-          + sightEvent.getHptId() + "&date=" + dateString.replaceAll("\\+", "%2B"), AUTH_TOKEN);
-      JsonArray jsonArray = (JsonArray) json;
-      var dtos = new ArrayList<AvailableTicketNumberAssociationDTO>();
-      final Jsonb jsonb = JsonbConfig.getInstance();
-      jsonArray.forEach(p -> {
-        dtos.add(jsonb.fromJson(p.toString(), AvailableTicketNumberAssociationDTO.class));
-      });
-      return dtos;
+      return JsonbConfig.getInstance().fromJson(
+          get("/v1/available-ticket-number-associations/?sightEventId=" + sightEvent.getHptId()
+              + "&date=" + dateString.replaceAll("\\+", "%2B"), AUTH_TOKEN).toString(),
+          AvailableTicketNumberAssociationDTO.class);
     } catch (JsonbException | IOException e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
       return null;

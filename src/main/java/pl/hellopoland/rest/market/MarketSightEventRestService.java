@@ -1,7 +1,6 @@
 package pl.hellopoland.rest.market;
 
 import java.util.Date;
-import java.util.List;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -62,7 +61,7 @@ public class MarketSightEventRestService {
 
   @GET
   @Path("/{id}/available-tickets")
-  public List<AvailableTicketNumberAssociationDTO> checkAvailability(@PathParam("id") Long id,
+  public AvailableTicketNumberAssociationDTO checkAvailability(@PathParam("id") Long id,
       @QueryParam("date") @DateTimeFormat final Date date) {
     return service.checkAvailability(id, date);
   }

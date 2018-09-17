@@ -300,7 +300,7 @@ public class SightEventService extends ServiceSuperclass {
     return grouped;
   }
 
-  public List<AvailableTicketNumberAssociationDTO> checkAvailability(Long sightEventId, Date date) {
+  public AvailableTicketNumberAssociationDTO checkAvailability(Long sightEventId, Date date) {
     HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
     return hpt.checkAvailabilityOfTicketsForSightEvent(get(sightEventId), date);
   }

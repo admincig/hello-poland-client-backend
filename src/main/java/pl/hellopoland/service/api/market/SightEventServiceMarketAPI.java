@@ -67,7 +67,7 @@ public class SightEventServiceMarketAPI {
   }
 
   @PermitAll
-  public List<AvailableTicketNumberAssociationDTO> checkAvailability(Long sightEventId, Date date) {
+  public AvailableTicketNumberAssociationDTO checkAvailability(Long sightEventId, Date date) {
     return service.checkAvailability(sightEventId, date);
   }
 
