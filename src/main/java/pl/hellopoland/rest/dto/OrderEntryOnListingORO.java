@@ -1,6 +1,6 @@
 package pl.hellopoland.rest.dto;
 
-import pl.hellopoland.order.OrderEntry;
+import pl.hellopoland.bo.OrderEntry;
 
 public class OrderEntryOnListingORO {
 

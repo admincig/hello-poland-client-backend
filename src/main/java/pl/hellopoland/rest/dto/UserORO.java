@@ -1,6 +1,6 @@
 package pl.hellopoland.rest.dto;
 
-import pl.hellopoland.user.User;
+import pl.hellopoland.bo.User;
 import pl.hellopoland.util.NameAndAddressSplitter;
 
 public class UserORO {
