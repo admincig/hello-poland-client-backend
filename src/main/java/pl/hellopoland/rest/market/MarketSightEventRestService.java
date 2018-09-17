@@ -15,8 +15,10 @@ import javax.ws.rs.core.MediaType;
 import pl.hellopoland.annotation.DateTimeFormat;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.AvailableTicketNumberAssociationDTO;
+import pl.hellopoland.dto.FiltersContainerDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.rest.dto.PagedCollection;
+import pl.hellopoland.service.api.market.FilterMarketAPI;
 import pl.hellopoland.service.api.market.SightEventServiceMarketAPI;
 
 @Path("/market/sight-events")
@@ -27,6 +29,9 @@ public class MarketSightEventRestService {
 
   @Inject
   SightEventServiceMarketAPI service;
+
+  @Inject
+  private FilterMarketAPI filterService;
 
   @GET
   public PagedCollection getList(@QueryParam("city") String city) {
@@ -47,6 +52,12 @@ public class MarketSightEventRestService {
   @Path("/{id}")
   public SightEventDTO get(@PathParam("id") Long id) {
     return service.get(id);
+  }
+
+  @GET
+  @Path("/filters")
+  public FiltersContainerDTO getFilters() {
+    return filterService.getForSightEvents();
   }
 
   @GET
