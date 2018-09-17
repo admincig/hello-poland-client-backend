@@ -219,7 +219,6 @@ public class SightEventService extends ServiceSuperclass {
     delete(id);
   }
 
-
   public void fetchTicketPoolDefinitions(Collection<SightEvent> bos,
       List<SightEventDTO> sightEventDtos) {
 
@@ -230,19 +229,22 @@ public class SightEventService extends ServiceSuperclass {
       Map<Long, TicketDefinition> externalIdToTicket = null;
       for (var entry : groupedByPartner.entrySet()) {
         Partner partner = entry.getKey();
-        List<Pair<Long, SightEventDTO>> sightEvents = entry.getValue();
         List<TicketPoolDefinitionDTO> poolDefinitions =
             hpt.getTicketPoolDefinitions(partner.getHptToken());
         List<TicketDefinitionDTO> ticketDefinitions = new ArrayList<>();
         poolDefinitions.forEach(p -> ticketDefinitions.addAll(p.ticketDefinitions));
         List<TicketDefinition> ticketBos = ticketService.getTicketsByExternalIds(
             ticketDefinitions.stream().map(t -> t.id).collect(Collectors.toList()));
-        externalIdToTicket =
-            ticketBos.stream().collect(Collectors.toMap(TicketDefinition::getExternalId, t -> t));
-
-
+        if (externalIdToTicket == null) {
+          externalIdToTicket =
+              ticketBos.stream().collect(Collectors.toMap(TicketDefinition::getExternalId, t -> t));
+        } else {
+          externalIdToTicket.putAll(ticketBos.stream()
+              .collect(Collectors.toMap(TicketDefinition::getExternalId, t -> t)));
+        }
         var poolDefinitionsGroupedBySightEventId =
             poolDefinitions.stream().collect(Collectors.groupingBy(pool -> pool.sightEventId));
+        List<Pair<Long, SightEventDTO>> sightEvents = entry.getValue();
         for (var pair : sightEvents) {
           pair.getRight().ticketPoolDefinitions =
               poolDefinitionsGroupedBySightEventId.get(pair.getLeft());
