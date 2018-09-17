@@ -1,5 +1,6 @@
 package pl.hellopoland.service.api.market;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
@@ -7,6 +8,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
+import pl.hellopoland.dto.AvailableTicketNumberAssociationDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.SightEventService;
@@ -33,6 +35,11 @@ public class SightEventServiceMarketAPI {
     var dto = DtoMapper.getFullDTO(bo);
     service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto));
     return dto;
+  }
+
+  @PermitAll
+  public List<AvailableTicketNumberAssociationDTO> checkAvailability(Long sightEventId, Date date) {
+    return service.checkAvailability(sightEventId, date);
   }
 
 }
