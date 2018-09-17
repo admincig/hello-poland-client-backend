@@ -54,7 +54,9 @@ public class OrderService extends ServiceSuperclass {
         triplets.stream().collect(groupingBy(t -> t.first));
     Set<Long> ticketsIds = tripletsGroupedByTicketId.keySet();
     List<TicketDefinition> tickets = em.createQuery(
-        "from TicketDefinition t join fetch t.sightEvent s where t.id in (:ids) order by s.id asc",
+        "from TicketDefinition t join fetch t.sightEvent s where t.externalId in (:ids) order by s.id asc",
+        // "from TicketDefinition t join fetch t.sightEvent s where t.id in (:ids) order by s.id
+        // asc",
         TicketDefinition.class).setParameter("ids", ticketsIds).getResultList();
     if (tickets.size() < ticketsIds.size()) {
       throw new ResourceNotFoundException();
