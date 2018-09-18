@@ -328,19 +328,18 @@ public class DbFiller extends ServiceSuperclass {
     createTicketPoolDefinition("Park Szczytnicki", 15, false, todayMidnight, todaySecondToTommorow,
         parkSzczEvent.getId(), userHelloPoland.getPartner(),
         createTicketDefinition("Normalny", 15, 2900, userHelloPoland.getPartner()));
-    createTicketPoolDefinition("Zwiedzanie ZOO", null, true, todayMidnight, todaySecondToTommorow,
+    createTicketPoolDefinition("Zwiedzanie ZOO", -1, true, todayMidnight, todaySecondToTommorow,
         zwZooEvent.getId(), userZoo.getPartner(),
-        createTicketDefinition("Normalny", null, 4500, userZoo.getPartner()),
-        createTicketDefinition("Ulgowy", null, 3500, userZoo.getPartner()),
-        createTicketDefinition("Dzieci", null, 0, userZoo.getPartner()),
-        createTicketDefinition("Studencki", null, 4000, userZoo.getPartner()),
-        createTicketDefinition("Rodzinny (dwoje dorosłych i max 3 dzieci)", null, 15000,
-            userZoo.getPartner()));
-    createTicketPoolDefinition("Zwiedzanie stadionu", null, true, todayMidnight,
+        createTicketDefinition("Normalny", -1, 4500, userZoo.getPartner()),
+        createTicketDefinition("Ulgowy", -1, 3500, userZoo.getPartner()),
+        createTicketDefinition("Dzieci", -1, 0, userZoo.getPartner()),
+        createTicketDefinition("Studencki", -1, 4000, userZoo.getPartner()), createTicketDefinition(
+            "Rodzinny (dwoje dorosłych i max 3 dzieci)", -1, 15000, userZoo.getPartner()));
+    createTicketPoolDefinition("Zwiedzanie stadionu", -1, true, todayMidnight,
         todaySecondToTommorow, zwStadEvent.getId(), userStadionGd.getPartner(),
-        createTicketDefinition("Normalny", null, 1700, userStadionGd.getPartner()),
-        createTicketDefinition("Ulgowy", null, 1200, userStadionGd.getPartner()),
-        createTicketDefinition("Rodzinny (2+2)", null, 3600, userStadionGd.getPartner()));
+        createTicketDefinition("Normalny", -1, 1700, userStadionGd.getPartner()),
+        createTicketDefinition("Ulgowy", -1, 1200, userStadionGd.getPartner()),
+        createTicketDefinition("Rodzinny (2+2)", -1, 3600, userStadionGd.getPartner()));
     Date match = new Date();
     match.setHours(19);
     match.setMinutes(00);
@@ -349,10 +348,10 @@ public class DbFiller extends ServiceSuperclass {
         meczPCEvent.getId(), userStadionGd.getPartner(),
         createTicketDefinition("Normalny", 40, 12500, userStadionGd.getPartner()),
         createTicketDefinition("VIP", 10, 24000, userStadionGd.getPartner()));
-    createTicketPoolDefinition("Zwiedzanie Kolejkowa", null, true, todayMidnight,
+    createTicketPoolDefinition("Zwiedzanie Kolejkowa", -1, true, todayMidnight,
         todaySecondToTommorow, kolEvent.getId(), userKolejkowo.getPartner(),
-        createTicketDefinition("Normalny", null, 1900, userKolejkowo.getPartner()),
-        createTicketDefinition("Ulgowy", null, 1500, userKolejkowo.getPartner()));
+        createTicketDefinition("Normalny", -1, 1900, userKolejkowo.getPartner()),
+        createTicketDefinition("Ulgowy", -1, 1500, userKolejkowo.getPartner()));
   }
 
   private void createTicketPoolDefinition(String name, Integer availableTicketsNumber,
