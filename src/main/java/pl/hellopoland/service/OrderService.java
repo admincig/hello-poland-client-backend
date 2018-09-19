@@ -64,7 +64,8 @@ public class OrderService extends ServiceSuperclass {
     Map<SightEvent, List<TicketDefinition>> ticketsGroupedBySight =
         tickets.stream().collect(groupingBy(TicketDefinition::getSightEvent));
     Map<Long, TicketDefinition> ticketIdToObject =
-        tickets.stream().collect(toMap(TicketDefinition::getId, t -> t));
+        tickets.stream().collect(toMap(TicketDefinition::getExternalId, t -> t));
+    // tickets.stream().collect(toMap(TicketDefinition::getId, t -> t));
     for (Map.Entry<SightEvent, List<TicketDefinition>> entry : ticketsGroupedBySight.entrySet()) {
       OrderSightEntry ose = new OrderSightEntry();
       ose.setOrder(o);
@@ -72,7 +73,8 @@ public class OrderService extends ServiceSuperclass {
       em.persist(ose);
 
       List<Long> ticketsOfSight =
-          entry.getValue().stream().map(TicketDefinition::getId).collect(toList());
+          entry.getValue().stream().map(TicketDefinition::getExternalId).collect(toList());
+      // entry.getValue().stream().map(TicketDefinition::getId).collect(toList());
       Map<Date, List<Triplet<Long, Date, Integer>>> inSightGroupedByDate = triplets.stream()
           .filter(trip -> ticketsOfSight.contains(trip.first)).collect(groupingBy(t -> t.second));
 
