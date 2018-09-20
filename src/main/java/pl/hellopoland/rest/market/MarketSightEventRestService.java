@@ -13,9 +13,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import pl.hellopoland.annotation.DateTimeFormat;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
-import pl.hellopoland.dto.AvailableTicketNumberAssociationDTO;
 import pl.hellopoland.dto.FiltersContainerDTO;
 import pl.hellopoland.dto.SightEventDTO;
+import pl.hellopoland.rest.dto.AvailableTicketNumberAssociationORO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.api.market.FilterMarketAPI;
 import pl.hellopoland.service.api.market.SightEventServiceMarketAPI;
@@ -61,7 +61,7 @@ public class MarketSightEventRestService {
 
   @GET
   @Path("/{id}/available-tickets")
-  public AvailableTicketNumberAssociationDTO checkAvailability(@PathParam("id") Long id,
+  public AvailableTicketNumberAssociationORO checkAvailability(@PathParam("id") Long id,
       @QueryParam("date") @DateTimeFormat final Date date) {
     return service.checkAvailability(id, date);
   }

@@ -30,6 +30,7 @@ import pl.hellopoland.dto.PushDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
+import pl.hellopoland.rest.dto.AvailableTicketNumberAssociationORO;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PagedEntityCollection;
@@ -300,9 +301,54 @@ public class SightEventService extends ServiceSuperclass {
     return grouped;
   }
 
-  public AvailableTicketNumberAssociationDTO checkAvailability(Long sightEventId, Date date) {
+  public AvailableTicketNumberAssociationORO checkAvailability(Long sightEventId, Date date) {
     HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
-    return hpt.checkAvailabilityOfTicketsForSightEvent(get(sightEventId), date);
+    AvailableTicketNumberAssociationDTO associationDTO =
+        hpt.checkAvailabilityOfTicketsForSightEvent(get(sightEventId), date);
+
+    var tdExternalIds = new ArrayList<Long>();
+
+    var tpdDTOs = associationDTO.ticketPoolDefinitions;
+    if (tpdDTOs != null && !tpdDTOs.isEmpty()) {
+      tpdDTOs.forEach(tpd -> tpd.ticketDefinitions.forEach(td -> tdExternalIds.add(td.id)));
+    }
+
+    var tpDTOs = associationDTO.ticketPools;
+    if (tpDTOs != null && !tpDTOs.isEmpty()) {
+      tpDTOs.forEach(tp -> tp.ticketDefinitions.forEach(td -> tdExternalIds.add(td.id)));
+    }
+
+    var tdOBs = ticketService.getTicketsByExternalIds(tdExternalIds).stream().distinct()
+        .collect(Collectors.toList());
+
+    if (tpdDTOs != null && !tpdDTOs.isEmpty()) {
+      for (var tpdDto : tpdDTOs) {
+        var tdDtos = tpdDto.ticketDefinitions;
+        for (var tdDto : tdDtos) {
+          for (var tdBo : tdOBs) {
+            if (tdBo.getExternalId() == tdDto.id && tdBo.getPoolId() == tpdDto.id) {
+              tdDto.id = tdBo.getId();
+              break;
+            }
+          }
+        }
+      }
+    }
+    if (tpDTOs != null && !tpDTOs.isEmpty()) {
+      for (var tpDto : tpDTOs) {
+        var tdDtos = tpDto.ticketDefinitions;
+        for (var tdDto : tdDtos) {
+          for (var tdBo : tdOBs) {
+            if (tdBo.getExternalId() == tdDto.id
+                && tdBo.getPoolId() == tpDto.ticketPoolDefinitionId) {
+              tdDto.id = tdBo.getId();
+              break;
+            }
+          }
+        }
+      }
+    }
+    return new AvailableTicketNumberAssociationORO(associationDTO);
   }
 
 }

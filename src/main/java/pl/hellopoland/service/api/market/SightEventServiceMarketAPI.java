@@ -8,9 +8,9 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
-import pl.hellopoland.dto.AvailableTicketNumberAssociationDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
+import pl.hellopoland.rest.dto.AvailableTicketNumberAssociationORO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.service.TicketPoolDefinitionService;
@@ -67,7 +67,7 @@ public class SightEventServiceMarketAPI {
   }
 
   @PermitAll
-  public AvailableTicketNumberAssociationDTO checkAvailability(Long sightEventId, Date date) {
+  public AvailableTicketNumberAssociationORO checkAvailability(Long sightEventId, Date date) {
     return service.checkAvailability(sightEventId, date);
   }
 
