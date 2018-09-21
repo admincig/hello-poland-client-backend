@@ -25,7 +25,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     final Long sightEventId = dto.sightEventId;
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
-    SightEvent se = sightEventService.get(dto.sightEventId);
+    SightEvent se = sightEventService.getForLoggedUser(dto.sightEventId);
     dto.sightEventId = se.getHptId();
     dto = hpt.addTicketPoolDefinition(dto, partner.getHptToken());
     dto.sightEventId = sightEventId;
