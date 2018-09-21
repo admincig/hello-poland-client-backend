@@ -227,7 +227,8 @@ public class SightEventService extends ServiceSuperclass {
       var pairedByIds = pairBosWithDtos(bos, sightEventDtos);
       var groupedByPartner = groupByPartner(pairedByIds);
       HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
-      Map<Long, TicketDefinition> externalIdToTicket = null;
+      Map<Long, List<TicketDefinition>> externalIdToTicket = null;
+      // Map<Long, TicketDefinition> externalIdToTicket = null;
       for (var entry : groupedByPartner.entrySet()) {
         Partner partner = entry.getKey();
         List<TicketPoolDefinitionDTO> poolDefinitions =
@@ -238,10 +239,12 @@ public class SightEventService extends ServiceSuperclass {
             ticketDefinitions.stream().map(t -> t.id).collect(Collectors.toList()));
         if (externalIdToTicket == null) {
           externalIdToTicket =
-              ticketBos.stream().collect(Collectors.toMap(TicketDefinition::getExternalId, t -> t));
+              ticketBos.stream().collect(Collectors.groupingBy(TicketDefinition::getExternalId));
+          // ticketBos.stream().collect(Collectors.toMap(TicketDefinition::getExternalId, t -> t));
         } else {
-          externalIdToTicket.putAll(ticketBos.stream()
-              .collect(Collectors.toMap(TicketDefinition::getExternalId, t -> t)));
+          externalIdToTicket.putAll(
+              ticketBos.stream().collect(Collectors.groupingBy(TicketDefinition::getExternalId)));
+          // .collect(Collectors.toMap(TicketDefinition::getExternalId, t -> t)));
         }
         var poolDefinitionsGroupedBySightEventId =
             poolDefinitions.stream().collect(Collectors.groupingBy(pool -> pool.sightEventId));
@@ -257,7 +260,9 @@ public class SightEventService extends ServiceSuperclass {
           for (var poolDefinitionDto : sightEventDto.ticketPoolDefinitions) {
             poolDefinitionDto.sightEventId = sightEventDto.id;
             for (var t : poolDefinitionDto.ticketDefinitions) {
-              t.id = externalIdToTicket.get(t.id).getId();
+              t.id = externalIdToTicket.get(t.id).stream()
+                  .filter(tBo -> tBo.getPoolId() == poolDefinitionDto.id).findFirst().get().getId();
+              // t.id = externalIdToTicket.get(t.id).getId();
               minPrice = Math.min(minPrice, t.price);
             }
           }
