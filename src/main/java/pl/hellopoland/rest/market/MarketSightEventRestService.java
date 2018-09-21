@@ -11,7 +11,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import pl.hellopoland.annotation.DateTimeFormat;
+import pl.hellopoland.annotation.DateFormat;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.FiltersContainerDTO;
 import pl.hellopoland.dto.SightEventDTO;
@@ -62,7 +62,7 @@ public class MarketSightEventRestService {
   @GET
   @Path("/{id}/available-tickets")
   public AvailableTicketNumberAssociationORO checkAvailability(@PathParam("id") Long id,
-      @QueryParam("date") @DateTimeFormat final Date date) {
+      @QueryParam("date") @DateFormat final Date date) {
     return service.checkAvailability(id, date);
   }
 
