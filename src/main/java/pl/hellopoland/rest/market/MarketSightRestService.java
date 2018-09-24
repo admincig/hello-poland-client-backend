@@ -8,10 +8,13 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import pl.hellopoland.config.SightPagedCollectionConfig;
+import pl.hellopoland.dto.FiltersContainerDTO;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.rest.dto.PagedCollection;
+import pl.hellopoland.service.api.market.FilterMarketAPI;
 import pl.hellopoland.service.api.market.SightServiceMarketAPI;
 
 @Path("/market/sights")
@@ -23,10 +26,14 @@ public class MarketSightRestService {
   @Inject
   private SightServiceMarketAPI service;
 
+  @Inject
+  private FilterMarketAPI filterService;
+
   @GET
-  public PagedCollection get() {
+  public PagedCollection get(@QueryParam("city") String city) {
     var config = new SightPagedCollectionConfig();
     config.onlyActive();
+    config.setCity(city);
     return service.getList(config);
   }
 
@@ -41,6 +48,12 @@ public class MarketSightRestService {
   public PagedCollection search(SightPagedCollectionConfig config) {
     config.onlyActive();
     return service.getList(config);
+  }
+
+  @GET
+  @Path("/filters")
+  public FiltersContainerDTO getFilters() {
+    return filterService.getForSights();
   }
 
 }

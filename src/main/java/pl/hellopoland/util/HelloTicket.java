@@ -6,7 +6,9 @@ import java.io.PrintWriter;
 import java.lang.System.Logger.Level;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.json.JsonArray;
@@ -16,6 +18,7 @@ import javax.json.bind.JsonbException;
 import pl.hellopoland.bo.OrderDetails;
 import pl.hellopoland.bo.OrderEntry;
 import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.dto.AvailableTicketNumberAssociationDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
@@ -35,6 +38,9 @@ public class HelloTicket {
   private System.Logger logger = System.getLogger(HelloTicket.class.getName());
   private String url;
 
+  private static final String AUTH_TOKEN =
+      "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.";
+
   public JsonStructure book(OrderDetails details, List<OrderEntry> orderEntries) {
     BookingDTO booking = new BookingDTO();
     booking.customerEmail = details.getEmail();
@@ -50,9 +56,7 @@ public class HelloTicket {
     booking.ticketBookings = ticketBookings;
     var json = JsonbConfig.getInstance().toJson(booking);
     try {
-      String authToken =
-          "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.";
-      var resp = post("/v1/bookings", json, authToken);
+      var resp = post("/v1/bookings", json, AUTH_TOKEN);
       booking = JsonbConfig.getInstance().fromJson(resp.toString(), BookingDTO.class);
 
       for (var oe : orderEntries) {
@@ -74,9 +78,7 @@ public class HelloTicket {
 
   public JsonStructure confirm(String serialNumber, List<OrderEntry> orderEntries) {
     try {
-      String authToken =
-          "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.";
-      var resp = put("/v1/bookings/buy/" + serialNumber, null, authToken);
+      var resp = put("/v1/bookings/buy/" + serialNumber, null, AUTH_TOKEN);
       BookingDTO booking = JsonbConfig.getInstance().fromJson(resp.toString(), BookingDTO.class);
       for (var oe : orderEntries) {
         for (var iter = booking.tickets.iterator(); iter.hasNext();) {
@@ -279,6 +281,20 @@ public class HelloTicket {
       });
       return dtos;
     } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      return null;
+    }
+  }
+
+  public AvailableTicketNumberAssociationDTO checkAvailabilityOfTicketsForSightEvent(
+      SightEvent sightEvent, Date date) {
+    try {
+      String dateString = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmXXX").format(date);
+      return JsonbConfig.getInstance().fromJson(
+          get("/v1/available-ticket-number-associations/?sightEventId=" + sightEvent.getHptId()
+              + "&date=" + dateString.replaceAll("\\+", "%2B"), AUTH_TOKEN).toString(),
+          AvailableTicketNumberAssociationDTO.class);
+    } catch (JsonbException | IOException e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
       return null;
     }
