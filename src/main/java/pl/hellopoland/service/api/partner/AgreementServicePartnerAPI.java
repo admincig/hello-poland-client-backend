@@ -22,7 +22,7 @@ public class AgreementServicePartnerAPI {
 
   @RolesAllowed("partner")
   public List<AgreementDTO> getForPartner() {
-    return service.getForPartner().stream().map(a -> DtoMapper.getDTO(a))
+    return service.getForLoggedUser().stream().map(a -> DtoMapper.getDTO(a))
         .collect(Collectors.toList());
   }
 
@@ -36,6 +36,7 @@ public class AgreementServicePartnerAPI {
     service.deleteForLoggedUser(id);
   }
 
+  @RolesAllowed("partner")
   public AgreementDTO update(AgreementDTO dto) {
     return DtoMapper.getDTO(service.updateForLoggedUser(dto));
   }

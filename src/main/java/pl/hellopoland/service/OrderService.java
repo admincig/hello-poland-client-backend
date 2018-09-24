@@ -66,7 +66,10 @@ public class OrderService extends ServiceSuperclass {
     for (Map.Entry<SightEvent, List<TicketDefinition>> entry : ticketsGroupedBySight.entrySet()) {
       OrderSightEntry ose = new OrderSightEntry();
       ose.setOrder(o);
-      ose.setSightEvent(entry.getKey());
+
+      var sightEvent = entry.getKey();
+      ose.setSightEvent(sightEvent);
+      ose.setAgreements(sightEvent.getAgreements());
       em.persist(ose);
 
       List<Long> ticketsOfSight =

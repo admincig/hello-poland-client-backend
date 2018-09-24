@@ -16,9 +16,14 @@ public class AgreementService extends ServiceSuperclass {
         .setParameter("id", id).setParameter("partner", getLoggedPartner()).getSingleResult();
   }
 
-  public List<Agreement> getForPartner() {
+  public List<Agreement> getForLoggedUser() {
     return em.createQuery("from Agreement where partner=:partner", Agreement.class)
         .setParameter("partner", getLoggedPartner()).getResultList();
+  }
+
+  public List<Agreement> getForLoggedUser(List<Long> ids) {
+    return em.createQuery("from Agreement where partner=:partner and id in (:ids)", Agreement.class)
+        .setParameter("partner", getLoggedPartner()).setParameter("ids", ids).getResultList();
   }
 
   public Agreement create(AgreementDTO dto) {
@@ -35,8 +40,11 @@ public class AgreementService extends ServiceSuperclass {
 
   public Agreement updateForLoggedUser(AgreementDTO dto) {
     var bo = getForLoggedUser(dto.id);
-    DtoMapper.copy(dto, bo);
-    return getForLoggedUser(dto.id);
+    em.detach(bo);
+    var updated = DtoMapper.copy(dto, bo);
+    updated.setId(null);
+    em.persist(updated);
+    return getForLoggedUser(updated.getId());
   }
 
 }

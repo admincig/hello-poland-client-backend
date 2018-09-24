@@ -51,15 +51,20 @@ public class DtoMapper {
   }
 
   public static Agreement copy(AgreementDTO source, Agreement target) {
-    target.setLinkUrl(source.linkUrl);
-    target.setObligatory(source.obligatory);
-    target.setText(source.text);
+    if (source.linkUrl != null && !source.linkUrl.isEmpty()) {
+      target.setLinkUrl(source.linkUrl);
+    }
+    if (source.text != null && !source.text.isEmpty()) {
+      target.setText(source.text);
+    }
+    if (source.obligatory != null) {
+      target.setObligatory(source.obligatory);
+    }
     return target;
   }
 
   public static SightDTO getDTO(Sight bo) {
     SightDTO dto = new SightDTO();
-
     dto.id = bo.getId();
     dto.name = bo.getName();
     dto.lead = bo.getLead();
@@ -84,12 +89,14 @@ public class DtoMapper {
     if (bo.getOpeningHours() != null && !bo.getOpeningHours().isEmpty()) {
       dto.openingHours = bo.getOpeningHours().stream().map(DtoMapper::getDTO).collect(toList());
     }
+    if (bo.getAgreements() != null && !bo.getAgreements().isEmpty()) {
+      dto.agreements = bo.getAgreements().stream().map(DtoMapper::getDTO).collect(toList());
+    }
     return dto;
   }
 
   public static SightEventDTO getDTO(SightEvent bo) {
     SightEventDTO dto = new SightEventDTO();
-
     dto.id = bo.getId();
     dto.name = bo.getName();
     dto.lead = bo.getLead();
@@ -118,20 +125,11 @@ public class DtoMapper {
     if (bo.getOpeningHours() != null && !bo.getOpeningHours().isEmpty()) {
       dto.openingHours = bo.getOpeningHours().stream().map(DtoMapper::getDTO).collect(toList());
     }
-    // if (bo.getAgreements() != null && !bo.getAgreements().isEmpty()) {
-    // dto.agreements = bo.getAgreements().stream().map(DtoMapper::getDTO).collect(toList());
-    // }
+    if (bo.getAgreements() != null && !bo.getAgreements().isEmpty()) {
+      dto.agreements = bo.getAgreements().stream().map(DtoMapper::getDTO).collect(toList());
+    }
     return dto;
   }
-
-  // private static AgreementDTO getDTO(Agreement bo) {
-  // var dto = new AgreementDTO();
-  //
-  // dto.name = ofNullable(bo.getSightEvent()).map(SightEvent::getName).orElse(null);
-  // dto.url = bo.getLinkUrl();
-  //
-  // return dto;
-  // }
 
   private static OpeningHoursDTO getDTO(OpeningHours bo) {
     var dto = new OpeningHoursDTO();

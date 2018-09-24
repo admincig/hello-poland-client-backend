@@ -39,6 +39,9 @@ public class SightService extends ServiceSuperclass {
   @Inject
   private OpeningHoursService oHoursService;
 
+  @Inject
+  private AgreementService agreementService;
+
   public PagedEntityCollection<Sight> getList(SightPagedCollectionConfig config) {
     if (config.isCurrentPartner()) {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
@@ -70,6 +73,16 @@ public class SightService extends ServiceSuperclass {
     }
     if (Boolean.TRUE.equals(dto.generalAdmission)) {
       createGeneralAdmissionSightEvent(bo, partner);
+    }
+    var agreements = dto.agreements;
+    if (agreements != null && !agreements.isEmpty()) {
+      var agreementBos = agreementService.getForLoggedUser(
+          agreements.stream().map(agrDto -> agrDto.id).collect(Collectors.toList()));
+      bo.setAgreements(agreementBos);
+      var sightEventBos = bo.getSightEvents();
+      if (sightEventBos != null && !sightEventBos.isEmpty()) {
+        sightEventBos.forEach(se -> se.setAgreements(agreementBos));
+      }
     }
     return get(bo.getId());
   }
@@ -110,6 +123,22 @@ public class SightService extends ServiceSuperclass {
     }
     bo.setOpeningHours(null);
     bo.setOpeningHours(oHoursList);
+
+
+
+    var agreements = dto.agreements;
+    if (agreements != null && !agreements.isEmpty()) {
+      var agreementBos = agreementService.getForLoggedUser(
+          agreements.stream().map(agrDto -> agrDto.id).collect(Collectors.toList()));
+      bo.setAgreements(agreementBos);
+      var sightEventBos = bo.getSightEvents();
+      if (sightEventBos != null && !sightEventBos.isEmpty()) {
+        sightEventBos.forEach(se -> se.setAgreements(agreementBos));
+      }
+    }
+
+
+
     return get(id);
   }
 

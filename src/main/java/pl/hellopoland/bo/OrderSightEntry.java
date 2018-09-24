@@ -23,7 +23,8 @@ public class OrderSightEntry extends ModelSuperclass {
   private Order order;
   private String serialNumber;
   private Long externalId;
-
+  @OneToMany
+  private Collection<Agreement> agreements;
 
   public SightEvent getSightEvent() {
     return sightEvent;
@@ -40,7 +41,6 @@ public class OrderSightEntry extends ModelSuperclass {
   public void setEntries(Collection<OrderDateEntry> entries) {
     this.entries = entries;
   }
-
 
   public Order getOrder() {
     return order;
@@ -82,6 +82,14 @@ public class OrderSightEntry extends ModelSuperclass {
       this.setEntries(new ArrayList<>());
     }
     this.getEntries().add(entry);
+  }
+
+  public Collection<Agreement> getAgreements() {
+    return agreements;
+  }
+
+  public void setAgreements(Collection<Agreement> agreements) {
+    this.agreements = agreements;
   }
 
 }
