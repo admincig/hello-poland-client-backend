@@ -104,7 +104,6 @@ public class SightService extends ServiceSuperclass {
 
   public List<Sight> getActiveForPartner() {
     Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
-
     return em.createQuery(
         "from Sight sight where sight.active=true and sight.partner=:partner order by sight.id desc",
         Sight.class).setParameter("partner", partner).getResultList();
@@ -123,9 +122,6 @@ public class SightService extends ServiceSuperclass {
     }
     bo.setOpeningHours(null);
     bo.setOpeningHours(oHoursList);
-
-
-
     var agreements = dto.agreements;
     if (agreements != null && !agreements.isEmpty()) {
       var agreementBos = agreementService.getForLoggedUser(
@@ -136,9 +132,6 @@ public class SightService extends ServiceSuperclass {
         sightEventBos.forEach(se -> se.setAgreements(agreementBos));
       }
     }
-
-
-
     return get(id);
   }
 
@@ -148,7 +141,6 @@ public class SightService extends ServiceSuperclass {
         return true;
       }
     }
-
     return false;
   }
 
@@ -197,6 +189,16 @@ public class SightService extends ServiceSuperclass {
     }
     bo.setOpeningHours(null);
     bo.setOpeningHours(oHoursList);
+    var agreements = dto.agreements;
+    if (agreements != null && !agreements.isEmpty()) {
+      var agreementBos = agreementService.getForLoggedUser(
+          agreements.stream().map(agrDto -> agrDto.id).collect(Collectors.toList()));
+      bo.setAgreements(agreementBos);
+      var sightEventBos = bo.getSightEvents();
+      if (sightEventBos != null && !sightEventBos.isEmpty()) {
+        sightEventBos.forEach(se -> se.setAgreements(agreementBos));
+      }
+    }
     return getActiveForLoggedUser(dto.id);
   }
 
