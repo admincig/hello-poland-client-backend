@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 import javax.json.JsonArray;
 import javax.json.JsonStructure;
@@ -289,10 +290,12 @@ public class HelloTicket {
   public AvailableTicketNumberAssociationDTO checkAvailabilityOfTicketsForSightEvent(
       SightEvent sightEvent, Date date) {
     try {
-      String dateString = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmXXX").format(date);
+      var dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+      dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+      String dateString = dateFormat.format(date);
       return JsonbConfig.getInstance().fromJson(
           get("/v1/available-ticket-number-associations/?sightEventId=" + sightEvent.getHptId()
-              + "&date=" + dateString.replaceAll("\\+", "%2B"), AUTH_TOKEN).toString(),
+              + "&date=" + dateString, AUTH_TOKEN).toString(),
           AvailableTicketNumberAssociationDTO.class);
     } catch (JsonbException | IOException e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
