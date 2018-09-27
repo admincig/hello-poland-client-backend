@@ -1,5 +1,7 @@
 package pl.hellopoland.service;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.System.Logger;
 import java.util.Collection;
@@ -46,6 +48,9 @@ public abstract class ServiceSuperclass {
       properties.load(ServiceSuperclass.class.getResourceAsStream("/etc/config.properties"));
       properties.load(ServiceSuperclass.class.getResourceAsStream(
           "/etc/" + properties.getProperty("user.name") + ".config.properties"));
+      if (copy.containsKey("local.properties")) {
+        properties.load(new FileInputStream(new File(copy.getProperty("local.properties"))));
+      }
       properties.putAll(copy);
     } catch (IOException e) {
       staticLogger.log(Logger.Level.WARNING, "Failed to load properties", e);
