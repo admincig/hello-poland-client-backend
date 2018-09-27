@@ -3,7 +3,6 @@ package pl.hellopoland.rest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.ext.ParamConverter;
 import pl.hellopoland.annotation.DateFormat;
@@ -24,9 +23,8 @@ public class DateParameterConverter implements ParamConverter<Date> {
       format = customDateTimeFormat.value();
     }
 
+    final var simpleDateFormat = new SimpleDateFormat(format);
     try {
-      var simpleDateFormat = new SimpleDateFormat(format);
-      simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
       return simpleDateFormat.parse(value);
     } catch (ParseException ex) {
       throw new WebApplicationException(ex);
@@ -36,7 +34,6 @@ public class DateParameterConverter implements ParamConverter<Date> {
   @Override
   public String toString(Date value) {
     var dateFormat = new SimpleDateFormat(DEFAULT_FORMAT);
-    dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     return dateFormat.format(value);
   }
 

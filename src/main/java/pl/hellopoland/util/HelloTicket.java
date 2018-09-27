@@ -10,7 +10,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.stream.Collectors;
 import javax.json.JsonArray;
 import javax.json.JsonStructure;
@@ -291,7 +290,6 @@ public class HelloTicket {
       SightEvent sightEvent, Date date) {
     try {
       var dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-      dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
       String dateString = dateFormat.format(date);
       return JsonbConfig.getInstance().fromJson(
           get("/v1/available-ticket-number-associations/?sightEventId=" + sightEvent.getHptId()
