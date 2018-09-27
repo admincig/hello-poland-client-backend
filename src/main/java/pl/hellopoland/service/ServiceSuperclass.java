@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.System.Logger;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -43,13 +44,13 @@ public abstract class ServiceSuperclass {
 
     try {
       properties = System.getProperties();
-      var copy = new Properties(properties);
+      var copy = new HashMap<>(properties);
       properties.clear();
       properties.load(ServiceSuperclass.class.getResourceAsStream("/etc/config.properties"));
       properties.load(ServiceSuperclass.class
-          .getResourceAsStream("/etc/" + copy.getProperty("user.name") + ".config.properties"));
+          .getResourceAsStream("/etc/" + copy.get("user.name") + ".config.properties"));
       if (copy.containsKey("local.properties")) {
-        properties.load(new FileInputStream(new File(copy.getProperty("local.properties"))));
+        properties.load(new FileInputStream(new File((String) copy.get("local.properties"))));
       }
       properties.putAll(copy);
     } catch (IOException e) {
