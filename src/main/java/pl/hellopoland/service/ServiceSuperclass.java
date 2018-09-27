@@ -46,8 +46,8 @@ public abstract class ServiceSuperclass {
       var copy = new Properties(properties);
       properties.clear();
       properties.load(ServiceSuperclass.class.getResourceAsStream("/etc/config.properties"));
-      properties.load(ServiceSuperclass.class.getResourceAsStream(
-          "/etc/" + properties.getProperty("user.name") + ".config.properties"));
+      properties.load(ServiceSuperclass.class
+          .getResourceAsStream("/etc/" + copy.getProperty("user.name") + ".config.properties"));
       if (copy.containsKey("local.properties")) {
         properties.load(new FileInputStream(new File(copy.getProperty("local.properties"))));
       }
