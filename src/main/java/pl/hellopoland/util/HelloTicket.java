@@ -10,13 +10,17 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.json.JsonArray;
 import javax.json.JsonStructure;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbException;
+import pl.hellopoland.bo.Order;
+import pl.hellopoland.bo.OrderDateEntry;
 import pl.hellopoland.bo.OrderDetails;
 import pl.hellopoland.bo.OrderEntry;
+import pl.hellopoland.bo.OrderSightEntry;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.dto.AvailableTicketNumberAssociationDTO;
 import pl.hellopoland.dto.SightEventDTO;
@@ -78,7 +82,10 @@ public class HelloTicket {
 
   public JsonStructure confirm(String serialNumber, List<OrderEntry> orderEntries) {
     try {
-      var resp = put("/v1/bookings/buy/" + serialNumber, null, AUTH_TOKEN);
+      var p24OrderId = Optional.ofNullable(orderEntries.get(0)).map(OrderEntry::getDateEntry)
+          .map(OrderDateEntry::getSightEntry).map(OrderSightEntry::getOrder)
+          .map(Order::getP24OrderId).orElse("");
+      var resp = put("/v1/bookings/buy/" + serialNumber + "/" + p24OrderId, null, AUTH_TOKEN);
       BookingDTO booking = JsonbConfig.getInstance().fromJson(resp.toString(), BookingDTO.class);
       for (var oe : orderEntries) {
         for (var iter = booking.tickets.iterator(); iter.hasNext();) {
