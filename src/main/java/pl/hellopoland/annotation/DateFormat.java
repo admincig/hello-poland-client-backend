@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 @Retention(RUNTIME)
 @Target({FIELD, PARAMETER})
 public @interface DateFormat {
-  public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
+  public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-ddXXX";
 
   String value() default DEFAULT_DATE_FORMAT;
 }

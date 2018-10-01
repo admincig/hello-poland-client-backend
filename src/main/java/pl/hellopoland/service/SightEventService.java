@@ -30,6 +30,7 @@ import pl.hellopoland.dto.PushDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
+import pl.hellopoland.rest.dto.AvailableTicketNumberAssociationORO;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PagedEntityCollection;
@@ -210,8 +211,12 @@ public class SightEventService extends ServiceSuperclass {
 
   public SightEvent getForLoggedUser(Long id) {
     Partner partner = partnerService.getLoggedPartner();
+    return getForPartner(id, partner);
+  }
+
+  public SightEvent getForPartner(Long sightEventId, Partner partner) {
     return em.createQuery("from SightEvent where id=:id and partner=:partner", SightEvent.class)
-        .setParameter("id", id).setParameter("partner", partner).getSingleResult();
+        .setParameter("id", sightEventId).setParameter("partner", partner).getSingleResult();
   }
 
   public void deleteForLoggedUser(Long id) {
@@ -226,7 +231,8 @@ public class SightEventService extends ServiceSuperclass {
       var pairedByIds = pairBosWithDtos(bos, sightEventDtos);
       var groupedByPartner = groupByPartner(pairedByIds);
       HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
-      Map<Long, TicketDefinition> externalIdToTicket = null;
+      Map<Long, List<TicketDefinition>> externalIdToTicket = null;
+      // Map<Long, TicketDefinition> externalIdToTicket = null;
       for (var entry : groupedByPartner.entrySet()) {
         Partner partner = entry.getKey();
         List<TicketPoolDefinitionDTO> poolDefinitions =
@@ -237,10 +243,12 @@ public class SightEventService extends ServiceSuperclass {
             ticketDefinitions.stream().map(t -> t.id).collect(Collectors.toList()));
         if (externalIdToTicket == null) {
           externalIdToTicket =
-              ticketBos.stream().collect(Collectors.toMap(TicketDefinition::getExternalId, t -> t));
+              ticketBos.stream().collect(Collectors.groupingBy(TicketDefinition::getExternalId));
+          // ticketBos.stream().collect(Collectors.toMap(TicketDefinition::getExternalId, t -> t));
         } else {
-          externalIdToTicket.putAll(ticketBos.stream()
-              .collect(Collectors.toMap(TicketDefinition::getExternalId, t -> t)));
+          externalIdToTicket.putAll(
+              ticketBos.stream().collect(Collectors.groupingBy(TicketDefinition::getExternalId)));
+          // .collect(Collectors.toMap(TicketDefinition::getExternalId, t -> t)));
         }
         var poolDefinitionsGroupedBySightEventId =
             poolDefinitions.stream().collect(Collectors.groupingBy(pool -> pool.sightEventId));
@@ -256,7 +264,9 @@ public class SightEventService extends ServiceSuperclass {
           for (var poolDefinitionDto : sightEventDto.ticketPoolDefinitions) {
             poolDefinitionDto.sightEventId = sightEventDto.id;
             for (var t : poolDefinitionDto.ticketDefinitions) {
-              t.id = externalIdToTicket.get(t.id).getId();
+              t.id = externalIdToTicket.get(t.id).stream()
+                  .filter(tBo -> tBo.getPoolId() == poolDefinitionDto.id).findFirst().get().getId();
+              // t.id = externalIdToTicket.get(t.id).getId();
               minPrice = Math.min(minPrice, t.price);
             }
           }
@@ -300,9 +310,54 @@ public class SightEventService extends ServiceSuperclass {
     return grouped;
   }
 
-  public List<AvailableTicketNumberAssociationDTO> checkAvailability(Long sightEventId, Date date) {
+  public AvailableTicketNumberAssociationORO checkAvailability(Long sightEventId, Date date) {
     HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
-    return hpt.checkAvailabilityOfTicketsForSightEvent(get(sightEventId), date);
+    AvailableTicketNumberAssociationDTO associationDTO =
+        hpt.checkAvailabilityOfTicketsForSightEvent(get(sightEventId), date);
+
+    var tdExternalIds = new ArrayList<Long>();
+
+    var tpdDTOs = associationDTO.ticketPoolDefinitions;
+    if (tpdDTOs != null && !tpdDTOs.isEmpty()) {
+      tpdDTOs.forEach(tpd -> tpd.ticketDefinitions.forEach(td -> tdExternalIds.add(td.id)));
+    }
+
+    var tpDTOs = associationDTO.ticketPools;
+    if (tpDTOs != null && !tpDTOs.isEmpty()) {
+      tpDTOs.forEach(tp -> tp.ticketDefinitions.forEach(td -> tdExternalIds.add(td.id)));
+    }
+
+    var tdOBs = ticketService.getTicketsByExternalIds(tdExternalIds).stream().distinct()
+        .collect(Collectors.toList());
+
+    if (tpdDTOs != null && !tpdDTOs.isEmpty()) {
+      for (var tpdDto : tpdDTOs) {
+        var tdDtos = tpdDto.ticketDefinitions;
+        for (var tdDto : tdDtos) {
+          for (var tdBo : tdOBs) {
+            if (tdBo.getExternalId() == tdDto.id && tdBo.getPoolId() == tpdDto.id) {
+              tdDto.id = tdBo.getId();
+              break;
+            }
+          }
+        }
+      }
+    }
+    if (tpDTOs != null && !tpDTOs.isEmpty()) {
+      for (var tpDto : tpDTOs) {
+        var tdDtos = tpDto.ticketDefinitions;
+        for (var tdDto : tdDtos) {
+          for (var tdBo : tdOBs) {
+            if (tdBo.getExternalId() == tdDto.id
+                && tdBo.getPoolId() == tpDto.ticketPoolDefinitionId) {
+              tdDto.id = tdBo.getId();
+              break;
+            }
+          }
+        }
+      }
+    }
+    return new AvailableTicketNumberAssociationORO(associationDTO);
   }
 
 }
