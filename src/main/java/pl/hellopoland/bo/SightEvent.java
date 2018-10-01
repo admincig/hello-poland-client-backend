@@ -14,6 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 import pl.hellopoland.util.Imaged;
 import pl.hellopoland.util.Located;
@@ -63,6 +64,9 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
   private String email;
 
   private String phone;
+
+  @OneToOne
+  private FileDescriptor pdfAttachment;
 
   @OneToMany(mappedBy = "sightEvent")
   private Collection<OpeningHours> openingHours;
@@ -256,6 +260,15 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
 
   public void setImages(Collection<ImageCollector> images) {
     this.images = images;
+  }
+
+
+  public FileDescriptor getPdfAttachment() {
+    return pdfAttachment;
+  }
+
+  public void setPdfAttachment(FileDescriptor pdfAttachment) {
+    this.pdfAttachment = pdfAttachment;
   }
 
   public void addImage(ImageCollector img) {

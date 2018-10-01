@@ -55,6 +55,9 @@ public class SightEventService extends ServiceSuperclass {
   @Inject
   private OpeningHoursService oHoursService;
 
+  @Inject
+  private FileDescriptorService fdService;
+
   public PagedEntityCollection<SightEvent> getList(SightEventPagedCollectionConfig config) {
     if (config.isCurrentPartner()) {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
@@ -358,6 +361,12 @@ public class SightEventService extends ServiceSuperclass {
       }
     }
     return new AvailableTicketNumberAssociationORO(associationDTO);
+  }
+
+  public SightEvent uploadPdf(Long id, byte[] pdf) {
+    SightEvent bo = getForLoggedUser(id);
+    bo.setPdfAttachment(fdService.storeFile(new ByteArrayInputStream(pdf), "pdf"));
+    return bo;
   }
 
 }
