@@ -289,10 +289,11 @@ public class HelloTicket {
   public AvailableTicketNumberAssociationDTO checkAvailabilityOfTicketsForSightEvent(
       SightEvent sightEvent, Date date) {
     try {
-      String dateString = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmXXX").format(date);
+      var dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+      String dateString = dateFormat.format(date);
       return JsonbConfig.getInstance().fromJson(
           get("/v1/available-ticket-number-associations/?sightEventId=" + sightEvent.getHptId()
-              + "&date=" + dateString.replaceAll("\\+", "%2B"), AUTH_TOKEN).toString(),
+              + "&date=" + dateString, AUTH_TOKEN).toString(),
           AvailableTicketNumberAssociationDTO.class);
     } catch (JsonbException | IOException e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);

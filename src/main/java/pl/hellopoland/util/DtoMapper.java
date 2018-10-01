@@ -271,7 +271,7 @@ public class DtoMapper {
     dto.city = od.getCity() != null ? od.getCity() : "";
     dto.client = (od.getFirstName() == null && od.getLastName() == null) ? ""
         : od.getFirstName() + " " + od.getLastName();
-    dto.country = od.getCountry() != null ? od.getCountry() : "";
+    dto.country = od.getCountry() != null ? od.getCountry() : "PL";
     dto.currency = "PLN";
     dto.email = od.getEmail() != null ? od.getEmail() : "";
     dto.language = "pl";

@@ -361,21 +361,23 @@ public class DbFiller extends ServiceSuperclass {
     dto.name = name;
     dto.availableTicketsNumber = availableTicketsNumber;
     dto.isCyclic = cyclicalPool;
+    var sDate = (Date) startDate.clone();
+    var eDate = (Date) endDate.clone();
     if (cyclicalPool) {
       dto.frequencyData = new FrequencyDataDTO();
       dto.frequencyData.frequencyType = FrequencyTypeDTO.DAILY;
       dto.frequencyData.frequency = 1;
-      dto.frequencyData.startDate = startDate;
+      dto.frequencyData.startDate = sDate;
       Calendar cal = Calendar.getInstance();
       cal.set(Calendar.DAY_OF_YEAR, 365);
       dto.frequencyData.endDate = cal.getTime();
     }
     if (!cyclicalPool) {
-      startDate.setMonth(startDate.getMonth() + 1);
-      endDate.setMonth(endDate.getMonth() + 1);
+      sDate.setMonth(sDate.getMonth() + 1);
+      eDate.setMonth(eDate.getMonth() + 1);
     }
-    dto.startDate = startDate;
-    dto.endDate = endDate;
+    dto.startDate = sDate;
+    dto.endDate = eDate;
     dto.sightEventId = sightEventId;
     dto.ticketDefinitions = Arrays.asList(ticketDefinitions);
     tpdService.add(dto, partner);

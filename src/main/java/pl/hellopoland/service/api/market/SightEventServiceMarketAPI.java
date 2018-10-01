@@ -61,7 +61,8 @@ public class SightEventServiceMarketAPI {
     var now = new Date();
     var tpdStartDate = tpd.startDate;
     if (tpd.isCyclic) {
-      return now.before(tpdStartDate) || now.before(tpd.frequencyData.endDate);
+      return now.before(tpdStartDate)
+          || ((tpd.frequencyData.endDate != null ? now.before(tpd.frequencyData.endDate) : true));
     }
     return now.before(tpdStartDate);
   }
