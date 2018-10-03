@@ -127,7 +127,7 @@ public class DtoMapper {
   // return dto;
   // }
 
-  private static FileDescriptorDTO getDTO(FileDescriptor bo) {
+  public static FileDescriptorDTO getDTO(FileDescriptor bo) {
     var dto = new FileDescriptorDTO();
     dto.id = bo.getId();
     dto.path = bo.getPath();
