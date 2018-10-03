@@ -1,6 +1,8 @@
 package pl.hellopoland.bo;
 
+import java.util.Set;
 import javax.persistence.Entity;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotBlank;
 
@@ -9,11 +11,11 @@ public class Agreement extends ModelSuperclass {
 
   private static final long serialVersionUID = -3524491821261836536L;
 
-  @ManyToOne
-  private Sight sight;
+  @ManyToMany(mappedBy = "agreements")
+  private Set<Sight> sight;
 
-  @ManyToOne
-  private SightEvent sightEvent;
+  @ManyToMany(mappedBy = "agreements")
+  private Set<SightEvent> sightEvent;
 
   @ManyToOne(optional = false)
   private Partner partner;
@@ -26,11 +28,19 @@ public class Agreement extends ModelSuperclass {
 
   private boolean obligatory;
 
-  public SightEvent getSightEvent() {
+  public Set<Sight> getSight() {
+    return sight;
+  }
+
+  public void setSight(Set<Sight> sight) {
+    this.sight = sight;
+  }
+
+  public Set<SightEvent> getSightEvent() {
     return sightEvent;
   }
 
-  public void setSightEvent(SightEvent sightEvent) {
+  public void setSightEvent(Set<SightEvent> sightEvent) {
     this.sightEvent = sightEvent;
   }
 
@@ -56,14 +66,6 @@ public class Agreement extends ModelSuperclass {
 
   public void setObligatory(boolean obligatory) {
     this.obligatory = obligatory;
-  }
-
-  public Sight getSight() {
-    return sight;
-  }
-
-  public void setSight(Sight sight) {
-    this.sight = sight;
   }
 
   public Partner getPartner() {

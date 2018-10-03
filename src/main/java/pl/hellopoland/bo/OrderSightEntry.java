@@ -7,6 +7,9 @@ import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
@@ -23,7 +26,10 @@ public class OrderSightEntry extends ModelSuperclass {
   private Order order;
   private String serialNumber;
   private Long externalId;
-  @OneToMany
+  @ManyToMany(cascade = CascadeType.PERSIST)
+  @JoinTable(name = "ordersightentry_agreement",
+      joinColumns = {@JoinColumn(name = "ordersightentry_id", referencedColumnName = "id")},
+      inverseJoinColumns = {@JoinColumn(name = "agreement_id", referencedColumnName = "id")})
   private Collection<Agreement> agreements;
 
   public SightEvent getSightEvent() {

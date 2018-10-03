@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -76,8 +77,8 @@ public class SightService extends ServiceSuperclass {
     }
     var agreements = dto.agreements;
     if (agreements != null && !agreements.isEmpty()) {
-      var agreementBos = agreementService.getForLoggedUser(
-          agreements.stream().map(agrDto -> agrDto.id).collect(Collectors.toList()));
+      var agreementBos = Set.copyOf(agreementService.getForLoggedUser(
+          agreements.stream().map(agrDto -> agrDto.id).collect(Collectors.toSet())));
       bo.setAgreements(agreementBos);
       var sightEventBos = bo.getSightEvents();
       if (sightEventBos != null && !sightEventBos.isEmpty()) {
@@ -124,8 +125,8 @@ public class SightService extends ServiceSuperclass {
     bo.setOpeningHours(oHoursList);
     var agreements = dto.agreements;
     if (agreements != null && !agreements.isEmpty()) {
-      var agreementBos = agreementService.getForLoggedUser(
-          agreements.stream().map(agrDto -> agrDto.id).collect(Collectors.toList()));
+      var agreementBos = Set.copyOf(agreementService.getForLoggedUser(
+          agreements.stream().map(agrDto -> agrDto.id).collect(Collectors.toSet())));
       bo.setAgreements(agreementBos);
       var sightEventBos = bo.getSightEvents();
       if (sightEventBos != null && !sightEventBos.isEmpty()) {
@@ -191,8 +192,8 @@ public class SightService extends ServiceSuperclass {
     bo.setOpeningHours(oHoursList);
     var agreements = dto.agreements;
     if (agreements != null && !agreements.isEmpty()) {
-      var agreementBos = agreementService.getForLoggedUser(
-          agreements.stream().map(agrDto -> agrDto.id).collect(Collectors.toList()));
+      var agreementBos = Set.copyOf(agreementService.getForLoggedUser(
+          agreements.stream().map(agrDto -> agrDto.id).collect(Collectors.toSet())));
       bo.setAgreements(agreementBos);
       var sightEventBos = bo.getSightEvents();
       if (sightEventBos != null && !sightEventBos.isEmpty()) {

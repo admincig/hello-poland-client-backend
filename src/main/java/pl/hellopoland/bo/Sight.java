@@ -6,11 +6,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import pl.hellopoland.util.Imaged;
@@ -59,8 +61,8 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
   @OneToMany(mappedBy = "sight")
   private List<OpeningHours> openingHours;
 
-  @OneToMany(mappedBy = "sight")
-  private Collection<Agreement> agreements;
+  @ManyToMany
+  private Set<Agreement> agreements;
 
   public Sight() {}
 
@@ -194,7 +196,7 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
     return agreements;
   }
 
-  public void setAgreements(Collection<Agreement> agreements) {
+  public void setAgreements(Set<Agreement> agreements) {
     this.agreements = agreements;
   }
 }

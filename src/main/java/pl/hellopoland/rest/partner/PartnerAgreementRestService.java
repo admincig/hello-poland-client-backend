@@ -41,12 +41,15 @@ public class PartnerAgreementRestService {
   }
 
   @DELETE
+  @Path("/{id}")
   public void delete(@PathParam("id") Long id) {
     service.delete(id);
   }
 
   @PUT
-  public AgreementDTO update(AgreementDTO dto) {
+  @Path("/{id}")
+  public AgreementDTO update(@PathParam("id") Long id, AgreementDTO dto) {
+    dto.id = id;
     return service.update(dto);
   }
 
