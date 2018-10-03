@@ -241,6 +241,7 @@ public class OrderService extends ServiceSuperclass {
     Order order = findByHash(hash);
     if (resp.equals("OK")) {
       logger.log(Logger.Level.INFO, "transaction confirmed. successful");
+      order.setP24OrderId(ackMap.get("p24_order_id"));
       confirm(order);
     } else {
       logger.log(Logger.Level.WARNING, "transaction problem.");
