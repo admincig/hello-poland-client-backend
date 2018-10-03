@@ -3,6 +3,9 @@ package pl.hellopoland.bo;
 import java.io.File;
 import java.time.LocalDateTime;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import pl.hellopoland.exception.conflict.ConflictingException;
 
@@ -26,6 +29,7 @@ public class FileDescriptor extends ModelSuperclass {
   }
 
   @NotNull
+  @Enumerated(EnumType.STRING)
   private MimeType mimeType;
 
   @NotNull
@@ -75,12 +79,13 @@ public class FileDescriptor extends ModelSuperclass {
     }
   }
 
+  @Transient
   private String getFileExtension(File file) {
     String extension = "";
     try {
       if (file != null && file.exists()) {
         String name = file.getName();
-        extension = name.substring(name.lastIndexOf("."));
+        extension = name.substring(name.lastIndexOf(".") + 1);
       }
     } catch (Exception e) {
       extension = "";
