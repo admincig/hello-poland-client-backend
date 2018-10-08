@@ -64,6 +64,9 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
 
   private String phone;
 
+  @ManyToOne
+  private FileDescriptor pdfAttachment;
+
   @OneToMany(mappedBy = "sightEvent")
   private Collection<OpeningHours> openingHours;
 
@@ -256,6 +259,15 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
 
   public void setImages(Collection<ImageCollector> images) {
     this.images = images;
+  }
+
+
+  public FileDescriptor getPdfAttachment() {
+    return pdfAttachment;
+  }
+
+  public void setPdfAttachment(FileDescriptor pdfAttachment) {
+    this.pdfAttachment = pdfAttachment;
   }
 
   public void addImage(ImageCollector img) {

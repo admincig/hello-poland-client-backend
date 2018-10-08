@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
+import pl.hellopoland.bo.FileDescriptor;
 import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.Location;
 import pl.hellopoland.bo.OpeningHours;
@@ -17,6 +18,7 @@ import pl.hellopoland.bo.OrderSightEntry;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.TicketDefinition;
+import pl.hellopoland.dto.FileDescriptorDTO;
 import pl.hellopoland.dto.ImageDTO;
 import pl.hellopoland.dto.LocationDTO;
 import pl.hellopoland.dto.OpeningHoursDTO;
@@ -112,6 +114,7 @@ public class DtoMapper {
     // if (bo.getAgreements() != null && !bo.getAgreements().isEmpty()) {
     // dto.agreements = bo.getAgreements().stream().map(DtoMapper::getDTO).collect(toList());
     // }
+    dto.pdfAttachment = bo.getPdfAttachment() != null ? getDTO(bo.getPdfAttachment()) : null;
     return dto;
   }
 
@@ -123,6 +126,15 @@ public class DtoMapper {
   //
   // return dto;
   // }
+
+  public static FileDescriptorDTO getDTO(FileDescriptor bo) {
+    var dto = new FileDescriptorDTO();
+    dto.id = bo.getId();
+    dto.path = bo.getPath();
+    dto.created = bo.getCreated();
+    dto.type = bo.getMimeType().toString();
+    return dto;
+  }
 
   private static OpeningHoursDTO getDTO(OpeningHours bo) {
     var dto = new OpeningHoursDTO();
