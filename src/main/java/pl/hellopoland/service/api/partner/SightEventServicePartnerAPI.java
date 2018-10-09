@@ -78,4 +78,13 @@ public class SightEventServicePartnerAPI {
     var dto = DtoMapper.getFullDTO(bo);
     return dto;
   }
+
+  @RolesAllowed("partner")
+  public SightEventDTO uploadPdf(Long id, byte[] pdf) {
+    SightEvent bo = service.uploadPdf(id, pdf);
+    var dto = DtoMapper.getFullDTO(bo);
+    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto));
+    return dto;
+  }
+
 }

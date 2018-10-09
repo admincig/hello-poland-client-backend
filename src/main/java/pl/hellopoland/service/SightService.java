@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -39,6 +40,9 @@ public class SightService extends ServiceSuperclass {
   @Inject
   private OpeningHoursService oHoursService;
 
+  @Inject
+  private AgreementService agreementService;
+
   public PagedEntityCollection<Sight> getList(SightPagedCollectionConfig config) {
     if (config.isCurrentPartner()) {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
@@ -71,6 +75,16 @@ public class SightService extends ServiceSuperclass {
     if (Boolean.TRUE.equals(dto.generalAdmission)) {
       createGeneralAdmissionSightEvent(bo, partner);
     }
+    var agreements = dto.agreements;
+    if (agreements != null && !agreements.isEmpty()) {
+      var agreementBos = Set.copyOf(agreementService.getForLoggedUser(
+          agreements.stream().map(agrDto -> agrDto.id).collect(Collectors.toSet())));
+      bo.setAgreements(agreementBos);
+      var sightEventBos = bo.getSightEvents();
+      if (sightEventBos != null && !sightEventBos.isEmpty()) {
+        sightEventBos.forEach(se -> se.setAgreements(agreementBos));
+      }
+    }
     return get(bo.getId());
   }
 
@@ -91,7 +105,6 @@ public class SightService extends ServiceSuperclass {
 
   public List<Sight> getActiveForPartner() {
     Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
-
     return em.createQuery(
         "from Sight sight where sight.active=true and sight.partner=:partner order by sight.id desc",
         Sight.class).setParameter("partner", partner).getResultList();
@@ -110,6 +123,16 @@ public class SightService extends ServiceSuperclass {
     }
     bo.setOpeningHours(null);
     bo.setOpeningHours(oHoursList);
+    var agreements = dto.agreements;
+    if (agreements != null && !agreements.isEmpty()) {
+      var agreementBos = Set.copyOf(agreementService.getForLoggedUser(
+          agreements.stream().map(agrDto -> agrDto.id).collect(Collectors.toSet())));
+      bo.setAgreements(agreementBos);
+      var sightEventBos = bo.getSightEvents();
+      if (sightEventBos != null && !sightEventBos.isEmpty()) {
+        sightEventBos.forEach(se -> se.setAgreements(agreementBos));
+      }
+    }
     return get(id);
   }
 
@@ -119,7 +142,6 @@ public class SightService extends ServiceSuperclass {
         return true;
       }
     }
-
     return false;
   }
 
@@ -168,6 +190,16 @@ public class SightService extends ServiceSuperclass {
     }
     bo.setOpeningHours(null);
     bo.setOpeningHours(oHoursList);
+    var agreements = dto.agreements;
+    if (agreements != null && !agreements.isEmpty()) {
+      var agreementBos = Set.copyOf(agreementService.getForLoggedUser(
+          agreements.stream().map(agrDto -> agrDto.id).collect(Collectors.toSet())));
+      bo.setAgreements(agreementBos);
+      var sightEventBos = bo.getSightEvents();
+      if (sightEventBos != null && !sightEventBos.isEmpty()) {
+        sightEventBos.forEach(se -> se.setAgreements(agreementBos));
+      }
+    }
     return getActiveForLoggedUser(dto.id);
   }
 

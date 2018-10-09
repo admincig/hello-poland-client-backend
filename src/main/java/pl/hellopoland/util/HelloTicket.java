@@ -10,13 +10,17 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.json.JsonArray;
 import javax.json.JsonStructure;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbException;
+import pl.hellopoland.bo.Order;
+import pl.hellopoland.bo.OrderDateEntry;
 import pl.hellopoland.bo.OrderDetails;
 import pl.hellopoland.bo.OrderEntry;
+import pl.hellopoland.bo.OrderSightEntry;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.dto.AvailableTicketNumberAssociationDTO;
 import pl.hellopoland.dto.SightEventDTO;
@@ -54,6 +58,9 @@ public class HelloTicket {
       return t;
     }).collect(Collectors.toList());
     booking.ticketBookings = ticketBookings;
+    booking.sightEventPdfAttachments = orderEntries.stream()
+        .map(oe -> oe.getDateEntry().getSightEntry().getSightEvent().getPdfAttachment())
+        .filter(pdf -> pdf != null).map(DtoMapper::getDTO).distinct().collect(Collectors.toSet());
     var json = JsonbConfig.getInstance().toJson(booking);
     try {
       var resp = post("/v1/bookings", json, AUTH_TOKEN);
@@ -78,7 +85,10 @@ public class HelloTicket {
 
   public JsonStructure confirm(String serialNumber, List<OrderEntry> orderEntries) {
     try {
-      var resp = put("/v1/bookings/buy/" + serialNumber, null, AUTH_TOKEN);
+      var p24OrderId = Optional.ofNullable(orderEntries.get(0)).map(OrderEntry::getDateEntry)
+          .map(OrderDateEntry::getSightEntry).map(OrderSightEntry::getOrder)
+          .map(Order::getP24OrderId).orElse("");
+      var resp = put("/v1/bookings/buy/" + serialNumber + "/" + p24OrderId, null, AUTH_TOKEN);
       BookingDTO booking = JsonbConfig.getInstance().fromJson(resp.toString(), BookingDTO.class);
       for (var oe : orderEntries) {
         for (var iter = booking.tickets.iterator(); iter.hasNext();) {
@@ -286,19 +296,15 @@ public class HelloTicket {
     }
   }
 
-  public List<AvailableTicketNumberAssociationDTO> checkAvailabilityOfTicketsForSightEvent(
+  public AvailableTicketNumberAssociationDTO checkAvailabilityOfTicketsForSightEvent(
       SightEvent sightEvent, Date date) {
     try {
-      String dateString = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmXXX").format(date);
-      JsonStructure json = get("/v1/available-ticket-number-associations/?sightEventId="
-          + sightEvent.getHptId() + "&date=" + dateString.replaceAll("\\+", "%2B"), AUTH_TOKEN);
-      JsonArray jsonArray = (JsonArray) json;
-      var dtos = new ArrayList<AvailableTicketNumberAssociationDTO>();
-      final Jsonb jsonb = JsonbConfig.getInstance();
-      jsonArray.forEach(p -> {
-        dtos.add(jsonb.fromJson(p.toString(), AvailableTicketNumberAssociationDTO.class));
-      });
-      return dtos;
+      var dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+      String dateString = dateFormat.format(date);
+      return JsonbConfig.getInstance().fromJson(
+          get("/v1/available-ticket-number-associations/?sightEventId=" + sightEvent.getHptId()
+              + "&date=" + dateString, AUTH_TOKEN).toString(),
+          AvailableTicketNumberAssociationDTO.class);
     } catch (JsonbException | IOException e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
       return null;

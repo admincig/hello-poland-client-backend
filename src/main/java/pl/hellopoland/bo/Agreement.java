@@ -1,34 +1,47 @@
 package pl.hellopoland.bo;
 
+import java.util.Set;
 import javax.persistence.Entity;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.NotBlank;
 
 @Entity
 public class Agreement extends ModelSuperclass {
 
   private static final long serialVersionUID = -3524491821261836536L;
 
+  @ManyToMany(mappedBy = "agreements")
+  private Set<Sight> sight;
+
+  @ManyToMany(mappedBy = "agreements")
+  private Set<SightEvent> sightEvent;
+
   @ManyToOne(optional = false)
-  private SightEvent sightEvent;
-  private String linkText = "regulamin";
+  private Partner partner;
+
+  @NotBlank
   private String linkUrl;
-  private String text = "Akceptuję {link} obiektu";
 
+  @NotBlank
+  private String text;
 
-  public SightEvent getSightEvent() {
+  private boolean obligatory;
+
+  public Set<Sight> getSight() {
+    return sight;
+  }
+
+  public void setSight(Set<Sight> sight) {
+    this.sight = sight;
+  }
+
+  public Set<SightEvent> getSightEvent() {
     return sightEvent;
   }
 
-  public void setSightEvent(SightEvent sightEvent) {
+  public void setSightEvent(Set<SightEvent> sightEvent) {
     this.sightEvent = sightEvent;
-  }
-
-  public String getLinkText() {
-    return linkText;
-  }
-
-  public void setLinkText(String linkText) {
-    this.linkText = linkText;
   }
 
   public String getLinkUrl() {
@@ -47,5 +60,20 @@ public class Agreement extends ModelSuperclass {
     this.text = text;
   }
 
+  public boolean isObligatory() {
+    return obligatory;
+  }
+
+  public void setObligatory(boolean obligatory) {
+    this.obligatory = obligatory;
+  }
+
+  public Partner getPartner() {
+    return partner;
+  }
+
+  public void setPartner(Partner partner) {
+    this.partner = partner;
+  }
 
 }

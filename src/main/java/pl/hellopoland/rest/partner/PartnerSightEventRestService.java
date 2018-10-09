@@ -79,4 +79,12 @@ public class PartnerSightEventRestService {
   public SightEventDTO deleteImage(@PathParam("id") Long id, @PathParam("imgId") Long imgId) {
     return service.removeImageFromGallery(id, imgId);
   }
+
+  @POST
+  @Path("/{id}/pdf")
+  @Consumes("application/pdf")
+  public SightEventDTO uploadPdf(@PathParam("id") Long id, byte[] pdf) {
+    return service.uploadPdf(id, pdf);
+  }
+
 }

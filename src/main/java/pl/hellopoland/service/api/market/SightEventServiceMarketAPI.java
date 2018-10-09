@@ -8,9 +8,9 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
-import pl.hellopoland.dto.AvailableTicketNumberAssociationDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
+import pl.hellopoland.rest.dto.AvailableTicketNumberAssociationORO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.service.TicketPoolDefinitionService;
@@ -61,13 +61,14 @@ public class SightEventServiceMarketAPI {
     var now = new Date();
     var tpdStartDate = tpd.startDate;
     if (tpd.isCyclic) {
-      return now.before(tpdStartDate) || now.before(tpd.frequencyData.endDate);
+      return now.before(tpdStartDate)
+          || ((tpd.frequencyData.endDate != null ? now.before(tpd.frequencyData.endDate) : true));
     }
     return now.before(tpdStartDate);
   }
 
   @PermitAll
-  public List<AvailableTicketNumberAssociationDTO> checkAvailability(Long sightEventId, Date date) {
+  public AvailableTicketNumberAssociationORO checkAvailability(Long sightEventId, Date date) {
     return service.checkAvailability(sightEventId, date);
   }
 

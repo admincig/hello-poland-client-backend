@@ -38,6 +38,7 @@ public class Order extends ModelSuperclass {
   private Status status = Status.NEW;
   @NotNull
   private Date date = new Date();
+  private String P24OrderId;
 
   public Collection<OrderSightEntry> getEntries() {
     return entries;
@@ -85,6 +86,14 @@ public class Order extends ModelSuperclass {
 
   public void setDate(Date date) {
     this.date = date;
+  }
+
+  public String getP24OrderId() {
+    return P24OrderId;
+  }
+
+  public void setP24OrderId(String p24OrderId) {
+    P24OrderId = p24OrderId;
   }
 
   public Integer getSum() {
