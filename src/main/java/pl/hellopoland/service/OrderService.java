@@ -41,6 +41,9 @@ public class OrderService extends ServiceSuperclass {
   @Inject
   UserService uService;
 
+  @Inject
+  AgreementService aService;
+
   public Order create(Collection<Triplet<Long, Date, Integer>> triplets, OrderDetails details) {
     User user = getLoggedUser();
 
@@ -66,9 +69,11 @@ public class OrderService extends ServiceSuperclass {
     for (Map.Entry<SightEvent, List<TicketDefinition>> entry : ticketsGroupedBySight.entrySet()) {
       OrderSightEntry ose = new OrderSightEntry();
       ose.setOrder(o);
-      ose.setSightEvent(entry.getKey());
+      var sightEvent = entry.getKey();
+      ose.setSightEvent(sightEvent);
       em.persist(ose);
-
+      ose.setAgreements(new ArrayList<>(sightEvent.getAgreements()));
+      em.flush();
       List<Long> ticketsOfSight =
           entry.getValue().stream().map(TicketDefinition::getId).collect(toList());
       Map<Date, List<Triplet<Long, Date, Integer>>> inSightGroupedByDate = triplets.stream()

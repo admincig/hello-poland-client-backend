@@ -32,6 +32,9 @@ public class Partner extends ModelSuperclass {
   @OneToMany(mappedBy = "partner")
   private List<SightEvent> sightEvents;
 
+  @OneToMany(mappedBy = "partner")
+  private List<Agreement> agreements;
+
   public Integer getP24Id() {
     return p24Id;
   }
@@ -71,4 +74,13 @@ public class Partner extends ModelSuperclass {
   public void setHptToken(String hptToken) {
     this.hptToken = hptToken;
   }
+
+  public List<Agreement> getAgreements() {
+    return agreements;
+  }
+
+  public void setAgreements(List<Agreement> agreements) {
+    this.agreements = agreements;
+  }
+
 }
