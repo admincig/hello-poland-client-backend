@@ -18,6 +18,7 @@ import pl.hellopoland.config.SightPagedCollectionConfig;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.exception.ExceptionFactory;
+import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.PagedEntityCollection;
 
@@ -42,6 +43,9 @@ public class SightService extends ServiceSuperclass {
 
   @Inject
   private AgreementService agreementService;
+
+  @Inject
+  private TranslationService translationService;
 
   public PagedEntityCollection<Sight> getList(SightPagedCollectionConfig config) {
     if (config.isCurrentPartner()) {
@@ -86,6 +90,19 @@ public class SightService extends ServiceSuperclass {
       }
     }
     return get(bo.getId());
+  }
+
+  public Sight createLanguageVesrion(SightDTO dto, Partner partner, String language) {
+    if (partner == null) {
+      partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
+    }
+    var bo = em.createQuery("from Sight where partner = :partner and id = :id", Sight.class)
+        .setParameter("partner", partner).setParameter("id", dto.id).getResultStream().findFirst()
+        .orElseThrow(ResourceNotFoundException::new);
+    fetchColections(bo);
+    em.detach(bo);
+    var translations = translationService.createSightLanguageVersion(bo, dto, language);
+    return (Sight) translationService.translateEntity(bo, translations);
   }
 
   public Sight get(Long id) {
@@ -216,6 +233,21 @@ public class SightService extends ServiceSuperclass {
       throw exceptionFactory.sightHasAssignedSightEventsException();
     } else {
       bo.setActive(false);
+    }
+  }
+
+  private void fetchColections(Sight bo) {
+    if (bo.getSightEvents() != null && !bo.getSightEvents().isEmpty()) {
+      bo.getSightEvents().size();
+    }
+    if (bo.getImages() != null && !bo.getImages().isEmpty()) {
+      bo.getImages().size();
+    }
+    if (bo.getOpeningHours() != null && !bo.getOpeningHours().isEmpty()) {
+      bo.getOpeningHours().size();
+    }
+    if (bo.getAgreements() != null && !bo.getAgreements().isEmpty()) {
+      bo.getAgreements().size();
     }
   }
 
