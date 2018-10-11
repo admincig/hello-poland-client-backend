@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
+import pl.hellopoland.bo.Agreement;
 import pl.hellopoland.bo.FileDescriptor;
 import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.Location;
@@ -18,6 +19,7 @@ import pl.hellopoland.bo.OrderSightEntry;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.TicketDefinition;
+import pl.hellopoland.dto.AgreementDTO;
 import pl.hellopoland.dto.FileDescriptorDTO;
 import pl.hellopoland.dto.ImageDTO;
 import pl.hellopoland.dto.LocationDTO;
@@ -50,9 +52,21 @@ public class DtoMapper {
     return target;
   }
 
+  public static Agreement copy(AgreementDTO source, Agreement target) {
+    if (source.linkUrl != null && !source.linkUrl.isEmpty()) {
+      target.setLinkUrl(source.linkUrl);
+    }
+    if (source.text != null && !source.text.isEmpty()) {
+      target.setText(source.text);
+    }
+    if (source.obligatory != null) {
+      target.setObligatory(source.obligatory);
+    }
+    return target;
+  }
+
   public static SightDTO getDTO(Sight bo) {
     SightDTO dto = new SightDTO();
-
     dto.id = bo.getId();
     dto.name = bo.getName();
     dto.lead = bo.getLead();
@@ -77,12 +91,14 @@ public class DtoMapper {
     if (bo.getOpeningHours() != null && !bo.getOpeningHours().isEmpty()) {
       dto.openingHours = bo.getOpeningHours().stream().map(DtoMapper::getDTO).collect(toList());
     }
+    if (bo.getAgreements() != null && !bo.getAgreements().isEmpty()) {
+      dto.agreements = bo.getAgreements().stream().map(DtoMapper::getDTO).collect(toList());
+    }
     return dto;
   }
 
   public static SightEventDTO getDTO(SightEvent bo) {
     SightEventDTO dto = new SightEventDTO();
-
     dto.id = bo.getId();
     dto.name = bo.getName();
     dto.lead = bo.getLead();
@@ -111,21 +127,12 @@ public class DtoMapper {
     if (bo.getOpeningHours() != null && !bo.getOpeningHours().isEmpty()) {
       dto.openingHours = bo.getOpeningHours().stream().map(DtoMapper::getDTO).collect(toList());
     }
-    // if (bo.getAgreements() != null && !bo.getAgreements().isEmpty()) {
-    // dto.agreements = bo.getAgreements().stream().map(DtoMapper::getDTO).collect(toList());
-    // }
+    if (bo.getAgreements() != null && !bo.getAgreements().isEmpty()) {
+      dto.agreements = bo.getAgreements().stream().map(DtoMapper::getDTO).collect(toList());
+    }
     dto.pdfAttachment = bo.getPdfAttachment() != null ? getDTO(bo.getPdfAttachment()) : null;
     return dto;
   }
-
-  // private static AgreementDTO getDTO(Agreement bo) {
-  // var dto = new AgreementDTO();
-  //
-  // dto.name = ofNullable(bo.getSightEvent()).map(SightEvent::getName).orElse(null);
-  // dto.url = bo.getLinkUrl();
-  //
-  // return dto;
-  // }
 
   public static FileDescriptorDTO getDTO(FileDescriptor bo) {
     var dto = new FileDescriptorDTO();
@@ -316,6 +323,15 @@ public class DtoMapper {
       url = url.concat("/");
     }
     return url.concat("market/orders/" + o.getHash() + "/ackPayment");
+  }
+
+  public static AgreementDTO getDTO(Agreement bo) {
+    var dto = new AgreementDTO();
+    dto.id = bo.getId();
+    dto.linkUrl = bo.getLinkUrl();
+    dto.obligatory = bo.isObligatory();
+    dto.text = bo.getText();
+    return dto;
   }
 
 }

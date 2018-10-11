@@ -6,12 +6,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Random;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
@@ -43,8 +45,8 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
   @OneToMany(mappedBy = "sightEvent")
   private Collection<TicketDefinition> tickets;
 
-  @OneToMany(mappedBy = "sightEvent")
-  private Collection<Agreement> agreements;
+  @ManyToMany
+  private Set<Agreement> agreements;
 
   private String lead;
 
@@ -114,7 +116,7 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
     return agreements;
   }
 
-  public void setAgreements(Collection<Agreement> agreements) {
+  public void setAgreements(Set<Agreement> agreements) {
     this.agreements = agreements;
   }
 
