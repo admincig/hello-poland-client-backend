@@ -43,7 +43,7 @@ public class TranslationService extends ServiceSuperclass {
         .getResultList();
   }
 
-  public ModelSuperclass translateEntity(ModelSuperclass bo, List<Translation> translations) {
+  public <T extends ModelSuperclass> T translateEntity(T bo, List<Translation> translations) {
     for (Translation translation : translations) {
       if (StringUtils.isNotBlank(translation.getValue())) {
         var key = translation.getKey();

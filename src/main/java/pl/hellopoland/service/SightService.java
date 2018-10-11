@@ -102,7 +102,7 @@ public class SightService extends ServiceSuperclass {
     fetchColections(bo);
     em.detach(bo);
     var translations = translationService.createSightLanguageVersion(bo, dto, language);
-    return (Sight) translationService.translateEntity(bo, translations);
+    return translationService.translateEntity(bo, translations);
   }
 
   public Sight get(Long id) {

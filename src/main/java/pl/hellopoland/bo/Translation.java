@@ -10,7 +10,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(name = "translation_key-language_unique",
+@Table(uniqueConstraints = @UniqueConstraint(name = "translation_key_language_unique",
     columnNames = {"key", "language"}))
 public class Translation extends ModelSuperclass {
   private static final long serialVersionUID = 4888676435527982407L;
