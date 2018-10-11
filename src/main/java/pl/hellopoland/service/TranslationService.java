@@ -45,14 +45,16 @@ public class TranslationService extends ServiceSuperclass {
 
   public ModelSuperclass translateEntity(ModelSuperclass bo, List<Translation> translations) {
     for (Translation translation : translations) {
-      var key = translation.getKey();
-      var fieldName = key.substring(key.lastIndexOf(Translation.KEY_DELIMITER) + 1);
-      try {
-        bo.getClass().getMethod("set" + StringUtils.capitalize(fieldName), String.class).invoke(bo,
-            translation.getValue());
-      } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
-          | NoSuchMethodException | SecurityException e) {
-        continue;
+      if (StringUtils.isNotBlank(translation.getValue())) {
+        var key = translation.getKey();
+        var fieldName = key.substring(key.lastIndexOf(Translation.KEY_DELIMITER) + 1);
+        try {
+          bo.getClass().getMethod("set" + StringUtils.capitalize(fieldName), String.class)
+              .invoke(bo, translation.getValue());
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+            | NoSuchMethodException | SecurityException e) {
+          continue;
+        }
       }
     }
     return bo;
