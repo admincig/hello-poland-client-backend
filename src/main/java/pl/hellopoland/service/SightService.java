@@ -95,7 +95,7 @@ public class SightService extends ServiceSuperclass {
 
   public Sight createLanguageVesrion(SightDTO dto, Partner partner, String language) {
     var bo = getForLoggedPartner(dto.id);
-    var translations = translationService.createSightLanguageVersion(bo, dto, language);
+    var translations = translationService.createEntityLanguageVersion(bo, dto, language);
     return translationService.translateEntity(bo, translations);
   }
 

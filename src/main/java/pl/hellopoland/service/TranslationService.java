@@ -1,41 +1,44 @@
 package pl.hellopoland.service;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import org.apache.commons.lang3.StringUtils;
 import pl.hellopoland.bo.ModelSuperclass;
-import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.Translation;
 import pl.hellopoland.bo.Translation.LanguageVersion;
 import pl.hellopoland.dto.DTOSuperclass;
-import pl.hellopoland.dto.SightDTO;
 
 @LocalBean
 @Stateless
 public class TranslationService extends ServiceSuperclass {
+  private static final List<String> EXCLUDED_DTO_FIELDS_NAMES = List.of("email", "phone");
 
-  public List<Translation> createSightLanguageVersion(Sight bo, SightDTO dto, String language) {
-    var translation = new Translation();
-    translation.putLanguage(language);
-    translation.generateKey(bo, "name");
-    translation.setValue(dto.name);
-    em.persist(translation);
-    em.flush();
-    translation = new Translation();
-    translation.putLanguage(language);
-    translation.generateKey(bo, "description");
-    translation.setValue(dto.description);
-    em.persist(translation);
-    em.flush();
-    translation = new Translation();
-    translation.putLanguage(language);
-    translation.generateKey(bo, "lead");
-    translation.setValue(dto.lead);
-    em.persist(translation);
-    em.flush();
-    return getTranslations(bo, language);
+  public <T extends ModelSuperclass, D extends DTOSuperclass> List<Translation> createEntityLanguageVersion(
+      T bo, D dto, String language) {
+    List<Field> dtoStringFields = Arrays.asList(dto.getClass().getFields()).stream().filter(
+        f -> (f.getType().equals(String.class) && !EXCLUDED_DTO_FIELDS_NAMES.contains(f.getName())))
+        .collect(Collectors.toList());
+    var translations = new ArrayList<Translation>();
+    for (Field field : dtoStringFields) {
+      var translation = new Translation();
+      translation.putLanguage(language);
+      translation.generateKey(bo, field.getName());
+      try {
+        translation.setValue((String) field.get(dto));
+      } catch (IllegalArgumentException | IllegalAccessException e) {
+        continue;
+      }
+      em.persist(translation);
+      em.flush();
+      translations.add(translation);
+    }
+    return translations;
   }
 
   public <T extends ModelSuperclass> T translateEntity(T bo, List<Translation> translations) {
