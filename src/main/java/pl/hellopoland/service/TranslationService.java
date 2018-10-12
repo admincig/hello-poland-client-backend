@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import pl.hellopoland.bo.ModelSuperclass;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.Translation;
+import pl.hellopoland.bo.Translation.LanguageVersion;
 import pl.hellopoland.dto.SightDTO;
 
 @LocalBean
@@ -37,10 +38,13 @@ public class TranslationService extends ServiceSuperclass {
   }
 
   private List<Translation> getTranslations(ModelSuperclass bo, String language) {
-    return em.createQuery("from Translation t where t.key like :key", Translation.class)
-        .setParameter("key", bo.getClass().getSimpleName() + Translation.KEY_DELIMITER + bo.getId()
-            + Translation.KEY_DELIMITER + "%")
-        .getResultList();
+    return em
+        .createQuery("from Translation t where t.key like :key and language = :language",
+            Translation.class)
+        .setParameter("key",
+            bo.getClass().getSimpleName() + Translation.KEY_DELIMITER + bo.getId()
+                + Translation.KEY_DELIMITER + "%")
+        .setParameter("language", LanguageVersion.valueOf(language.toUpperCase())).getResultList();
   }
 
   public <T extends ModelSuperclass> T translateEntity(T bo, List<Translation> translations) {
