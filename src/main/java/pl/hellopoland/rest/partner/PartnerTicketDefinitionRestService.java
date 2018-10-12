@@ -26,11 +26,6 @@ public class PartnerTicketDefinitionRestService {
     return service.add(ticketDefinitionDTO, null);
   }
 
-  // @GET
-  // public List<TicketDefinitionDTO> ticketDefinitions() {
-  // return service.getTicketDefinitionsForLoggedUser();
-  // }
-
   @GET
   public PagedCollection ticketDefinitions() {
     return service.getList();
