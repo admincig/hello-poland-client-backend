@@ -9,6 +9,7 @@ import pl.hellopoland.bo.ModelSuperclass;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.Translation;
 import pl.hellopoland.bo.Translation.LanguageVersion;
+import pl.hellopoland.dto.DTOSuperclass;
 import pl.hellopoland.dto.SightDTO;
 
 @LocalBean
@@ -37,16 +38,6 @@ public class TranslationService extends ServiceSuperclass {
     return getTranslations(bo, language);
   }
 
-  private List<Translation> getTranslations(ModelSuperclass bo, String language) {
-    return em
-        .createQuery("from Translation t where t.key like :key and language = :language",
-            Translation.class)
-        .setParameter("key",
-            bo.getClass().getSimpleName() + Translation.KEY_DELIMITER + bo.getId()
-                + Translation.KEY_DELIMITER + "%")
-        .setParameter("language", LanguageVersion.valueOf(language.toUpperCase())).getResultList();
-  }
-
   public <T extends ModelSuperclass> T translateEntity(T bo, List<Translation> translations) {
     for (Translation translation : translations) {
       if (StringUtils.isNotBlank(translation.getValue())) {
@@ -62,6 +53,35 @@ public class TranslationService extends ServiceSuperclass {
       }
     }
     return bo;
+  }
+
+  public <T extends ModelSuperclass, D extends DTOSuperclass> List<Translation> updateTranslations(
+      T bo, D dto, String language) {
+    var translations = getTranslations(bo, language);
+    for (Translation t : translations) {
+      var key = t.getKey();
+      var fieldName = key.substring(key.lastIndexOf(Translation.KEY_DELIMITER) + 1);
+      try {
+        var value = (String) dto.getClass().getField(StringUtils.uncapitalize(fieldName)).get(dto);
+        if (value != null) {
+          t.setValue(value);
+        }
+      } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException
+          | SecurityException e) {
+        continue;
+      }
+    }
+    return translations;
+  }
+
+  private List<Translation> getTranslations(ModelSuperclass bo, String language) {
+    return em
+        .createQuery("from Translation t where t.key like :key and language = :language",
+            Translation.class)
+        .setParameter("key",
+            bo.getClass().getSimpleName() + Translation.KEY_DELIMITER + bo.getId()
+                + Translation.KEY_DELIMITER + "%")
+        .setParameter("language", LanguageVersion.valueOf(language.toUpperCase())).getResultList();
   }
 
 }
