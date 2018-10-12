@@ -54,6 +54,14 @@ public class PartnerSightRestService {
     return service.update(dto);
   }
 
+  @PUT
+  @Path("/version/{id}")
+  public SightDTO updateLanguageVersion(@PathParam("id") Long id, SightDTO dto,
+      @QueryParam("language") String language) {
+    dto.id = id;
+    return service.updateLanguageVersion(dto, language);
+  }
+
   @DELETE
   @Path("/{id}")
   public void delete(@PathParam("id") Long id) {

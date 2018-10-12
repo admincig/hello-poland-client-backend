@@ -53,6 +53,13 @@ public class SightServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
+  public SightDTO updateLanguageVersion(SightDTO dto, String language) {
+    Sight bo = service.updateLanguageVersionForLoggedUser(dto, language);
+    dto = DtoMapper.getFullDTO(bo);
+    return dto;
+  }
+
+  @RolesAllowed("partner")
   public void delete(Long id) {
     service.deleteForLoggedUser(id);
   }
