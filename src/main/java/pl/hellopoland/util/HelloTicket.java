@@ -88,7 +88,11 @@ public class HelloTicket {
       var p24OrderId = Optional.ofNullable(orderEntries.get(0)).map(OrderEntry::getDateEntry)
           .map(OrderDateEntry::getSightEntry).map(OrderSightEntry::getOrder)
           .map(Order::getP24OrderId).orElse("");
-      var resp = put("/v1/bookings/buy/" + serialNumber + "/" + p24OrderId, null, AUTH_TOKEN);
+      var p24Currency = Optional.ofNullable(orderEntries.get(0)).map(OrderEntry::getDateEntry)
+          .map(OrderDateEntry::getSightEntry).map(OrderSightEntry::getOrder)
+          .map(Order::getP24Currency).orElse("");
+      var resp = put("/v1/bookings/buy/" + serialNumber + "/" + p24OrderId + "/" + p24Currency,
+          null, AUTH_TOKEN);
       BookingDTO booking = JsonbConfig.getInstance().fromJson(resp.toString(), BookingDTO.class);
       for (var oe : orderEntries) {
         for (var iter = booking.tickets.iterator(); iter.hasNext();) {

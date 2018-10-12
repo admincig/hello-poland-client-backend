@@ -143,7 +143,6 @@ public class OrderService extends ServiceSuperclass {
           confirmInHpt(entry);
           break;
       }
-
     }
   }
 
@@ -242,6 +241,7 @@ public class OrderService extends ServiceSuperclass {
     if (resp.equals("OK")) {
       logger.log(Logger.Level.INFO, "transaction confirmed. successful");
       order.setP24OrderId(ackMap.get("p24_order_id"));
+      order.setP24Currency(ackMap.get("p24_currency"));
       confirm(order);
     } else {
       logger.log(Logger.Level.WARNING, "transaction problem.");
