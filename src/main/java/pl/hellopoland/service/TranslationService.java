@@ -17,6 +17,10 @@ import pl.hellopoland.dto.DTOSuperclass;
 @LocalBean
 @Stateless
 public class TranslationService extends ServiceSuperclass {
+
+  /**
+   * The list of the names of the fields excluded from translation.
+   */
   private static final List<String> EXCLUDED_DTO_FIELDS_NAMES = List.of("email", "phone");
 
   public <T extends ModelSuperclass, D extends DTOSuperclass> List<Translation> createEntityLanguageVersion(
