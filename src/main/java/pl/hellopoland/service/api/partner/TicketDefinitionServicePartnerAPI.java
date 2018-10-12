@@ -6,6 +6,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.dto.TicketDefinitionDTO;
+import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.TicketDefinitionService;
 
 @Stateless
@@ -22,6 +23,11 @@ public class TicketDefinitionServicePartnerAPI {
   @RolesAllowed("partner")
   public List<TicketDefinitionDTO> getTicketDefinitionsForLoggedUser() {
     return service.getTicketDefinitionsForLoggedUser();
+  }
+
+  @RolesAllowed("partner")
+  public PagedCollection getList() {
+    return new PagedCollection(service.getTicketDefinitionsForLoggedUser(), null);
   }
 
 }
