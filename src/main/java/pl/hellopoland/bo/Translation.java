@@ -4,7 +4,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -51,12 +50,10 @@ public class Translation extends ModelSuperclass {
     this.language = language;
   }
 
-  @Transient
   public void generateKey(ModelSuperclass bo, String fieldName) {
     setKey(bo.getClass().getSimpleName() + KEY_DELIMITER + bo.getId() + KEY_DELIMITER + fieldName);
   }
 
-  @Transient
   public void putLanguage(String language) {
     var langVersions = LanguageVersion.values();
     for (int i = 0; i < langVersions.length; i++) {
