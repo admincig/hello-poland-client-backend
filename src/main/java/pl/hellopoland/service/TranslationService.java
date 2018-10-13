@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -21,13 +22,17 @@ public class TranslationService extends ServiceSuperclass {
   /**
    * The list of the names of the fields excluded from translation.
    */
-  private static final List<String> EXCLUDED_DTO_FIELDS_NAMES = List.of("email", "phone");
+  private static final List<String> EXCLUDED_FIELDS_NAMES =
+      List.of("Sight.email", "Sight.phone");
 
   public <T extends ModelSuperclass, D extends DTOSuperclass> List<Translation> createEntityLanguageVersion(
       T bo, D dto, String language) {
-    List<Field> dtoStringFields = Arrays.asList(dto.getClass().getFields()).stream().filter(
-        f -> (f.getType().equals(String.class) && !EXCLUDED_DTO_FIELDS_NAMES.contains(f.getName())))
-        .collect(Collectors.toList());
+
+    Predicate<? super Field> predicate = f -> (f.getType().equals(String.class)
+        && !EXCLUDED_FIELDS_NAMES.contains(bo.getClass().getSimpleName() + "." + f.getName()));
+
+    List<Field> dtoStringFields = Arrays.asList(dto.getClass().getFields()).stream()
+        .filter(predicate).collect(Collectors.toList());
     var translations = new ArrayList<Translation>();
     for (Field field : dtoStringFields) {
       var translation = new Translation();
