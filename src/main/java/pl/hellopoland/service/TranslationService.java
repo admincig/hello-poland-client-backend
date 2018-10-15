@@ -25,8 +25,8 @@ public class TranslationService extends ServiceSuperclass {
    */
   private static final List<String> EXCLUDED_FIELDS_NAMES = List.of("Sight.email", "Sight.phone");
 
-  public <T extends ModelSuperclass, D extends DTOSuperclass> List<Translation> createEntityLanguageVersion(
-      T bo, D dto, String language) {
+  public <T extends ModelSuperclass, D extends DTOSuperclass> T createEntityLanguageVersion(T bo,
+      D dto, String language) {
 
     Predicate<? super Field> predicate = f -> (f.getType().equals(String.class)
         && !EXCLUDED_FIELDS_NAMES.contains(bo.getClass().getSimpleName() + "." + f.getName()));
@@ -47,7 +47,26 @@ public class TranslationService extends ServiceSuperclass {
       em.flush();
       translations.add(translation);
     }
-    return translations;
+    return translateEntity(bo, language);
+  }
+
+  public <T extends ModelSuperclass, D extends DTOSuperclass> T updateEntityLanguageVersion(T bo, D dto,
+      String language) {
+    var translations = getTranslations(bo, language);
+    for (Translation t : translations) {
+      var key = t.getKey();
+      var fieldName = key.substring(key.lastIndexOf(Translation.KEY_DELIMITER) + 1);
+      try {
+        var value = (String) dto.getClass().getField(StringUtils.uncapitalize(fieldName)).get(dto);
+        if (value != null) {
+          t.setValue(value);
+        }
+      } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException
+          | SecurityException e) {
+        continue;
+      }
+    }
+    return translateEntity(bo, language);
   }
 
   public <T extends ModelSuperclass> T translateEntity(T bo, String language) {
@@ -71,56 +90,9 @@ public class TranslationService extends ServiceSuperclass {
 
   public <T extends ModelSuperclass> List<T> translateEntities(Collection<T> bos, String language) {
     return bos.stream().map(bo -> {
-      fetchColections(bo);
       bo = translateEntity(bo, language);
       return bo;
     }).collect(Collectors.toList());
-  }
-
-  private <T extends ModelSuperclass> void fetchColections(T bo) {
-    Predicate<? super Field> predicateNotEmptyCollection = field -> {
-      try {
-        return (field.getType().isAssignableFrom(Collection.class)) && (bo.getClass()
-            .getMethod("get" + StringUtils.capitalize(field.getName())).invoke(bo) != null);
-      } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
-          | NoSuchMethodException | SecurityException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-      return false;
-    };
-
-    Arrays.asList(bo.getClass().getDeclaredFields()).stream().filter(predicateNotEmptyCollection)
-        .map(field -> {
-          try {
-            return (Collection<?>) bo.getClass()
-                .getMethod("get" + StringUtils.capitalize(field.getName())).invoke(bo);
-          } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
-              | NoSuchMethodException | SecurityException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-          }
-          return null;
-        }).forEach(collection -> collection.size());
-  }
-
-  public <T extends ModelSuperclass, D extends DTOSuperclass> List<Translation> updateTranslations(
-      T bo, D dto, String language) {
-    var translations = getTranslations(bo, language);
-    for (Translation t : translations) {
-      var key = t.getKey();
-      var fieldName = key.substring(key.lastIndexOf(Translation.KEY_DELIMITER) + 1);
-      try {
-        var value = (String) dto.getClass().getField(StringUtils.uncapitalize(fieldName)).get(dto);
-        if (value != null) {
-          t.setValue(value);
-        }
-      } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException
-          | SecurityException e) {
-        continue;
-      }
-    }
-    return translations;
   }
 
   private List<Translation> getTranslations(ModelSuperclass bo, String language) {
