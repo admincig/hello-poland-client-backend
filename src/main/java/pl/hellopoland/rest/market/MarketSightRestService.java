@@ -31,11 +31,12 @@ public class MarketSightRestService {
   private FilterMarketAPI filterService;
 
   @GET
-  public PagedCollection get(@QueryParam("city") String city) {
+  public PagedCollection get(@QueryParam("city") String city,
+      @HeaderParam("Accept-Language") String language) {
     var config = new SightPagedCollectionConfig();
     config.onlyActive();
     config.setCity(city);
-    return service.getList(config);
+    return service.getList(config, language);
   }
 
   @GET
@@ -46,9 +47,10 @@ public class MarketSightRestService {
 
   @POST
   @Path("/search")
-  public PagedCollection search(SightPagedCollectionConfig config) {
+  public PagedCollection search(SightPagedCollectionConfig config,
+      @HeaderParam("Accept-Language") String language) {
     config.onlyActive();
-    return service.getList(config);
+    return service.getList(config, language);
   }
 
   @GET

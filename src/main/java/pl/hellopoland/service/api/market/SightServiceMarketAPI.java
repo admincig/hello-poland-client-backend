@@ -23,8 +23,16 @@ public class SightServiceMarketAPI {
   private TranslationService translationService;
 
   @PermitAll
-  public PagedCollection getList(SightPagedCollectionConfig config) {
+  public PagedCollection getList(SightPagedCollectionConfig config, String language) {
     PagedEntityCollection<Sight> bos = service.getList(config);
+
+
+    if (language != null && !language.toLowerCase().contains("pl")) {
+      bos.items = translationService.translateEntities(bos.items, language);
+    }
+
+
+
     var dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
     return new PagedCollection(dtos, bos.config);
   }

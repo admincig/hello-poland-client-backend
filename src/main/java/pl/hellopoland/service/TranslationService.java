@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -66,6 +67,41 @@ public class TranslationService extends ServiceSuperclass {
       }
     }
     return bo;
+  }
+
+  public <T extends ModelSuperclass> List<T> translateEntities(Collection<T> bos, String language) {
+    return bos.stream().map(bo -> {
+      fetchColections(bo);
+      bo = translateEntity(bo, language);
+      return bo;
+    }).collect(Collectors.toList());
+  }
+
+  private <T extends ModelSuperclass> void fetchColections(T bo) {
+    Predicate<? super Field> predicateNotEmptyCollection = field -> {
+      try {
+        return (field.getType().isAssignableFrom(Collection.class)) && (bo.getClass()
+            .getMethod("get" + StringUtils.capitalize(field.getName())).invoke(bo) != null);
+      } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+          | NoSuchMethodException | SecurityException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+      return false;
+    };
+
+    Arrays.asList(bo.getClass().getDeclaredFields()).stream().filter(predicateNotEmptyCollection)
+        .map(field -> {
+          try {
+            return (Collection<?>) bo.getClass()
+                .getMethod("get" + StringUtils.capitalize(field.getName())).invoke(bo);
+          } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+              | NoSuchMethodException | SecurityException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+          return null;
+        }).forEach(collection -> collection.size());
   }
 
   public <T extends ModelSuperclass, D extends DTOSuperclass> List<Translation> updateTranslations(
