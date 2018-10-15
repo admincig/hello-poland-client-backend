@@ -1,5 +1,6 @@
 package pl.hellopoland.service.api.market;
 
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
@@ -40,6 +41,14 @@ public class SightServiceMarketAPI {
     if (language != null && !language.toLowerCase().contains("pl")) {
       service.fetchColections(bo);
       bo = translationService.translateEntity(bo, language);
+      var agreements = bo.getAgreements();
+      var sightEvents = bo.getSightEvents();
+      if (agreements != null && !agreements.isEmpty()) {
+        bo.setAgreements(Set.copyOf(translationService.translateEntities(agreements, language)));
+      }
+      if (sightEvents != null && !sightEvents.isEmpty()) {
+        bo.setSightEvents(translationService.translateEntities(sightEvents, language));
+      }
     }
     var dto = DtoMapper.getFullDTO(bo);
     return dto;
