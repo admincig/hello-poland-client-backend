@@ -55,7 +55,7 @@ public class PartnerSightRestService {
   }
 
   @PUT
-  @Path("/version/{id}")
+  @Path("/{id}/version")
   public SightDTO updateLanguageVersion(@PathParam("id") Long id, SightDTO dto,
       @QueryParam("language") String language) {
     dto.id = id;

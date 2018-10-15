@@ -14,7 +14,6 @@ import pl.hellopoland.bo.OpeningHours;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
-import pl.hellopoland.bo.Translation;
 import pl.hellopoland.config.SightPagedCollectionConfig;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.dto.SightEventDTO;
@@ -95,8 +94,8 @@ public class SightService extends ServiceSuperclass {
 
   public Sight createLanguageVesrion(SightDTO dto, Partner partner, String language) {
     var bo = getForLoggedPartner(dto.id);
-    var translations = translationService.createEntityLanguageVersion(bo, dto, language);
-    return translationService.translateEntity(bo, translations);
+    translationService.createEntityLanguageVersion(bo, dto, language);
+    return translationService.translateEntity(bo, language);
   }
 
   public Sight get(Long id) {
@@ -216,8 +215,8 @@ public class SightService extends ServiceSuperclass {
 
   public Sight updateLanguageVersionForLoggedUser(SightDTO dto, String language) {
     Sight bo = getForLoggedPartner(dto.id);
-    List<Translation> translations = translationService.updateTranslations(bo, dto, language);
-    return translationService.translateEntity(bo, translations);
+    translationService.updateTranslations(bo, dto, language);
+    return translationService.translateEntity(bo, language);
   }
 
   private ArrayList<OpeningHours> getOpeningHoursCollectionFromDTO(SightDTO dto) {

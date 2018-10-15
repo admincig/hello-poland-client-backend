@@ -4,6 +4,7 @@ import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -39,8 +40,8 @@ public class MarketSightRestService {
 
   @GET
   @Path("/{id}")
-  public SightDTO get(@PathParam("id") Long id) {
-    return service.get(id);
+  public SightDTO get(@PathParam("id") Long id, @HeaderParam("Accept-Language") String language) {
+    return service.get(id, language);
   }
 
   @POST

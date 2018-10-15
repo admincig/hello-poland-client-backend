@@ -22,8 +22,7 @@ public class TranslationService extends ServiceSuperclass {
   /**
    * The list of the names of the fields excluded from translation.
    */
-  private static final List<String> EXCLUDED_FIELDS_NAMES =
-      List.of("Sight.email", "Sight.phone");
+  private static final List<String> EXCLUDED_FIELDS_NAMES = List.of("Sight.email", "Sight.phone");
 
   public <T extends ModelSuperclass, D extends DTOSuperclass> List<Translation> createEntityLanguageVersion(
       T bo, D dto, String language) {
@@ -50,7 +49,9 @@ public class TranslationService extends ServiceSuperclass {
     return translations;
   }
 
-  public <T extends ModelSuperclass> T translateEntity(T bo, List<Translation> translations) {
+  public <T extends ModelSuperclass> T translateEntity(T bo, String language) {
+    var translations = getTranslations(bo, getLanguageSymbol(language));
+    em.detach(bo);
     for (Translation translation : translations) {
       if (StringUtils.isNotBlank(translation.getValue())) {
         var key = translation.getKey();
@@ -94,6 +95,11 @@ public class TranslationService extends ServiceSuperclass {
             bo.getClass().getSimpleName() + Translation.KEY_DELIMITER + bo.getId()
                 + Translation.KEY_DELIMITER + "%")
         .setParameter("language", LanguageVersion.valueOf(language.toUpperCase())).getResultList();
+  }
+
+  private String getLanguageSymbol(String language) {
+    int indexOfDelimiter = language.indexOf("-");
+    return language.substring(0, indexOfDelimiter == -1 ? language.length() : indexOfDelimiter);
   }
 
 }
