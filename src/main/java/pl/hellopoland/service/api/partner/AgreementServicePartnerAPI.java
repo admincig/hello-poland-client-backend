@@ -32,6 +32,11 @@ public class AgreementServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
+  public AgreementDTO createLanguageVersion(AgreementDTO dto, String language) {
+    return DtoMapper.getDTO(service.createLanguageVersion(dto, language));
+  }
+
+  @RolesAllowed("partner")
   public void delete(Long id) {
     service.deleteForLoggedUser(id);
   }
@@ -39,6 +44,11 @@ public class AgreementServicePartnerAPI {
   @RolesAllowed("partner")
   public AgreementDTO update(AgreementDTO dto) {
     return DtoMapper.getDTO(service.updateForLoggedUser(dto));
+  }
+
+  @RolesAllowed("partner")
+  public AgreementDTO updateLanguageVersion(AgreementDTO dto, String language) {
+    return DtoMapper.getDTO(service.updateLanguageVersion(dto, language));
   }
 
 }

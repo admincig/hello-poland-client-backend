@@ -93,8 +93,8 @@ public class SightService extends ServiceSuperclass {
   }
 
   public Sight createLanguageVesrion(SightDTO dto, Partner partner, String language) {
-    var bo = getForLoggedPartner(dto.id);
-    return translationService.createEntityLanguageVersion(bo, dto, language);
+    return translationService.createEntityLanguageVersion(getForLoggedPartner(dto.id), dto,
+        language);
   }
 
   public Sight get(Long id) {
@@ -213,8 +213,8 @@ public class SightService extends ServiceSuperclass {
   }
 
   public Sight updateLanguageVersionForLoggedUser(SightDTO dto, String language) {
-    Sight bo = getForLoggedPartner(dto.id);
-    return translationService.updateEntityLanguageVersion(bo, dto, language);
+    return translationService.updateEntityLanguageVersion(getForLoggedPartner(dto.id), dto,
+        language);
   }
 
   private ArrayList<OpeningHours> getOpeningHoursCollectionFromDTO(SightDTO dto) {
