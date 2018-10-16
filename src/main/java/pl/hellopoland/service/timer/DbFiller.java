@@ -309,7 +309,7 @@ public class DbFiller extends ServiceSuperclass {
             + "W zbiorach muzeum znajdują się pierwsze wydanie Ech leśnych z dedykacją dla Zofii Kochnowskiej czy O Adamie Żeromskim wspomnienie z dedykacją dla Jana Müllera.\r\n"
             + "Muzeum posiada płytę gramofonową z 1924 roku z nagranym głosem Stefana Żeromskiego, oraz kolekcję fotografii szkolnych kolegów Żeromskiego pochodzących z lat 1884-1886 (niektóre z nich opatrzone są dedykacjami).",
         "Muzeum zajmuje się gromadzeniem, eksponowaniem zbiorów związanych z młodzieńczym okresem życia oraz twórczością Stefana Żeromskiego",
-        false, zeromKielce.getId(), zeromLocation, userHelloPoland.getPartner());
+        true, zeromKielce.getId(), zeromLocation, userHelloPoland.getPartner());
     geoparkKielcEvent = createSightEvent(geopark1Img, "Geopark Kielce – Centrum Geoedukacji",
         "Obiekt zlokalizowany jest w południowo-wschodniej części rezerwatu Wietrznia i jest to najważniejsza atrakcja geoturystyczna na trasie „Świętokrzyskiego Szlaku Archeo-Geologicznego”. Inwestycja została zrealizowana ze środków Europejskiego Funduszu Regionalnego w ramach Programu Operacyjnego Innowacyjna Gospodarka 2007-2013.\r\n"
             + "Centrum Geoedukacji  to miejsce, gdzie w przystępny sposób przekazujemy wiedzę geologiczną i geograficzną, z wykorzystaniem nowoczesnych metod i narzędzi edukacyjnych.\r\n"
@@ -320,7 +320,7 @@ public class DbFiller extends ServiceSuperclass {
             + "zajęcia geoedukacyjne (teoretyczno-praktyczne)\r\n"
             + "zajęcia terenowe w obrębie obiektów geoturystycznych Kielc\r\n"
             + "imprezy i wydarzenia geoedukacyjne",
-        "Centrum Geoedukacji to nowoczesna placówka, należąca do Geoparku Kielce", false,
+        "Centrum Geoedukacji to nowoczesna placówka, należąca do Geoparku Kielce", true,
         geoparkKielce.getId(), geoparkKielceLocation, userHelloPoland.getPartner());
     afrEvent = createSightEvent(afrImg, "Wieczorne zwiedzanie Afrykarium",
         "Chcielibyście zobaczyć, co się dzieje w Afrykarium, gdy wyjdą ostatni zwiedzający? Hello Poland zaprasza na zwiedzanie Afrykarium po godzinach otwarcia obiektu! Jest to niepowtarzalna okazja, aby poznać ten unikatowy na skalę Polski obiekt bez tłumu turystów, w niedostępnej porze i w towarzystwie przewodnika, który zdradzi Państwu tajemnice tego fascynującego miejsca.\n"
