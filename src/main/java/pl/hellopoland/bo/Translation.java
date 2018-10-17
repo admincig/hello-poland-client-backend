@@ -16,7 +16,7 @@ public class Translation extends ModelSuperclass {
   public static final String KEY_DELIMITER = "|";
 
   public enum LanguageVersion {
-    DE, EN;
+    PL, DE, EN;
   }
 
   @NotBlank
