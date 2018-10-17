@@ -41,7 +41,8 @@ public class DtoMapper {
     target.setDescription(source.description);
     target.setEmail(source.email);
     target.setPhone(source.phone);
-
+    target.setBlocked(source.blocked);
+    target.setPublished(source.published);
     copyLocation(source.location, target);
   }
 
@@ -76,7 +77,8 @@ public class DtoMapper {
     dto.email = bo.getEmail();
     dto.phone = bo.getPhone();
     dto.score = bo.getScore();
-
+    dto.blocked = bo.isBlocked();
+    dto.published = bo.isPublished();
     return dto;
   }
 
@@ -112,7 +114,8 @@ public class DtoMapper {
     dto.generalAdmission = bo.getGeneralAdmission();
     dto.score = bo.getScore();
     dto.sightId = bo.getSight() != null ? bo.getSight().getId() : null;
-
+    dto.blocked = bo.isBlocked();
+    dto.published = bo.isPublished();
     return dto;
   }
 
@@ -236,7 +239,8 @@ public class DtoMapper {
     target.setPhone(source.phone);
     target.setGeneralAdmission(source.generalAdmission);
     target.setHptId(source.id);
-
+    target.setBlocked(source.blocked);
+    target.setPublished(source.published);
     copyLocation(source.location, target);
   }
 

@@ -36,6 +36,7 @@ public class MarketSightEventRestService {
   public PagedCollection getList(@QueryParam("city") String city) {
     var config = new SightEventPagedCollectionConfig();
     config.onlyActive();
+    config.onlyPublished();
     config.setCity(city);
     return service.getList(config);
   }
@@ -44,6 +45,7 @@ public class MarketSightEventRestService {
   @Path("/search")
   public PagedCollection search(SightEventPagedCollectionConfig config) {
     config.onlyActive();
+    config.onlyPublished();
     return service.getList(config);
   }
 

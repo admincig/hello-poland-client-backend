@@ -56,6 +56,9 @@ public class SightService extends ServiceSuperclass {
   public Sight create(SightDTO dto, Partner partner) {
     Sight bo = new Sight();
     DtoMapper.copy(dto, bo);
+    if (bo.isBlocked()) {
+      bo.setPublished(false);
+    }
     if (partner == null) {
       partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
     }
@@ -113,6 +116,9 @@ public class SightService extends ServiceSuperclass {
   public Sight update(Long id, SightDTO dto) {
     Sight bo = get(id);
     DtoMapper.copy(dto, bo);
+    if (bo.isBlocked()) {
+      bo.setPublished(false);
+    }
     oHoursService.remove(bo.getOpeningHours());
     ArrayList<OpeningHours> oHoursList = getOpeningHoursCollectionFromDTO(dto);
     if (oHoursList != null && !oHoursList.isEmpty()) {
@@ -180,6 +186,9 @@ public class SightService extends ServiceSuperclass {
   public Sight updateForLoggedUser(SightDTO dto) {
     Sight bo = getActiveForLoggedUser(dto.id);
     DtoMapper.copy(dto, bo);
+    if (bo.isBlocked()) {
+      bo.setPublished(false);
+    }
     oHoursService.remove(bo.getOpeningHours());
     ArrayList<OpeningHours> oHoursList = getOpeningHoursCollectionFromDTO(dto);
     if (oHoursList != null && !oHoursList.isEmpty()) {

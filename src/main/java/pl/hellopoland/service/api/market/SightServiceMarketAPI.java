@@ -28,10 +28,14 @@ public class SightServiceMarketAPI {
   @PermitAll
   public SightDTO get(Long id) {
     Sight bo = service.get(id);
-    bo.setSightEvents(
-        bo.getSightEvents().stream().filter(se -> se.isActive()).collect(Collectors.toList()));
-    var dto = DtoMapper.getFullDTO(bo);
-    return dto;
+    if (bo.isPublished()) {
+      bo.setSightEvents(bo.getSightEvents().stream()
+          .filter(se -> se.isActive() && se.isPublished() && !se.isBlocked())
+          .collect(Collectors.toList()));
+      var dto = DtoMapper.getFullDTO(bo);
+      return dto;
+    }
+    return null;
   }
 
 }
