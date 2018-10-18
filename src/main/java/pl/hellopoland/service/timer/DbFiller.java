@@ -69,12 +69,24 @@ public class DbFiller extends ServiceSuperclass {
   private ImageCollector zooImg;
   private ImageCollector zwStadImg;
   private ImageCollector zwZooImg;
+  private ImageCollector zwKielc1Img;
+  private ImageCollector zwKielc2Img;
+  private ImageCollector geopark1Img;
+  private ImageCollector geopark2Img;
+  private ImageCollector zerom1Img;
+  private ImageCollector zerom2Img;
   private Location hpLocation;
   private Location zooWroLocation;
   private Location stadGdLocation;
   private Location kolLocation;
   private Location parkSzczLocation;
-  private Sight hp;
+  private Location zwKielcLocation;
+  private Location geoparkKielceLocation;
+  private Location zeromLocation;
+  private Sight hpWroc;
+  private Sight hpKielce;
+  private Sight geoparkKielce;
+  private Sight zeromKielce;
   private Sight zooWro;
   private Sight stadGd;
   private Sight kol;
@@ -84,6 +96,9 @@ public class DbFiller extends ServiceSuperclass {
   private SightEvent parkSzczEvent;
   private SightEvent zwStadEvent;
   private SightEvent zwZooEvent;
+  private SightEvent zwKielcEvent;
+  private SightEvent zeromEvent;
+  private SightEvent geoparkKielcEvent;
 
   @PostConstruct
   public void fillDb() {
@@ -174,6 +189,18 @@ public class DbFiller extends ServiceSuperclass {
         this.getClass().getResourceAsStream("/images/zwiedzanie_stadionu.jpg"));
     zwZooImg =
         createImageCollector(this.getClass().getResourceAsStream("/images/zwiedzanie_zoo.jpg"));
+    zwKielc1Img =
+        createImageCollector(this.getClass().getResourceAsStream("/images/Kielce_sight.jpeg"));
+    zwKielc2Img =
+        createImageCollector(this.getClass().getResourceAsStream("/images/Kielce_se.jpeg"));
+    geopark1Img =
+        createImageCollector(this.getClass().getResourceAsStream("/images/Geopark_sight.jpeg"));
+    geopark2Img =
+        createImageCollector(this.getClass().getResourceAsStream("/images/Geopark_se.jpeg"));
+    zerom1Img =
+        createImageCollector(this.getClass().getResourceAsStream("/images/Zeromski_sight.jpeg"));
+    zerom2Img =
+        createImageCollector(this.getClass().getResourceAsStream("/images/Zeromski_se.jpeg"));
   }
 
   private ImageCollector createImageCollector(InputStream is) {
@@ -190,6 +217,12 @@ public class DbFiller extends ServiceSuperclass {
     kolLocation = createLocation(51.108029, 17.0180163, "plac Orląt Lwowskich 20B", "53-605",
         "Wrocław", "Polska");
     parkSzczLocation = createLocation(51.1114018, 17.0799816, "", "50-001", "Wrocław", "Polska");
+    zwKielcLocation =
+        createLocation(50.8717573, 20.6285292, "Rynek 1", "25-303", "Kielce", "Polska");
+    geoparkKielceLocation =
+        createLocation(50.8523704, 20.6481324, "ul. Daleszycka 21", "25-202", "Kielce", "Polska");
+    zeromLocation =
+        createLocation(50.8678941, 20.6273561, "ul. Jana Pawła II 5", "25-013", "Kielce", "Polska");
   }
 
   private Location createLocation(Double latitude, Double longitude, String street, String zipCode,
@@ -205,10 +238,33 @@ public class DbFiller extends ServiceSuperclass {
   }
 
   private void createSights() {
-    hp = createSight(hpImg, "Wycieczki Hello Poland we Wrocławiu",
+    hpWroc = createSight(hpImg, "Wycieczki Hello Poland we Wrocławiu",
         "Kupuj taniej, zwiedzaj łatwiej!",
         "Specjalizujemy się w obsłudze zorganizowanych grup turystycznych oraz biznesowych z kraju i zagranicy.",
         userHelloPoland.getPartner(), hpLocation);
+    hpKielce = createSight(zwKielc1Img, "Kieleckie wycieczki Hello Poland",
+        "Kupuj taniej, zwiedzaj łatwiej!",
+        "Specjalizujemy się w obsłudze zorganizowanych grup turystycznych oraz biznesowych z kraju i zagranicy.",
+        userHelloPoland.getPartner(), hpLocation);
+    zeromKielce = createSight(zerom1Img, "Muzeum Lat Szkolnych Stefana Żeromskiego",
+        "Muzeum zajmuje się gromadzeniem, eksponowaniem zbiorów związanych z młodzieńczym okresem życia oraz twórczością Stefana Żeromskiego",
+        "W zbiorach muzeum znajdują się rękopisy utworów Stefan Żeromskiego. Między innymi fragment brulionu Wiernej rzeki, część czystopisu Słowa o bandosie, tekst polski włoskiej przedmowy do książki G.L. Milesi La spedizione di Francesco Nullo in Polonia, 1863, czystopisy utworów Wszystko i nic oraz Snu o chlebie, pięć kartek noweli Z odczytem, a także rękopis Oświadczenia w sprawie ochrony dla dzieci w Nałęczowie.\r\n"
+            + "W muzeum zgromadzono zbiór listów pisarza z różnych lat. Ich adresatami byli: Bronisław Saski – kuzyn Żeromskiego, Zofia Kozierkiewiczowa – mieszkanka Kielc, Edmund Massalski – ówczesny redaktor „Gazety Kieleckiej”, Edward Łuszczkiewicz – szkolny kolega, Aleksander Januszkowski – zakopiański lekarz, Antoni Osuchowski – prawnik, czy Stefania Gliwicówna i Maria Bogdanowicz.\r\n"
+            + "W zbiorach muzeum znajdują się pierwsze wydanie Ech leśnych z dedykacją dla Zofii Kochnowskiej czy O Adamie Żeromskim wspomnienie z dedykacją dla Jana Müllera.\r\n"
+            + "Muzeum posiada płytę gramofonową z 1924 roku z nagranym głosem Stefana Żeromskiego, oraz kolekcję fotografii szkolnych kolegów Żeromskiego pochodzących z lat 1884-1886 (niektóre z nich opatrzone są dedykacjami).",
+        userHelloPoland.getPartner(), zeromLocation);
+    geoparkKielce = createSight(geopark1Img, "Geopark Kielce",
+        "Centrum Geoedukacji to nowoczesna placówka, należąca do Geoparku Kielce",
+        "Obiekt zlokalizowany jest w południowo-wschodniej części rezerwatu Wietrznia i jest to najważniejsza atrakcja geoturystyczna na trasie „Świętokrzyskiego Szlaku Archeo-Geologicznego”. Inwestycja została zrealizowana ze środków Europejskiego Funduszu Regionalnego w ramach Programu Operacyjnego Innowacyjna Gospodarka 2007-2013.\r\n"
+            + "Centrum Geoedukacji  to miejsce, gdzie w przystępny sposób przekazujemy wiedzę geologiczną i geograficzną, z wykorzystaniem nowoczesnych metod i narzędzi edukacyjnych.\r\n"
+            + "Wizyta w Centrum Geoedukacji jest świetnym wstępem do lepszego zrozumienia geologicznego fenomenu Gór Świętokrzyskiego, na czele z gołoborzami, jaskiniami czy dawnymi rafami koralowymi.\r\n"
+            + "Dla odwiedzających proponujemy:\r\n"
+            + "zwiedzanie Galerii Ziemi wraz z wirtualną jaskinią\r\n"
+            + "„Podróż do wnętrza Ziemi” – seans w kinie 5D\r\n" + "zwiedzanie wystaw czasowych\r\n"
+            + "zajęcia geoedukacyjne (teoretyczno-praktyczne)\r\n"
+            + "zajęcia terenowe w obrębie obiektów geoturystycznych Kielc\r\n"
+            + "imprezy i wydarzenia geoedukacyjne",
+        userHelloPoland.getPartner(), geoparkKielceLocation);
     zooWro = createSight(zooImg, "ZOO we Wrocławiu", "Ogród Zoologiczny we Wrocławiu",
         "Ogród Zoologiczny we Wrocławiu – ogród zoologiczny znajdujący się przy ul. Wróblewskiego 1–5 we Wrocławiu, otwarty 10 lipca 1865. Jest najstarszym na obecnych ziemiach polskich ogrodem zoologicznym w Polsce. Powierzchnia ogrodu to 33 hektary.",
         userZoo.getPartner(), zooWroLocation);
@@ -240,6 +296,32 @@ public class DbFiller extends ServiceSuperclass {
   }
 
   private void createSightEvents() {
+    zwKielcEvent = createSightEvent(zwKielc2Img, "Zwiedzanie miasta z przewodnikiem",
+        "Podczas spaceru poznamy najciekawsze zakątki miasta oraz wyjątkowe atrakcje takie jak zabudowa Rynku, Stary Ratusz oraz wiele więcej… \r\n"
+            + "Znajdująca się tutaj malownicza zabudowa pochodzi głównie z XIX i XX stulecia. Całą zachodnią pierzeję Rynku stanowi ratusz – Urząd Miasta Kielce. Jest to budynek o trzech kondygnacjach i czterospadowym dachu, posiadający arkadowe podcienie skrywające wejście do środka.\r\n"
+            + "Tuż obok ratusza, na rogu z ulicą Małą w południowej pierzei stoi kamienica z 1767 roku, której budowniczym był Maciej Gilba – kucharz biskupa krakowskiego Kajetana Sołtyka. Jest to jednopiętrowy budynek z podpiwniczeniem oraz podcieniami mieszczący obecnie kawiarnię. Na fasadzie budynku umieszczony jest orzeł będący herbem Sołtyków. Na lewo od Sołtyków znajduje się jedna z najbardziej okazałych kieleckich kamienic powstała w XIX wieku charakteryzująca się neobarokowym wystrojem frontowej elewacji i stiukowymidekoracjami we wnętrzach. Obecnie mieści się w niej siedziba „Gazety Wyborczej”.\r\n"
+            + "Po stronie wschodniej na rogu ul. św. Leonarda stała kamienica zwana Wójtostwem, o której wzmianki pojawiły się już w XVI wieku. W czerwcu 1794 roku przebywał tu przez dwa dni Tadeusz Kościuszko, co upamiętnia znajdująca się obecnie tablica wmurowana w ścianę. 24 maja 1800 roku budynek uległ spaleniu podczas wielkiego pożaru miasta, który pochłonął 276 domów. Budynek odbudowano, a w 1858 roku został on sprzedany Janowi Höningmanowi, który urządził na parterze sklep kolonialny, natomiast z pozostałej części zrobił „Hotel Saski”. Obecnie piętro budynku jest zamieszkane, natomiast na parterze znajdują się lokale usługowe.",
+        "Hello Poland zaprasza na niezwykły spacer z przewodnikiem po najciekawszych zakątkach miasta.",
+        false, hpKielce.getId(), zwKielcLocation, userHelloPoland.getPartner());
+    zeromEvent = createSightEvent(zerom2Img, "Muzeum Lat Szkolnych Stefana Żeromskiego",
+        "W zbiorach muzeum znajdują się rękopisy utworów Stefan Żeromskiego. Między innymi fragment brulionu Wiernej rzeki, część czystopisu Słowa o bandosie, tekst polski włoskiej przedmowy do książki G.L. Milesi La spedizione di Francesco Nullo in Polonia, 1863, czystopisy utworów Wszystko i nic oraz Snu o chlebie, pięć kartek noweli Z odczytem, a także rękopis Oświadczenia w sprawie ochrony dla dzieci w Nałęczowie.\r\n"
+            + "W muzeum zgromadzono zbiór listów pisarza z różnych lat. Ich adresatami byli: Bronisław Saski – kuzyn Żeromskiego, Zofia Kozierkiewiczowa – mieszkanka Kielc, Edmund Massalski – ówczesny redaktor „Gazety Kieleckiej”, Edward Łuszczkiewicz – szkolny kolega, Aleksander Januszkowski – zakopiański lekarz, Antoni Osuchowski – prawnik, czy Stefania Gliwicówna i Maria Bogdanowicz.\r\n"
+            + "W zbiorach muzeum znajdują się pierwsze wydanie Ech leśnych z dedykacją dla Zofii Kochnowskiej czy O Adamie Żeromskim wspomnienie z dedykacją dla Jana Müllera.\r\n"
+            + "Muzeum posiada płytę gramofonową z 1924 roku z nagranym głosem Stefana Żeromskiego, oraz kolekcję fotografii szkolnych kolegów Żeromskiego pochodzących z lat 1884-1886 (niektóre z nich opatrzone są dedykacjami).",
+        "Muzeum zajmuje się gromadzeniem, eksponowaniem zbiorów związanych z młodzieńczym okresem życia oraz twórczością Stefana Żeromskiego",
+        true, zeromKielce.getId(), zeromLocation, userHelloPoland.getPartner());
+    geoparkKielcEvent = createSightEvent(geopark1Img, "Geopark Kielce – Centrum Geoedukacji",
+        "Obiekt zlokalizowany jest w południowo-wschodniej części rezerwatu Wietrznia i jest to najważniejsza atrakcja geoturystyczna na trasie „Świętokrzyskiego Szlaku Archeo-Geologicznego”. Inwestycja została zrealizowana ze środków Europejskiego Funduszu Regionalnego w ramach Programu Operacyjnego Innowacyjna Gospodarka 2007-2013.\r\n"
+            + "Centrum Geoedukacji  to miejsce, gdzie w przystępny sposób przekazujemy wiedzę geologiczną i geograficzną, z wykorzystaniem nowoczesnych metod i narzędzi edukacyjnych.\r\n"
+            + "Wizyta w Centrum Geoedukacji jest świetnym wstępem do lepszego zrozumienia geologicznego fenomenu Gór Świętokrzyskiego, na czele z gołoborzami, jaskiniami czy dawnymi rafami koralowymi.\r\n"
+            + "Dla odwiedzających proponujemy:\r\n"
+            + "zwiedzanie Galerii Ziemi wraz z wirtualną jaskinią\r\n"
+            + "„Podróż do wnętrza Ziemi” – seans w kinie 5D\r\n" + "zwiedzanie wystaw czasowych\r\n"
+            + "zajęcia geoedukacyjne (teoretyczno-praktyczne)\r\n"
+            + "zajęcia terenowe w obrębie obiektów geoturystycznych Kielc\r\n"
+            + "imprezy i wydarzenia geoedukacyjne",
+        "Centrum Geoedukacji to nowoczesna placówka, należąca do Geoparku Kielce", true,
+        geoparkKielce.getId(), geoparkKielceLocation, userHelloPoland.getPartner());
     afrEvent = createSightEvent(afrImg, "Wieczorne zwiedzanie Afrykarium",
         "Chcielibyście zobaczyć, co się dzieje w Afrykarium, gdy wyjdą ostatni zwiedzający? Hello Poland zaprasza na zwiedzanie Afrykarium po godzinach otwarcia obiektu! Jest to niepowtarzalna okazja, aby poznać ten unikatowy na skalę Polski obiekt bez tłumu turystów, w niedostępnej porze i w towarzystwie przewodnika, który zdradzi Państwu tajemnice tego fascynującego miejsca.\n"
             + "\n"
@@ -250,13 +332,13 @@ public class DbFiller extends ServiceSuperclass {
             + "– wejście do Afrykarium po godzinach otwarcia obiektu,\n"
             + "– zwiedzanie Afrykarium z przewodnikiem,\n"
             + "– poczęstunek w Laguna Bistro & Cafe\n" + "Dzieci do lat 3 – wstęp wolny.",
-        false, hp.getId(), zooWroLocation, userHelloPoland.getPartner());
+        null, false, hpWroc.getId(), zooWroLocation, userHelloPoland.getPartner());
     parkSzczEvent = createSightEvent(parkSzcz2Img,
         "Park Szczytnicki – najstarszy z wrocławskich parków",
         "Park Szczytnicki to największy i najstarszy z wrocławskich parków, najcenniejszy pod względem składu botanicznego, związany nierozerwalnie od XVIII wieku z losami miasta, jego ambicjami i tragediami. Znają go chyba wszyscy mieszkańcy Wrocławia, ale czy na pewno…? Przekonacie się podczas wycieczki w czwartek, 2 sierpnia o 17:30.\n"
             + "\n"
             + "Na terenie parku można odnaleźć wiele niezwykłych miejsc, zaskakujących budowli i wyjątkowych okazów roślin. Zapraszamy na spacer przez te „zielone płuca miasta”, a po drodze zobaczymy ponad 100 letnie alpinarium, przeprawimy się przez modernistyczny „wgłębnik”, odwiedzimy drewniany kościół skrywający mroczne tajemnice, poszukamy willi twórcy Hali Stulecia, dowiemy się do czego służą pneumatofory i spróbujemy zapolować na brytyjską wiewiórkę, oczywiście bezkrwawo.",
-        false, hp.getId(), parkSzczLocation, userHelloPoland.getPartner());
+        null, false, hpWroc.getId(), parkSzczLocation, userHelloPoland.getPartner());
     zwZooEvent = createSightEvent(zwZooImg, "Zwiedzanie ZOO",
         "Zakupiony bilet oraz karta roczna uprawniają do zwiedzania całego ZOO, w tym AFRYKARIUM. Wszystkie bilety uprawniają do jednorazowego wstępu.\n"
             + "\n" + "Bilet ulgowy, jednorazowy przysługuje:\n" + "\n"
@@ -269,7 +351,7 @@ public class DbFiller extends ServiceSuperclass {
             + " warunkiem skorzystania z ulgi jest okazanie ważnej legitymacji, a w przypadku emerytów i rencistów dodatkowo dowodu osobistego lub Legitymacji Osoby Niepełnosprawnej\n"
             + "\n" + "Bilet rodzinny:\n"
             + "Do skorzystania z biletu rodzinnego uprawnione są dwie osoby dorosłe wraz z maksymalnie trójką podopiecznych (przysługują dzieciom, młodzieży szkolnej oraz osobom uczącym się w szkołach ponadgimnazjalnych do ukończenia 21 roku życia jak i  osobom studiującym do ukończenia 26 roku życia pod warunkiem, że przynajmniej jeden z opiekunów jest rodzicem studenta - podopiecznego).",
-        true, zooWro.getId(), zooWroLocation, userZoo.getPartner());
+        null, true, zooWro.getId(), zooWroLocation, userZoo.getPartner());
     zwStadEvent = createSightEvent(zwStadImg, "Zwiedzanie stadionu",
         "Trasa zwiedzania obejmuje zakątki i lokalizacje, których nie zobaczymy przychodząc na mecz. Po zobaczeniu emocjonujących atrakcji FUN ARENY wycieczki poprowadzone zostaną do: szatni zawodników, sali konferencyjnej w której przed i po meczach występują trenerzy drużyn, kaplicy stadionowej, strefy mixed zone, czyli miejsca z którego zawodnicy wychodzą na boisko.\n"
             + "\n"
@@ -280,7 +362,7 @@ public class DbFiller extends ServiceSuperclass {
             + "Zwiedzanie stadionu z Arenką - maskotką FUN ARENY to gwarancja dobrej zabawy. Będzie towarzyszyła ona przewodnikowi podczas oprowadzania. Nasza maskotka przeprowadzi także rozgrzewkę w salce treningowej i na obrzeżach murawy, gdzie dzieci będą mogły zrobić wspólne zdjęcie z Arenką. Gwarantujemy dużo radości i śmiechu.\n"
             + "Czas trwania: 1 h. Wiek - minimum 4 lata.\n"
             + "Cena: 15 zł od dziecka, jeden opiekun na 10 podopiecznych: gratis.Oferta skierowana do grup powyżej 15 osób.",
-        true, stadGd.getId(), stadGdLocation, userStadionGd.getPartner());
+        null, true, stadGd.getId(), stadGdLocation, userStadionGd.getPartner());
     meczPCEvent = createSightEvent(meczPCImg, "Mecz towarzyski Polska-Czechy",
         "Zapadła decyzja o organizacji jesiennych meczy towarzyskich Reprezentacji Polski. Biało-Czerwoni zmierzą się na Stadionie Energa Gdańsk z reprezentacją Czech 15 listopada 2018 r.\n"
             + "\n"
@@ -293,18 +375,19 @@ public class DbFiller extends ServiceSuperclass {
             + "Największymi gwiazdami współczesnej reprezentacji Czech są występujący w linii pomocy Antonin Barak z Udinese Calcio, oraz napastnik Romy Patrick Schick. Pierwszy z wymienionych piłkarzy to jeden z najlepszych strzelców drużyny z Udine. Urodzony w Pribramie zawodnik w bieżącej kampanii ligowej zdobył dla swojej drużyny sześć goli. Natomiast Patrick Schick zdobył dla klubu ze stolicy Włoch jedną bramkę w aktualnych rozgrywkach Serie A.\n"
             + "\n"
             + "Czechy w dotychczasowej historii zagrały zaledwie raz na Mistrzostwach Świata. Drużyna z takimi piłkarzami w składzie jak Jan Koller, Pavel Nedved, czy Petr Cech, wystąpiła na turnieju w Niemczech w 2006 roku. Zespół prowadzony przez Karela Brucknera, odpadł z turnieju już po fazie grupowej. Czesi zwyciężyli jedynie w pierwszym meczu ze Stanami Zjednoczonymi 3:0, natomiast w kolejnych przegrali dwukrotnie 0:2 z Ghaną i Włochami.",
-        false, stadGd.getId(), stadGdLocation, userStadionGd.getPartner());
+        null, false, stadGd.getId(), stadGdLocation, userStadionGd.getPartner());
     kolEvent = createSightEvent(kol1Img, "Zwiedzanie Kolejkowa",
-        "Czynne 365 dni w roku, również w niedziele i święta w godzinach 10:00–18:00.", true,
+        "Czynne 365 dni w roku, również w niedziele i święta w godzinach 10:00–18:00.", null, true,
         kol.getId(), kolLocation, userKolejkowo.getPartner());
   }
 
   private SightEvent createSightEvent(ImageCollector mainImage, String name, String description,
-      Boolean generalAdmission, Long sightId, Location location, Partner partner) {
+      String lead, Boolean generalAdmission, Long sightId, Location location, Partner partner) {
     var dto = new SightEventDTO();
     dto.name = name;
     dto.mainImage = DtoMapper.getDTO(mainImage);
     dto.description = description;
+    dto.lead = lead;
     dto.generalAdmission = generalAdmission;
     dto.sightId = sightId;
     dto.location = DtoMapper.getDTO(location);
@@ -322,6 +405,18 @@ public class DbFiller extends ServiceSuperclass {
     todaySecondToTommorow.setMinutes(59);
     todaySecondToTommorow.setSeconds(59);
 
+    createTicketPoolDefinition("Zwiedzanie miasta z przewodnikiem", 30, false, todayMidnight,
+        todaySecondToTommorow, zwKielcEvent.getId(), userHelloPoland.getPartner(),
+        createTicketDefinition("Normalny", -1, 3500, userHelloPoland.getPartner()),
+        createTicketDefinition("Ulgowy", -1, 2500, userHelloPoland.getPartner()));
+    createTicketPoolDefinition("Wstęp do kieleckiego Geoparku", -1, true, todayMidnight,
+        todaySecondToTommorow, geoparkKielcEvent.getId(), userHelloPoland.getPartner(),
+        createTicketDefinition("Normalny", -1, 2000, userHelloPoland.getPartner()),
+        createTicketDefinition("Ulgowy", -1, 1000, userHelloPoland.getPartner()));
+    createTicketPoolDefinition("Wstęp do muzeum", -1, true, todayMidnight, todaySecondToTommorow,
+        zeromEvent.getId(), userHelloPoland.getPartner(),
+        createTicketDefinition("Normalny", -1, 800, userHelloPoland.getPartner()),
+        createTicketDefinition("Ulgowy", -1, 600, userHelloPoland.getPartner()));
     createTicketPoolDefinition("Wieczorne zwiedzanie Afrykarium", 25, false, todayMidnight,
         todaySecondToTommorow, afrEvent.getId(), userHelloPoland.getPartner(),
         createTicketDefinition("Normalny", 25, 7900, userHelloPoland.getPartner()));
