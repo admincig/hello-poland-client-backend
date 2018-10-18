@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -108,6 +109,9 @@ public class SightEventService extends ServiceSuperclass {
     if (dto.sightId != null) {
       Sight sight = sightService.get(dto.sightId);
       bo.setSight(sight);
+      if (sight.getAgreements() != null && !sight.getAgreements().isEmpty()) {
+        bo.setAgreements(Set.copyOf(sight.getAgreements()));
+      }
     }
 
     bo.setPartner(partner);
