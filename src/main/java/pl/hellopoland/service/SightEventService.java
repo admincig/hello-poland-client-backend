@@ -58,6 +58,9 @@ public class SightEventService extends ServiceSuperclass {
   @Inject
   private FileDescriptorService fdService;
 
+  @Inject
+  private TranslationService translationService;
+
   public PagedEntityCollection<SightEvent> getList(SightEventPagedCollectionConfig config) {
     if (config.isCurrentPartner()) {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
@@ -133,6 +136,13 @@ public class SightEventService extends ServiceSuperclass {
         .orElse(null);
   }
 
+  public SightEvent createLanguageVesrion(SightEventDTO dto, String language) {
+    SightEvent bo = getForLoggedUser(dto.id);
+    fetchColections(bo);
+    em.detach(bo);
+    return translationService.createEntityLanguageVersion(bo, dto, language);
+  }
+
   public SightEvent updateForLoggedUser(SightEventDTO dto) {
     SightEvent bo = getForLoggedUser(dto.id);
     if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
@@ -155,6 +165,13 @@ public class SightEventService extends ServiceSuperclass {
     bo.setOpeningHours(null);
     bo.setOpeningHours(oHoursList);
     return bo;
+  }
+
+  public SightEvent updateLanguageVersionForLoggedUser(SightEventDTO dto, String language) {
+    SightEvent bo = getForLoggedUser(dto.id);
+    fetchColections(bo);
+    em.detach(bo);
+    return translationService.updateEntityLanguageVersion(bo, dto, language);
   }
 
   public List<SightEvent> getForPartner() {
@@ -367,6 +384,21 @@ public class SightEventService extends ServiceSuperclass {
     SightEvent bo = getForLoggedUser(id);
     bo.setPdfAttachment(fdService.storeFile(new ByteArrayInputStream(pdf), "pdf"));
     return bo;
+  }
+
+  public void fetchColections(SightEvent bo) {
+    if (bo.getTickets() != null && !bo.getTickets().isEmpty()) {
+      bo.getTickets().size();
+    }
+    if (bo.getImages() != null && !bo.getImages().isEmpty()) {
+      bo.getImages().size();
+    }
+    if (bo.getOpeningHours() != null && !bo.getOpeningHours().isEmpty()) {
+      bo.getOpeningHours().size();
+    }
+    if (bo.getAgreements() != null && !bo.getAgreements().isEmpty()) {
+      bo.getAgreements().size();
+    }
   }
 
 }

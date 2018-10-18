@@ -26,9 +26,7 @@ public class SightServicePartnerAPI {
 
   @RolesAllowed("partner")
   public SightDTO createLanguageVesrion(SightDTO dto, String language) {
-    Sight bo = service.createLanguageVesrion(dto, null, language);
-    dto = DtoMapper.getFullDTO(bo);
-    return dto;
+    return DtoMapper.getFullDTO(service.createLanguageVesrion(dto, language));
   }
 
   @RolesAllowed("partner")
@@ -54,9 +52,7 @@ public class SightServicePartnerAPI {
 
   @RolesAllowed("partner")
   public SightDTO updateLanguageVersion(SightDTO dto, String language) {
-    Sight bo = service.updateLanguageVersionForLoggedUser(dto, language);
-    dto = DtoMapper.getFullDTO(bo);
-    return dto;
+    return DtoMapper.getFullDTO(service.updateLanguageVersionForLoggedUser(dto, language));
   }
 
   @RolesAllowed("partner")

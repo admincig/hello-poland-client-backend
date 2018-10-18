@@ -92,9 +92,11 @@ public class SightService extends ServiceSuperclass {
     return get(bo.getId());
   }
 
-  public Sight createLanguageVesrion(SightDTO dto, Partner partner, String language) {
-    return translationService.createEntityLanguageVersion(getForLoggedPartner(dto.id), dto,
-        language);
+  public Sight createLanguageVesrion(SightDTO dto, String language) {
+    Sight bo = getForLoggedPartner(dto.id);
+    fetchColections(bo);
+    em.detach(bo);
+    return translationService.createEntityLanguageVersion(bo, dto, language);
   }
 
   public Sight get(Long id) {
@@ -213,8 +215,10 @@ public class SightService extends ServiceSuperclass {
   }
 
   public Sight updateLanguageVersionForLoggedUser(SightDTO dto, String language) {
-    return translationService.updateEntityLanguageVersion(getForLoggedPartner(dto.id), dto,
-        language);
+    Sight bo = getForLoggedPartner(dto.id);
+    fetchColections(bo);
+    em.detach(bo);
+    return translationService.updateEntityLanguageVersion(bo, dto, language);
   }
 
   private ArrayList<OpeningHours> getOpeningHoursCollectionFromDTO(SightDTO dto) {
@@ -233,21 +237,11 @@ public class SightService extends ServiceSuperclass {
     }
   }
 
-  /**
-   * Returns detached Sight with fetched collections.
-   * 
-   * @param dto
-   * @param partner
-   * @return Sight
-   */
   private Sight getForLoggedPartner(Long sightId) {
     var partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
-    var bo = em.createQuery("from Sight where partner = :partner and id = :id", Sight.class)
+    return em.createQuery("from Sight where partner = :partner and id = :id", Sight.class)
         .setParameter("partner", partner).setParameter("id", sightId).getResultStream().findFirst()
         .orElseThrow(ResourceNotFoundException::new);
-    fetchColections(bo);
-    em.detach(bo);
-    return bo;
   }
 
   public void fetchColections(Sight bo) {

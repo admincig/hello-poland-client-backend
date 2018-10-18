@@ -5,6 +5,7 @@ import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -33,24 +34,27 @@ public class MarketSightEventRestService {
   private FilterMarketAPI filterService;
 
   @GET
-  public PagedCollection getList(@QueryParam("city") String city) {
+  public PagedCollection getList(@QueryParam("city") String city,
+      @HeaderParam("Accept-Language") String language) {
     var config = new SightEventPagedCollectionConfig();
     config.onlyActive();
     config.setCity(city);
-    return service.getList(config);
+    return service.getList(config, language);
   }
 
   @POST
   @Path("/search")
-  public PagedCollection search(SightEventPagedCollectionConfig config) {
+  public PagedCollection search(SightEventPagedCollectionConfig config,
+      @HeaderParam("Accept-Language") String language) {
     config.onlyActive();
-    return service.getList(config);
+    return service.getList(config, language);
   }
 
   @GET
   @Path("/{id}")
-  public SightEventDTO get(@PathParam("id") Long id) {
-    return service.get(id);
+  public SightEventDTO get(@PathParam("id") Long id,
+      @HeaderParam("Accept-Language") String language) {
+    return service.get(id, language);
   }
 
   @GET
