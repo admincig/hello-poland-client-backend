@@ -24,7 +24,7 @@ public class TicketDefinitionService extends ServiceSuperclass {
 
   public TicketDefinition create(TicketDefinitionDTO dto, Long sightEventId, Partner partner) {
     if (dto.price < 0) {
-      throw new BadRequestException();
+      throw new BadRequestException("The ticket price must be greater than 0");
     }
     if (partner == null) {
       partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
@@ -55,7 +55,7 @@ public class TicketDefinitionService extends ServiceSuperclass {
 
   public TicketDefinitionDTO add(TicketDefinitionDTO dto, Partner partner) {
     if (dto.price < 0) {
-      throw new BadRequestException();
+      throw new BadRequestException("The ticket price must be greater than 0");
     }
     partner = partner == null ? partnerService.findByUserEmail(ctx.getCallerPrincipal().getName())
         : partner;
