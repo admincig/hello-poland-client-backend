@@ -241,18 +241,32 @@ public class DbFiller extends ServiceSuperclass {
     hpWroc = createSight(hpImg, "Wycieczki Hello Poland we Wrocławiu",
         "Kupuj taniej, zwiedzaj łatwiej!",
         "Specjalizujemy się w obsłudze zorganizowanych grup turystycznych oraz biznesowych z kraju i zagranicy.",
-        userHelloPoland.getPartner(), hpLocation);
+        userHelloPoland.getPartner(), hpLocation, false, true);
+    zooWro = createSight(zooImg, "ZOO we Wrocławiu", "Ogród Zoologiczny we Wrocławiu",
+        "Ogród Zoologiczny we Wrocławiu – ogród zoologiczny znajdujący się przy ul. Wróblewskiego 1–5 we Wrocławiu, otwarty 10 lipca 1865. Jest najstarszym na obecnych ziemiach polskich ogrodem zoologicznym w Polsce. Powierzchnia ogrodu to 33 hektary.",
+        userZoo.getPartner(), zooWroLocation, false, true);
+    stadGd = createSight(stadGdImg, "Stadion w Gdańsku", "Stadion Energa Gdańsk",
+        "Stadionowe atrakcje skupione są przede wszystkim w FUN ARENIE – stworzonym na ponad 9 tysiącach metrów kwadratowych na Stadionie Energa Gdańsk, tworzącym największy park rozrywki w Trójmieście, który rozszerza ofertę jednej z najpiękniejszych aren w Europie.\n"
+            + "\n"
+            + "Oprócz tego stadion zapewnia całą gamę dodatkowych atrakcji – zarówno płatnych jak i bezpłatnych. Multifunkcjonalność gdańskiego obiektu potwierdza nasza oferta przygotowana zarówno dla dzieci, młodzieży, rodzin jak i seniorów.",
+        userStadionGd.getPartner(), stadGdLocation, false, true);
+    kol = createSight(kol2Img, "Kolejkowo",
+        "Odwiedź Kolejkowo i przeżyj z nami niezapomnianą przygodę!",
+        "W Kolejkowie zabierzemy Cię w podróż przez miniaturowy świat. Twórcy Kolejkowa stworzyli ogromną makietę, atrakcję tętniącą życiem i przedstawiającą wspaniały Dolny Śląsk. Dołożyli wszelkich starań, aby jak najdokładniej odwzorować rzeczywistość i przedstawić życie miniaturowych mieszkańców Kolejkowa, ukazując ich w przeróżnych sytuacjach dnia codziennego. W Kolejkowie zobaczymy życie na wsi, potowarzyszymy turystom podczas górskich wypraw, weźmiemy udział w akcji ratunkowej, wcielimy się w leśniczych, narciarzy, kupców, pracowników budowlanych, cyrkowców czy plażowiczów.\n"
+            + "\n"
+            + "Atrakcja Kolejkowo mieści się na terenie jednego z najstarszych dworców kolejowych we Wrocławiu. Dworzec Świebodzki zlokalizowany jest w ścisłym centrum Wrocławia przy Placu Orląt Lwowskich, niespełna 800 m od wrocławskiego rynku. Odwiedzając miniaturowy świat, w tym wspaniałym późnoklasycystycznym obiekcie, zobaczyć można m.in. makiety obiektów z Wrocławia oraz całego Dolnego Śląska. Swoje miejsce znalazły tam takie perełki architektoniczne jak: Dworzec Świebodzki,  kamienice wrocławskiego rynku, obserwatorium meteorologiczne na Śnieżce, Karkonoskie Tajemnice w Karpaczu, schronisko Szwajcarka w Sudetach Zachodnich.",
+        userKolejkowo.getPartner(), kolLocation, false, true);
     hpKielce = createSight(zwKielc1Img, "Kieleckie wycieczki Hello Poland",
         "Kupuj taniej, zwiedzaj łatwiej!",
         "Specjalizujemy się w obsłudze zorganizowanych grup turystycznych oraz biznesowych z kraju i zagranicy.",
-        userHelloPoland.getPartner(), hpLocation);
+        userHelloPoland.getPartner(), hpLocation, false, true);
     zeromKielce = createSight(zerom1Img, "Muzeum Lat Szkolnych Stefana Żeromskiego",
         "Muzeum zajmuje się gromadzeniem, eksponowaniem zbiorów związanych z młodzieńczym okresem życia oraz twórczością Stefana Żeromskiego",
         "W zbiorach muzeum znajdują się rękopisy utworów Stefan Żeromskiego. Między innymi fragment brulionu Wiernej rzeki, część czystopisu Słowa o bandosie, tekst polski włoskiej przedmowy do książki G.L. Milesi La spedizione di Francesco Nullo in Polonia, 1863, czystopisy utworów Wszystko i nic oraz Snu o chlebie, pięć kartek noweli Z odczytem, a także rękopis Oświadczenia w sprawie ochrony dla dzieci w Nałęczowie.\r\n"
             + "W muzeum zgromadzono zbiór listów pisarza z różnych lat. Ich adresatami byli: Bronisław Saski – kuzyn Żeromskiego, Zofia Kozierkiewiczowa – mieszkanka Kielc, Edmund Massalski – ówczesny redaktor „Gazety Kieleckiej”, Edward Łuszczkiewicz – szkolny kolega, Aleksander Januszkowski – zakopiański lekarz, Antoni Osuchowski – prawnik, czy Stefania Gliwicówna i Maria Bogdanowicz.\r\n"
             + "W zbiorach muzeum znajdują się pierwsze wydanie Ech leśnych z dedykacją dla Zofii Kochnowskiej czy O Adamie Żeromskim wspomnienie z dedykacją dla Jana Müllera.\r\n"
             + "Muzeum posiada płytę gramofonową z 1924 roku z nagranym głosem Stefana Żeromskiego, oraz kolekcję fotografii szkolnych kolegów Żeromskiego pochodzących z lat 1884-1886 (niektóre z nich opatrzone są dedykacjami).",
-        userHelloPoland.getPartner(), zeromLocation);
+        userHelloPoland.getPartner(), zeromLocation, false, true);
     geoparkKielce = createSight(geopark1Img, "Geopark Kielce",
         "Centrum Geoedukacji to nowoczesna placówka, należąca do Geoparku Kielce",
         "Obiekt zlokalizowany jest w południowo-wschodniej części rezerwatu Wietrznia i jest to najważniejsza atrakcja geoturystyczna na trasie „Świętokrzyskiego Szlaku Archeo-Geologicznego”. Inwestycja została zrealizowana ze środków Europejskiego Funduszu Regionalnego w ramach Programu Operacyjnego Innowacyjna Gospodarka 2007-2013.\r\n"
@@ -264,25 +278,11 @@ public class DbFiller extends ServiceSuperclass {
             + "zajęcia geoedukacyjne (teoretyczno-praktyczne)\r\n"
             + "zajęcia terenowe w obrębie obiektów geoturystycznych Kielc\r\n"
             + "imprezy i wydarzenia geoedukacyjne",
-        userHelloPoland.getPartner(), geoparkKielceLocation);
-    zooWro = createSight(zooImg, "ZOO we Wrocławiu", "Ogród Zoologiczny we Wrocławiu",
-        "Ogród Zoologiczny we Wrocławiu – ogród zoologiczny znajdujący się przy ul. Wróblewskiego 1–5 we Wrocławiu, otwarty 10 lipca 1865. Jest najstarszym na obecnych ziemiach polskich ogrodem zoologicznym w Polsce. Powierzchnia ogrodu to 33 hektary.",
-        userZoo.getPartner(), zooWroLocation);
-    stadGd = createSight(stadGdImg, "Stadion w Gdańsku", "Stadion Energa Gdańsk",
-        "Stadionowe atrakcje skupione są przede wszystkim w FUN ARENIE – stworzonym na ponad 9 tysiącach metrów kwadratowych na Stadionie Energa Gdańsk, tworzącym największy park rozrywki w Trójmieście, który rozszerza ofertę jednej z najpiękniejszych aren w Europie.\n"
-            + "\n"
-            + "Oprócz tego stadion zapewnia całą gamę dodatkowych atrakcji – zarówno płatnych jak i bezpłatnych. Multifunkcjonalność gdańskiego obiektu potwierdza nasza oferta przygotowana zarówno dla dzieci, młodzieży, rodzin jak i seniorów.",
-        userStadionGd.getPartner(), stadGdLocation);
-    kol = createSight(kol2Img, "Kolejkowo",
-        "Odwiedź Kolejkowo i przeżyj z nami niezapomnianą przygodę!",
-        "W Kolejkowie zabierzemy Cię w podróż przez miniaturowy świat. Twórcy Kolejkowa stworzyli ogromną makietę, atrakcję tętniącą życiem i przedstawiającą wspaniały Dolny Śląsk. Dołożyli wszelkich starań, aby jak najdokładniej odwzorować rzeczywistość i przedstawić życie miniaturowych mieszkańców Kolejkowa, ukazując ich w przeróżnych sytuacjach dnia codziennego. W Kolejkowie zobaczymy życie na wsi, potowarzyszymy turystom podczas górskich wypraw, weźmiemy udział w akcji ratunkowej, wcielimy się w leśniczych, narciarzy, kupców, pracowników budowlanych, cyrkowców czy plażowiczów.\n"
-            + "\n"
-            + "Atrakcja Kolejkowo mieści się na terenie jednego z najstarszych dworców kolejowych we Wrocławiu. Dworzec Świebodzki zlokalizowany jest w ścisłym centrum Wrocławia przy Placu Orląt Lwowskich, niespełna 800 m od wrocławskiego rynku. Odwiedzając miniaturowy świat, w tym wspaniałym późnoklasycystycznym obiekcie, zobaczyć można m.in. makiety obiektów z Wrocławia oraz całego Dolnego Śląska. Swoje miejsce znalazły tam takie perełki architektoniczne jak: Dworzec Świebodzki,  kamienice wrocławskiego rynku, obserwatorium meteorologiczne na Śnieżce, Karkonoskie Tajemnice w Karpaczu, schronisko Szwajcarka w Sudetach Zachodnich.",
-        userKolejkowo.getPartner(), kolLocation);
+        userHelloPoland.getPartner(), geoparkKielceLocation, false, true);
   }
 
   private Sight createSight(ImageCollector mainImage, String name, String lead, String description,
-      Partner partner, Location location) {
+      Partner partner, Location location, boolean blocked, boolean published) {
     var bo = new Sight();
     bo.setMainImage(mainImage);
     bo.setName(name);
@@ -291,6 +291,8 @@ public class DbFiller extends ServiceSuperclass {
     bo.setPartner(partner);
     bo.generateRandomScore();
     bo.setLocation(location);
+    bo.setBlocked(blocked);
+    bo.setPublished(published);
     em.persist(bo);
     return bo;
   }
@@ -302,14 +304,14 @@ public class DbFiller extends ServiceSuperclass {
             + "Tuż obok ratusza, na rogu z ulicą Małą w południowej pierzei stoi kamienica z 1767 roku, której budowniczym był Maciej Gilba – kucharz biskupa krakowskiego Kajetana Sołtyka. Jest to jednopiętrowy budynek z podpiwniczeniem oraz podcieniami mieszczący obecnie kawiarnię. Na fasadzie budynku umieszczony jest orzeł będący herbem Sołtyków. Na lewo od Sołtyków znajduje się jedna z najbardziej okazałych kieleckich kamienic powstała w XIX wieku charakteryzująca się neobarokowym wystrojem frontowej elewacji i stiukowymidekoracjami we wnętrzach. Obecnie mieści się w niej siedziba „Gazety Wyborczej”.\r\n"
             + "Po stronie wschodniej na rogu ul. św. Leonarda stała kamienica zwana Wójtostwem, o której wzmianki pojawiły się już w XVI wieku. W czerwcu 1794 roku przebywał tu przez dwa dni Tadeusz Kościuszko, co upamiętnia znajdująca się obecnie tablica wmurowana w ścianę. 24 maja 1800 roku budynek uległ spaleniu podczas wielkiego pożaru miasta, który pochłonął 276 domów. Budynek odbudowano, a w 1858 roku został on sprzedany Janowi Höningmanowi, który urządził na parterze sklep kolonialny, natomiast z pozostałej części zrobił „Hotel Saski”. Obecnie piętro budynku jest zamieszkane, natomiast na parterze znajdują się lokale usługowe.",
         "Hello Poland zaprasza na niezwykły spacer z przewodnikiem po najciekawszych zakątkach miasta.",
-        false, hpKielce.getId(), zwKielcLocation, userHelloPoland.getPartner());
+        false, hpKielce.getId(), zwKielcLocation, userHelloPoland.getPartner(), false, true);
     zeromEvent = createSightEvent(zerom2Img, "Muzeum Lat Szkolnych Stefana Żeromskiego",
         "W zbiorach muzeum znajdują się rękopisy utworów Stefan Żeromskiego. Między innymi fragment brulionu Wiernej rzeki, część czystopisu Słowa o bandosie, tekst polski włoskiej przedmowy do książki G.L. Milesi La spedizione di Francesco Nullo in Polonia, 1863, czystopisy utworów Wszystko i nic oraz Snu o chlebie, pięć kartek noweli Z odczytem, a także rękopis Oświadczenia w sprawie ochrony dla dzieci w Nałęczowie.\r\n"
             + "W muzeum zgromadzono zbiór listów pisarza z różnych lat. Ich adresatami byli: Bronisław Saski – kuzyn Żeromskiego, Zofia Kozierkiewiczowa – mieszkanka Kielc, Edmund Massalski – ówczesny redaktor „Gazety Kieleckiej”, Edward Łuszczkiewicz – szkolny kolega, Aleksander Januszkowski – zakopiański lekarz, Antoni Osuchowski – prawnik, czy Stefania Gliwicówna i Maria Bogdanowicz.\r\n"
             + "W zbiorach muzeum znajdują się pierwsze wydanie Ech leśnych z dedykacją dla Zofii Kochnowskiej czy O Adamie Żeromskim wspomnienie z dedykacją dla Jana Müllera.\r\n"
             + "Muzeum posiada płytę gramofonową z 1924 roku z nagranym głosem Stefana Żeromskiego, oraz kolekcję fotografii szkolnych kolegów Żeromskiego pochodzących z lat 1884-1886 (niektóre z nich opatrzone są dedykacjami).",
         "Muzeum zajmuje się gromadzeniem, eksponowaniem zbiorów związanych z młodzieńczym okresem życia oraz twórczością Stefana Żeromskiego",
-        true, zeromKielce.getId(), zeromLocation, userHelloPoland.getPartner());
+        true, zeromKielce.getId(), zeromLocation, userHelloPoland.getPartner(), false, true);
     geoparkKielcEvent = createSightEvent(geopark1Img, "Geopark Kielce – Centrum Geoedukacji",
         "Obiekt zlokalizowany jest w południowo-wschodniej części rezerwatu Wietrznia i jest to najważniejsza atrakcja geoturystyczna na trasie „Świętokrzyskiego Szlaku Archeo-Geologicznego”. Inwestycja została zrealizowana ze środków Europejskiego Funduszu Regionalnego w ramach Programu Operacyjnego Innowacyjna Gospodarka 2007-2013.\r\n"
             + "Centrum Geoedukacji  to miejsce, gdzie w przystępny sposób przekazujemy wiedzę geologiczną i geograficzną, z wykorzystaniem nowoczesnych metod i narzędzi edukacyjnych.\r\n"
@@ -321,7 +323,7 @@ public class DbFiller extends ServiceSuperclass {
             + "zajęcia terenowe w obrębie obiektów geoturystycznych Kielc\r\n"
             + "imprezy i wydarzenia geoedukacyjne",
         "Centrum Geoedukacji to nowoczesna placówka, należąca do Geoparku Kielce", true,
-        geoparkKielce.getId(), geoparkKielceLocation, userHelloPoland.getPartner());
+        geoparkKielce.getId(), geoparkKielceLocation, userHelloPoland.getPartner(), false, true);
     afrEvent = createSightEvent(afrImg, "Wieczorne zwiedzanie Afrykarium",
         "Chcielibyście zobaczyć, co się dzieje w Afrykarium, gdy wyjdą ostatni zwiedzający? Hello Poland zaprasza na zwiedzanie Afrykarium po godzinach otwarcia obiektu! Jest to niepowtarzalna okazja, aby poznać ten unikatowy na skalę Polski obiekt bez tłumu turystów, w niedostępnej porze i w towarzystwie przewodnika, który zdradzi Państwu tajemnice tego fascynującego miejsca.\n"
             + "\n"
@@ -332,13 +334,13 @@ public class DbFiller extends ServiceSuperclass {
             + "– wejście do Afrykarium po godzinach otwarcia obiektu,\n"
             + "– zwiedzanie Afrykarium z przewodnikiem,\n"
             + "– poczęstunek w Laguna Bistro & Cafe\n" + "Dzieci do lat 3 – wstęp wolny.",
-        null, false, hpWroc.getId(), zooWroLocation, userHelloPoland.getPartner());
+        null, false, hpWroc.getId(), zooWroLocation, userHelloPoland.getPartner(), false, true);
     parkSzczEvent = createSightEvent(parkSzcz2Img,
         "Park Szczytnicki – najstarszy z wrocławskich parków",
         "Park Szczytnicki to największy i najstarszy z wrocławskich parków, najcenniejszy pod względem składu botanicznego, związany nierozerwalnie od XVIII wieku z losami miasta, jego ambicjami i tragediami. Znają go chyba wszyscy mieszkańcy Wrocławia, ale czy na pewno…? Przekonacie się podczas wycieczki w czwartek, 2 sierpnia o 17:30.\n"
             + "\n"
             + "Na terenie parku można odnaleźć wiele niezwykłych miejsc, zaskakujących budowli i wyjątkowych okazów roślin. Zapraszamy na spacer przez te „zielone płuca miasta”, a po drodze zobaczymy ponad 100 letnie alpinarium, przeprawimy się przez modernistyczny „wgłębnik”, odwiedzimy drewniany kościół skrywający mroczne tajemnice, poszukamy willi twórcy Hali Stulecia, dowiemy się do czego służą pneumatofory i spróbujemy zapolować na brytyjską wiewiórkę, oczywiście bezkrwawo.",
-        null, false, hpWroc.getId(), parkSzczLocation, userHelloPoland.getPartner());
+        null, false, hpWroc.getId(), parkSzczLocation, userHelloPoland.getPartner(), false, true);
     zwZooEvent = createSightEvent(zwZooImg, "Zwiedzanie ZOO",
         "Zakupiony bilet oraz karta roczna uprawniają do zwiedzania całego ZOO, w tym AFRYKARIUM. Wszystkie bilety uprawniają do jednorazowego wstępu.\n"
             + "\n" + "Bilet ulgowy, jednorazowy przysługuje:\n" + "\n"
@@ -351,7 +353,7 @@ public class DbFiller extends ServiceSuperclass {
             + " warunkiem skorzystania z ulgi jest okazanie ważnej legitymacji, a w przypadku emerytów i rencistów dodatkowo dowodu osobistego lub Legitymacji Osoby Niepełnosprawnej\n"
             + "\n" + "Bilet rodzinny:\n"
             + "Do skorzystania z biletu rodzinnego uprawnione są dwie osoby dorosłe wraz z maksymalnie trójką podopiecznych (przysługują dzieciom, młodzieży szkolnej oraz osobom uczącym się w szkołach ponadgimnazjalnych do ukończenia 21 roku życia jak i  osobom studiującym do ukończenia 26 roku życia pod warunkiem, że przynajmniej jeden z opiekunów jest rodzicem studenta - podopiecznego).",
-        null, true, zooWro.getId(), zooWroLocation, userZoo.getPartner());
+        null, true, zooWro.getId(), zooWroLocation, userZoo.getPartner(), false, true);
     zwStadEvent = createSightEvent(zwStadImg, "Zwiedzanie stadionu",
         "Trasa zwiedzania obejmuje zakątki i lokalizacje, których nie zobaczymy przychodząc na mecz. Po zobaczeniu emocjonujących atrakcji FUN ARENY wycieczki poprowadzone zostaną do: szatni zawodników, sali konferencyjnej w której przed i po meczach występują trenerzy drużyn, kaplicy stadionowej, strefy mixed zone, czyli miejsca z którego zawodnicy wychodzą na boisko.\n"
             + "\n"
@@ -362,7 +364,7 @@ public class DbFiller extends ServiceSuperclass {
             + "Zwiedzanie stadionu z Arenką - maskotką FUN ARENY to gwarancja dobrej zabawy. Będzie towarzyszyła ona przewodnikowi podczas oprowadzania. Nasza maskotka przeprowadzi także rozgrzewkę w salce treningowej i na obrzeżach murawy, gdzie dzieci będą mogły zrobić wspólne zdjęcie z Arenką. Gwarantujemy dużo radości i śmiechu.\n"
             + "Czas trwania: 1 h. Wiek - minimum 4 lata.\n"
             + "Cena: 15 zł od dziecka, jeden opiekun na 10 podopiecznych: gratis.Oferta skierowana do grup powyżej 15 osób.",
-        null, true, stadGd.getId(), stadGdLocation, userStadionGd.getPartner());
+        null, true, stadGd.getId(), stadGdLocation, userStadionGd.getPartner(), false, true);
     meczPCEvent = createSightEvent(meczPCImg, "Mecz towarzyski Polska-Czechy",
         "Zapadła decyzja o organizacji jesiennych meczy towarzyskich Reprezentacji Polski. Biało-Czerwoni zmierzą się na Stadionie Energa Gdańsk z reprezentacją Czech 15 listopada 2018 r.\n"
             + "\n"
@@ -375,14 +377,15 @@ public class DbFiller extends ServiceSuperclass {
             + "Największymi gwiazdami współczesnej reprezentacji Czech są występujący w linii pomocy Antonin Barak z Udinese Calcio, oraz napastnik Romy Patrick Schick. Pierwszy z wymienionych piłkarzy to jeden z najlepszych strzelców drużyny z Udine. Urodzony w Pribramie zawodnik w bieżącej kampanii ligowej zdobył dla swojej drużyny sześć goli. Natomiast Patrick Schick zdobył dla klubu ze stolicy Włoch jedną bramkę w aktualnych rozgrywkach Serie A.\n"
             + "\n"
             + "Czechy w dotychczasowej historii zagrały zaledwie raz na Mistrzostwach Świata. Drużyna z takimi piłkarzami w składzie jak Jan Koller, Pavel Nedved, czy Petr Cech, wystąpiła na turnieju w Niemczech w 2006 roku. Zespół prowadzony przez Karela Brucknera, odpadł z turnieju już po fazie grupowej. Czesi zwyciężyli jedynie w pierwszym meczu ze Stanami Zjednoczonymi 3:0, natomiast w kolejnych przegrali dwukrotnie 0:2 z Ghaną i Włochami.",
-        null, false, stadGd.getId(), stadGdLocation, userStadionGd.getPartner());
+        null, false, stadGd.getId(), stadGdLocation, userStadionGd.getPartner(), false, true);
     kolEvent = createSightEvent(kol1Img, "Zwiedzanie Kolejkowa",
         "Czynne 365 dni w roku, również w niedziele i święta w godzinach 10:00–18:00.", null, true,
-        kol.getId(), kolLocation, userKolejkowo.getPartner());
+        kol.getId(), kolLocation, userKolejkowo.getPartner(), false, true);
   }
 
   private SightEvent createSightEvent(ImageCollector mainImage, String name, String description,
-      String lead, Boolean generalAdmission, Long sightId, Location location, Partner partner) {
+      String lead, Boolean generalAdmission, Long sightId, Location location, Partner partner,
+      boolean blocked, boolean published) {
     var dto = new SightEventDTO();
     dto.name = name;
     dto.mainImage = DtoMapper.getDTO(mainImage);
@@ -391,6 +394,8 @@ public class DbFiller extends ServiceSuperclass {
     dto.generalAdmission = generalAdmission;
     dto.sightId = sightId;
     dto.location = DtoMapper.getDTO(location);
+    dto.blocked = blocked;
+    dto.published = published;
     return sService.create(dto, partner);
   }
 

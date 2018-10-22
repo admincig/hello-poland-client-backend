@@ -64,6 +64,10 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
   @ManyToMany
   private Set<Agreement> agreements;
 
+  private boolean published;
+
+  private boolean blocked;
+
   public Sight() {}
 
   public String getName() {
@@ -199,4 +203,21 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
   public void setAgreements(Set<Agreement> agreements) {
     this.agreements = agreements;
   }
+
+  public boolean isPublished() {
+    return published;
+  }
+
+  public void setPublished(boolean published) {
+    this.published = published;
+  }
+
+  public boolean isBlocked() {
+    return blocked;
+  }
+
+  public void setBlocked(boolean blocked) {
+    this.blocked = blocked;
+  }
+
 }
