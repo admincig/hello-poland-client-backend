@@ -31,6 +31,7 @@ import pl.hellopoland.dto.PushDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
+import pl.hellopoland.exception.notfound.AccessDeniedException;
 import pl.hellopoland.rest.dto.AvailableTicketNumberAssociationORO;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
@@ -96,6 +97,13 @@ public class SightEventService extends ServiceSuperclass {
     if (partner == null) {
       partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
     }
+    Sight sight = null;
+    if (dto.sightId != null) {
+      sight = sightService.get(dto.sightId);
+      if (!sight.getPartner().equals(partner)) {
+        throw new AccessDeniedException();
+      }
+    }
     dto.generalAdmission = Boolean.TRUE.equals(dto.generalAdmission);
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
@@ -106,8 +114,7 @@ public class SightEventService extends ServiceSuperclass {
     bo.generateRandomScore();
     bo.setPortal(hpt);
 
-    if (dto.sightId != null) {
-      Sight sight = sightService.get(dto.sightId);
+    if (sight != null) {
       bo.setSight(sight);
       if (sight.getAgreements() != null && !sight.getAgreements().isEmpty()) {
         bo.setAgreements(Set.copyOf(sight.getAgreements()));
