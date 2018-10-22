@@ -41,8 +41,12 @@ public class DtoMapper {
     target.setDescription(source.description);
     target.setEmail(source.email);
     target.setPhone(source.phone);
-    target.setBlocked(source.blocked);
-    target.setPublished(source.published);
+    if (source.blocked != null) {
+      target.setBlocked(source.blocked);
+    }
+    if (source.published != null) {
+      target.setPublished(source.published);
+    }
     copyLocation(source.location, target);
   }
 
@@ -239,8 +243,12 @@ public class DtoMapper {
     target.setPhone(source.phone);
     target.setGeneralAdmission(source.generalAdmission);
     target.setHptId(source.id);
-    target.setBlocked(source.blocked);
-    target.setPublished(source.published);
+    if (source.blocked != null) {
+      target.setBlocked(source.blocked);
+    }
+    if (source.published != null) {
+      target.setPublished(source.published);
+    }
     copyLocation(source.location, target);
   }
 
