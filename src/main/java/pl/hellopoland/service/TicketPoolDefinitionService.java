@@ -7,6 +7,8 @@ import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.TicketDefinition;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
+import pl.hellopoland.exception.notfound.AccessDeniedException;
+import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.util.HelloTicket;
 
 @Stateless
@@ -25,7 +27,14 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     final Long sightEventId = dto.sightEventId;
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
-    SightEvent se = sightEventService.getForPartner(dto.sightEventId, partner);
+    SightEvent se = sightEventService.get(dto.sightEventId);
+    if (se == null) {
+      throw new ResourceNotFoundException();
+    }
+    if (se.getPartner() != partner) {
+      throw new AccessDeniedException();
+    }
+    // SightEvent se = sightEventService.getForPartner(dto.sightEventId, partner);
     dto.sightEventId = se.getHptId();
     dto = hpt.addTicketPoolDefinition(dto, partner.getHptToken());
     dto.sightEventId = sightEventId;
