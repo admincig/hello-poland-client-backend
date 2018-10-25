@@ -1,6 +1,5 @@
 package pl.hellopoland.service.timer;
 
-import static java.util.Collections.singletonList;
 import java.io.InputStream;
 import java.lang.System.Logger;
 import java.util.Arrays;
@@ -19,7 +18,6 @@ import pl.hellopoland.bo.Portal.Type;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.User;
-import pl.hellopoland.bo.UserRole;
 import pl.hellopoland.bo.UserRole.Role;
 import pl.hellopoland.dto.FrequencyDataDTO;
 import pl.hellopoland.dto.FrequencyTypeDTO;
@@ -122,35 +120,29 @@ public class DbFiller extends ServiceSuperclass {
   private void createUsers() {
     userHelloPoland = createPartner("Hello Poland",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.",
-        Integer.valueOf(properties.getProperty("przelewy24.merchantId")));
+        Integer.valueOf(properties.getProperty("przelewy24.merchantId")), Role.PARTNER, Role.ADMIN);
     userZoo = createPartner("Zoo",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiJDOTU1NTI0MDk2REU0MjlEQjBGODM1NTA1RUI5MzAxNzkzQzE4NEJBQzM2NTFBNzI2MDFCRDNGMUFEQTkyQzAzIn0.",
-        Integer.valueOf(properties.getProperty("przelewy24.merchantId")));
+        Integer.valueOf(properties.getProperty("przelewy24.merchantId")), Role.PARTNER);
     userKolejkowo = createPartner("Kolejkowo",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiI0MDc5MTkyRkI2NTQyQTYyRjc3QTcwNDZDRDU1QkJGNUM5NDAzNkE0MjRFRDI4RTM0MEYwODNCRDE1MDRFODZBIn0.",
-        Integer.valueOf(properties.getProperty("przelewy24.merchantId")));
+        Integer.valueOf(properties.getProperty("przelewy24.merchantId")), Role.PARTNER);
     userStadionGd = createPartner("Stadion Gdański",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiIyODQyODcyRThEQ0EzMENFNkJBOTk5REMzQjBGODJFNUNFOTNFNzA5RTJEMjlGMEQ4NjFFOTU4QjMxQ0QwQzREIn0.",
-        Integer.valueOf(properties.getProperty("przelewy24.merchantId")));
+        Integer.valueOf(properties.getProperty("przelewy24.merchantId")), Role.PARTNER);
   }
 
-  private User createPartner(String partnerName, String token, Integer p24Id) {
+  private User createPartner(String partnerName, String token, Integer p24Id, Role... roles) {
     Partner helloPolandPartner = new Partner();
     helloPolandPartner.setName(partnerName + " Partner");
     helloPolandPartner.setHptToken(token);
     helloPolandPartner.setP24Id(p24Id);
 
-    User user = new User();
-
-    UserRole userRole = new UserRole();
-    userRole.setRole(Role.PARTNER);
-    userRole.setUser(user);
-
+    User user = new User(roles);
     String email = partnerName.toLowerCase().replaceAll(" ", "") + "@"
         + partnerName.toLowerCase().replaceAll(" ", "") + ".pl";
     user.setEmail(email);
     user.setPassword(passwordEncoder.encode(partnerName.toLowerCase().replaceAll(" ", "")));
-    user.setRoles(singletonList(userRole));
     user.setPartner(helloPolandPartner);
 
     em.persist(user);

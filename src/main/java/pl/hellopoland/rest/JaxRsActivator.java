@@ -5,7 +5,7 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 @ApplicationPath("/v1")
-@DeclareRoles({"root", "admin", "user", "hp_admin"})
+@DeclareRoles({"root", "admin", "user"})
 public class JaxRsActivator extends Application {
 
 }

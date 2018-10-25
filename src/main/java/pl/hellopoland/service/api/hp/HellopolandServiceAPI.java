@@ -1,5 +1,6 @@
 package pl.hellopoland.service.api.hp;
 
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.dto.PartnerDTO;
@@ -11,7 +12,7 @@ public class HellopolandServiceAPI {
   @Inject
   private HellopolandService service;
 
-  // @RolesAllowed("admin")
+  @RolesAllowed("admin")
   public PartnerDTO addPartner(PartnerDTO partner) {
     return DtoMapper.getDTO(service.addPartner(partner));
   }
