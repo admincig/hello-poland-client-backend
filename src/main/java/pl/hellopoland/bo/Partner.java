@@ -1,5 +1,6 @@
 package pl.hellopoland.bo;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -81,6 +82,13 @@ public class Partner extends ModelSuperclass {
 
   public void setAgreements(List<Agreement> agreements) {
     this.agreements = agreements;
+  }
+
+  public void addUser(User user) {
+    if (this.users == null) {
+      this.users = new ArrayList<>();
+    }
+    this.users.add(user);
   }
 
 }

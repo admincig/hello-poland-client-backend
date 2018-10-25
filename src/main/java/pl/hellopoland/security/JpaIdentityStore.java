@@ -10,9 +10,8 @@ import javax.security.enterprise.credential.Credential;
 import javax.security.enterprise.credential.UsernamePasswordCredential;
 import javax.security.enterprise.identitystore.CredentialValidationResult;
 import javax.security.enterprise.identitystore.IdentityStore;
-import pl.hellopoland.security.password.PasswordEncoder;
 import pl.hellopoland.bo.User;
-import pl.hellopoland.bo.UserRole;
+import pl.hellopoland.security.password.PasswordEncoder;
 import pl.hellopoland.service.UserService;
 
 @RequestScoped
@@ -33,8 +32,8 @@ public class JpaIdentityStore implements IdentityStore {
 
       if (user.isPresent() && passwordEncoder.matches(
           new String(usernamePassword.getPassword().getValue()), user.get().getPassword())) {
-        return new CredentialValidationResult(usernamePassword.getCaller(),
-            user.get().getRoles().stream().map(UserRole::getRole).collect(Collectors.toSet()));
+        return new CredentialValidationResult(usernamePassword.getCaller(), user.get().getRoles()
+            .stream().map(ur -> ur.getRole().toString()).collect(Collectors.toSet()));
       }
     }
 

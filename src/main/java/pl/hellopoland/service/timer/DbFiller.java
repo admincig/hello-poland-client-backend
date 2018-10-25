@@ -20,6 +20,7 @@ import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole;
+import pl.hellopoland.bo.UserRole.Role;
 import pl.hellopoland.dto.FrequencyDataDTO;
 import pl.hellopoland.dto.FrequencyTypeDTO;
 import pl.hellopoland.dto.SightEventDTO;
@@ -142,7 +143,7 @@ public class DbFiller extends ServiceSuperclass {
     User user = new User();
 
     UserRole userRole = new UserRole();
-    userRole.setRole("partner");
+    userRole.setRole(Role.PARTNER);
     userRole.setUser(user);
 
     String email = partnerName.toLowerCase().replaceAll(" ", "") + "@"
