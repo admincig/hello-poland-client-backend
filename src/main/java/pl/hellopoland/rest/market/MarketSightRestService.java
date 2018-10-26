@@ -46,9 +46,11 @@ public class MarketSightRestService {
 
   @POST
   @Path("/search")
-  public PagedCollection search(SightPagedCollectionConfig config) {
+  public PagedCollection search(SightPagedCollectionConfig config,
+      @QueryParam("city") String city) {
     config.onlyActive();
     config.onlyPublished();
+    config.setCity(city);
     return service.getList(config);
   }
 
