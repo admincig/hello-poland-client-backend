@@ -25,6 +25,8 @@ import pl.hellopoland.util.HelloTicket;
 public class HellopolandService extends ServiceSuperclass {
   @Inject
   private UserService userService;
+  @Inject
+  private EmailService emailService;
 
   public Partner addPartner(PartnerDTO partner) {
     if (StringUtils.isBlank(partner.email)) {
@@ -41,9 +43,10 @@ public class HellopolandService extends ServiceSuperclass {
     partnerBO.setHptToken("temporaryToken");
     String password = RandomStringUtils.randomAlphanumeric(10);
     userService.create(partner.email, password, null, null, null, partnerBO, UserRole.Role.PARTNER);
+    var emailPassword = new HashMap<String, String>();
+    emailPassword.put(partner.email, password);
 
     // 2. tworzenie uzytkownikow dla danego partnera:
-    var emailPassword = new HashMap<String, String>();
     var usersDTOs = partner.users;
     if (usersDTOs != null && !usersDTOs.isEmpty()) {
       for (UserDTO userDTO : usersDTOs) {
@@ -70,6 +73,8 @@ public class HellopolandService extends ServiceSuperclass {
     partnerBO.setHptToken(hptPartner.token);
 
     // 4. przeslanie hasel uzytkownikow i loginu do partnera:
+    emailPassword.forEach((key, value) -> emailService.sendEmail(key, "Nowe konto w Hello Poland.",
+        "Twój login to " + key + ", hasło to " + value));
 
     return partnerBO;
   }
