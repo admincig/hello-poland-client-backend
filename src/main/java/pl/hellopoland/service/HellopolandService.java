@@ -37,10 +37,10 @@ public class HellopolandService extends ServiceSuperclass {
 
   public Partner addPartner(PartnerDTO partner) {
     if (StringUtils.isBlank(partner.email)) {
-      throw new ConflictingException(""); // TODO: add message
+      throw new ConflictingException("The email cannot be blank.");
     }
     if (StringUtils.isBlank(partner.name)) {
-      throw new ConflictingException(""); // TODO: add message
+      throw new ConflictingException("The partner name cannot be blank.");
     }
 
     // 1. creating a partner and the user in hpl:
@@ -60,10 +60,10 @@ public class HellopolandService extends ServiceSuperclass {
         if (userDTO.roles == null || userDTO.roles.isEmpty()
             || !List.of(UserRole.Role.values()).containsAll(
                 getFilteredRolesStreamFromDTO(userDTO.roles).collect(Collectors.toList()))) {
-          throw new ConflictingException(""); // TODO: add message
+          throw new ConflictingException("Roles are blank or some role is unsupported.");
         }
         if (StringUtils.isBlank(userDTO.email)) {
-          throw new ConflictingException(""); // TODO: add message
+          throw new ConflictingException("The email cannot be blank.");
         }
         String pass = RandomStringUtils.randomAlphanumeric(10);
         User userBO = userService.create(userDTO.email, pass, userDTO.name, null, null, partnerBO,
