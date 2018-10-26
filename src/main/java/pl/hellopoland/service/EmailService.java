@@ -29,7 +29,8 @@ public class EmailService extends ServiceSuperclass {
       "mail.smtp.socketFactory.class";
   private static final String MAIL_SMTP_STARTTLS_ENABLE_PROPERTY = "mail.smtp.starttls.enable";
 
-  public void sendEmail(String recipientEmail, String subject, String msg) {
+  public void sendEmail(String recipientEmail, String subject, String msg)
+      throws MessagingException {
     var message = new MimeMessage(createSessionForEmail(getSessionProperties()));
     try {
       message.setFrom(new InternetAddress(System.getProperty(MAIL_USERNAME_PROPERTY)));
@@ -44,6 +45,7 @@ public class EmailService extends ServiceSuperclass {
     } catch (MessagingException e) {
       lOG.log(System.Logger.Level.ERROR, "Sending an email failed: " + recipientEmail);
       lOG.log(System.Logger.Level.ERROR, e.getLocalizedMessage());
+      throw e;
     }
 
   }

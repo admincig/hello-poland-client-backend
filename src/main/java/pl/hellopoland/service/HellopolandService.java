@@ -1,5 +1,6 @@
 package pl.hellopoland.service;
 
+import java.lang.System.Logger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -8,6 +9,7 @@ import java.util.stream.Stream;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.mail.MessagingException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import pl.hellopoland.bo.Partner;
@@ -18,11 +20,14 @@ import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.dto.RoleDTO;
 import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
+import pl.hellopoland.exception.email.EmailSendingException;
 import pl.hellopoland.util.HelloTicket;
 
 @LocalBean
 @Stateless
 public class HellopolandService extends ServiceSuperclass {
+  private static final Logger lOG = System.getLogger("HellopolandService");
+
   @Inject
   private UserService userService;
   @Inject
@@ -76,8 +81,15 @@ public class HellopolandService extends ServiceSuperclass {
     partnerBO.setHptToken(hptPartner.token);
 
     // 4. sending emails to users (with theirs login and password):
-    emailPassword.forEach((key, value) -> emailService.sendEmail(key, "Nowe konto w Hello Poland.",
-        "Twój login to " + key + ", hasło to " + value));
+    emailPassword.forEach((key, value) -> {
+      try {
+        emailService.sendEmail(key, "Nowe konto w Hello Poland.",
+            "Twój login to " + key + ", hasło to " + value);
+      } catch (MessagingException e) {
+        lOG.log(System.Logger.Level.ERROR, e.getLocalizedMessage());
+        throw new EmailSendingException();
+      }
+    });
 
     return partnerBO;
   }
