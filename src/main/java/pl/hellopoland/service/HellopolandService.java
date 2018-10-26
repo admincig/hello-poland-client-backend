@@ -28,6 +28,8 @@ public class HellopolandService extends ServiceSuperclass {
   @Inject
   private EmailService emailService;
 
+  final Set<UserRole.Role> excluded_roles = Set.of(UserRole.Role.ROOT, UserRole.Role.ADMIN);
+
   public Partner addPartner(PartnerDTO partner) {
     if (StringUtils.isBlank(partner.email)) {
       throw new ConflictingException(""); // TODO: add message
@@ -36,7 +38,7 @@ public class HellopolandService extends ServiceSuperclass {
       throw new ConflictingException(""); // TODO: add message
     }
 
-    // 1. tworzenie partnera i odpowiedniego uzytkownika w hpl:
+    // 1. creating a partner and the user in hpl:
     var partnerBO = new Partner();
     partnerBO.setName(partner.name);
     partnerBO.setP24Id(partner.p24MerchantId);
@@ -46,12 +48,13 @@ public class HellopolandService extends ServiceSuperclass {
     var emailPassword = new HashMap<String, String>();
     emailPassword.put(partner.email, password);
 
-    // 2. tworzenie uzytkownikow dla danego partnera:
+    // 2. creating users of the partner in hpl:
     var usersDTOs = partner.users;
     if (usersDTOs != null && !usersDTOs.isEmpty()) {
       for (UserDTO userDTO : usersDTOs) {
-        if (userDTO.roles == null || userDTO.roles.isEmpty() || !List.of(UserRole.Role.values())
-            .containsAll(getRolesStreamFromDTO(userDTO.roles).collect(Collectors.toList()))) {
+        if (userDTO.roles == null || userDTO.roles.isEmpty()
+            || !List.of(UserRole.Role.values()).containsAll(
+                getFilteredRolesStreamFromDTO(userDTO.roles).collect(Collectors.toList()))) {
           throw new ConflictingException(""); // TODO: add message
         }
         if (StringUtils.isBlank(userDTO.email)) {
@@ -59,28 +62,29 @@ public class HellopolandService extends ServiceSuperclass {
         }
         String pass = RandomStringUtils.randomAlphanumeric(10);
         User userBO = userService.create(userDTO.email, pass, userDTO.name, null, null, partnerBO,
-            getRolesStreamFromDTO(userDTO.roles)
+            getFilteredRolesStreamFromDTO(userDTO.roles)
                 .toArray(size -> new UserRole.Role[userDTO.roles.size()]));
         emailPassword.put(userDTO.email, pass);
         partnerBO.addUser(userBO);
       }
     }
 
-    // 3. utworzenie partnera w hpt:
+    // 3. creating a partner in hpt:
     Portal hpt = getPortal("Hello Ticket Cloud");
     var ht = new HelloTicket(hpt.getUrl());
     var hptPartner = ht.addPartner(partner);
     partnerBO.setHptToken(hptPartner.token);
 
-    // 4. przeslanie hasel uzytkownikow i loginu do partnera:
+    // 4. sending emails to users (with theirs login and password):
     emailPassword.forEach((key, value) -> emailService.sendEmail(key, "Nowe konto w Hello Poland.",
         "Twój login to " + key + ", hasło to " + value));
 
     return partnerBO;
   }
 
-  private Stream<UserRole.Role> getRolesStreamFromDTO(Set<RoleDTO> roles) {
-    return roles.stream().map(r -> UserRole.Role.valueOf(r.name()));
+  private Stream<UserRole.Role> getFilteredRolesStreamFromDTO(Set<RoleDTO> roles) {
+    return roles.stream().map(r -> UserRole.Role.valueOf(r.name()))
+        .filter(r -> !excluded_roles.contains(r));
   }
 
 }
