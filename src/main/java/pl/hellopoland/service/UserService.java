@@ -6,14 +6,14 @@ import javax.ejb.Stateless;
 import javax.persistence.NoResultException;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserLocation;
-import pl.hellopoland.exception.notfound.ResourceNotFoundException;
+import pl.hellopoland.exception.UnauthorizedException;
 
 @LocalBean
 @Stateless
 public class UserService extends ServiceSuperclass {
 
   public User me() {
-    return Optional.ofNullable(getLoggedUser()).orElseThrow(ResourceNotFoundException::new);
+    return Optional.ofNullable(getLoggedUser()).orElseThrow(UnauthorizedException::new);
   }
 
   public User getOrCreateSocialMedia(User user) {
