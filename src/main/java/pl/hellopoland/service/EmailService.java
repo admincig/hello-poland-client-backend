@@ -37,7 +37,7 @@ public class EmailService extends ServiceSuperclass {
       message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
       message.setSubject(subject, "UTF-8");
       var mimeBodyPart = new MimeBodyPart();
-      mimeBodyPart.setContent(msg, "text/html");
+      mimeBodyPart.setText(msg, "UTF-8");
       var multipart = new MimeMultipart();
       multipart.addBodyPart(mimeBodyPart);
       message.setContent(multipart);
