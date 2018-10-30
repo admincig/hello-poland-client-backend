@@ -43,9 +43,12 @@ public class SightEventServiceMarketAPI {
   @PermitAll
   public SightEventDTO get(Long id) {
     SightEvent bo = service.get(id);
-    var dto = DtoMapper.getFullDTO(bo);
-    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto));
-    return isAvailable(dto) ? dto : null;
+    if (bo.isPublished()) {
+      var dto = DtoMapper.getFullDTO(bo);
+      service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto));
+      return isAvailable(dto) ? dto : null;
+    }
+    return null;
   }
 
   private boolean isAvailable(SightEventDTO dto) {

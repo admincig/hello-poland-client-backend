@@ -14,9 +14,9 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
   public void setSearchQuery(String searchQuery) {
     if (searchQuery != null) {
       addCondition("searchQuery", "%" + searchQuery.toLowerCase() + "%",
-          "(unaccent(lower(e.name)) like unaccent(:searchQuery))"
+          "((unaccent(lower(e.name)) like unaccent(:searchQuery))"
               + " or (unaccent(lower(e.lead)) like unaccent(:searchQuery))"
-              + " or (unaccent(lower(e.location.city)) like unaccent(:searchQuery))");
+              + " or (unaccent(lower(e.location.city)) like unaccent(:searchQuery)))");
     }
   }
 
@@ -28,6 +28,11 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
 
   public void onlyActive() {
     addCondition("active", true, "e.active=:active");
+  }
+
+  public void onlyPublished() {
+    addCondition("published", true, "e.published=:published");
+    addCondition("blocked", false, "e.blocked=:blocked");
   }
 
   public void onlyCurrentPartner(boolean only) {
