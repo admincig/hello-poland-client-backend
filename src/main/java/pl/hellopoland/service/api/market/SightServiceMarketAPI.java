@@ -36,22 +36,26 @@ public class SightServiceMarketAPI {
   @PermitAll
   public SightDTO get(Long id, String language) {
     Sight bo = service.get(id);
-    bo.setSightEvents(
-        bo.getSightEvents().stream().filter(se -> se.isActive()).collect(Collectors.toList()));
-    if (language != null && !language.toLowerCase().contains("pl")) {
-      service.fetchColections(bo);
-      bo = translationService.translateEntity(bo, language);
-      var agreements = bo.getAgreements();
-      var sightEvents = bo.getSightEvents();
-      if (agreements != null && !agreements.isEmpty()) {
-        bo.setAgreements(Set.copyOf(translationService.translateEntities(agreements, language)));
+    if (bo.isPublished()) {
+      bo.setSightEvents(bo.getSightEvents().stream()
+          .filter(se -> se.isActive() && se.isPublished() && !se.isBlocked())
+          .collect(Collectors.toList()));
+      if (language != null && !language.toLowerCase().contains("pl")) {
+        service.fetchColections(bo);
+        bo = translationService.translateEntity(bo, language);
+        var agreements = bo.getAgreements();
+        var sightEvents = bo.getSightEvents();
+        if (agreements != null && !agreements.isEmpty()) {
+          bo.setAgreements(Set.copyOf(translationService.translateEntities(agreements, language)));
+        }
+        if (sightEvents != null && !sightEvents.isEmpty()) {
+          bo.setSightEvents(translationService.translateEntities(sightEvents, language));
+        }
       }
-      if (sightEvents != null && !sightEvents.isEmpty()) {
-        bo.setSightEvents(translationService.translateEntities(sightEvents, language));
-      }
+      var dto = DtoMapper.getFullDTO(bo);
+      return dto;
     }
-    var dto = DtoMapper.getFullDTO(bo);
-    return dto;
+    return null;
   }
 
 }

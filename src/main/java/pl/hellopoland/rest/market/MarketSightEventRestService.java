@@ -38,6 +38,7 @@ public class MarketSightEventRestService {
       @HeaderParam("Accept-Language") String language) {
     var config = new SightEventPagedCollectionConfig();
     config.onlyActive();
+    config.onlyPublished();
     config.setCity(city);
     return service.getList(config, language);
   }
@@ -45,8 +46,11 @@ public class MarketSightEventRestService {
   @POST
   @Path("/search")
   public PagedCollection search(SightEventPagedCollectionConfig config,
-      @HeaderParam("Accept-Language") String language) {
+      @QueryParam("city") String city, @HeaderParam("Accept-Language") String language) {
     config.onlyActive();
+    config.onlyActive();
+    config.onlyPublished();
+    config.setCity(city);
     return service.getList(config, language);
   }
 

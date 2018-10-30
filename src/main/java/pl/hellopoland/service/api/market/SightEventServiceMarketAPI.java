@@ -51,33 +51,33 @@ public class SightEventServiceMarketAPI {
   @PermitAll
   public SightEventDTO get(Long id, String language) {
     SightEvent bo = service.get(id);
-    if (language != null && !language.toLowerCase().contains("pl")) {
-      service.fetchColections(bo);
-      bo = translationService.translateEntity(bo, language);
-      var agreements = bo.getAgreements();
-      var tickets = bo.getTickets();
-      if (agreements != null && !agreements.isEmpty()) {
-        bo.setAgreements(Set.copyOf(translationService.translateEntities(agreements, language)));
+    if (bo.isPublished()) {
+      if (language != null && !language.toLowerCase().contains("pl")) {
+        service.fetchColections(bo);
+        bo = translationService.translateEntity(bo, language);
+        var agreements = bo.getAgreements();
+        var tickets = bo.getTickets();
+        if (agreements != null && !agreements.isEmpty()) {
+          bo.setAgreements(Set.copyOf(translationService.translateEntities(agreements, language)));
+        }
+        if (tickets != null && !tickets.isEmpty()) {
+          bo.setTickets(translationService.translateEntities(tickets, language));
+        }
       }
-      if (tickets != null && !tickets.isEmpty()) {
-        bo.setTickets(translationService.translateEntities(tickets, language));
-      }
+      var dto = DtoMapper.getFullDTO(bo);
+      service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto));
+      return isAvailable(dto) ? dto : null;
     }
-    var dto = DtoMapper.getFullDTO(bo);
-    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto));
-    return isAvailable(dto) ? dto : null;
+    return null;
   }
 
   private boolean isAvailable(SightEventDTO dto) {
-    // List<TicketPoolDefinitionDTO> tpds = dto.ticketPoolDefinitions;
-    // if (tpds != null && !tpds.isEmpty()) {
-    // return !tpds.stream().filter(tpd -> tpd.deleted == false).filter(tpd -> isDateOK(tpd))
-    // .collect(Collectors.toList()).isEmpty();
-    // }
-    // return false;
-
-
-    return true;
+    List<TicketPoolDefinitionDTO> tpds = dto.ticketPoolDefinitions;
+    if (tpds != null && !tpds.isEmpty()) {
+      return !tpds.stream().filter(tpd -> tpd.deleted == false).filter(tpd -> isDateOK(tpd))
+          .collect(Collectors.toList()).isEmpty();
+    }
+    return false;
   }
 
   private boolean isDateOK(TicketPoolDefinitionDTO tpd) {

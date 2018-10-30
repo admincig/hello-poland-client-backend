@@ -86,6 +86,10 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
 
   private boolean active = true;
 
+  private boolean published;
+
+  private boolean blocked;
+
   public String getName() {
     return name;
   }
@@ -284,4 +288,21 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
       images.remove(img);
     }
   }
+
+  public boolean isPublished() {
+    return published;
+  }
+
+  public void setPublished(boolean published) {
+    this.published = published;
+  }
+
+  public boolean isBlocked() {
+    return blocked;
+  }
+
+  public void setBlocked(boolean blocked) {
+    this.blocked = blocked;
+  }
+
 }

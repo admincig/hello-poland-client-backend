@@ -23,6 +23,7 @@ import pl.hellopoland.bo.OrderEntry;
 import pl.hellopoland.bo.OrderSightEntry;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.dto.AvailableTicketNumberAssociationDTO;
+import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
@@ -310,6 +311,17 @@ public class HelloTicket {
               + "&date=" + dateString, AUTH_TOKEN).toString(),
           AvailableTicketNumberAssociationDTO.class);
     } catch (JsonbException | IOException e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      return null;
+    }
+  }
+
+  public PartnerDTO addPartner(PartnerDTO dto) {
+    try {
+      Jsonb jsonb = JsonbConfig.getInstance();
+      JsonStructure json = post("/v1/partners", jsonb.toJson(dto), AUTH_TOKEN);
+      return jsonb.fromJson(json.toString(), PartnerDTO.class);
+    } catch (Exception e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
       return null;
     }
