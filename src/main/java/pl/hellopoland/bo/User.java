@@ -23,8 +23,8 @@ public class User extends ModelSuperclass {
 
   public User() {}
 
-  public User(String... roles) {
-    for (String role : roles) {
+  public User(UserRole.Role... roles) {
+    for (var role : roles) {
       this.addRole(role);
     }
   }
@@ -92,7 +92,7 @@ public class User extends ModelSuperclass {
     this.roles = roles;
   }
 
-  private void addRole(String role) {
+  private void addRole(UserRole.Role role) {
     UserRole ur = new UserRole();
     ur.setUser(this);
     ur.setRole(role);

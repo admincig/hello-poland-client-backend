@@ -3,7 +3,9 @@ package pl.hellopoland.util;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import pl.hellopoland.bo.Agreement;
@@ -16,9 +18,12 @@ import pl.hellopoland.bo.OrderDateEntry;
 import pl.hellopoland.bo.OrderDetails;
 import pl.hellopoland.bo.OrderEntry;
 import pl.hellopoland.bo.OrderSightEntry;
+import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.TicketDefinition;
+import pl.hellopoland.bo.User;
+import pl.hellopoland.bo.UserRole;
 import pl.hellopoland.dto.AgreementDTO;
 import pl.hellopoland.dto.FileDescriptorDTO;
 import pl.hellopoland.dto.ImageDTO;
@@ -27,9 +32,12 @@ import pl.hellopoland.dto.OpeningHoursDTO;
 import pl.hellopoland.dto.P24PassageCartDTO;
 import pl.hellopoland.dto.P24PassageCartEntryDTO;
 import pl.hellopoland.dto.P24PassageTransactionParamsDTO;
+import pl.hellopoland.dto.PartnerDTO;
+import pl.hellopoland.dto.RoleDTO;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
+import pl.hellopoland.dto.UserDTO;
 
 public class DtoMapper {
 
@@ -343,6 +351,32 @@ public class DtoMapper {
     dto.linkUrl = bo.getLinkUrl();
     dto.obligatory = bo.isObligatory();
     dto.text = bo.getText();
+    return dto;
+  }
+
+  public static RoleDTO getDTO(UserRole bo) {
+    return RoleDTO.valueOf(bo.getRole().name());
+  }
+
+  public static UserDTO getDTO(User bo) {
+    var dto = new UserDTO();
+    dto.id = bo.getId();
+    dto.name = bo.getName();
+    dto.email = bo.getEmail();
+    dto.roles = Optional.ofNullable(bo.getRoles()).orElse(Collections.emptyList()).stream()
+        .map(DtoMapper::getDTO).collect(Collectors.toSet());
+    return dto;
+  }
+
+  public static PartnerDTO getDTO(Partner bo) {
+    var dto = new PartnerDTO();
+    dto.id = bo.getId();
+    dto.name = bo.getName();
+    dto.p24MerchantId = bo.getP24Id();
+    dto.users = Optional.ofNullable(bo.getUsers()).orElse(Collections.emptyList()).stream()
+        .map(DtoMapper::getDTO).collect(Collectors.toList());
+    // dto.sightEvents = ;
+    // dto.agreements = ;
     return dto;
   }
 

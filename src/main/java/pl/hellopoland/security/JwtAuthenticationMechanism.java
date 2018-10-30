@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.HttpHeaders;
 import pl.hellopoland.bo.User;
-import pl.hellopoland.bo.UserRole;
 import pl.hellopoland.security.token.ExpiredTokenService;
 import pl.hellopoland.security.token.JwtCredential;
 import pl.hellopoland.security.token.TokenInExpiredTokensListException;
@@ -309,7 +308,8 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
 
     String principal = user.getEmail();
 
-    Set<String> authorities = user.getRoles().stream().map(UserRole::getRole).collect(toSet());
+    Set<String> authorities =
+        user.getRoles().stream().map(ur -> ur.getRole().toString()).collect(toSet());
 
     String accessToken =
         tokenProvider.createToken(user.getEmail(), authorities, TokenType.ACCESS_TOKEN);
