@@ -41,7 +41,6 @@ public class SightServiceMarketAPI {
           .filter(se -> se.isActive() && se.isPublished() && !se.isBlocked())
           .collect(Collectors.toList()));
       if (language != null && !language.toLowerCase().contains("pl")) {
-        service.fetchColections(bo);
         bo = translationService.translateEntity(bo, language);
         var agreements = bo.getAgreements();
         var sightEvents = bo.getSightEvents();

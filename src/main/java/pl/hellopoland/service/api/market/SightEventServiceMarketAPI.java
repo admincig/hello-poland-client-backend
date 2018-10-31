@@ -53,7 +53,6 @@ public class SightEventServiceMarketAPI {
     SightEvent bo = service.get(id);
     if (bo.isPublished()) {
       if (language != null && !language.toLowerCase().contains("pl")) {
-        service.fetchColections(bo);
         bo = translationService.translateEntity(bo, language);
         var agreements = bo.getAgreements();
         var tickets = bo.getTickets();

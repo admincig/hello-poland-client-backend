@@ -149,7 +149,6 @@ public class SightEventService extends ServiceSuperclass {
 
   public SightEvent createLanguageVesrion(SightEventDTO dto, String language) {
     SightEvent bo = getForLoggedUser(dto.id);
-    fetchColections(bo);
     em.detach(bo);
     return translationService.createEntityLanguageVersion(bo, dto, language);
   }
@@ -180,7 +179,6 @@ public class SightEventService extends ServiceSuperclass {
 
   public SightEvent updateLanguageVersionForLoggedUser(SightEventDTO dto, String language) {
     SightEvent bo = getForLoggedUser(dto.id);
-    fetchColections(bo);
     em.detach(bo);
     return translationService.updateEntityLanguageVersion(bo, dto, language);
   }
@@ -395,21 +393,6 @@ public class SightEventService extends ServiceSuperclass {
     SightEvent bo = getForLoggedUser(id);
     bo.setPdfAttachment(fdService.storeFile(new ByteArrayInputStream(pdf), "pdf"));
     return bo;
-  }
-
-  public void fetchColections(SightEvent bo) {
-    if (bo.getTickets() != null && !bo.getTickets().isEmpty()) {
-      bo.getTickets().size();
-    }
-    if (bo.getImages() != null && !bo.getImages().isEmpty()) {
-      bo.getImages().size();
-    }
-    if (bo.getOpeningHours() != null && !bo.getOpeningHours().isEmpty()) {
-      bo.getOpeningHours().size();
-    }
-    if (bo.getAgreements() != null && !bo.getAgreements().isEmpty()) {
-      bo.getAgreements().size();
-    }
   }
 
 }

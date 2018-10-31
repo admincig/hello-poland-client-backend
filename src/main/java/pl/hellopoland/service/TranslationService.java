@@ -28,7 +28,6 @@ public class TranslationService extends ServiceSuperclass {
 
   public <T extends ModelSuperclass, D extends DTOSuperclass> T createEntityLanguageVersion(T bo,
       D dto, String language) {
-
     Predicate<? super Field> predicate = f -> (f.getType().equals(String.class)
         && !EXCLUDED_FIELDS_NAMES.contains(bo.getClass().getSimpleName() + "." + f.getName()));
 
@@ -71,6 +70,7 @@ public class TranslationService extends ServiceSuperclass {
   }
 
   public <T extends ModelSuperclass> T translateEntity(T bo, String language) {
+    fetchColections(bo);
     var translations = getTranslations(bo, getLanguageSymbol(language));
     em.detach(bo);
     for (Translation translation : translations) {
@@ -94,6 +94,36 @@ public class TranslationService extends ServiceSuperclass {
       bo = translateEntity(bo, language);
       return bo;
     }).collect(Collectors.toList());
+  }
+
+  private <T extends ModelSuperclass> void fetchColections(T bo) {
+    Predicate<? super Field> predicateNotEmptyCollection = field -> {
+      try {
+        return Collection.class.isAssignableFrom(field.getType())
+            && bo.getClass().getMethod("get" + StringUtils.capitalize(field.getName()))
+                .invoke(bo) != null
+            && !((Collection<?>) bo.getClass()
+                .getMethod("get" + StringUtils.capitalize(field.getName())).invoke(bo)).isEmpty();
+      } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+          | NoSuchMethodException | SecurityException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+      return false;
+    };
+
+    Arrays.asList(bo.getClass().getDeclaredFields()).stream().filter(predicateNotEmptyCollection)
+        .map(field -> {
+          try {
+            return (Collection<?>) bo.getClass()
+                .getMethod("get" + StringUtils.capitalize(field.getName())).invoke(bo);
+          } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+              | NoSuchMethodException | SecurityException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+          return null;
+        }).forEach(collection -> collection.size());
   }
 
   private List<Translation> getTranslations(ModelSuperclass bo, String language) {

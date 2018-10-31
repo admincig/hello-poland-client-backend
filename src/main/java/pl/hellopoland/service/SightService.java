@@ -97,7 +97,6 @@ public class SightService extends ServiceSuperclass {
 
   public Sight createLanguageVesrion(SightDTO dto, String language) {
     Sight bo = getForLoggedPartner(dto.id);
-    fetchColections(bo);
     em.detach(bo);
     return translationService.createEntityLanguageVersion(bo, dto, language);
   }
@@ -225,7 +224,6 @@ public class SightService extends ServiceSuperclass {
 
   public Sight updateLanguageVersionForLoggedUser(SightDTO dto, String language) {
     Sight bo = getForLoggedPartner(dto.id);
-    fetchColections(bo);
     em.detach(bo);
     return translationService.updateEntityLanguageVersion(bo, dto, language);
   }
@@ -251,21 +249,6 @@ public class SightService extends ServiceSuperclass {
     return em.createQuery("from Sight where partner = :partner and id = :id", Sight.class)
         .setParameter("partner", partner).setParameter("id", sightId).getResultStream().findFirst()
         .orElseThrow(ResourceNotFoundException::new);
-  }
-
-  public void fetchColections(Sight bo) {
-    if (bo.getSightEvents() != null && !bo.getSightEvents().isEmpty()) {
-      bo.getSightEvents().size();
-    }
-    if (bo.getImages() != null && !bo.getImages().isEmpty()) {
-      bo.getImages().size();
-    }
-    if (bo.getOpeningHours() != null && !bo.getOpeningHours().isEmpty()) {
-      bo.getOpeningHours().size();
-    }
-    if (bo.getAgreements() != null && !bo.getAgreements().isEmpty()) {
-      bo.getAgreements().size();
-    }
   }
 
 }
