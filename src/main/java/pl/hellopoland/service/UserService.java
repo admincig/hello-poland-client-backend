@@ -10,6 +10,7 @@ import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserLocation;
 import pl.hellopoland.bo.UserRole;
 import pl.hellopoland.bo.UserRole.Role;
+import pl.hellopoland.exception.UnauthorizedException;
 import pl.hellopoland.security.password.PasswordEncoder;
 
 @LocalBean
@@ -19,7 +20,7 @@ public class UserService extends ServiceSuperclass {
   private PasswordEncoder passwordEncoder;
 
   public User me() {
-    return getLoggedUser();
+    return Optional.ofNullable(getLoggedUser()).orElseThrow(UnauthorizedException::new);
   }
 
   public User getOrCreateSocialMedia(User user) {
