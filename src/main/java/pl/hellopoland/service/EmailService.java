@@ -1,5 +1,6 @@
 package pl.hellopoland.service;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.System.Logger;
 import java.util.Properties;
 import javax.ejb.LocalBean;
@@ -20,6 +21,7 @@ import javax.mail.internet.MimeMultipart;
 public class EmailService extends ServiceSuperclass {
   private static final Logger lOG = System.getLogger("EmailService");
 
+  private static final String MAIL_PERSONAL = "Bilety Hello Poland";
   private static final String MAIL_USERNAME_PROPERTY = "mail.username";
   private static final String MAIL_PASSWORD_PROPERTY = "mail.password";
   private static final String MAIL_SMTP_HOST_PROPERTY = "mail.smtp.host";
@@ -30,10 +32,11 @@ public class EmailService extends ServiceSuperclass {
   private static final String MAIL_SMTP_STARTTLS_ENABLE_PROPERTY = "mail.smtp.starttls.enable";
 
   public void sendEmail(String recipientEmail, String subject, String msg)
-      throws MessagingException {
+      throws MessagingException, UnsupportedEncodingException {
     var message = new MimeMessage(createSessionForEmail(getSessionProperties()));
     try {
-      message.setFrom(new InternetAddress(System.getProperty(MAIL_USERNAME_PROPERTY)));
+      message
+          .setFrom(new InternetAddress(System.getProperty(MAIL_USERNAME_PROPERTY), MAIL_PERSONAL));
       message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
       message.setSubject(subject, "UTF-8");
       var mimeBodyPart = new MimeBodyPart();
@@ -42,7 +45,7 @@ public class EmailService extends ServiceSuperclass {
       multipart.addBodyPart(mimeBodyPart);
       message.setContent(multipart);
       Transport.send(message);
-    } catch (MessagingException e) {
+    } catch (MessagingException | UnsupportedEncodingException e) {
       lOG.log(System.Logger.Level.ERROR, "Sending an email failed: " + recipientEmail);
       lOG.log(System.Logger.Level.ERROR, e.getLocalizedMessage());
       throw e;
