@@ -1,5 +1,6 @@
 package pl.hellopoland.service;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.System.Logger;
 import java.util.HashMap;
 import java.util.List;
@@ -85,7 +86,7 @@ public class HellopolandService extends ServiceSuperclass {
       try {
         emailService.sendEmail(key, "Nowe konto w Hello Poland.",
             "Twój login to " + key + ", hasło to " + value);
-      } catch (MessagingException e) {
+      } catch (MessagingException | UnsupportedEncodingException e) {
         lOG.log(System.Logger.Level.ERROR, e.getLocalizedMessage());
         throw new EmailSendingException();
       }
