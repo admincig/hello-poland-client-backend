@@ -148,9 +148,7 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public SightEvent createLanguageVesrion(SightEventDTO dto, String language) {
-    SightEvent bo = getForLoggedUser(dto.id);
-    em.detach(bo);
-    return translationService.createEntityLanguageVersion(bo, dto, language);
+    return translationService.createEntityLanguageVersion(getForLoggedUser(dto.id), dto, language);
   }
 
   public SightEvent updateForLoggedUser(SightEventDTO dto) {
@@ -178,9 +176,7 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public SightEvent updateLanguageVersionForLoggedUser(SightEventDTO dto, String language) {
-    SightEvent bo = getForLoggedUser(dto.id);
-    em.detach(bo);
-    return translationService.updateEntityLanguageVersion(bo, dto, language);
+    return translationService.updateEntityLanguageVersion(getForLoggedUser(dto.id), dto, language);
   }
 
   public List<SightEvent> getForPartner() {
