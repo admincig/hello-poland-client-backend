@@ -47,7 +47,7 @@ public class TranslationService extends ServiceSuperclass {
       em.flush();
       translations.add(translation);
     }
-    return translateEntity(bo, language);
+    return translateEntity(bo, language, true);
   }
 
   public <T extends ModelSuperclass, D extends DTOSuperclass> T updateEntityLanguageVersion(T bo,
@@ -66,11 +66,14 @@ public class TranslationService extends ServiceSuperclass {
         continue;
       }
     }
-    return translateEntity(bo, language);
+    return translateEntity(bo, language, true);
   }
 
-  public <T extends ModelSuperclass> T translateEntity(T bo, String language) {
-    fetchColections(bo);
+  public <T extends ModelSuperclass> T translateEntity(T bo, String language,
+      boolean fetchColections) {
+    if (fetchColections) {
+      fetchColections(bo);
+    }
     var translations = getTranslations(bo, getLanguageSymbol(language));
     em.detach(bo);
     for (Translation translation : translations) {
@@ -89,9 +92,10 @@ public class TranslationService extends ServiceSuperclass {
     return bo;
   }
 
-  public <T extends ModelSuperclass> List<T> translateEntities(Collection<T> bos, String language) {
+  public <T extends ModelSuperclass> List<T> translateEntities(Collection<T> bos, String language,
+      boolean fetchColections) {
     return bos.stream().map(bo -> {
-      bo = translateEntity(bo, language);
+      bo = translateEntity(bo, language, fetchColections);
       return bo;
     }).collect(Collectors.toList());
   }

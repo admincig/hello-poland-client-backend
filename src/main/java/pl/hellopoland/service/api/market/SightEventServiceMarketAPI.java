@@ -35,7 +35,7 @@ public class SightEventServiceMarketAPI {
   public PagedCollection getList(SightEventPagedCollectionConfig config, String language) {
     PagedEntityCollection<SightEvent> bos = service.getList(config);
     if (language != null && !language.toLowerCase().contains("pl")) {
-      bos.items = translationService.translateEntities(bos.items, language);
+      bos.items = translationService.translateEntities(bos.items, language, false);
     }
     List<SightEventDTO> dtos =
         bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
@@ -53,14 +53,15 @@ public class SightEventServiceMarketAPI {
     SightEvent bo = service.get(id);
     if (bo.isPublished()) {
       if (language != null && !language.toLowerCase().contains("pl")) {
-        bo = translationService.translateEntity(bo, language);
+        bo = translationService.translateEntity(bo, language, true);
         var agreements = bo.getAgreements();
         var tickets = bo.getTickets();
         if (agreements != null && !agreements.isEmpty()) {
-          bo.setAgreements(Set.copyOf(translationService.translateEntities(agreements, language)));
+          bo.setAgreements(
+              Set.copyOf(translationService.translateEntities(agreements, language, true)));
         }
         if (tickets != null && !tickets.isEmpty()) {
-          bo.setTickets(translationService.translateEntities(tickets, language));
+          bo.setTickets(translationService.translateEntities(tickets, language, true));
         }
       }
       var dto = DtoMapper.getFullDTO(bo);
