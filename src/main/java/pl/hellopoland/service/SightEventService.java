@@ -60,6 +60,9 @@ public class SightEventService extends ServiceSuperclass {
   @Inject
   private FileDescriptorService fdService;
 
+  @Inject
+  private TranslationService translationService;
+
   public PagedEntityCollection<SightEvent> getList(SightEventPagedCollectionConfig config) {
     if (config.isCurrentPartner()) {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
@@ -144,6 +147,10 @@ public class SightEventService extends ServiceSuperclass {
         .orElse(null);
   }
 
+  public SightEvent createLanguageVesrion(SightEventDTO dto, String language) {
+    return translationService.createEntityLanguageVersion(getForLoggedUser(dto.id), dto, language);
+  }
+
   public SightEvent updateForLoggedUser(SightEventDTO dto) {
     SightEvent bo = getForLoggedUser(dto.id);
     if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
@@ -166,6 +173,10 @@ public class SightEventService extends ServiceSuperclass {
     bo.setOpeningHours(null);
     bo.setOpeningHours(oHoursList);
     return bo;
+  }
+
+  public SightEvent updateLanguageVersionForLoggedUser(SightEventDTO dto, String language) {
+    return translationService.updateEntityLanguageVersion(getForLoggedUser(dto.id), dto, language);
   }
 
   public List<SightEvent> getForPartner() {

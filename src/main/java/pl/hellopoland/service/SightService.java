@@ -18,6 +18,7 @@ import pl.hellopoland.config.SightPagedCollectionConfig;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.exception.ExceptionFactory;
+import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.PagedEntityCollection;
 
@@ -42,6 +43,9 @@ public class SightService extends ServiceSuperclass {
 
   @Inject
   private AgreementService agreementService;
+
+  @Inject
+  private TranslationService translationService;
 
   public PagedEntityCollection<Sight> getList(SightPagedCollectionConfig config) {
     if (config.isCurrentPartner()) {
@@ -89,6 +93,11 @@ public class SightService extends ServiceSuperclass {
       }
     }
     return get(bo.getId());
+  }
+
+  public Sight createLanguageVesrion(SightDTO dto, String language) {
+    return translationService.createEntityLanguageVersion(getForLoggedPartner(dto.id), dto,
+        language);
   }
 
   public Sight get(Long id) {
@@ -212,6 +221,11 @@ public class SightService extends ServiceSuperclass {
     return getActiveForLoggedUser(dto.id);
   }
 
+  public Sight updateLanguageVersionForLoggedUser(SightDTO dto, String language) {
+    return translationService.updateEntityLanguageVersion(getForLoggedPartner(dto.id), dto,
+        language);
+  }
+
   private ArrayList<OpeningHours> getOpeningHoursCollectionFromDTO(SightDTO dto) {
     return Optional.ofNullable(dto.openingHours)
         .map(l -> l.stream().map(oh -> DtoMapper.copy(oh, new OpeningHours()))
@@ -226,6 +240,13 @@ public class SightService extends ServiceSuperclass {
     } else {
       bo.setActive(false);
     }
+  }
+
+  private Sight getForLoggedPartner(Long sightId) {
+    var partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
+    return em.createQuery("from Sight where partner = :partner and id = :id", Sight.class)
+        .setParameter("partner", partner).setParameter("id", sightId).getResultStream().findFirst()
+        .orElseThrow(ResourceNotFoundException::new);
   }
 
 }

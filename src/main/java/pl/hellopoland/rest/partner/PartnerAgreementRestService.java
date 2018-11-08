@@ -11,7 +11,9 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import org.apache.commons.lang3.StringUtils;
 import pl.hellopoland.dto.AgreementDTO;
 import pl.hellopoland.service.api.partner.AgreementServicePartnerAPI;
 
@@ -36,7 +38,10 @@ public class PartnerAgreementRestService {
   }
 
   @POST
-  public AgreementDTO create(AgreementDTO dto) {
+  public AgreementDTO create(AgreementDTO dto, @QueryParam("language") String language) {
+    if (dto.id != null) {
+      return service.createLanguageVersion(dto, language);
+    }
     return service.create(dto);
   }
 
@@ -48,8 +53,12 @@ public class PartnerAgreementRestService {
 
   @PUT
   @Path("/{id}")
-  public AgreementDTO update(@PathParam("id") Long id, AgreementDTO dto) {
+  public AgreementDTO update(@PathParam("id") Long id, AgreementDTO dto,
+      @QueryParam("language") String language) {
     dto.id = id;
+    if (StringUtils.isNotBlank(language)) {
+      return service.updateLanguageVersion(dto, language);
+    }
     return service.update(dto);
   }
 

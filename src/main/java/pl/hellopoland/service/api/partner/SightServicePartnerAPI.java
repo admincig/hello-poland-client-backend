@@ -17,12 +17,16 @@ public class SightServicePartnerAPI {
   @Inject
   SightService service;
 
-
   @RolesAllowed("partner")
   public SightDTO create(SightDTO dto) {
     Sight bo = service.create(dto, null);
     dto = DtoMapper.getFullDTO(bo);
     return dto;
+  }
+
+  @RolesAllowed("partner")
+  public SightDTO createLanguageVesrion(SightDTO dto, String language) {
+    return DtoMapper.getFullDTO(service.createLanguageVesrion(dto, language));
   }
 
   @RolesAllowed("partner")
@@ -44,6 +48,11 @@ public class SightServicePartnerAPI {
     Sight bo = service.updateForLoggedUser(dto);
     dto = DtoMapper.getFullDTO(bo);
     return dto;
+  }
+
+  @RolesAllowed("partner")
+  public SightDTO updateLanguageVersion(SightDTO dto, String language) {
+    return DtoMapper.getFullDTO(service.updateLanguageVersionForLoggedUser(dto, language));
   }
 
   @RolesAllowed("partner")
@@ -71,4 +80,5 @@ public class SightServicePartnerAPI {
     var dto = DtoMapper.getFullDTO(bo);
     return dto;
   }
+
 }
