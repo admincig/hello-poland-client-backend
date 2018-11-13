@@ -250,7 +250,7 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public void fetchTicketPoolDefinitions(Collection<SightEvent> bos,
-      List<SightEventDTO> sightEventDtos) {
+      List<SightEventDTO> sightEventDtos, boolean showDeletedTPD) {
 
     if (hasAnyHptCloudEvent(bos)) {
       var pairedByIds = pairBosWithDtos(bos, sightEventDtos);
@@ -262,6 +262,9 @@ public class SightEventService extends ServiceSuperclass {
         Partner partner = entry.getKey();
         List<TicketPoolDefinitionDTO> poolDefinitions =
             hpt.getTicketPoolDefinitions(partner.getHptToken());
+        if (!showDeletedTPD) {
+          poolDefinitions.stream().filter(tpd -> !tpd.deleted).collect(Collectors.toList());
+        }
         List<TicketDefinitionDTO> ticketDefinitions = new ArrayList<>();
         poolDefinitions.forEach(p -> ticketDefinitions.addAll(p.ticketDefinitions));
         List<TicketDefinition> ticketBos = ticketService.getTicketsByExternalIds(
