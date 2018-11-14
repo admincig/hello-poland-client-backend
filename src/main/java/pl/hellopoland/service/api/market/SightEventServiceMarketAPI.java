@@ -74,7 +74,7 @@ public class SightEventServiceMarketAPI {
   private boolean isAvailable(SightEventDTO dto) {
     List<TicketPoolDefinitionDTO> tpds = dto.ticketPoolDefinitions;
     if (tpds != null && !tpds.isEmpty()) {
-      return !tpds.stream().filter(tpd -> tpd.deleted == false).filter(tpd -> isDateOK(tpd))
+      return !tpds.stream().filter(tpd -> tpd.deleted == false && isDateOK(tpd))
           .collect(Collectors.toList()).isEmpty();
     }
     return false;
