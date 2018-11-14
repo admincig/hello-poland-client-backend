@@ -36,6 +36,8 @@ public class Partner extends ModelSuperclass {
   @OneToMany(mappedBy = "partner")
   private List<Agreement> agreements;
 
+  private double commission;
+
   public Integer getP24Id() {
     return p24Id;
   }
@@ -89,6 +91,14 @@ public class Partner extends ModelSuperclass {
       this.users = new ArrayList<>();
     }
     this.users.add(user);
+  }
+
+  public double getCommission() {
+    return commission;
+  }
+
+  public void setCommission(double commission) {
+    this.commission = commission;
   }
 
 }

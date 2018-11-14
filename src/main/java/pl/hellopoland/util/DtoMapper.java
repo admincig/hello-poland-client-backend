@@ -378,6 +378,7 @@ public class DtoMapper {
     dto.id = bo.getId();
     dto.name = bo.getName();
     dto.p24MerchantId = bo.getP24Id();
+    dto.commission = bo.getCommission();
     dto.users = Optional.ofNullable(bo.getUsers()).orElse(Collections.emptyList()).stream()
         .map(DtoMapper::getDTO).collect(Collectors.toList());
     // dto.sightEvents = ;
