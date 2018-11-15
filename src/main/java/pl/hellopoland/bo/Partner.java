@@ -1,5 +1,6 @@
 package pl.hellopoland.bo;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Column;
@@ -12,8 +13,8 @@ public class Partner extends ModelSuperclass {
 
   private static final long serialVersionUID = 6118414827783500940L;
 
-  // @NotNull
-  // @Column(nullable = false)
+  @NotNull
+  @Column(nullable = false)
   private Integer p24Id;
 
   @NotNull
@@ -36,7 +37,9 @@ public class Partner extends ModelSuperclass {
   @OneToMany(mappedBy = "partner")
   private List<Agreement> agreements;
 
-  private double commission;
+  @NotNull
+  @Column(nullable = false)
+  private BigDecimal commission;
 
   public Integer getP24Id() {
     return p24Id;
@@ -93,11 +96,11 @@ public class Partner extends ModelSuperclass {
     this.users.add(user);
   }
 
-  public double getCommission() {
+  public BigDecimal getCommission() {
     return commission;
   }
 
-  public void setCommission(double commission) {
+  public void setCommission(BigDecimal commission) {
     this.commission = commission;
   }
 

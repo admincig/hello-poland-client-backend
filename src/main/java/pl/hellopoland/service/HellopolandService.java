@@ -43,6 +43,9 @@ public class HellopolandService extends ServiceSuperclass {
     if (StringUtils.isBlank(partner.name)) {
       throw new ConflictingException("The partner name cannot be blank.");
     }
+    if (partner.commission == null) {
+      throw new ConflictingException("The partner commission cannot be blank.");
+    }
 
     // 1. creating a partner and the user in hpl:
     var partnerBO = new Partner();

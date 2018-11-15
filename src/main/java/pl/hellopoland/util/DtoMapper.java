@@ -2,7 +2,10 @@ package pl.hellopoland.util;
 
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -275,13 +278,14 @@ public class DtoMapper {
 
   public static P24PassageCartDTO getP24PassageCartDTO(Order o) {
     var passageCart = new ArrayList<P24PassageCartEntryDTO>();
-    gatherOrderEntries(o.getEntries().stream().collect(Collectors.toList())).forEach(oe -> {
+    gatherOrderEntries(o.getEntries()).forEach(oe -> {
       var cartEntry = getP24PassageCartEntryDTO(oe);
       cartEntry.description = "Hello Poland, " + o.getHash();
       passageCart.add(cartEntry);
     });
     var p24Params = getP24PassageTransactionParamsDTO(o);
-    p24Params.amount = passageCart.stream().collect(Collectors.summingInt(f -> f.targetAmount));
+    p24Params.amount =
+        passageCart.stream().collect(Collectors.summingInt(f -> f.price * f.quantity));
     p24Params.passageCart = passageCart;
     p24Params.sign = getP24Sign(p24Params);
     var dto = new P24PassageCartDTO();
@@ -296,9 +300,18 @@ public class DtoMapper {
     dto.number = oe.getExternalId();
     dto.price = oe.getUnitPrice();
     dto.quantity = oe.getQuantity();
-    dto.targetAmount = oe.getUnitPrice() * oe.getQuantity();
+    dto.targetAmount = getTargetAmount(oe);
     dto.targetPosId = oe.getDateEntry().getSightEntry().getSightEvent().getPartner().getP24Id();
     return dto;
+  }
+
+  private static Integer getTargetAmount(OrderEntry oe) {
+    var total = new BigDecimal(oe.getUnitPrice() * oe.getQuantity());
+    var hundred = new BigDecimal("100");
+    var commission = hundred
+        .subtract(oe.getDateEntry().getSightEntry().getSightEvent().getPartner().getCommission())
+        .divide(new BigDecimal("100"));
+    return total.multiply(commission).setScale(0, RoundingMode.HALF_EVEN).intValue();
   }
 
   public static P24PassageTransactionParamsDTO getP24PassageTransactionParamsDTO(Order o) {
@@ -332,9 +345,9 @@ public class DtoMapper {
     return PaymentUtils.MD5(signBuilder.toString());
   }
 
-  private static List<OrderEntry> gatherOrderEntries(List<OrderSightEntry> list) {
+  private static List<OrderEntry> gatherOrderEntries(Collection<OrderSightEntry> collection) {
     List<OrderEntry> returnList = new ArrayList<>();
-    for (OrderSightEntry se : list) {
+    for (OrderSightEntry se : collection) {
       for (OrderDateEntry de : se.getEntries()) {
         returnList.addAll(de.getEntries());
       }
