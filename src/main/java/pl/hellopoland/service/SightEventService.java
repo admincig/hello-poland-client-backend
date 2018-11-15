@@ -391,4 +391,23 @@ public class SightEventService extends ServiceSuperclass {
     return bo;
   }
 
+  public boolean isAvailable(SightEventDTO dto) {
+    List<TicketPoolDefinitionDTO> tpds = dto.ticketPoolDefinitions;
+    if (tpds != null && !tpds.isEmpty()) {
+      return !tpds.stream().filter(tpd -> tpd.deleted == false && isDateOK(tpd))
+          .collect(Collectors.toList()).isEmpty();
+    }
+    return false;
+  }
+
+  private boolean isDateOK(TicketPoolDefinitionDTO tpd) {
+    var now = new Date();
+    var tpdStartDate = tpd.startDate;
+    if (tpd.isCyclic) {
+      return now.before(tpdStartDate)
+          || ((tpd.frequencyData.endDate != null ? now.before(tpd.frequencyData.endDate) : true));
+    }
+    return now.before(tpdStartDate);
+  }
+
 }

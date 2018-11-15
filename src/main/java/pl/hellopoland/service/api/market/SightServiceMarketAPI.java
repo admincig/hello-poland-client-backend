@@ -9,6 +9,7 @@ import pl.hellopoland.bo.Sight;
 import pl.hellopoland.config.SightPagedCollectionConfig;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.rest.dto.PagedCollection;
+import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.service.SightService;
 import pl.hellopoland.service.TranslationService;
 import pl.hellopoland.util.DtoMapper;
@@ -19,6 +20,9 @@ public class SightServiceMarketAPI {
 
   @Inject
   SightService service;
+
+  @Inject
+  SightEventService sEservice;
 
   @Inject
   private TranslationService translationService;
@@ -53,9 +57,15 @@ public class SightServiceMarketAPI {
         }
       }
       var dto = DtoMapper.getFullDTO(bo);
+      sEservice.fetchTicketPoolDefinitions(bo.getSightEvents(), dto.sightEvents);
+      dto.sightEvents = dto.sightEvents.stream().filter(se -> sEservice.isAvailable(se)).map(se -> {
+        se.ticketPoolDefinitions = null;
+        return se;
+      }).collect(Collectors.toList());
       return dto;
     }
     return null;
+
   }
 
 }
