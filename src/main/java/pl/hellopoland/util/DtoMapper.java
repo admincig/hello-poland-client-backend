@@ -49,6 +49,7 @@ public class DtoMapper {
     target.setDescription(source.description);
     target.setEmail(source.email);
     target.setPhone(source.phone);
+    target.setScore(source.score);
     if (source.blocked != null) {
       target.setBlocked(source.blocked);
     }
@@ -256,6 +257,7 @@ public class DtoMapper {
     target.setPhone(source.phone);
     target.setGeneralAdmission(source.generalAdmission);
     target.setHptId(source.id);
+    target.setScore(source.score);
     if (source.blocked != null) {
       target.setBlocked(source.blocked);
     }

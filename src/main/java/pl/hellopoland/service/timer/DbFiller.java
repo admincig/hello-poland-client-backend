@@ -282,7 +282,7 @@ public class DbFiller extends ServiceSuperclass {
     bo.setLead(lead);
     bo.setDescription(description);
     bo.setPartner(partner);
-    bo.generateRandomScore();
+    // bo.generateRandomScore();
     bo.setLocation(location);
     bo.setBlocked(blocked);
     bo.setPublished(published);

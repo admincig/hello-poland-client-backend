@@ -114,7 +114,7 @@ public class SightEventService extends ServiceSuperclass {
     SightEvent bo = new SightEvent();
     DtoMapper.copy(dto, bo);
     iService.update(bo, dto.mainImage == null ? null : dto.mainImage.original);
-    bo.generateRandomScore();
+    // bo.generateRandomScore();
     bo.setPortal(hpt);
 
     if (sight != null) {
