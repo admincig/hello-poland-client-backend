@@ -25,7 +25,7 @@ public class SightEventServicePartnerAPI {
     config.onlyActive();
     PagedEntityCollection<SightEvent> bos = service.getList(config);
     var dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
-    service.fetchTicketPoolDefinitions(bos.items, dtos);
+    service.fetchTicketPoolDefinitions(bos.items, dtos, true);
     return new PagedCollection(dtos, bos.config);
   }
 
@@ -57,7 +57,7 @@ public class SightEventServicePartnerAPI {
   public SightEventDTO get(Long id) {
     SightEvent bo = service.getForLoggedUser(id);
     var dto = DtoMapper.getFullDTO(bo);
-    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto));
+    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), true);
     return dto;
   }
 
@@ -70,7 +70,7 @@ public class SightEventServicePartnerAPI {
   public SightEventDTO uploadMainImage(Long id, byte[] icon) {
     SightEvent bo = service.uploadMainImageForLoggedUser(id, icon);
     var dto = DtoMapper.getFullDTO(bo);
-    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto));
+    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), true);
     return dto;
   }
 
@@ -78,7 +78,7 @@ public class SightEventServicePartnerAPI {
   public SightEventDTO uploadImage(Long id, byte[] img) {
     SightEvent bo = service.addImageToSightEventGallery(id, img);
     var dto = DtoMapper.getFullDTO(bo);
-    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto));
+    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), true);
     return dto;
   }
 
@@ -93,7 +93,7 @@ public class SightEventServicePartnerAPI {
   public SightEventDTO uploadPdf(Long id, byte[] pdf) {
     SightEvent bo = service.uploadPdf(id, pdf);
     var dto = DtoMapper.getFullDTO(bo);
-    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto));
+    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), true);
     return dto;
   }
 

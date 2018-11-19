@@ -257,20 +257,20 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
 
   private AuthenticationStatus validateRefreshToken(String token, HttpMessageContext context) {
     AuthenticationStatus authenticationStatus;
-
     try {
       validateTokenNotInExpiredTokensList(token);
       tokenProvider.validateToken(token, TokenType.REFRESH_TOKEN);
 
       JwtCredential jwtCredential = tokenProvider.getCredential(token, TokenType.REFRESH_TOKEN);
-
+      if (identityStoreHandler.validate(jwtCredential).getStatus()
+          .equals(CredentialValidationResult.NOT_VALIDATED_RESULT.getStatus())) {
+        return context.doNothing();
+      }
       addOldTokenToExpiredTokensList(token);
-
       authenticationStatus = createToken(jwtCredential, context);
     } catch (Exception e) {
       authenticationStatus = context.responseUnauthorized();
     }
-
     return authenticationStatus;
   }
 
