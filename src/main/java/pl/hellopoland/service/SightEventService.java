@@ -263,7 +263,8 @@ public class SightEventService extends ServiceSuperclass {
         List<TicketPoolDefinitionDTO> poolDefinitions =
             hpt.getTicketPoolDefinitions(partner.getHptToken());
         if (!showDeletedTPD) {
-          poolDefinitions.stream().filter(tpd -> !tpd.deleted).collect(Collectors.toList());
+          poolDefinitions =
+              poolDefinitions.stream().filter(tpd -> !tpd.deleted).collect(Collectors.toList());
         }
         List<TicketDefinitionDTO> ticketDefinitions = new ArrayList<>();
         poolDefinitions.forEach(p -> ticketDefinitions.addAll(p.ticketDefinitions));
