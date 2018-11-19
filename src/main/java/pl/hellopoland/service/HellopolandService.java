@@ -2,6 +2,7 @@ package pl.hellopoland.service;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.System.Logger;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -45,6 +46,10 @@ public class HellopolandService extends ServiceSuperclass {
     }
     if (partner.commission == null) {
       throw new ConflictingException("The partner commission cannot be blank.");
+    }
+    if (partner.commission.compareTo(BigDecimal.ZERO) == -1
+        || partner.commission.compareTo(new BigDecimal("100")) == 1) {
+      throw new ConflictingException("The partner commission is out of range: 0 - 100.");
     }
 
     // 1. creating a partner and the user in hpl:
