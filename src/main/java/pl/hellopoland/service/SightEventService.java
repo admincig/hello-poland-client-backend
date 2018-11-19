@@ -398,7 +398,7 @@ public class SightEventService extends ServiceSuperclass {
   public boolean isAvailable(SightEventDTO dto) {
     List<TicketPoolDefinitionDTO> tpds = dto.ticketPoolDefinitions;
     if (tpds != null && !tpds.isEmpty()) {
-      return !tpds.stream().filter(tpd -> tpd.deleted == false && isDateOK(tpd))
+      return !tpds.stream().filter(tpd -> !tpd.deleted && isDateOK(tpd))
           .collect(Collectors.toList()).isEmpty();
     }
     return false;
