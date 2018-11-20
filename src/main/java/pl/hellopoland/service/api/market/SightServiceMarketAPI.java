@@ -25,6 +25,8 @@ public class SightServiceMarketAPI {
 
   @PermitAll
   public PagedCollection getList(SightPagedCollectionConfig config, String language) {
+    config.setOrderColumn("name");
+    config.setOrderDirection("asc");
     PagedEntityCollection<Sight> bos = service.getList(config);
     if (language != null && !language.toLowerCase().contains("pl")) {
       bos.items = translationService.translateEntities(bos.items, language, false);

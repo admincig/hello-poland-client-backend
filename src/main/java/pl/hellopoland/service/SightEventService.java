@@ -1,6 +1,5 @@
 package pl.hellopoland.service;
 
-import static java.util.stream.Collectors.toList;
 import java.io.ByteArrayInputStream;
 import java.lang.System.Logger;
 import java.util.ArrayList;
@@ -67,9 +66,9 @@ public class SightEventService extends ServiceSuperclass {
     if (config.isCurrentPartner()) {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
     }
-
-    List<SightEvent> sightEvents = getQuery(config).getResultList().stream()
-        .sorted(sightEventDatesComparator()).collect(toList());
+    List<SightEvent> sightEvents = getQuery(config).getResultList();
+    // List<SightEvent> sightEvents = getQuery(config).getResultList().stream()
+    // .sorted(sightEventDatesComparator()).collect(toList());
     return new PagedEntityCollection<>(sightEvents, config);
   }
 
