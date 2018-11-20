@@ -2,6 +2,7 @@ package pl.hellopoland.service.timer;
 
 import java.io.InputStream;
 import java.lang.System.Logger;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -120,23 +121,29 @@ public class DbFiller extends ServiceSuperclass {
   private void createUsers() {
     userHelloPoland = createPartner("Hello Poland",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.",
-        Integer.valueOf(properties.getProperty("przelewy24.merchantId")), Role.PARTNER, Role.ADMIN);
+        Integer.valueOf(properties.getProperty("przelewy24.merchantId")), BigDecimal.ZERO,
+        Role.PARTNER, Role.ADMIN);
     userZoo = createPartner("Zoo",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiJDOTU1NTI0MDk2REU0MjlEQjBGODM1NTA1RUI5MzAxNzkzQzE4NEJBQzM2NTFBNzI2MDFCRDNGMUFEQTkyQzAzIn0.",
-        Integer.valueOf(properties.getProperty("przelewy24.merchantId")), Role.PARTNER);
+        Integer.valueOf(properties.getProperty("przelewy24.merchantId")), new BigDecimal("3.5"),
+        Role.PARTNER);
     userKolejkowo = createPartner("Kolejkowo",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiI0MDc5MTkyRkI2NTQyQTYyRjc3QTcwNDZDRDU1QkJGNUM5NDAzNkE0MjRFRDI4RTM0MEYwODNCRDE1MDRFODZBIn0.",
-        Integer.valueOf(properties.getProperty("przelewy24.merchantId")), Role.PARTNER);
+        Integer.valueOf(properties.getProperty("przelewy24.merchantId")), new BigDecimal("5"),
+        Role.PARTNER);
     userStadionGd = createPartner("Stadion Gdański",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiIyODQyODcyRThEQ0EzMENFNkJBOTk5REMzQjBGODJFNUNFOTNFNzA5RTJEMjlGMEQ4NjFFOTU4QjMxQ0QwQzREIn0.",
-        Integer.valueOf(properties.getProperty("przelewy24.merchantId")), Role.PARTNER);
+        Integer.valueOf(properties.getProperty("przelewy24.merchantId")), new BigDecimal("4"),
+        Role.PARTNER);
   }
 
-  private User createPartner(String partnerName, String token, Integer p24Id, Role... roles) {
+  private User createPartner(String partnerName, String token, Integer p24Id, BigDecimal commission,
+      Role... roles) {
     Partner helloPolandPartner = new Partner();
     helloPolandPartner.setName(partnerName + " Partner");
     helloPolandPartner.setHptToken(token);
     helloPolandPartner.setP24Id(p24Id);
+    helloPolandPartner.setCommission(commission);
 
     User user = new User(roles);
     String email = partnerName.toLowerCase().replaceAll(" ", "") + "@"
