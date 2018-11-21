@@ -282,7 +282,7 @@ public class DbFiller extends ServiceSuperclass {
     bo.setLead(lead);
     bo.setDescription(description);
     bo.setPartner(partner);
-    // bo.generateRandomScore();
+    bo.generateRandomScore();
     bo.setLocation(location);
     bo.setBlocked(blocked);
     bo.setPublished(published);
@@ -389,6 +389,9 @@ public class DbFiller extends ServiceSuperclass {
     dto.location = DtoMapper.getDTO(location);
     dto.blocked = blocked;
     dto.published = published;
+    var se = new SightEvent();
+    se.generateRandomScore();
+    dto.score = se.getScore();
     return sService.create(dto, partner);
   }
 
