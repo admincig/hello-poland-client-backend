@@ -31,6 +31,7 @@ import pl.hellopoland.dto.PushDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
+import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.AccessDeniedException;
 import pl.hellopoland.rest.dto.AvailableTicketNumberAssociationORO;
 import pl.hellopoland.util.DtoMapper;
@@ -97,6 +98,9 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public SightEvent create(SightEventDTO dto, Partner partner) {
+    if (dto.sightId == null) {
+      throw new ConflictingException("sightId can't be null.");
+    }
     if (partner == null) {
       partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
     }
