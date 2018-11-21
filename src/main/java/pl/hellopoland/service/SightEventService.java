@@ -60,6 +60,9 @@ public class SightEventService extends ServiceSuperclass {
   @Inject
   private FileDescriptorService fdService;
 
+  @Inject
+  private TranslationService translationService;
+
   public PagedEntityCollection<SightEvent> getList(SightEventPagedCollectionConfig config) {
     if (config.isCurrentPartner()) {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
@@ -144,6 +147,10 @@ public class SightEventService extends ServiceSuperclass {
         .orElse(null);
   }
 
+  public SightEvent createLanguageVesrion(SightEventDTO dto, String language) {
+    return translationService.createEntityLanguageVersion(getForLoggedUser(dto.id), dto, language);
+  }
+
   public SightEvent updateForLoggedUser(SightEventDTO dto) {
     SightEvent bo = getForLoggedUser(dto.id);
     if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
@@ -166,6 +173,10 @@ public class SightEventService extends ServiceSuperclass {
     bo.setOpeningHours(null);
     bo.setOpeningHours(oHoursList);
     return bo;
+  }
+
+  public SightEvent updateLanguageVersionForLoggedUser(SightEventDTO dto, String language) {
+    return translationService.updateEntityLanguageVersion(getForLoggedUser(dto.id), dto, language);
   }
 
   public List<SightEvent> getForPartner() {
@@ -239,7 +250,7 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public void fetchTicketPoolDefinitions(Collection<SightEvent> bos,
-      List<SightEventDTO> sightEventDtos) {
+      List<SightEventDTO> sightEventDtos, boolean showDeletedTPD) {
 
     if (hasAnyHptCloudEvent(bos)) {
       var pairedByIds = pairBosWithDtos(bos, sightEventDtos);
@@ -251,6 +262,10 @@ public class SightEventService extends ServiceSuperclass {
         Partner partner = entry.getKey();
         List<TicketPoolDefinitionDTO> poolDefinitions =
             hpt.getTicketPoolDefinitions(partner.getHptToken());
+        if (!showDeletedTPD) {
+          poolDefinitions =
+              poolDefinitions.stream().filter(tpd -> !tpd.deleted).collect(Collectors.toList());
+        }
         List<TicketDefinitionDTO> ticketDefinitions = new ArrayList<>();
         poolDefinitions.forEach(p -> ticketDefinitions.addAll(p.ticketDefinitions));
         List<TicketDefinition> ticketBos = ticketService.getTicketsByExternalIds(

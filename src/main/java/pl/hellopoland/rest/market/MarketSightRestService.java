@@ -4,6 +4,7 @@ import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -30,28 +31,29 @@ public class MarketSightRestService {
   private FilterMarketAPI filterService;
 
   @GET
-  public PagedCollection get(@QueryParam("city") String city) {
+  public PagedCollection get(@QueryParam("city") String city,
+      @HeaderParam("Accept-Language") String language) {
     var config = new SightPagedCollectionConfig();
     config.onlyActive();
     config.onlyPublished();
     config.setCity(city);
-    return service.getList(config);
+    return service.getList(config, language);
   }
 
   @GET
   @Path("/{id}")
-  public SightDTO get(@PathParam("id") Long id) {
-    return service.get(id);
+  public SightDTO get(@PathParam("id") Long id, @HeaderParam("Accept-Language") String language) {
+    return service.get(id, language);
   }
 
   @POST
   @Path("/search")
-  public PagedCollection search(SightPagedCollectionConfig config,
-      @QueryParam("city") String city) {
+  public PagedCollection search(SightPagedCollectionConfig config, @QueryParam("city") String city,
+      @HeaderParam("Accept-Language") String language) {
     config.onlyActive();
     config.onlyPublished();
     config.setCity(city);
-    return service.getList(config);
+    return service.getList(config, language);
   }
 
   @GET

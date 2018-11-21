@@ -134,7 +134,10 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
       validateTokenNotInExpiredTokensList(token);
       tokenProvider.validateToken(token, TokenType.ACCESS_TOKEN);
       JwtCredential credential = tokenProvider.getCredential(token, TokenType.ACCESS_TOKEN);
-
+      if (identityStoreHandler.validate(credential).getStatus()
+          .equals(CredentialValidationResult.NOT_VALIDATED_RESULT.getStatus())) {
+        return context.doNothing();
+      }
       var user = new CurrentUser();
       user.setEmail(credential.getPrincipal());
       user.setRoles(credential.getAuthorities());
@@ -254,20 +257,20 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
 
   private AuthenticationStatus validateRefreshToken(String token, HttpMessageContext context) {
     AuthenticationStatus authenticationStatus;
-
     try {
       validateTokenNotInExpiredTokensList(token);
       tokenProvider.validateToken(token, TokenType.REFRESH_TOKEN);
 
       JwtCredential jwtCredential = tokenProvider.getCredential(token, TokenType.REFRESH_TOKEN);
-
+      if (identityStoreHandler.validate(jwtCredential).getStatus()
+          .equals(CredentialValidationResult.NOT_VALIDATED_RESULT.getStatus())) {
+        return context.doNothing();
+      }
       addOldTokenToExpiredTokensList(token);
-
       authenticationStatus = createToken(jwtCredential, context);
     } catch (Exception e) {
       authenticationStatus = context.responseUnauthorized();
     }
-
     return authenticationStatus;
   }
 

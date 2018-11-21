@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import pl.hellopoland.bo.Agreement;
 import pl.hellopoland.dto.AgreementDTO;
 import pl.hellopoland.util.DtoMapper;
@@ -11,6 +12,9 @@ import pl.hellopoland.util.DtoMapper;
 @LocalBean
 @Stateless
 public class AgreementService extends ServiceSuperclass {
+
+  @Inject
+  private TranslationService translationService;
 
   public Agreement getForLoggedUser(Long id) {
     return em.createQuery("from Agreement where id=:id and partner=:partner", Agreement.class)
@@ -35,6 +39,10 @@ public class AgreementService extends ServiceSuperclass {
     return bo;
   }
 
+  public Agreement createLanguageVersion(AgreementDTO dto, String language) {
+    return translationService.createEntityLanguageVersion(getForLoggedUser(dto.id), dto, language);
+  }
+
   public void deleteForLoggedUser(Long id) {
     em.remove(getForLoggedUser(id));
   }
@@ -46,6 +54,10 @@ public class AgreementService extends ServiceSuperclass {
     updated.setId(null);
     em.persist(updated);
     return getForLoggedUser(updated.getId());
+  }
+
+  public Agreement updateLanguageVersion(AgreementDTO dto, String language) {
+    return translationService.updateEntityLanguageVersion(getForLoggedUser(dto.id), dto, language);
   }
 
 }

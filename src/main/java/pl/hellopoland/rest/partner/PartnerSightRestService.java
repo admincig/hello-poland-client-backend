@@ -10,7 +10,9 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import org.apache.commons.lang3.StringUtils;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.api.partner.SightServicePartnerAPI;
@@ -25,7 +27,10 @@ public class PartnerSightRestService {
   private SightServicePartnerAPI service;
 
   @POST
-  public SightDTO add(SightDTO dto) {
+  public SightDTO add(SightDTO dto, @QueryParam("language") String language) {
+    if (dto.id != null) {
+      return service.createLanguageVesrion(dto, language);
+    }
     return service.create(dto);
   }
 
@@ -42,8 +47,12 @@ public class PartnerSightRestService {
 
   @PUT
   @Path("/{id}")
-  public SightDTO update(@PathParam("id") Long id, SightDTO dto) {
+  public SightDTO update(@PathParam("id") Long id, SightDTO dto,
+      @QueryParam("language") String language) {
     dto.id = id;
+    if (StringUtils.isNotBlank(language)) {
+      return service.updateLanguageVersion(dto, language);
+    }
     return service.update(dto);
   }
 

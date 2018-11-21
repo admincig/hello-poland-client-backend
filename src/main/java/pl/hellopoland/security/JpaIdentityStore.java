@@ -12,6 +12,7 @@ import javax.security.enterprise.identitystore.CredentialValidationResult;
 import javax.security.enterprise.identitystore.IdentityStore;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.security.password.PasswordEncoder;
+import pl.hellopoland.security.token.JwtCredential;
 import pl.hellopoland.service.UserService;
 
 @RequestScoped
@@ -35,6 +36,11 @@ public class JpaIdentityStore implements IdentityStore {
         return new CredentialValidationResult(usernamePassword.getCaller(), user.get().getRoles()
             .stream().map(ur -> ur.getRole().toString()).collect(Collectors.toSet()));
       }
+    }
+    if (credential instanceof JwtCredential
+        && userDao.findByEmail(((JwtCredential) credential).getPrincipal()).isPresent()) {
+      return new CredentialValidationResult(((JwtCredential) credential).getPrincipal(),
+          ((JwtCredential) credential).getAuthorities());
     }
 
     return NOT_VALIDATED_RESULT;
