@@ -32,7 +32,6 @@ import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.exception.notfound.AccessDeniedException;
-import pl.hellopoland.rest.dto.AvailableTicketNumberAssociationORO;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PagedEntityCollection;
@@ -339,7 +338,7 @@ public class SightEventService extends ServiceSuperclass {
     return grouped;
   }
 
-  public AvailableTicketNumberAssociationORO checkAvailability(Long sightEventId, Date date) {
+  public AvailableTicketNumberAssociationDTO checkAvailability(Long sightEventId, Date date) {
     HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
     AvailableTicketNumberAssociationDTO associationDTO =
         hpt.checkAvailabilityOfTicketsForSightEvent(get(sightEventId), date);
@@ -386,13 +385,45 @@ public class SightEventService extends ServiceSuperclass {
         }
       }
     }
-    return new AvailableTicketNumberAssociationORO(associationDTO);
+    return associationDTO;
   }
 
   public SightEvent uploadPdf(Long id, byte[] pdf) {
     SightEvent bo = getForLoggedUser(id);
     bo.setPdfAttachment(fdService.storeFile(new ByteArrayInputStream(pdf), "pdf"));
     return bo;
+  }
+
+  public boolean isAvailable(SightEventDTO dto) {
+    List<TicketPoolDefinitionDTO> tpds = dto.ticketPoolDefinitions;
+    if (tpds != null && !tpds.isEmpty()) {
+      return !tpds.stream()
+          .filter(tpd -> !tpd.deleted && isDateOK(tpd) && ticketAreAvailable(dto, tpd))
+          .collect(Collectors.toList()).isEmpty();
+    }
+    return false;
+  }
+
+  private boolean ticketAreAvailable(SightEventDTO dto, TicketPoolDefinitionDTO tpd) {
+    if (tpd.isCyclic) {
+      return true;
+    }
+    var availableTickets = checkAvailability(dto.id, tpd.startDate);
+
+    return availableTickets.ticketPoolDefinitions.stream()
+        .filter(f -> f.availableTicketsNumber != 0).count() != 0l
+        || availableTickets.ticketPools.stream().filter(f -> f.availableTicketsNumber != 0)
+            .count() != 0l;
+  }
+
+  private boolean isDateOK(TicketPoolDefinitionDTO tpd) {
+    var now = new Date();
+    var tpdStartDate = tpd.startDate;
+    if (tpd.isCyclic) {
+      return now.before(tpdStartDate)
+          || ((tpd.frequencyData.endDate != null ? now.before(tpd.frequencyData.endDate) : true));
+    }
+    return now.before(tpdStartDate);
   }
 
 }
