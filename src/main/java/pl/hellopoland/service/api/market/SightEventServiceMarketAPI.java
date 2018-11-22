@@ -71,7 +71,7 @@ public class SightEventServiceMarketAPI {
 
   @PermitAll
   public AvailableTicketNumberAssociationORO checkAvailability(Long sightEventId, Date date) {
-    return service.checkAvailability(sightEventId, date);
+    return new AvailableTicketNumberAssociationORO(service.checkAvailability(sightEventId, date));
   }
 
 }
