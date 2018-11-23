@@ -399,6 +399,9 @@ public class DbFiller extends ServiceSuperclass {
     dto.location = DtoMapper.getDTO(location);
     dto.blocked = blocked;
     dto.published = published;
+    var se = new SightEvent();
+    se.generateRandomScore();
+    dto.score = se.getScore();
     return sService.create(dto, partner);
   }
 

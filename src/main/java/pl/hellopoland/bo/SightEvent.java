@@ -50,7 +50,7 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
 
   private String lead;
 
-  @Column(columnDefinition = "varchar")
+  @Column(columnDefinition = "varchar(2500)")
   private String description;
 
   private Integer duration;
