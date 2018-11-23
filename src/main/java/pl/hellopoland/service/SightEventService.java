@@ -2,12 +2,15 @@ package pl.hellopoland.service;
 
 import java.io.ByteArrayInputStream;
 import java.lang.System.Logger;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -67,9 +70,17 @@ public class SightEventService extends ServiceSuperclass {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
     }
     List<SightEvent> sightEvents = getQuery(config).getResultList();
+    Collections.sort(sightEvents, sightEventNamesComparator(new Locale("pl_PL")));
+
     // List<SightEvent> sightEvents = getQuery(config).getResultList().stream()
     // .sorted(sightEventDatesComparator()).collect(toList());
     return new PagedEntityCollection<>(sightEvents, config);
+  }
+
+  private Comparator<SightEvent> sightEventNamesComparator(Locale locale) {
+    var collator = Collator.getInstance(locale);
+    collator.setStrength(Collator.CANONICAL_DECOMPOSITION);
+    return Comparator.comparing(SightEvent::getName, collator);
   }
 
   public SightEvent get(Long id) {
