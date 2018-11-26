@@ -1,8 +1,12 @@
 package pl.hellopoland.service;
 
 import java.io.ByteArrayInputStream;
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -51,10 +55,16 @@ public class SightService extends ServiceSuperclass {
     if (config.isCurrentPartner()) {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
     }
-    config.setOrderColumn("name");
-    config.setOrderDirection("asc");
-    List<Sight> sight = getQuery(config).getResultList();
-    return new PagedEntityCollection<>(sight, config);
+    List<Sight> sights = getQuery(config).getResultList();
+    Collections.sort(sights, sightNamesComparator(new Locale("pl_PL")));
+
+    return new PagedEntityCollection<>(sights, config);
+  }
+
+  private Comparator<Sight> sightNamesComparator(Locale locale) {
+    var collator = Collator.getInstance(locale);
+    collator.setStrength(Collator.CANONICAL_DECOMPOSITION);
+    return Comparator.comparing(Sight::getName, collator);
   }
 
   public Sight create(SightDTO dto, Partner partner) {
