@@ -4,7 +4,6 @@ import java.io.UnsupportedEncodingException;
 import java.lang.System.Logger;
 import java.math.BigDecimal;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -18,6 +17,7 @@ import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole;
+import pl.hellopoland.bo.UserRole.Role;
 import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.dto.RoleDTO;
 import pl.hellopoland.dto.UserDTO;
@@ -63,32 +63,36 @@ public class HellopolandService extends ServiceSuperclass {
     var emailPassword = new HashMap<String, String>();
     emailPassword.put(partner.email, password);
 
-    // 2. creating users of the partner in hpl:
+    // 2. creating users (excluded ushers) of the partner in hpl:
     var usersDTOs = partner.users;
     if (usersDTOs != null && !usersDTOs.isEmpty()) {
       for (UserDTO userDTO : usersDTOs) {
-        if (userDTO.roles == null || userDTO.roles.isEmpty()
-            || !List.of(UserRole.Role.values()).containsAll(
-                getFilteredRolesStreamFromDTO(userDTO.roles).collect(Collectors.toList()))) {
-          throw new ConflictingException("Roles are blank or some role is unsupported.");
-        }
         if (StringUtils.isBlank(userDTO.email)) {
           throw new ConflictingException("The email cannot be blank.");
         }
-        String pass = RandomStringUtils.randomAlphanumeric(10);
-        User userBO = userService.create(userDTO.email, pass, userDTO.name, null, null, partnerBO,
-            getFilteredRolesStreamFromDTO(userDTO.roles)
-                .toArray(size -> new UserRole.Role[userDTO.roles.size()]));
-        emailPassword.put(userDTO.email, pass);
-        partnerBO.addUser(userBO);
+        if (userDTO.roles == null || userDTO.roles.isEmpty() || areRolesSupported(userDTO.roles)) {
+          throw new ConflictingException("Roles are blank or some role is unsupported.");
+        }
+        Role[] userRoles = getFilteredRolesFromDTO(userDTO.roles);
+        if (userRoles.length > 0) {
+          String pass = RandomStringUtils.randomAlphanumeric(10);
+          User userBO = userService.create(userDTO.email, pass, userDTO.name, null, null, partnerBO,
+              userRoles);
+          emailPassword.put(userDTO.email, pass);
+          partnerBO.addUser(userBO);
+        }
       }
     }
 
     // 3. creating a partner in hpt:
-    Portal hpt = getPortal("Hello Ticket Cloud");
-    var ht = new HelloTicket(hpt.getUrl());
-    var hptPartner = ht.addPartner(partner);
-    partnerBO.setHptToken(hptPartner.token);
+    try {
+      Portal hpt = getPortal("Hello Ticket Cloud");
+      var ht = new HelloTicket(hpt.getUrl());
+      var hptPartner = ht.addPartner(partner);
+      partnerBO.setHptToken(hptPartner.token);
+    } catch (Exception e) {
+      throw new ConflictingException("Nie udało się stworzyć partnera w zewnętrznym systemie", e);
+    }
 
     // 4. sending emails to users (with theirs login and password):
     emailPassword.forEach((key, value) -> {
@@ -104,9 +108,21 @@ public class HellopolandService extends ServiceSuperclass {
     return partnerBO;
   }
 
-  private Stream<UserRole.Role> getFilteredRolesStreamFromDTO(Set<RoleDTO> roles) {
-    return roles.stream().map(r -> UserRole.Role.valueOf(r.name()))
-        .filter(r -> !excluded_roles.contains(r));
+  private boolean areRolesSupported(Set<RoleDTO> roles) {
+    var supported = Set.of(UserRole.Role.values());
+    supported.removeAll(excluded_roles);
+    try {
+      return supported.containsAll(
+          roles.stream().map(r -> UserRole.Role.valueOf(r.name())).collect(Collectors.toSet()));
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
+  private Role[] getFilteredRolesFromDTO(Set<RoleDTO> roles) {
+    Stream<UserRole.Role> stream = roles.stream().map(r -> UserRole.Role.valueOf(r.name()))
+        .filter(r -> !excluded_roles.contains(r) && !r.equals(UserRole.Role.USHER));
+    return stream.toArray(UserRole.Role[]::new);
   }
 
 }
