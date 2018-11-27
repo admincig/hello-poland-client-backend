@@ -14,6 +14,6 @@ public class HellopolandServiceAPI {
 
   @RolesAllowed("admin")
   public PartnerDTO addPartner(PartnerDTO partner) {
-    return DtoMapper.getDTO(service.addPartner(partner));
+    return DtoMapper.getFullDTO(service.addPartner(partner));
   }
 }

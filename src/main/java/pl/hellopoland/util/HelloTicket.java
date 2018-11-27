@@ -59,9 +59,16 @@ public class HelloTicket {
       return t;
     }).collect(Collectors.toList());
     booking.ticketBookings = ticketBookings;
-    booking.sightEventPdfAttachments = orderEntries.stream()
-        .map(oe -> oe.getDateEntry().getSightEntry().getSightEvent().getPdfAttachment())
-        .filter(pdf -> pdf != null).map(DtoMapper::getFullDTO).distinct()
+    var sightEvets =
+        orderEntries.stream().map(oe -> oe.getDateEntry().getSightEntry().getSightEvent());
+    booking.sightEventPdfAttachments =
+        sightEvets.map(SightEvent::getPdfAttachment).filter(pdf -> pdf != null).distinct()
+            .map(DtoMapper::getFullDTO).collect(Collectors.toSet());
+    // booking.sightEventPdfAttachments = orderEntries.stream()
+    // .map(oe -> oe.getDateEntry().getSightEntry().getSightEvent().getPdfAttachment())
+    // .filter(pdf -> pdf != null).map(DtoMapper::getFullDTO).distinct()
+    // .collect(Collectors.toSet());
+    booking.partners = sightEvets.map(SightEvent::getPartner).distinct().map(DtoMapper::getDTO)
         .collect(Collectors.toSet());
     var json = JsonbConfig.getInstance().toJson(booking);
     try {
