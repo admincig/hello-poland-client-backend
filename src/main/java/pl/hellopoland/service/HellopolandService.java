@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -54,6 +55,10 @@ public class HellopolandService extends ServiceSuperclass {
         || partner.commission.compareTo(new BigDecimal("100")) == 1) {
       throw new ConflictingException("The partner commission is out of range: 0 - 100.");
     }
+    var usersDTOs = partner.users;
+    if (usersDTOs == null || usersDTOs.isEmpty() || !isAtLeastOneUsher(usersDTOs)) {
+      throw new ConflictingException("Wymagany jest co najmniej jeden uzytkownik z rolą biletera.");
+    }
 
     // 1. creating a partner and the user in hpl:
     var partnerBO = new Partner();
@@ -67,23 +72,20 @@ public class HellopolandService extends ServiceSuperclass {
     emailPassword.put(partner.email, password);
 
     // 2. creating users (excluded ushers) of the partner in hpl:
-    var usersDTOs = partner.users;
-    if (usersDTOs != null && !usersDTOs.isEmpty()) {
-      for (UserDTO userDTO : usersDTOs) {
-        if (StringUtils.isBlank(userDTO.email)) {
-          throw new ConflictingException("The email cannot be blank.");
-        }
-        if (userDTO.roles == null || userDTO.roles.isEmpty() || !areRolesSupported(userDTO.roles)) {
-          throw new ConflictingException("Roles are blank or some role is unsupported.");
-        }
-        Role[] userRoles = getFilteredRolesFromDTO(userDTO.roles);
-        if (userRoles.length > 0) {
-          String pass = RandomStringUtils.randomAlphanumeric(10);
-          User userBO = userService.create(userDTO.email, pass, userDTO.name, null, null, partnerBO,
-              userRoles);
-          emailPassword.put(userDTO.email, pass);
-          partnerBO.addUser(userBO);
-        }
+    for (UserDTO userDTO : usersDTOs) {
+      if (StringUtils.isBlank(userDTO.email)) {
+        throw new ConflictingException("The email cannot be blank.");
+      }
+      if (userDTO.roles == null || !areRolesSupported(userDTO.roles)) {
+        throw new ConflictingException("Roles are blank or some role is unsupported.");
+      }
+      Role[] userRoles = getFilteredRolesFromDTO(userDTO.roles);
+      if (userRoles.length > 0) {
+        String pass = RandomStringUtils.randomAlphanumeric(10);
+        User userBO =
+            userService.create(userDTO.email, pass, userDTO.name, null, null, partnerBO, userRoles);
+        emailPassword.put(userDTO.email, pass);
+        partnerBO.addUser(userBO);
       }
     }
 
@@ -109,6 +111,10 @@ public class HellopolandService extends ServiceSuperclass {
     });
 
     return partnerBO;
+  }
+
+  private boolean isAtLeastOneUsher(List<UserDTO> usersDTOs) {
+    return usersDTOs.stream().anyMatch(user -> user.roles.contains(RoleDTO.USHER));
   }
 
   private boolean areRolesSupported(Set<RoleDTO> roles) {
