@@ -3,7 +3,9 @@ package pl.hellopoland.service;
 import java.io.UnsupportedEncodingException;
 import java.lang.System.Logger;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -109,7 +111,7 @@ public class HellopolandService extends ServiceSuperclass {
   }
 
   private boolean areRolesSupported(Set<RoleDTO> roles) {
-    var supported = Set.of(UserRole.Role.values());
+    var supported = new HashSet<Role>(Arrays.asList(UserRole.Role.values()));
     supported.removeAll(excluded_roles);
     try {
       return supported.containsAll(
