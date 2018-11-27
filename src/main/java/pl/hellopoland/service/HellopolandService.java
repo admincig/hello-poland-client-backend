@@ -72,7 +72,7 @@ public class HellopolandService extends ServiceSuperclass {
         if (StringUtils.isBlank(userDTO.email)) {
           throw new ConflictingException("The email cannot be blank.");
         }
-        if (userDTO.roles == null || userDTO.roles.isEmpty() || areRolesSupported(userDTO.roles)) {
+        if (userDTO.roles == null || userDTO.roles.isEmpty() || !areRolesSupported(userDTO.roles)) {
           throw new ConflictingException("Roles are blank or some role is unsupported.");
         }
         Role[] userRoles = getFilteredRolesFromDTO(userDTO.roles);
