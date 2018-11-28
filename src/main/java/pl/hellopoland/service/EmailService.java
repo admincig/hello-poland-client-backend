@@ -50,7 +50,6 @@ public class EmailService extends ServiceSuperclass {
       lOG.log(System.Logger.Level.ERROR, e.getLocalizedMessage());
       throw e;
     }
-
   }
 
   private Properties getSessionProperties() {

@@ -32,6 +32,8 @@ public class SightEventServiceMarketAPI {
 
   @PermitAll
   public PagedCollection getList(SightEventPagedCollectionConfig config, String language) {
+    config.setOrderColumn("name");
+    config.setOrderDirection("asc");
     PagedEntityCollection<SightEvent> bos = service.getList(config);
     if (language != null && !language.toLowerCase().contains("pl")) {
       bos.items = translationService.translateEntities(bos.items, language, false);
