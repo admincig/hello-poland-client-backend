@@ -288,11 +288,24 @@ public class DtoMapper {
     var p24Params = getP24PassageTransactionParamsDTO(o);
     p24Params.amount =
         passageCart.stream().collect(Collectors.summingInt(f -> f.price * f.quantity));
-    p24Params.passageCart = passageCart;
     p24Params.sign = getP24Sign(p24Params);
     var dto = new P24PassageCartDTO();
     dto.isSandbox = Boolean.parseBoolean(PROPERTIES.getProperty("przelewy24.isSandbox"));
     dto.transactionParams = p24Params;
+    passageCart.add(getHPCommissionPassageCart(p24Params.amount, passageCart, o.getHash()));
+    p24Params.passageCart = passageCart;
+    return dto;
+  }
+
+  private static P24PassageCartEntryDTO getHPCommissionPassageCart(Integer amount,
+      ArrayList<P24PassageCartEntryDTO> passageCart, String orderHash) {
+    var dto = new P24PassageCartEntryDTO();
+    dto.name = "HP prowizja - orderHash";
+    dto.quantity = 1;
+    dto.targetAmount =
+        amount - passageCart.stream().collect(Collectors.summingInt(f -> f.targetAmount));
+    dto.price = dto.targetAmount;
+    dto.targetPosId = Integer.parseInt(PROPERTIES.getProperty("przelewy24.posId"));
     return dto;
   }
 
