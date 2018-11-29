@@ -121,7 +121,7 @@ public class DbFiller extends ServiceSuperclass {
   private void createUsers() {
     userHelloPoland = createPartner("Hello Poland",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.",
-        Integer.valueOf(properties.getProperty("przelewy24.merchantId")), BigDecimal.ZERO,
+        Integer.valueOf(properties.getProperty("przelewy24.merchantId")), BigDecimal.TEN,
         Role.PARTNER, Role.ADMIN);
     userZoo = createPartner("Zoo",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiJDOTU1NTI0MDk2REU0MjlEQjBGODM1NTA1RUI5MzAxNzkzQzE4NEJBQzM2NTFBNzI2MDFCRDNGMUFEQTkyQzAzIn0.",
