@@ -436,6 +436,12 @@ public class DtoMapper {
     dto.name = bo.getName();
     dto.p24MerchantId = bo.getP24Id();
     dto.commission = bo.getCommission();
+    dto.email = bo.getEmail();
+    return dto;
+  }
+
+  public static PartnerDTO getFullDTO(Partner bo) {
+    var dto = getDTO(bo);
     dto.users = Optional.ofNullable(bo.getUsers()).orElse(Collections.emptyList()).stream()
         .map(DtoMapper::getDTO).collect(Collectors.toList());
     // dto.sightEvents = ;

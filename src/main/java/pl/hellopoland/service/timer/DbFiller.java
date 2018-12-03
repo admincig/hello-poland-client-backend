@@ -144,10 +144,11 @@ public class DbFiller extends ServiceSuperclass {
     helloPolandPartner.setHptToken(token);
     helloPolandPartner.setP24Id(p24Id);
     helloPolandPartner.setCommission(commission);
-
-    User user = new User(roles);
     String email = partnerName.toLowerCase().replaceAll(" ", "") + "@"
         + partnerName.toLowerCase().replaceAll(" ", "") + ".pl";
+    helloPolandPartner.setEmail(email);
+
+    User user = new User(roles);
     user.setEmail(email);
     user.setPassword(passwordEncoder.encode(partnerName.toLowerCase().replaceAll(" ", "")));
     user.setPartner(helloPolandPartner);
