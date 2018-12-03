@@ -280,14 +280,21 @@ public class DtoMapper {
 
   public static P24PassageCartDTO getP24PassageCartDTO(Order o) {
     var passageCart = new ArrayList<P24PassageCartEntryDTO>();
-    gatherOrderEntries(o.getEntries()).forEach(oe -> {
+    var p24Params = getP24PassageTransactionParamsDTO(o);
+
+
+    List<OrderEntry> orderEntries = gatherOrderEntries(o.getEntries());
+
+
+    orderEntries.forEach(oe -> {
       var cartEntry = getP24PassageCartEntryDTO(oe);
       cartEntry.description = "Hello Poland, " + o.getHash();
       passageCart.add(cartEntry);
     });
-    var p24Params = getP24PassageTransactionParamsDTO(o);
-    p24Params.amount =
-        passageCart.stream().collect(Collectors.summingInt(f -> f.price * f.quantity));
+    p24Params.amount = orderEntries.stream()
+        .collect(Collectors.summingInt(oe -> oe.getUnitPrice() * oe.getQuantity()));
+    // p24Params.amount =
+    // passageCart.stream().collect(Collectors.summingInt(f -> f.price * f.quantity));
     p24Params.sign = getP24Sign(p24Params);
     var dto = new P24PassageCartDTO();
     dto.isSandbox = Boolean.parseBoolean(PROPERTIES.getProperty("przelewy24.isSandbox"));
