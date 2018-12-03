@@ -372,7 +372,7 @@ public class DtoMapper {
     dto.phone = od.getPhone() != null ? od.getPhone() : "";
     dto.sessionId = o.getHash();
     dto.zip = "";
-    dto.description = "Market App, " + o.getHash();
+    dto.description = "Hello Poland, " + o.getHash();
     dto.merchantId = Integer.valueOf(PROPERTIES.getProperty("przelewy24.merchantId"));
     dto.urlStatus = getAckPaymentURL(o);
     return dto;
