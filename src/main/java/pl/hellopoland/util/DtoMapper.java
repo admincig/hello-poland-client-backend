@@ -288,11 +288,45 @@ public class DtoMapper {
     var p24Params = getP24PassageTransactionParamsDTO(o);
     p24Params.amount =
         passageCart.stream().collect(Collectors.summingInt(f -> f.price * f.quantity));
-    p24Params.passageCart = passageCart;
     p24Params.sign = getP24Sign(p24Params);
     var dto = new P24PassageCartDTO();
     dto.isSandbox = Boolean.parseBoolean(PROPERTIES.getProperty("przelewy24.isSandbox"));
     dto.transactionParams = p24Params;
+    // passageCart.add(getHPCommissionPassageCart(p24Params.amount, passageCart, o.getHash()));
+    p24Params.passageCart = organizeByPosId(passageCart);
+    // p24Params.passageCart = passageCart;
+    return dto;
+  }
+
+  private static ArrayList<P24PassageCartEntryDTO> organizeByPosId(
+      ArrayList<P24PassageCartEntryDTO> passageCart) {
+    var cart = new ArrayList<P24PassageCartEntryDTO>();
+    passageCart.stream().collect(Collectors.groupingBy(c -> c.targetPosId)).forEach((k, v) -> {
+      if (v.size() == 1) {
+        cart.add(v.get(0));
+      } else {
+        var c = new P24PassageCartEntryDTO();
+        c.description = v.get(0).description;
+        c.targetPosId = k;
+        c.name = "tickets";
+        c.quantity = 1;
+        c.price = v.stream().collect(Collectors.summingInt(cdto -> cdto.price));
+        c.targetAmount = v.stream().collect(Collectors.summingInt(cdto -> cdto.targetAmount));
+        cart.add(c);
+      }
+    });
+    return cart;
+  }
+
+  private static P24PassageCartEntryDTO getHPCommissionPassageCart(Integer amount,
+      ArrayList<P24PassageCartEntryDTO> passageCart, String orderHash) {
+    var dto = new P24PassageCartEntryDTO();
+    dto.name = "HP prowizja - orderHash";
+    dto.quantity = 1;
+    dto.targetAmount =
+        amount - passageCart.stream().collect(Collectors.summingInt(f -> f.targetAmount));
+    dto.price = dto.targetAmount;
+    dto.targetPosId = Integer.parseInt(PROPERTIES.getProperty("przelewy24.posId"));
     return dto;
   }
 
@@ -300,20 +334,28 @@ public class DtoMapper {
     var dto = new P24PassageCartEntryDTO();
     dto.name = oe.getName();
     dto.number = oe.getExternalId();
-    dto.price = oe.getUnitPrice();
-    dto.quantity = oe.getQuantity();
+    dto.quantity = 1;
+    // dto.quantity = oe.getQuantity();
     dto.targetAmount = getTargetAmount(oe);
+    dto.price = dto.targetAmount;
+    // dto.price = getUnitPrice(dto.quantity, dto.targetAmount);
     dto.targetPosId = oe.getDateEntry().getSightEntry().getSightEvent().getPartner().getP24Id();
     return dto;
   }
 
+  private static Integer getUnitPrice(Integer quantity, Integer targetAmount) {
+    return new BigDecimal(targetAmount).divide(new BigDecimal(quantity))
+        .setScale(0, RoundingMode.HALF_EVEN).intValue();
+  }
+
   private static Integer getTargetAmount(OrderEntry oe) {
-    var total = new BigDecimal(oe.getUnitPrice() * oe.getQuantity());
-    var hundred = new BigDecimal("100");
-    var commission = hundred
-        .subtract(oe.getDateEntry().getSightEntry().getSightEvent().getPartner().getCommission())
-        .divide(new BigDecimal("100"));
-    return total.multiply(commission).setScale(0, RoundingMode.HALF_EVEN).intValue();
+    return oe.getUnitPrice() * oe.getQuantity();
+    // var total = new BigDecimal(oe.getUnitPrice() * oe.getQuantity());
+    // var hundred = new BigDecimal("100");
+    // var commission = hundred
+    // .subtract(oe.getDateEntry().getSightEntry().getSightEvent().getPartner().getCommission())
+    // .divide(new BigDecimal("100"));
+    // return total.multiply(commission).setScale(0, RoundingMode.HALF_EVEN).intValue();
   }
 
   public static P24PassageTransactionParamsDTO getP24PassageTransactionParamsDTO(Order o) {
