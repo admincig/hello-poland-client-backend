@@ -66,6 +66,7 @@ public class HellopolandService extends ServiceSuperclass {
     partnerBO.setP24Id(partner.p24MerchantId);
     partnerBO.setCommission(partner.commission);
     partnerBO.setHptToken("temporaryToken");
+    partnerBO.setEmail(partner.email);
     String password = RandomStringUtils.randomAlphanumeric(10);
     userService.create(partner.email, password, null, null, null, partnerBO, UserRole.Role.PARTNER);
     var emailPassword = new HashMap<String, String>();

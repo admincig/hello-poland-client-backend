@@ -41,6 +41,10 @@ public class Partner extends ModelSuperclass {
   @Column(nullable = false)
   private BigDecimal commission;
 
+  @NotNull
+  @Column(nullable = false)
+  private String email;
+
   public Integer getP24Id() {
     return p24Id;
   }
@@ -102,6 +106,14 @@ public class Partner extends ModelSuperclass {
 
   public void setCommission(BigDecimal commission) {
     this.commission = commission;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
   }
 
 }

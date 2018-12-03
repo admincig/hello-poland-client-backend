@@ -139,11 +139,14 @@ public class DbFiller extends ServiceSuperclass {
 
   private User createPartner(String partnerName, String token, Integer p24Id, BigDecimal commission,
       Role... roles) {
+    var email = "biuro@hello-poland.pl";
+
     Partner helloPolandPartner = new Partner();
     helloPolandPartner.setName(partnerName + " Partner");
     helloPolandPartner.setHptToken(token);
     helloPolandPartner.setP24Id(p24Id);
     helloPolandPartner.setCommission(commission);
+    helloPolandPartner.setEmail(email);
 
     User user = new User(roles);
     // String email = partnerName.toLowerCase().replaceAll(" ", "") + "@"
@@ -151,10 +154,9 @@ public class DbFiller extends ServiceSuperclass {
     // user.setEmail(email);
     // user.setPassword(passwordEncoder.encode(partnerName.toLowerCase().replaceAll(" ", "")));
     user.setName("hpAdmin");
-    user.setEmail("biuro@hello-poland.pl");
+    user.setEmail(email);
     user.setPassword(passwordEncoder.encode("RozwazneWakacjeNaSkrajuWszechswiata"));
     user.setPartner(helloPolandPartner);
-
     em.persist(user);
 
     return user;

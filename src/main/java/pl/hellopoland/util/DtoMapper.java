@@ -321,7 +321,7 @@ public class DtoMapper {
   private static P24PassageCartEntryDTO getHPCommissionPassageCart(Integer amount,
       ArrayList<P24PassageCartEntryDTO> passageCart, String orderHash) {
     var dto = new P24PassageCartEntryDTO();
-    dto.name = "HP prowizja - orderHash";
+    dto.name = "HP prowizja - " + orderHash;
     dto.quantity = 1;
     dto.targetAmount =
         amount - passageCart.stream().collect(Collectors.summingInt(f -> f.targetAmount));
@@ -372,7 +372,7 @@ public class DtoMapper {
     dto.phone = od.getPhone() != null ? od.getPhone() : "";
     dto.sessionId = o.getHash();
     dto.zip = "";
-    dto.description = "Market App, " + o.getHash();
+    dto.description = "Hello Poland, " + o.getHash();
     dto.merchantId = Integer.valueOf(PROPERTIES.getProperty("przelewy24.merchantId"));
     dto.urlStatus = getAckPaymentURL(o);
     return dto;
@@ -436,6 +436,12 @@ public class DtoMapper {
     dto.name = bo.getName();
     dto.p24MerchantId = bo.getP24Id();
     dto.commission = bo.getCommission();
+    dto.email = bo.getEmail();
+    return dto;
+  }
+
+  public static PartnerDTO getFullDTO(Partner bo) {
+    var dto = getDTO(bo);
     dto.users = Optional.ofNullable(bo.getUsers()).orElse(Collections.emptyList()).stream()
         .map(DtoMapper::getDTO).collect(Collectors.toList());
     // dto.sightEvents = ;
