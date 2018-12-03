@@ -292,7 +292,7 @@ public class DtoMapper {
     var dto = new P24PassageCartDTO();
     dto.isSandbox = Boolean.parseBoolean(PROPERTIES.getProperty("przelewy24.isSandbox"));
     dto.transactionParams = p24Params;
-    // passageCart.add(getHPCommissionPassageCart(p24Params.amount, passageCart, o.getHash()));
+    passageCart.add(getHPCommissionPassageCart(p24Params.amount, passageCart, o.getHash()));
     // p24Params.passageCart = organizeByPosId(passageCart);
     p24Params.passageCart = passageCart;
     return dto;
@@ -349,13 +349,13 @@ public class DtoMapper {
   }
 
   private static Integer getTargetAmount(OrderEntry oe) {
-    return oe.getUnitPrice() * oe.getQuantity();
-    // var total = new BigDecimal(oe.getUnitPrice() * oe.getQuantity());
-    // var hundred = new BigDecimal("100");
-    // var commission = hundred
-    // .subtract(oe.getDateEntry().getSightEntry().getSightEvent().getPartner().getCommission())
-    // .divide(new BigDecimal("100"));
-    // return total.multiply(commission).setScale(0, RoundingMode.HALF_EVEN).intValue();
+    // return oe.getUnitPrice() * oe.getQuantity();
+    var total = new BigDecimal(oe.getUnitPrice() * oe.getQuantity());
+    var hundred = new BigDecimal("100");
+    var commission = hundred
+        .subtract(oe.getDateEntry().getSightEntry().getSightEvent().getPartner().getCommission())
+        .divide(new BigDecimal("100"));
+    return total.multiply(commission).setScale(0, RoundingMode.HALF_EVEN).intValue();
   }
 
   public static P24PassageTransactionParamsDTO getP24PassageTransactionParamsDTO(Order o) {
