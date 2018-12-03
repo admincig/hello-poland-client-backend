@@ -293,8 +293,8 @@ public class DtoMapper {
     dto.isSandbox = Boolean.parseBoolean(PROPERTIES.getProperty("przelewy24.isSandbox"));
     dto.transactionParams = p24Params;
     // passageCart.add(getHPCommissionPassageCart(p24Params.amount, passageCart, o.getHash()));
-    p24Params.passageCart = organizeByPosId(passageCart);
-    // p24Params.passageCart = passageCart;
+    // p24Params.passageCart = organizeByPosId(passageCart);
+    p24Params.passageCart = passageCart;
     return dto;
   }
 
