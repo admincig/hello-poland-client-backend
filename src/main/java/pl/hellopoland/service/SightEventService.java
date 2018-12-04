@@ -307,7 +307,8 @@ public class SightEventService extends ServiceSuperclass {
             poolDefinitionDto.sightEventId = sightEventDto.id;
             for (var t : poolDefinitionDto.ticketDefinitions) {
               t.id = externalIdToTicket.get(t.id).stream()
-                  .filter(tBo -> tBo.getPoolId() == poolDefinitionDto.id).findFirst().get().getId();
+                  .filter(tBo -> tBo.getPoolId().equals(poolDefinitionDto.id)).findFirst().get()
+                  .getId();
               // t.id = externalIdToTicket.get(t.id).getId();
               minPrice = Math.min(minPrice, t.price);
             }
