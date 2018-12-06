@@ -307,7 +307,8 @@ public class SightEventService extends ServiceSuperclass {
             poolDefinitionDto.sightEventId = sightEventDto.id;
             for (var t : poolDefinitionDto.ticketDefinitions) {
               t.id = externalIdToTicket.get(t.id).stream()
-                  .filter(tBo -> tBo.getPoolId() == poolDefinitionDto.id).findFirst().get().getId();
+                  .filter(tBo -> tBo.getPoolId().equals(poolDefinitionDto.id)).findFirst().get()
+                  .getId();
               // t.id = externalIdToTicket.get(t.id).getId();
               minPrice = Math.min(minPrice, t.price);
             }
@@ -377,7 +378,7 @@ public class SightEventService extends ServiceSuperclass {
         var tdDtos = tpdDto.ticketDefinitions;
         for (var tdDto : tdDtos) {
           for (var tdBo : tdOBs) {
-            if (tdBo.getExternalId() == tdDto.id && tdBo.getPoolId() == tpdDto.id) {
+            if (tdBo.getExternalId().equals(tdDto.id) && tdBo.getPoolId().equals(tpdDto.id)) {
               tdDto.id = tdBo.getId();
               break;
             }
@@ -390,8 +391,8 @@ public class SightEventService extends ServiceSuperclass {
         var tdDtos = tpDto.ticketDefinitions;
         for (var tdDto : tdDtos) {
           for (var tdBo : tdOBs) {
-            if (tdBo.getExternalId() == tdDto.id
-                && tdBo.getPoolId() == tpDto.ticketPoolDefinitionId) {
+            if (tdBo.getExternalId().equals(tdDto.id)
+                && tdBo.getPoolId().equals(tpDto.ticketPoolDefinitionId)) {
               tdDto.id = tdBo.getId();
               break;
             }

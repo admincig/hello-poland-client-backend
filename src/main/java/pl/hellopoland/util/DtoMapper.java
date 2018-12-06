@@ -280,19 +280,26 @@ public class DtoMapper {
 
   public static P24PassageCartDTO getP24PassageCartDTO(Order o) {
     var passageCart = new ArrayList<P24PassageCartEntryDTO>();
-    gatherOrderEntries(o.getEntries()).forEach(oe -> {
+    var p24Params = getP24PassageTransactionParamsDTO(o);
+
+
+    List<OrderEntry> orderEntries = gatherOrderEntries(o.getEntries());
+
+
+    orderEntries.forEach(oe -> {
       var cartEntry = getP24PassageCartEntryDTO(oe);
       cartEntry.description = "Hello Poland, " + o.getHash();
       passageCart.add(cartEntry);
     });
-    var p24Params = getP24PassageTransactionParamsDTO(o);
-    p24Params.amount =
-        passageCart.stream().collect(Collectors.summingInt(f -> f.price * f.quantity));
+    p24Params.amount = orderEntries.stream()
+        .collect(Collectors.summingInt(oe -> oe.getUnitPrice() * oe.getQuantity()));
+    // p24Params.amount =
+    // passageCart.stream().collect(Collectors.summingInt(f -> f.price * f.quantity));
     p24Params.sign = getP24Sign(p24Params);
     var dto = new P24PassageCartDTO();
     dto.isSandbox = Boolean.parseBoolean(PROPERTIES.getProperty("przelewy24.isSandbox"));
     dto.transactionParams = p24Params;
-    // passageCart.add(getHPCommissionPassageCart(p24Params.amount, passageCart, o.getHash()));
+    passageCart.add(getHPCommissionPassageCart(p24Params.amount, passageCart, o.getHash()));
     // p24Params.passageCart = organizeByPosId(passageCart);
     p24Params.passageCart = passageCart;
     return dto;
@@ -349,13 +356,13 @@ public class DtoMapper {
   }
 
   private static Integer getTargetAmount(OrderEntry oe) {
-    return oe.getUnitPrice() * oe.getQuantity();
-    // var total = new BigDecimal(oe.getUnitPrice() * oe.getQuantity());
-    // var hundred = new BigDecimal("100");
-    // var commission = hundred
-    // .subtract(oe.getDateEntry().getSightEntry().getSightEvent().getPartner().getCommission())
-    // .divide(new BigDecimal("100"));
-    // return total.multiply(commission).setScale(0, RoundingMode.HALF_EVEN).intValue();
+    // return oe.getUnitPrice() * oe.getQuantity();
+    var total = new BigDecimal(oe.getUnitPrice() * oe.getQuantity());
+    var hundred = new BigDecimal("100");
+    var commission = hundred
+        .subtract(oe.getDateEntry().getSightEntry().getSightEvent().getPartner().getCommission())
+        .divide(new BigDecimal("100"));
+    return total.multiply(commission).setScale(0, RoundingMode.HALF_EVEN).intValue();
   }
 
   public static P24PassageTransactionParamsDTO getP24PassageTransactionParamsDTO(Order o) {
