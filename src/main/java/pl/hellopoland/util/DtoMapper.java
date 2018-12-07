@@ -281,11 +281,7 @@ public class DtoMapper {
   public static P24PassageCartDTO getP24PassageCartDTO(Order o) {
     var passageCart = new ArrayList<P24PassageCartEntryDTO>();
     var p24Params = getP24PassageTransactionParamsDTO(o);
-
-
     List<OrderEntry> orderEntries = gatherOrderEntries(o.getEntries());
-
-
     orderEntries.forEach(oe -> {
       var cartEntry = getP24PassageCartEntryDTO(oe);
       cartEntry.description = "Hello Poland, " + o.getHash();
@@ -329,6 +325,7 @@ public class DtoMapper {
       ArrayList<P24PassageCartEntryDTO> passageCart, String orderHash) {
     var dto = new P24PassageCartEntryDTO();
     dto.name = "HP prowizja - " + orderHash;
+    dto.description = "Hello-Poland prowizja";
     dto.quantity = 1;
     dto.targetAmount =
         amount - passageCart.stream().collect(Collectors.summingInt(f -> f.targetAmount));
