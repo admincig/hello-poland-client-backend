@@ -138,6 +138,9 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
       JwtCredential credential = tokenProvider.getCredential(token, TokenType.ACCESS_TOKEN);
       if (identityStoreHandler.validate(credential).getStatus()
           .equals(CredentialValidationResult.NOT_VALIDATED_RESULT.getStatus())) {
+        if (isOrdersRequest(request)) {
+          return context.responseUnauthorized();
+        }
         return context.doNothing();
       }
       var user = new CurrentUser();
@@ -149,8 +152,7 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
           context.notifyContainerAboutLogin(credential.getPrincipal(), credential.getAuthorities());
 
     } catch (Exception e) {
-      if (POST_METHOD.equals(request.getMethod())
-          && request.getRequestURI().endsWith(ORDERS_REQUEST_PATH)) {
+      if (isOrdersRequest(request)) {
         return context.responseUnauthorized();
       }
       authenticationStatus = context.doNothing();
@@ -173,6 +175,11 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
 
   private boolean hasAuthorizationHeader(String authorizationHeader) {
     return authorizationHeader != null && authorizationHeader.startsWith(AUTHORIZATION_PREFIX);
+  }
+
+  private boolean isOrdersRequest(HttpServletRequest request) {
+    return POST_METHOD.equals(request.getMethod())
+        && request.getRequestURI().endsWith(ORDERS_REQUEST_PATH);
   }
 
   private boolean isLoginRequest(HttpServletRequest request) {
