@@ -324,8 +324,8 @@ public class DtoMapper {
   private static P24PassageCartEntryDTO getHPCommissionPassageCart(Integer amount,
       ArrayList<P24PassageCartEntryDTO> passageCart, String orderHash) {
     var dto = new P24PassageCartEntryDTO();
-    dto.name = "HP prowizja - " + orderHash;
-    dto.description = "Hello-Poland prowizja";
+    dto.name = "Hello-Poland prowizja";
+    dto.description = "HP prowizja do zamówienia " + orderHash;
     dto.quantity = 1;
     dto.targetAmount =
         amount - passageCart.stream().collect(Collectors.summingInt(f -> f.targetAmount));
