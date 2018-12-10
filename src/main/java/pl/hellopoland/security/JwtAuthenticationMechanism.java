@@ -38,11 +38,12 @@ import pl.hellopoland.util.GoogleAPIConnector;
 public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
 
   private static final String AUTHORIZATION_PREFIX = "Bearer ";
-  private static final String AUTHENTICATION_METHOD = "POST";
+  private static final String POST_METHOD = "POST";
 
   private static final String LOGIN_REQUEST_PATH = "/login";
   private static final String REFRESH_TOKEN_REQUEST_PATH = "/refresh";
   private static final String LOGOUT_REQUEST_PATH = "/logout";
+  private static final String ORDERS_REQUEST_PATH = "/orders";
 
   @Inject
   private IdentityStoreHandler identityStoreHandler;
@@ -99,7 +100,7 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
         authenticationStatus = AuthenticationStatus.NOT_DONE;
       }
     } else if (authorizationToken != null) {
-      authenticationStatus = validateAccessToken(authorizationToken, context);
+      authenticationStatus = validateAccessToken(authorizationToken, context, request);
     } else {
       authenticationStatus = context.doNothing();
     }
@@ -127,7 +128,8 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
     return userAuthDTO;
   }
 
-  private AuthenticationStatus validateAccessToken(String token, HttpMessageContext context) {
+  private AuthenticationStatus validateAccessToken(String token, HttpMessageContext context,
+      HttpServletRequest request) {
     AuthenticationStatus authenticationStatus;
 
     try {
@@ -136,6 +138,9 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
       JwtCredential credential = tokenProvider.getCredential(token, TokenType.ACCESS_TOKEN);
       if (identityStoreHandler.validate(credential).getStatus()
           .equals(CredentialValidationResult.NOT_VALIDATED_RESULT.getStatus())) {
+        if (isOrdersRequest(request)) {
+          return context.responseUnauthorized();
+        }
         return context.doNothing();
       }
       var user = new CurrentUser();
@@ -147,6 +152,9 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
           context.notifyContainerAboutLogin(credential.getPrincipal(), credential.getAuthorities());
 
     } catch (Exception e) {
+      if (isOrdersRequest(request)) {
+        return context.responseUnauthorized();
+      }
       authenticationStatus = context.doNothing();
     }
 
@@ -169,8 +177,13 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
     return authorizationHeader != null && authorizationHeader.startsWith(AUTHORIZATION_PREFIX);
   }
 
+  private boolean isOrdersRequest(HttpServletRequest request) {
+    return POST_METHOD.equals(request.getMethod())
+        && request.getRequestURI().endsWith(ORDERS_REQUEST_PATH);
+  }
+
   private boolean isLoginRequest(HttpServletRequest request) {
-    return AUTHENTICATION_METHOD.equals(request.getMethod())
+    return POST_METHOD.equals(request.getMethod())
         && request.getRequestURI().endsWith(LOGIN_REQUEST_PATH);
   }
 
@@ -190,14 +203,13 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
   }
 
   private boolean isRefreshingRequest(String token, HttpServletRequest request) {
-    return token != null && AUTHENTICATION_METHOD.equals(request.getMethod())
+    return token != null && POST_METHOD.equals(request.getMethod())
         && request.getRequestURI().endsWith(REFRESH_TOKEN_REQUEST_PATH);
   }
 
   private boolean isLogoutRequest(String accessToken, String refreshToken,
       HttpServletRequest request) {
-    return accessToken != null && refreshToken != null
-        && AUTHENTICATION_METHOD.equals(request.getMethod())
+    return accessToken != null && refreshToken != null && POST_METHOD.equals(request.getMethod())
         && request.getRequestURI().endsWith(LOGOUT_REQUEST_PATH);
   }
 
