@@ -44,4 +44,10 @@ public class RestService {
     return Response.ok().entity(file).type("image/" + extension).build();
   }
 
+  @GET
+  @Path("/ping")
+  public Response ping() {
+    return Response.ok().build();
+  }
+
 }
