@@ -326,6 +326,7 @@ public class DtoMapper {
     var dto = new P24PassageCartEntryDTO();
     dto.name = "Hello-Poland prowizja";
     dto.description = "HP prowizja do zamówienia " + orderHash;
+    dto.number = 0l;
     dto.quantity = 1;
     dto.targetAmount =
         amount - passageCart.stream().collect(Collectors.summingInt(f -> f.targetAmount));
