@@ -96,4 +96,11 @@ public class PartnerSightEventRestService {
     return service.uploadPdf(id, pdf);
   }
 
+  @DELETE
+  @Path("/{id}/pdf")
+  @Consumes("application/pdf")
+  public SightEventDTO deletePdf(@PathParam("id") Long id) {
+    return service.deletePdf(id);
+  }
+
 }

@@ -3,7 +3,9 @@ package pl.hellopoland.service;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.lang.System.Logger.Level;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 import javax.ejb.LocalBean;
@@ -13,6 +15,7 @@ import pl.hellopoland.bo.FileDescriptor;
 @LocalBean
 @Stateless
 public class FileDescriptorService extends ServiceSuperclass {
+  private final System.Logger logger = System.getLogger(this.getClass().getName());
 
   public FileDescriptor storeFile(ByteArrayInputStream byteArrayInputStream, String extension) {
     var fd = new FileDescriptor(storeFileOnDisc(byteArrayInputStream, extension));
@@ -41,6 +44,15 @@ public class FileDescriptorService extends ServiceSuperclass {
       throw new IllegalStateException("Couldn't create dir: " + parent);
     }
     return targetFile;
+  }
+
+  public void deleteFile(FileDescriptor fileDescriptor) {
+    try {
+      Files.deleteIfExists(Paths.get(fileDescriptor.getPath()));
+    } catch (IOException e) {
+      logger.log(Level.ERROR, e.getLocalizedMessage());
+      throw new IllegalStateException("Couldn't delete file: " + fileDescriptor.getPath());
+    }
   }
 
 }

@@ -409,6 +409,15 @@ public class SightEventService extends ServiceSuperclass {
     return bo;
   }
 
+  public void deletePdf(Long id) {
+    SightEvent bo = getForLoggedUser(id);
+    var pdf = bo.getPdfAttachment();
+    if (pdf != null) {
+      fdService.deleteFile(pdf);
+      bo.setPdfAttachment(null);
+    }
+  }
+
   public boolean isAvailable(SightEventDTO dto) {
     List<TicketPoolDefinitionDTO> tpds = dto.ticketPoolDefinitions;
     if (tpds != null && !tpds.isEmpty()) {
