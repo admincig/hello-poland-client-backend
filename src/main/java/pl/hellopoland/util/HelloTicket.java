@@ -63,9 +63,6 @@ public class HelloTicket {
         .map(oe -> oe.getDateEntry().getSightEntry().getSightEvent().getPdfAttachment())
         .filter(pdf -> pdf != null).distinct().map(DtoMapper::getFullDTO)
         .collect(Collectors.toSet());
-    booking.partnersEmails = orderEntries.stream()
-        .map(oe -> oe.getDateEntry().getSightEntry().getSightEvent().getPartner().getEmail())
-        .distinct().collect(Collectors.toSet());
     var json = JsonbConfig.getInstance().toJson(booking);
     try {
       var resp = post("/v1/bookings", json, AUTH_TOKEN);
