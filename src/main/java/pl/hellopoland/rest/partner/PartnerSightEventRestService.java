@@ -99,8 +99,8 @@ public class PartnerSightEventRestService {
   @DELETE
   @Path("/{id}/pdf")
   @Consumes("application/pdf")
-  public SightEventDTO deletePdf(@PathParam("id") Long id) {
-    return service.deletePdf(id);
+  public void deletePdf(@PathParam("id") Long id) {
+    service.deletePdf(id);
   }
 
 }

@@ -2,6 +2,7 @@ package pl.hellopoland.service;
 
 import java.io.ByteArrayInputStream;
 import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,6 +44,7 @@ import pl.hellopoland.util.Triplet;
 @LocalBean
 @Stateless
 public class SightEventService extends ServiceSuperclass {
+  private final Logger logger = System.getLogger(this.getClass().getName());
 
   @Inject
   private ImageService iService;
@@ -415,7 +417,9 @@ public class SightEventService extends ServiceSuperclass {
     if (pdf != null) {
       fdService.deleteFile(pdf);
       bo.setPdfAttachment(null);
+      return;
     }
+    logger.log(Level.INFO, "SightEvent [id=" + bo.getId() + "] doesn't have a pdf file ");
   }
 
   public boolean isAvailable(SightEventDTO dto) {

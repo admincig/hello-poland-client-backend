@@ -48,7 +48,9 @@ public class FileDescriptorService extends ServiceSuperclass {
 
   public void deleteFile(FileDescriptor fileDescriptor) {
     try {
-      Files.deleteIfExists(Paths.get(fileDescriptor.getPath()));
+      boolean deleted = Files.deleteIfExists(Paths.get(fileDescriptor.getPath()));
+      logger.log(Level.INFO,
+          "File " + fileDescriptor.getPath() + (deleted ? " deleted" : " not  exists"));
     } catch (IOException e) {
       logger.log(Level.ERROR, e.getLocalizedMessage());
       throw new IllegalStateException("Couldn't delete file: " + fileDescriptor.getPath());
