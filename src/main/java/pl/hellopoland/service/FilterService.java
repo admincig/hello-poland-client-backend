@@ -22,14 +22,16 @@ public class FilterService extends ServiceSuperclass {
   }
 
   private List<String> getAllCitiesFromSights() {
-    return em.createQuery(
-        "select distinct s.location.city from Sight s where s.active = true and s.published = true and s.blocked = false and s.location is not null and s.location.city is not null",
-        String.class).getResultList();
+    return em.createQuery("select distinct s.location.city from Sight s " + "where s.active = true "
+        + "and s.published = true " + "and s.blocked = false " + "and s.location is not null "
+        + "and (s.location.city::char(1) = '') is false", String.class).getResultList();
   }
 
   private List<String> getAllCitiesFromSightEvents() {
     return em.createQuery(
-        "select distinct se.location.city from SightEvent se where se.active = true and se.published = true and se.blocked = false and se.location is not null and se.location.city is not null",
+        "select distinct se.location.city from SightEvent se " + "where se.active = true "
+            + "and se.published = true " + "and se.blocked = false "
+            + "and se.location is not null " + "and (se.location.city::char(1) = '') is false",
         String.class).getResultList();
   }
 
