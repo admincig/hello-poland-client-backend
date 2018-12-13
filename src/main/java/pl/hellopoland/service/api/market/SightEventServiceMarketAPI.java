@@ -40,7 +40,7 @@ public class SightEventServiceMarketAPI {
     }
     List<SightEventDTO> dtos =
         bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
-    service.fetchTicketPoolDefinitions(bos.items, dtos, false);
+    service.fetchTicketPoolDefinitions(bos.items, dtos, false, true);
     List<SightEventDTO> list = dtos.stream().filter(dto -> service.isAvailable(dto)).map(dto -> {
       dto.ticketPoolDefinitions = null;
       return dto;
@@ -65,7 +65,7 @@ public class SightEventServiceMarketAPI {
         }
       }
       var dto = DtoMapper.getFullDTO(bo);
-      service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), false);
+      service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), false, true);
       return service.isAvailable(dto) ? dto : null;
     }
     return null;
