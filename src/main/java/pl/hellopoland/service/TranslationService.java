@@ -131,13 +131,18 @@ public class TranslationService extends ServiceSuperclass {
   }
 
   private List<Translation> getTranslations(ModelSuperclass bo, String language) {
+    LanguageVersion lang;
+    try {
+      lang = LanguageVersion.valueOf(language.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      lang = LanguageVersion.EN;
+    }
     return em
         .createQuery("from Translation t where t.key like :key and language = :language",
             Translation.class)
-        .setParameter("key",
-            bo.getClass().getSimpleName() + Translation.KEY_DELIMITER + bo.getId()
-                + Translation.KEY_DELIMITER + "%")
-        .setParameter("language", LanguageVersion.valueOf(language.toUpperCase())).getResultList();
+        .setParameter("key", bo.getClass().getSimpleName() + Translation.KEY_DELIMITER + bo.getId()
+            + Translation.KEY_DELIMITER + "%")
+        .setParameter("language", lang).getResultList();
   }
 
   private String getLanguageSymbol(String language) {
