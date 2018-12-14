@@ -59,7 +59,7 @@ public class SightServiceMarketAPI {
         }
       }
       var dto = DtoMapper.getFullDTO(bo);
-      sEservice.fetchTicketPoolDefinitions(bo.getSightEvents(), dto.sightEvents, false);
+      sEservice.fetchTicketPoolDefinitions(bo.getSightEvents(), dto.sightEvents, false, true);
       dto.sightEvents = dto.sightEvents.stream().filter(se -> sEservice.isAvailable(se)).map(se -> {
         se.ticketPoolDefinitions = null;
         return se;
