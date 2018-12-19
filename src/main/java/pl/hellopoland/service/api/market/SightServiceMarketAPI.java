@@ -1,5 +1,6 @@
 package pl.hellopoland.service.api.market;
 
+import java.util.Comparator;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
@@ -64,6 +65,8 @@ public class SightServiceMarketAPI {
         se.ticketPoolDefinitions = null;
         return se;
       }).collect(Collectors.toList());
+      dto.minPrice = dto.sightEvents.stream().min(Comparator.comparing(seDto -> seDto.minPrice))
+          .map(seDto -> seDto.minPrice).orElse(null);
       return dto;
     }
     return null;
