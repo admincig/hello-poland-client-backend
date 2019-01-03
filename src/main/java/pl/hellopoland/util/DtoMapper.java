@@ -149,7 +149,7 @@ public class DtoMapper {
     if (bo.getAgreements() != null && !bo.getAgreements().isEmpty()) {
       dto.agreements = bo.getAgreements().stream().map(DtoMapper::getDTO).collect(toList());
     }
-    dto.pdfAttachment = bo.getPdfAttachment() != null ? getDTO(bo.getPdfAttachment()) : null;
+    dto.pdfAttachment = bo.getPdfAttachment() != null ? getFullDTO(bo.getPdfAttachment()) : null;
     return dto;
   }
 
@@ -158,12 +158,13 @@ public class DtoMapper {
     dto.id = bo.getId();
     dto.created = bo.getCreated();
     dto.type = bo.getMimeType().toString();
+    dto.name = bo.getFileName();
     return dto;
   }
 
   public static FileDescriptorDTO getFullDTO(FileDescriptor bo) {
     var dto = getDTO(bo);
-    dto.path = bo.getPath();
+    dto.path = bo.getDownloadUrl();
     return dto;
   }
 

@@ -31,10 +31,8 @@ public class FileDescriptor extends ModelSuperclass {
   @NotNull
   @Enumerated(EnumType.STRING)
   private MimeType mimeType;
-
   @NotNull
   private String path;
-
   @NotNull
   private LocalDateTime created;
 
@@ -91,6 +89,18 @@ public class FileDescriptor extends ModelSuperclass {
       extension = "";
     }
     return extension;
+  }
+
+  @Transient
+  public String getDownloadUrl() {
+    return System.getProperty("base.url") + path;
+  }
+
+  @Transient
+  public String getFileName() {
+    var startIndex = path.lastIndexOf("/") + 1;
+    return path.substring(startIndex != -1 ? startIndex : path.lastIndexOf("\\") + 1,
+        path.lastIndexOf("."));
   }
 
 }
