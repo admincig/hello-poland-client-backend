@@ -93,14 +93,14 @@ public class FileDescriptor extends ModelSuperclass {
 
   @Transient
   public String getDownloadUrl() {
-    return System.getProperty("base.url") + path;
+    return System.getProperty("base.url") + "/files/" + getFileName();
   }
 
   @Transient
   public String getFileName() {
-    var startIndex = path.lastIndexOf("/") + 1;
-    return path.substring(startIndex != -1 ? startIndex : path.lastIndexOf("\\") + 1,
-        path.lastIndexOf("."));
+    var startIndex = path.lastIndexOf("/");
+    return path.substring(startIndex != -1 ? startIndex + 1 : path.lastIndexOf("\\") + 1,
+        path.length());
   }
 
 }

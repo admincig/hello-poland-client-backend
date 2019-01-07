@@ -57,4 +57,12 @@ public class FileDescriptorService extends ServiceSuperclass {
     }
   }
 
+  public File getFileDescriptor(String name) {
+    var path = em
+        .createQuery("select path from FileDescriptor where path like :name or path like :name2",
+            String.class)
+        .setParameter("name", "%/" + name).setParameter("name2", "%\\" + name).getSingleResult();
+    return new File(path);
+  }
+
 }
