@@ -164,7 +164,8 @@ public class DtoMapper {
 
   public static FileDescriptorDTO getFullDTO(FileDescriptor bo) {
     var dto = getDTO(bo);
-    dto.path = bo.getDownloadUrl();
+    dto.path = bo.getPath();
+    dto.downloadUrl = bo.getDownloadUrl();
     return dto;
   }
 
