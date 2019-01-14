@@ -14,6 +14,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import pl.hellopoland.service.FileDescriptorService;
 import pl.hellopoland.service.ImageService;
 
 @Path("/")
@@ -26,6 +27,8 @@ public class RestService {
 
   @Inject
   ImageService imageService;
+  @Inject
+  FileDescriptorService fileService;
 
   @POST
   @Path("/anything")
@@ -42,6 +45,15 @@ public class RestService {
     File file = imageService.getImage(name);
     String extension = file.getName().substring(file.getName().lastIndexOf('.') + 1);
     return Response.ok().entity(file).type("image/" + extension).build();
+  }
+
+  @GET
+  @Path("/files/{path}")
+  @Produces({MediaType.APPLICATION_JSON, "application/pdf"})
+  public Response downloadFile(@PathParam("path") String path) {
+    File file = fileService.getFileDescriptor(path);
+    String extension = file.getName().substring(file.getName().lastIndexOf('.') + 1);
+    return Response.ok().entity(file).type("application/" + extension).build();
   }
 
   @GET

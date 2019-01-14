@@ -94,13 +94,21 @@ public class ImageService extends ServiceSuperclass {
   }
 
   private BufferedImage scaleImage(BufferedImage buffImage, int width) {
-    var img = buffImage.getScaledInstance(width, -1, BufferedImage.SCALE_DEFAULT);
+    var img = buffImage.getScaledInstance(width, -1, BufferedImage.SCALE_SMOOTH);
     width = img.getWidth(null);
     var height = img.getHeight(null);
     var bImg = new BufferedImage(width, height, buffImage.getType());
     var g2d = bImg.createGraphics();
     g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
         RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+    g2d.setRenderingHint(RenderingHints.KEY_RESOLUTION_VARIANT,
+        RenderingHints.VALUE_RESOLUTION_VARIANT_SIZE_FIT);
+    g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING,
+        RenderingHints.VALUE_COLOR_RENDER_QUALITY);
+    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION,
+        RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
+    g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
     g2d.drawImage(img, 0, 0, width, height, null);
     g2d.dispose();
     return bImg;
