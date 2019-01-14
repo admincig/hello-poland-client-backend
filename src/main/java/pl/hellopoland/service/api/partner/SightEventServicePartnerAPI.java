@@ -97,4 +97,9 @@ public class SightEventServicePartnerAPI {
     return dto;
   }
 
+  @RolesAllowed("partner")
+  public void deletePdf(Long id) {
+    service.deletePdf(id);
+  }
+
 }
