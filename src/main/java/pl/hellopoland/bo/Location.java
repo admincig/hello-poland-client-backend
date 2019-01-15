@@ -11,6 +11,7 @@ public class Location {
   private String zipCode;
   private String city;
   private String country;
+  private String directions;
 
   public Double getLatitude() {
     return latitude;
@@ -60,5 +61,12 @@ public class Location {
     this.country = country;
   }
 
+  public String getDirections() {
+    return directions;
+  }
+
+  public void setDirections(String directions) {
+    this.directions = directions;
+  }
 
 }

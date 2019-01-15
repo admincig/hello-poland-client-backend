@@ -115,12 +115,9 @@ public class SightEventService extends ServiceSuperclass {
     if (partner == null) {
       partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
     }
-    Sight sight = null;
-    if (dto.sightId != null) {
-      sight = sightService.get(dto.sightId);
-      if (!sight.getPartner().equals(partner)) {
-        throw new AccessDeniedException();
-      }
+    Sight sight = sightService.get(dto.sightId);
+    if (!sight.getPartner().equals(partner)) {
+      throw new AccessDeniedException();
     }
     dto.generalAdmission = Boolean.TRUE.equals(dto.generalAdmission);
     Portal hpt = getPortal("Hello Ticket Cloud");
