@@ -120,11 +120,9 @@ public class SightEventService extends ServiceSuperclass {
       throw new AccessDeniedException();
     }
     dto.generalAdmission = Boolean.TRUE.equals(dto.generalAdmission);
-    var location = dto.location;
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
     dto = helloTicket.addSightEvent(dto, partner.getHptToken());
-    dto.location = location;
     SightEvent bo = new SightEvent();
     DtoMapper.copy(dto, bo);
     iService.update(bo, dto.mainImage == null ? null : dto.mainImage.original);
@@ -166,7 +164,6 @@ public class SightEventService extends ServiceSuperclass {
 
   public SightEvent updateForLoggedUser(SightEventDTO dto) {
     SightEvent bo = getForLoggedUser(dto.id);
-    var location = dto.location;
     if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
       Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
       Portal hpt = getPortal("Hello Ticket Cloud");
@@ -174,7 +171,6 @@ public class SightEventService extends ServiceSuperclass {
       dto.id = bo.getHptId();
       dto = helloTicket.updateSightEvent(dto, partner.getHptToken());
     }
-    dto.location = location;
     DtoMapper.copy(dto, bo);
     oHoursService.remove(bo.getOpeningHours());
     ArrayList<OpeningHours> oHoursList = getOpeningHoursCollectionFromDTO(dto);
