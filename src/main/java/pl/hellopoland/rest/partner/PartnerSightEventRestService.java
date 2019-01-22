@@ -1,5 +1,6 @@
 package pl.hellopoland.rest.partner;
 
+import java.util.Date;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -13,6 +14,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.lang3.StringUtils;
+import pl.hellopoland.annotation.DateTimeFormat;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.rest.dto.PagedCollection;
@@ -101,6 +103,13 @@ public class PartnerSightEventRestService {
   @Consumes("application/pdf")
   public void deletePdf(@PathParam("id") Long id) {
     service.deletePdf(id);
+  }
+
+  @DELETE
+  @Path("/{id}/sale")
+  public void stopSale(@PathParam("id") Long id, @QueryParam("tpdId") Long tpdId,
+      @QueryParam("date") @DateTimeFormat Date date) {
+    service.stopSale(id, tpdId, date);
   }
 
 }

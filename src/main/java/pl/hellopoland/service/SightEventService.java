@@ -458,4 +458,10 @@ public class SightEventService extends ServiceSuperclass {
     return now.before(tpdStartDate);
   }
 
+  public void stopSale(Long sightId, Long ticketPoolDefId, Date date) {
+    var bo = getForLoggedUser(sightId);
+    HelloTicket ht = new HelloTicket(bo.getPortal().getUrl());
+    ht.stopSale(getLoggedPartner().getHptToken(), bo.getHptId(), ticketPoolDefId, date);
+  }
+
 }
