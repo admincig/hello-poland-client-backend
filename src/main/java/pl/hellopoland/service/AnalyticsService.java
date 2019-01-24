@@ -22,23 +22,22 @@ import pl.hellopoland.bo.OrderEntry;
 @Stateless
 public class AnalyticsService extends ServiceSuperclass {
   final Logger logger = System.getLogger(this.getClass().getSimpleName());
+  final static String PATH =
+      properties.getProperty("dms.root.path") + File.separator + "analitics" + File.separator;
   final static SimpleDateFormat DATE_FORMATER = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
   @Inject
   OrderService orderService;
 
   public File getOrdersCsvFile(Date fromDate, Date toDate) {
-    String path =
-        properties.getProperty("dms.root.path") + File.separator + "analitics" + File.separator;
-
     final File csvFile =
-        createEmptyFileOnDisc(path + "orders_" + RandomStringUtils.randomAlphanumeric(10) + ".csv");
+        createEmptyFileOnDisc(PATH + "orders_" + RandomStringUtils.randomAlphanumeric(10) + ".csv");
     // csv file header:
     writeCsvRow(csvFile.toPath(), "DATA ZAMÓWIENIA", "PŁATNOŚĆ", "NR TRANSAKCJI P24",
         "NAZWA UŻUTKOWNIKA", "TELEON", "ADRES EMAIL", "NAZWA OFERTY", "DATA OFERTY",
         "ILOŚĆ I NAZWA BILETÓW");
 
-    var orders = orderService.getOrdersInDateRange(fromDate, toDate);
+    var orders = orderService.getOrdersForLoggedPartnerInDateRange(fromDate, toDate);
     for (OrderEntry oe : orders) {
       OrderDateEntry dateEntry = oe.getDateEntry();
       Order order = dateEntry.getSightEntry().getOrder();

@@ -296,11 +296,14 @@ public class OrderService extends ServiceSuperclass {
     return findByHash(hash).getStatus();
   }
 
-  public List<OrderEntry> getOrdersInDateRange(Date fromDate, Date toDate) {
-    List<OrderEntry> orders = em.createQuery(
-        "from OrderEntry oe join fetch oe.dateEntry.sightEntry.order o where (o.date between :fromDate and :toDate) order by o.date asc, o.id asc",
-        OrderEntry.class).setParameter("fromDate", fromDate).setParameter("toDate", toDate)
-        .getResultList();
+  public List<OrderEntry> getOrdersForLoggedPartnerInDateRange(Date fromDate, Date toDate) {
+    List<OrderEntry> orders = em
+        .createQuery("from OrderEntry oe join fetch oe.dateEntry.sightEntry.order o "
+            + "where (o.date between :fromDate and :toDate) "
+            + "and oe.dateEntry.sightEntry.sightEvent.partner =:partner "
+            + "order by o.date asc, o.id asc", OrderEntry.class)
+        .setParameter("fromDate", fromDate).setParameter("toDate", toDate)
+        .setParameter("partner", getLoggedPartner()).getResultList();
     return orders;
   }
 
