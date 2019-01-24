@@ -1,5 +1,6 @@
 package pl.hellopoland.rest.partner;
 
+import java.io.File;
 import java.util.Date;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -16,7 +17,6 @@ import pl.hellopoland.service.api.partner.AnalitycsServicePartnerAPI;
 @Path("/partner/analytics")
 @RequestScoped
 @Produces(MediaType.APPLICATION_OCTET_STREAM)
-// @Consumes(MediaType.APPLICATION_JSON)
 public class PartnerAnalyticsRestService {
 
   @Inject
@@ -26,8 +26,9 @@ public class PartnerAnalyticsRestService {
   @Path("/orders")
   public Response downloadOrdersCsv(@QueryParam("fromDate") @DateFormat Date fromDate,
       @QueryParam("toDate") @DateFormat Date toDate) {
-    ResponseBuilder response = Response.ok(service.getOrdersCsvFile(fromDate, toDate));
-    response.header("Content-Disposition", "attachment;filename=" + file);
+    File report = service.getOrdersCsvFile(fromDate, toDate);
+    ResponseBuilder response = Response.ok(report);
+    response.header("Content-Disposition", "attachment;filename=" + report);
     return response.build();
   }
 }
