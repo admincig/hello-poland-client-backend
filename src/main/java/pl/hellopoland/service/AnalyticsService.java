@@ -37,7 +37,7 @@ public class AnalyticsService extends ServiceSuperclass {
         "NAZWA UŻUTKOWNIKA", "TELEON", "ADRES EMAIL", "NAZWA OFERTY", "DATA OFERTY",
         "ILOŚĆ I NAZWA BILETÓW");
 
-    var orders = orderService.getOrdersForLoggedPartnerInDateRange(fromDate, toDate);
+    var orders = orderService.getOrdersInDateRange(fromDate, toDate, getLoggedPartner());
     for (OrderEntry oe : orders) {
       OrderDateEntry dateEntry = oe.getDateEntry();
       Order order = dateEntry.getSightEntry().getOrder();
