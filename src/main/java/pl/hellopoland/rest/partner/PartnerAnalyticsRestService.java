@@ -28,7 +28,7 @@ public class PartnerAnalyticsRestService {
       @QueryParam("toDate") @DateFormat Date toDate) {
     File report = service.getOrdersCsvFile(fromDate, toDate);
     ResponseBuilder response = Response.ok(report);
-    response.header("Content-Disposition", "attachment;filename=" + report);
+    response.header("Content-Disposition", "attachment;filename=" + report.getName());
     return response.build();
   }
 }

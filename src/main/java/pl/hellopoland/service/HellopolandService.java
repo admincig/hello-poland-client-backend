@@ -1,7 +1,6 @@
 package pl.hellopoland.service;
 
 import java.io.UnsupportedEncodingException;
-import java.lang.System.Logger;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -31,8 +30,6 @@ import pl.hellopoland.util.HelloTicket;
 @LocalBean
 @Stateless
 public class HellopolandService extends ServiceSuperclass {
-  private static final Logger lOG = System.getLogger("HellopolandService");
-
   @Inject
   private UserService userService;
   @Inject
@@ -106,7 +103,7 @@ public class HellopolandService extends ServiceSuperclass {
         emailService.sendEmail(key, "Nowe konto w Hello Poland.",
             "Twój login to " + key + ", hasło to " + value);
       } catch (MessagingException | UnsupportedEncodingException e) {
-        lOG.log(System.Logger.Level.ERROR, e.getLocalizedMessage());
+        logger.log(System.Logger.Level.ERROR, e.getLocalizedMessage());
         throw new EmailSendingException();
       }
     });

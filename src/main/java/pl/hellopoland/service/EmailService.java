@@ -1,7 +1,6 @@
 package pl.hellopoland.service;
 
 import java.io.UnsupportedEncodingException;
-import java.lang.System.Logger;
 import java.util.Properties;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -19,8 +18,6 @@ import javax.mail.internet.MimeMultipart;
 @LocalBean
 @Stateless
 public class EmailService extends ServiceSuperclass {
-  private static final Logger lOG = System.getLogger("EmailService");
-
   private static final String MAIL_PERSONAL = "Bilety Hello Poland";
   private static final String MAIL_USERNAME_PROPERTY = "mail.username";
   private static final String MAIL_PASSWORD_PROPERTY = "mail.password";
@@ -46,8 +43,8 @@ public class EmailService extends ServiceSuperclass {
       message.setContent(multipart);
       Transport.send(message);
     } catch (MessagingException | UnsupportedEncodingException e) {
-      lOG.log(System.Logger.Level.ERROR, "Sending an email failed: " + recipientEmail);
-      lOG.log(System.Logger.Level.ERROR, e.getLocalizedMessage());
+      logger.log(System.Logger.Level.ERROR, "Sending an email failed: " + recipientEmail);
+      logger.log(System.Logger.Level.ERROR, e.getLocalizedMessage());
       throw e;
     }
   }

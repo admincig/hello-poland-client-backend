@@ -12,6 +12,7 @@ import java.util.UUID;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.imageio.ImageIO;
+import javax.inject.Inject;
 import javax.persistence.NoResultException;
 import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.ImageVariant;
@@ -22,6 +23,8 @@ import pl.hellopoland.util.Imaged;
 @LocalBean
 @Stateless
 public class ImageService extends ServiceSuperclass {
+  @Inject
+  FileDescriptorService fileDescriptorService;
 
   public ImageCollector validateAndStoreImageCollector(InputStream is, String extension,
       String url) {
@@ -75,8 +78,7 @@ public class ImageService extends ServiceSuperclass {
 
     int size = 0;
     try {
-      createEmptyFileOnDisc(path + hash + "." + extension);
-      final File file = new File(path + hash + "." + extension);
+      final File file = fileDescriptorService.createEmptyFileOnDisc(path + hash + "." + extension);
       ImageIO.write(buffImage, extension, file);
       logger.log(Logger.Level.DEBUG, "Saved file of size" + size);
     } catch (Exception ioe) {
@@ -112,14 +114,6 @@ public class ImageService extends ServiceSuperclass {
     g2d.drawImage(img, 0, 0, width, height, null);
     g2d.dispose();
     return bImg;
-  }
-
-  private void createEmptyFileOnDisc(String path) {
-    File targetFile = new File(path);
-    File parent = targetFile.getParentFile();
-    if (!parent.exists() && !parent.mkdirs()) {
-      throw new IllegalStateException("Couldn't create dir: " + parent);
-    }
   }
 
   public File getImage(String name) {
