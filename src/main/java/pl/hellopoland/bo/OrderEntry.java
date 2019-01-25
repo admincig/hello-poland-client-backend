@@ -28,7 +28,6 @@ public class OrderEntry extends ModelSuperclass {
   @ElementCollection
   private List<String> numbers;
 
-
   public Integer getQuantity() {
     return quantity;
   }
