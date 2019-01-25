@@ -335,9 +335,12 @@ public class HelloTicket {
       delete("/v1/sight-events/" + sightEventHptId + "/sale?tpdId=" + ticketPoolDefId + "&date="
           + dateString, hptToken);
     } catch (Exception e) {
-      throw new ConflictingException(
-          "Cannot find sight event for id=" + sightEventHptId + ", ticketPoolDefId="
-              + ticketPoolDefId + " and date=" + SimpleDateFormat.getInstance().format(date));
+      logger
+          .log(System.Logger.Level.WARNING,
+              "Failed: cannot find sight event for id=" + sightEventHptId + ", ticketPoolDefId="
+                  + ticketPoolDefId + " and date=" + SimpleDateFormat.getInstance().format(date),
+              e);
+      throw new ConflictingException("Brak wydarzenia w danym dniu");
     }
   }
 
