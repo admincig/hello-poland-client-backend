@@ -181,26 +181,23 @@ public class DtoMapper {
 
   public static LocationDTO getDTO(Location bo) {
     LocationDTO dto = new LocationDTO();
-
     dto.latitude = bo.getLatitude();
     dto.longitude = bo.getLongitude();
     dto.street = bo.getStreet();
     dto.zipCode = bo.getZipCode();
     dto.city = bo.getCity();
     dto.country = bo.getCountry();
-
+    dto.directions = bo.getDirections();
     return dto;
   }
 
   public static TicketDefinitionDTO getDTO(TicketDefinition bo) {
     TicketDefinitionDTO dto = new TicketDefinitionDTO();
-
     dto.id = bo.getId();
     dto.name = bo.getName();
     dto.price = bo.getPrice();
     // dto.sightEventId = bo.getSightEvent().getId();
     dto.availableTicketsNumber = bo.getAvailableTicketsNumber();
-
     return dto;
   }
 
@@ -222,7 +219,6 @@ public class DtoMapper {
 
   private static void copyLocation(LocationDTO source, Located target) {
     Location location = target.getLocation();
-
     if (source != null) {
       if (location == null) {
         location = new Location();
@@ -233,7 +229,7 @@ public class DtoMapper {
       location.setZipCode(source.zipCode);
       location.setCity(source.city);
       location.setCountry(source.country);
-
+      location.setDirections(source.directions);
       target.setLocation(location);
     } else {
       target.setLocation(null);
