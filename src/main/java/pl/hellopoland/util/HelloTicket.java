@@ -69,11 +69,13 @@ public class HelloTicket {
       booking = JsonbConfig.getInstance().fromJson(resp.toString(), BookingDTO.class);
 
       for (var oe : orderEntries) {
-        oe.getDateEntry().getSightEntry().setSerialNumber(booking.serialNumber);
+        var ose = oe.getDateEntry().getSightEntry();
+        ose.setSerialNumber(booking.serialNumber);
         for (var iter = booking.tickets.iterator(); iter.hasNext();) {
           TicketDTO ticket = iter.next();
           if (oe.matches(ticket)) {
             oe.setExternalId((long) ticket.id);
+            ose.setWholeDay(ticket.wholeDay);
             break;
           }
         }
