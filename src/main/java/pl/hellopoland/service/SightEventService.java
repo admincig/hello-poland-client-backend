@@ -115,12 +115,9 @@ public class SightEventService extends ServiceSuperclass {
     if (partner == null) {
       partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
     }
-    Sight sight = null;
-    if (dto.sightId != null) {
-      sight = sightService.get(dto.sightId);
-      if (!sight.getPartner().equals(partner)) {
-        throw new AccessDeniedException();
-      }
+    Sight sight = sightService.get(dto.sightId);
+    if (!sight.getPartner().equals(partner)) {
+      throw new AccessDeniedException();
     }
     dto.generalAdmission = Boolean.TRUE.equals(dto.generalAdmission);
     Portal hpt = getPortal("Hello Ticket Cloud");
@@ -129,7 +126,6 @@ public class SightEventService extends ServiceSuperclass {
     SightEvent bo = new SightEvent();
     DtoMapper.copy(dto, bo);
     iService.update(bo, dto.mainImage == null ? null : dto.mainImage.original);
-    // bo.generateRandomScore();
     bo.setPortal(hpt);
 
     if (sight != null) {
@@ -172,7 +168,6 @@ public class SightEventService extends ServiceSuperclass {
       Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
       Portal hpt = getPortal("Hello Ticket Cloud");
       HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
-
       dto.id = bo.getHptId();
       dto = helloTicket.updateSightEvent(dto, partner.getHptToken());
     }
