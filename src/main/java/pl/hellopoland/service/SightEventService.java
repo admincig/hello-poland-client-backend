@@ -3,6 +3,7 @@ package pl.hellopoland.service;
 import java.io.ByteArrayInputStream;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
+import java.nio.file.Paths;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,8 +45,6 @@ import pl.hellopoland.util.Triplet;
 @LocalBean
 @Stateless
 public class SightEventService extends ServiceSuperclass {
-  private final Logger logger = System.getLogger(this.getClass().getName());
-
   @Inject
   private ImageService iService;
 
@@ -406,7 +405,7 @@ public class SightEventService extends ServiceSuperclass {
 
   public SightEvent uploadPdf(Long id, byte[] pdf) {
     SightEvent bo = getForLoggedUser(id);
-    bo.setPdfAttachment(fdService.storeFile(new ByteArrayInputStream(pdf), "pdf"));
+    bo.setPdfAttachment(fdService.storeFileDescriptor(new ByteArrayInputStream(pdf), "pdf"));
     return bo;
   }
 
@@ -414,7 +413,7 @@ public class SightEventService extends ServiceSuperclass {
     SightEvent bo = getForLoggedUser(id);
     var pdf = bo.getPdfAttachment();
     if (pdf != null) {
-      fdService.deleteFile(pdf);
+      fdService.deleteFile(Paths.get(pdf.getPath()));
       bo.setPdfAttachment(null);
       return;
     }

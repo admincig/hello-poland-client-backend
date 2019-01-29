@@ -17,6 +17,7 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.json.JsonObject;
+import javax.persistence.TypedQuery;
 import javax.ws.rs.core.MediaType;
 import pl.hellopoland.bo.Order;
 import pl.hellopoland.bo.Order.Status;
@@ -24,6 +25,7 @@ import pl.hellopoland.bo.OrderDateEntry;
 import pl.hellopoland.bo.OrderDetails;
 import pl.hellopoland.bo.OrderEntry;
 import pl.hellopoland.bo.OrderSightEntry;
+import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.TicketDefinition;
@@ -294,6 +296,26 @@ public class OrderService extends ServiceSuperclass {
 
   public Status getStatus(String hash) {
     return findByHash(hash).getStatus();
+  }
+
+  @SuppressWarnings("deprecation")
+  public List<OrderEntry> getOrdersInDateRange(Date fromDate, Date toDate, Partner partner) {
+    String query = "from OrderEntry oe join fetch oe.dateEntry.sightEntry.order o "
+        + "where (:fromDate <= o.date and :toDate > o.date) "
+        // + "where (o.date between :fromDate and :toDate) "
+        + (partner != null ? "and oe.dateEntry.sightEntry.sightEvent.partner =:partner " : "")
+        + "order by o.date asc, o.id asc";
+
+    toDate.setDate(toDate.getDate() + 1);
+
+    TypedQuery<OrderEntry> tQuery = em.createQuery(query, OrderEntry.class)
+        .setParameter("fromDate", fromDate).setParameter("toDate", toDate);
+
+    if (partner != null) {
+      tQuery.setParameter("partner", partner);
+    }
+
+    return tQuery.getResultList();
   }
 
 }

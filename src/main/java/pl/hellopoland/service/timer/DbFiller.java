@@ -108,6 +108,7 @@ public class DbFiller extends ServiceSuperclass {
           "omitting dbfiller because hibernate.hbm2ddl.auto isnt set to create");
       return;
     }
+    logger.log(Logger.Level.INFO, "DbFiller started");
     createPortals();
     createUsers();
     createImageCollectors();

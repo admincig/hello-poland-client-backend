@@ -21,7 +21,6 @@ public class TicketDefinitionService extends ServiceSuperclass {
   @Inject
   SightEventService sightEventService;
 
-
   public TicketDefinition create(TicketDefinitionDTO dto, Long sightEventId, Partner partner) {
     if (dto.price < 0) {
       throw new BadRequestException("The ticket price must be greater than 0");
