@@ -30,7 +30,6 @@ import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 
 public abstract class ServiceSuperclass {
 
-
   private static Context namingContext;
   protected static Properties properties;
   private static Logger staticLogger = System.getLogger(ServiceSuperclass.class.getName());
