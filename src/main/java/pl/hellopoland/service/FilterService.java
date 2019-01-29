@@ -24,19 +24,19 @@ public class FilterService extends ServiceSuperclass {
 
   private List<String> getCitiesFromSights() {
     return em.createQuery(
-        "select distinct s.location.city from Sight s where s.active = true "
+        "select distinct trim(s.location.city) from Sight s where s.active = true "
             + "and s.published = true and s.blocked = false and trim(s.location.city) != ''",
         String.class).getResultList();
   }
 
   private List<String> getCitiesFromSightEvents(Set<Long> sightEventsIds) {
     if (sightEventsIds == null || sightEventsIds.isEmpty()) {
-      return em.createQuery("select distinct se.location.city from SightEvent se "
+      return em.createQuery("select distinct trim(se.location.city) from SightEvent se "
           + "where se.active = true and se.published = true and se.blocked = false "
           + "and trim(se.location.city) != ''", String.class).getResultList();
     }
     return em
-        .createQuery("select distinct se.location.city from SightEvent se "
+        .createQuery("select distinct trim(se.location.city) from SightEvent se "
             + "where se.id in (:sightEventsIds) and trim(se.location.city) != ''", String.class)
         .setParameter("sightEventsIds", sightEventsIds).getResultList();
   }
