@@ -30,6 +30,7 @@ import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.dto.booking.BookingDTO;
 import pl.hellopoland.dto.booking.TicketDTO;
 import pl.hellopoland.dto.booking.TicketOrderDTO;
+import pl.hellopoland.exception.badrequest.BadRequestException;
 import pl.hellopoland.exception.conflict.CannotDeleteSightEventFromExternalSystemException;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.JsonbConfig;
@@ -261,6 +262,12 @@ public class HelloTicket {
       return jsonb.fromJson(json.toString(), TicketPoolDefinitionDTO.class);
     } catch (Exception e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
+      if (e.getMessage() != null && e.getMessage().contains("400")) {
+        throw new BadRequestException("TicketPoolDefinition must have tickets definitions.");
+      }
+      if (e.getMessage() != null && e.getMessage().contains("409")) {
+        throw new ConflictingException("Bad availableTicketsNumber limit combination.");
+      }
       return null;
     }
   }
