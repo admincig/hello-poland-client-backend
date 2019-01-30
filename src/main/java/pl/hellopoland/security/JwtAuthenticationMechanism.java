@@ -19,12 +19,12 @@ import javax.security.enterprise.authentication.mechanism.http.HttpAuthenticatio
 import javax.security.enterprise.authentication.mechanism.http.HttpMessageContext;
 import javax.security.enterprise.credential.UsernamePasswordCredential;
 import javax.security.enterprise.identitystore.CredentialValidationResult;
-import javax.security.enterprise.identitystore.CredentialValidationResult.Status;
 import javax.security.enterprise.identitystore.IdentityStoreHandler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.HttpHeaders;
 import pl.hellopoland.bo.User;
+import pl.hellopoland.bo.UserRole;
 import pl.hellopoland.security.token.ExpiredTokenService;
 import pl.hellopoland.security.token.JwtCredential;
 import pl.hellopoland.security.token.TokenInExpiredTokensListException;
@@ -44,6 +44,8 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
   private static final String REFRESH_TOKEN_REQUEST_PATH = "/refresh";
   private static final String LOGOUT_REQUEST_PATH = "/logout";
   private static final String ORDERS_REQUEST_PATH = "/orders";
+  private static final String PARTNER_CONTEXT_PATH = "/partner";
+  private static final String HELPDESK_CONTEXT_PATH = "/helpdesk";
 
   @Inject
   private IdentityStoreHandler identityStoreHandler;
@@ -219,7 +221,7 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
     CredentialValidationResult credentialValidationResult =
         identityStoreHandler.validate(new UsernamePasswordCredential(login, password));
 
-    if (loggedCorrectly(credentialValidationResult.getStatus())) {
+    if (loggedCorrectly(credentialValidationResult, context.getRequest())) {
       authenticationStatus = createToken(credentialValidationResult, context);
     } else {
       authenticationStatus = context.responseUnauthorized();
@@ -227,7 +229,6 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
 
     return authenticationStatus;
   }
-
 
   private AuthenticationStatus login(String socialMediaAuthenticationToken,
       HttpMessageContext context) {
@@ -296,8 +297,20 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
     expiredTokenService.addTokenToExpiredTokensList(token);
   }
 
-  private boolean loggedCorrectly(Status status) {
-    return status == CredentialValidationResult.Status.VALID;
+  private boolean loggedCorrectly(CredentialValidationResult credentialValidationResult,
+      HttpServletRequest request) {
+    if (HELPDESK_CONTEXT_PATH.concat(LOGIN_REQUEST_PATH).equals(request.getPathInfo())) {
+      return credentialValidationResult.getCallerGroups().contains(UserRole.Role.ADMIN.toString())
+          && isStatusSuccess(credentialValidationResult);
+    } else if (PARTNER_CONTEXT_PATH.concat(LOGIN_REQUEST_PATH).equals(request.getPathInfo())) {
+      return credentialValidationResult.getCallerGroups().contains(UserRole.Role.PARTNER.toString())
+          && isStatusSuccess(credentialValidationResult);
+    }
+    return isStatusSuccess(credentialValidationResult);
+  }
+
+  private boolean isStatusSuccess(CredentialValidationResult credentialValidationResult) {
+    return CredentialValidationResult.Status.VALID == credentialValidationResult.getStatus();
   }
 
   private AuthenticationStatus createToken(CredentialValidationResult result,
