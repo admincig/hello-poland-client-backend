@@ -298,23 +298,35 @@ public class OrderService extends ServiceSuperclass {
     return findByHash(hash).getStatus();
   }
 
-  @SuppressWarnings("deprecation")
   public List<OrderEntry> getOrdersInDateRange(Date fromDate, Date toDate, Partner partner) {
+    if (toDate == null) {
+      return getOrderForSightEventInDate(fromDate, partner);
+    }
     String query = "from OrderEntry oe join fetch oe.dateEntry.sightEntry.order o "
         + "where (:fromDate <= o.date and :toDate > o.date) "
-        // + "where (o.date between :fromDate and :toDate) "
         + (partner != null ? "and oe.dateEntry.sightEntry.sightEvent.partner =:partner " : "")
         + "order by o.date asc, o.id asc";
+    return getOrderEntries(query, fromDate, toDate, partner);
+  }
 
+  private List<OrderEntry> getOrderForSightEventInDate(Date fromDate, Partner partner) {
+    var toDate = new Date(fromDate.getTime());
+    String query = "from OrderEntry oe join fetch oe.dateEntry.sightEntry.order o "
+        + "where (:fromDate <= oe.dateEntry.date and :toDate > oe.dateEntry.date) "
+        + (partner != null ? "and oe.dateEntry.sightEntry.sightEvent.partner =:partner " : "")
+        + "order by o.date asc, o.id asc";
+    return getOrderEntries(query, fromDate, toDate, partner);
+  }
+
+  @SuppressWarnings("deprecation")
+  private List<OrderEntry> getOrderEntries(String query, Date fromDate, Date toDate,
+      Partner partner) {
     toDate.setDate(toDate.getDate() + 1);
-
     TypedQuery<OrderEntry> tQuery = em.createQuery(query, OrderEntry.class)
         .setParameter("fromDate", fromDate).setParameter("toDate", toDate);
-
     if (partner != null) {
       tQuery.setParameter("partner", partner);
     }
-
     return tQuery.getResultList();
   }
 
