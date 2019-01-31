@@ -44,8 +44,9 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
   private static final String REFRESH_TOKEN_REQUEST_PATH = "/refresh";
   private static final String LOGOUT_REQUEST_PATH = "/logout";
   private static final String ORDERS_REQUEST_PATH = "/orders";
-  private static final String PARTNER_CONTEXT_PATH = "/partner";
   private static final String HELPDESK_CONTEXT_PATH = "/helpdesk";
+  private static final String MARKET_CONTEXT_PATH = "/market";
+  private static final String PARTNER_CONTEXT_PATH = "/partner";
 
   @Inject
   private IdentityStoreHandler identityStoreHandler;
@@ -301,6 +302,9 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
       HttpServletRequest request) {
     if (HELPDESK_CONTEXT_PATH.concat(LOGIN_REQUEST_PATH).equals(request.getPathInfo())) {
       return credentialValidationResult.getCallerGroups().contains(UserRole.Role.ADMIN.toString())
+          && isStatusSuccess(credentialValidationResult);
+    } else if (MARKET_CONTEXT_PATH.concat(LOGIN_REQUEST_PATH).equals(request.getPathInfo())) {
+      return credentialValidationResult.getCallerGroups().contains(UserRole.Role.USER.toString())
           && isStatusSuccess(credentialValidationResult);
     } else if (PARTNER_CONTEXT_PATH.concat(LOGIN_REQUEST_PATH).equals(request.getPathInfo())) {
       return credentialValidationResult.getCallerGroups().contains(UserRole.Role.PARTNER.toString())
