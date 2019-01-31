@@ -277,7 +277,7 @@ public class SightEventService extends ServiceSuperclass {
         }
         if (checkDate) {
           poolDefinitions =
-              poolDefinitions.stream().filter(tpd -> isDateOK(tpd)).collect(Collectors.toList());
+              poolDefinitions.stream().filter(tpd -> isInFuture(tpd)).collect(Collectors.toList());
         }
         List<TicketDefinitionDTO> ticketDefinitions = new ArrayList<>();
         poolDefinitions.forEach(p -> ticketDefinitions.addAll(p.ticketDefinitions));
@@ -353,10 +353,11 @@ public class SightEventService extends ServiceSuperclass {
     return grouped;
   }
 
-  public AvailableTicketNumberAssociationDTO checkAvailability(Long sightEventId, Date date) {
+  public AvailableTicketNumberAssociationDTO checkAvailability(Long sightEventId, Date fromDate,
+      Date toDate) {
     HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
     AvailableTicketNumberAssociationDTO associationDTO =
-        hpt.checkAvailabilityOfTicketsForSightEvent(get(sightEventId), date);
+        hpt.checkAvailabilityOfTicketsForSightEvent(get(sightEventId), fromDate, toDate);
 
     var tdExternalIds = new ArrayList<Long>();
 
@@ -420,21 +421,23 @@ public class SightEventService extends ServiceSuperclass {
     logger.log(Level.INFO, "SightEvent [id=" + bo.getId() + "] doesn't have a pdf file ");
   }
 
-  public boolean isAvailable(SightEventDTO dto) {
+  public boolean isAvailable(SightEventDTO dto, Date fromDate, Date toDate) {
     List<TicketPoolDefinitionDTO> tpds = dto.ticketPoolDefinitions;
     if (tpds != null && !tpds.isEmpty()) {
-      return !tpds.stream()
-          .filter(tpd -> !tpd.deleted && isDateOK(tpd) && ticketAreAvailable(dto, tpd))
+      return !tpds.stream().filter(
+          tpd -> !tpd.deleted && isInFuture(tpd) && ticketAreAvailable(dto, tpd, fromDate, toDate))
           .collect(Collectors.toList()).isEmpty();
     }
     return false;
   }
 
-  private boolean ticketAreAvailable(SightEventDTO dto, TicketPoolDefinitionDTO tpd) {
+  private boolean ticketAreAvailable(SightEventDTO dto, TicketPoolDefinitionDTO tpd, Date fromDate,
+      Date toDate) {
     if (tpd.isCyclic) {
       return true;
     }
-    var availableTickets = checkAvailability(dto.id, tpd.startDate);
+    var availableTickets =
+        checkAvailability(dto.id, fromDate == null ? tpd.startDate : fromDate, toDate);
 
     return availableTickets.ticketPoolDefinitions.stream()
         .filter(f -> f.availableTicketsNumber != 0).count() != 0l
@@ -442,7 +445,7 @@ public class SightEventService extends ServiceSuperclass {
             .count() != 0l;
   }
 
-  private boolean isDateOK(TicketPoolDefinitionDTO tpd) {
+  private boolean isInFuture(TicketPoolDefinitionDTO tpd) {
     var now = new Date();
     var tpdStartDate = tpd.startDate;
     if (tpd.isCyclic) {

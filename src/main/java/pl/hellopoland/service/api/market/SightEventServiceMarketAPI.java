@@ -31,7 +31,8 @@ public class SightEventServiceMarketAPI {
   private TranslationService translationService;
 
   @PermitAll
-  public PagedCollection getList(SightEventPagedCollectionConfig config, String language) {
+  public PagedCollection getList(SightEventPagedCollectionConfig config, Date fromDate, Date toDate,
+      String language) {
     config.setOrderColumn("name");
     config.setOrderDirection("asc");
     PagedEntityCollection<SightEvent> bos = service.getList(config);
@@ -41,10 +42,11 @@ public class SightEventServiceMarketAPI {
     List<SightEventDTO> dtos =
         bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
     service.fetchTicketPoolDefinitions(bos.items, dtos, false, true);
-    List<SightEventDTO> list = dtos.stream().filter(dto -> service.isAvailable(dto)).map(dto -> {
-      dto.ticketPoolDefinitions = null;
-      return dto;
-    }).collect(Collectors.toList());
+    List<SightEventDTO> list =
+        dtos.stream().filter(dto -> service.isAvailable(dto, fromDate, toDate)).map(dto -> {
+          dto.ticketPoolDefinitions = null;
+          return dto;
+        }).collect(Collectors.toList());
     return new PagedCollection(list, bos.config);
   }
 
@@ -66,14 +68,16 @@ public class SightEventServiceMarketAPI {
       }
       var dto = DtoMapper.getFullDTO(bo);
       service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), false, true);
-      return service.isAvailable(dto) ? dto : null;
+      return service.isAvailable(dto, null, null) ? dto : null;
     }
     return null;
   }
 
   @PermitAll
-  public AvailableTicketNumberAssociationORO checkAvailability(Long sightEventId, Date date) {
-    return new AvailableTicketNumberAssociationORO(service.checkAvailability(sightEventId, date));
+  public AvailableTicketNumberAssociationORO checkAvailability(Long sightEventId, Date fromDate,
+      Date toDate) {
+    return new AvailableTicketNumberAssociationORO(
+        service.checkAvailability(sightEventId, fromDate, toDate));
   }
 
 }
