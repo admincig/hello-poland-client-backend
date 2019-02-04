@@ -335,4 +335,20 @@ public class HelloTicket {
     }
   }
 
+  public void stopSale(String hptToken, Long sightEventHptId, Long ticketPoolDefId, Date date) {
+    try {
+      var dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+      String dateString = dateFormat.format(date);
+      delete("/v1/sight-events/" + sightEventHptId + "/sale?tpdId=" + ticketPoolDefId + "&date="
+          + dateString, hptToken);
+    } catch (Exception e) {
+      logger
+          .log(System.Logger.Level.WARNING,
+              "Failed: cannot find sight event for id=" + sightEventHptId + ", ticketPoolDefId="
+                  + ticketPoolDefId + " and date=" + SimpleDateFormat.getInstance().format(date),
+              e);
+      throw new ConflictingException("Brak wydarzenia w danym dniu");
+    }
+  }
+
 }
