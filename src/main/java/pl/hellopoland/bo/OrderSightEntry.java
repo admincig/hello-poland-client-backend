@@ -12,6 +12,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
 
 @Entity
 public class OrderSightEntry extends ModelSuperclass {
@@ -31,6 +32,8 @@ public class OrderSightEntry extends ModelSuperclass {
       joinColumns = {@JoinColumn(name = "ordersightentry_id", referencedColumnName = "id")},
       inverseJoinColumns = {@JoinColumn(name = "agreement_id", referencedColumnName = "id")})
   private Collection<Agreement> agreements;
+  @NotNull
+  private boolean wholeDay;
 
   public SightEvent getSightEvent() {
     return sightEvent;
@@ -96,6 +99,14 @@ public class OrderSightEntry extends ModelSuperclass {
 
   public void setAgreements(Collection<Agreement> agreements) {
     this.agreements = agreements;
+  }
+
+  public boolean isWholeDay() {
+    return wholeDay;
+  }
+
+  public void setWholeDay(boolean wholeDay) {
+    this.wholeDay = wholeDay;
   }
 
 }
