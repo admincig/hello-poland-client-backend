@@ -433,11 +433,12 @@ public class SightEventService extends ServiceSuperclass {
 
   private boolean ticketAreAvailable(SightEventDTO dto, TicketPoolDefinitionDTO tpd, Date fromDate,
       Date toDate) {
-    if (tpd.isCyclic) {
+    if (tpd.isCyclic && fromDate == null && toDate == null) {
       return true;
     }
     var availableTickets =
-        checkAvailability(dto.id, fromDate == null ? tpd.startDate : fromDate, toDate);
+        checkAvailability(dto.id, fromDate == null ? new Date() : fromDate, toDate);
+    // checkAvailability(dto.id, fromDate == null ? tpd.startDate : fromDate, toDate);
 
     return availableTickets.ticketPoolDefinitions.stream()
         .filter(f -> f.availableTicketsNumber != 0).count() != 0l
