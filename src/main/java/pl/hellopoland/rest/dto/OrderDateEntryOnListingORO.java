@@ -9,12 +9,14 @@ public class OrderDateEntryOnListingORO {
   public Long id;
   public SightEventSimpleRO sight;
   public String date;
+  public boolean wholeDay;
   public List<OrderEntryOnListingORO> entries;
 
   public OrderDateEntryOnListingORO(OrderDateEntry ode) {
     this.id = ode.getId();
-    this.date = DtoUtils.df.format(ode.getDate());
     this.sight = new SightEventSimpleRO(ode.getSightEntry().getSightEvent());
+    this.date = DtoUtils.df.format(ode.getDate());
+    this.wholeDay = ode.getSightEntry().isWholeDay();
     this.entries =
         ode.getEntries().stream().map(OrderEntryOnListingORO::new).collect(Collectors.toList());
   }

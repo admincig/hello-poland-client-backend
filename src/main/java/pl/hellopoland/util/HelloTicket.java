@@ -70,11 +70,13 @@ public class HelloTicket {
       booking = JsonbConfig.getInstance().fromJson(resp.toString(), BookingDTO.class);
 
       for (var oe : orderEntries) {
-        oe.getDateEntry().getSightEntry().setSerialNumber(booking.serialNumber);
+        var ose = oe.getDateEntry().getSightEntry();
+        ose.setSerialNumber(booking.serialNumber);
         for (var iter = booking.tickets.iterator(); iter.hasNext();) {
           TicketDTO ticket = iter.next();
           if (oe.matches(ticket)) {
             oe.setExternalId((long) ticket.id);
+            ose.setWholeDay(ticket.wholeDay);
             break;
           }
         }
@@ -333,6 +335,22 @@ public class HelloTicket {
     } catch (Exception e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
       return null;
+    }
+  }
+
+  public void stopSale(String hptToken, Long sightEventHptId, Long ticketPoolDefId, Date date) {
+    try {
+      var dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+      String dateString = dateFormat.format(date);
+      delete("/v1/sight-events/" + sightEventHptId + "/sale?tpdId=" + ticketPoolDefId + "&date="
+          + dateString, hptToken);
+    } catch (Exception e) {
+      logger
+          .log(System.Logger.Level.WARNING,
+              "Failed: cannot find sight event for id=" + sightEventHptId + ", ticketPoolDefId="
+                  + ticketPoolDefId + " and date=" + SimpleDateFormat.getInstance().format(date),
+              e);
+      throw new ConflictingException("Brak wydarzenia w danym dniu");
     }
   }
 

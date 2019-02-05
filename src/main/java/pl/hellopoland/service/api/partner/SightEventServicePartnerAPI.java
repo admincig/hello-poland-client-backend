@@ -1,5 +1,6 @@
 package pl.hellopoland.service.api.partner;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.security.RolesAllowed;
@@ -100,6 +101,11 @@ public class SightEventServicePartnerAPI {
   @RolesAllowed("partner")
   public void deletePdf(Long id) {
     service.deletePdf(id);
+  }
+
+  @RolesAllowed("partner")
+  public void stopSale(Long sightId, Long ticketPoolDefId, Date date) {
+    service.stopSale(sightId, ticketPoolDefId, date);
   }
 
 }
