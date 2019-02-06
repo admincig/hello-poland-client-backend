@@ -74,20 +74,22 @@ public class HellopolandService extends ServiceSuperclass {
 
     // 2. creating users (excluded ushers) of the partner in hpl:
     var usersDTOs = partner.users;
-    for (UserDTO userDTO : usersDTOs) {
-      if (StringUtils.isBlank(userDTO.email)) {
-        throw new ConflictingException("The email cannot be blank.");
-      }
-      if (userDTO.roles == null || !areRolesSupported(userDTO.roles)) {
-        throw new ConflictingException("Roles are blank or some role is unsupported.");
-      }
-      Role[] userRoles = getFilteredRolesFromDTO(userDTO.roles);
-      if (userRoles.length > 0) {
-        String pass = RandomStringUtils.randomAlphanumeric(10);
-        User userBO =
-            userService.create(userDTO.email, pass, userDTO.name, null, null, partnerBO, userRoles);
-        emailPassword.put(userDTO.email, pass);
-        partnerBO.addUser(userBO);
+    if (usersDTOs != null && !usersDTOs.isEmpty()) {
+      for (UserDTO userDTO : usersDTOs) {
+        if (StringUtils.isBlank(userDTO.email)) {
+          throw new ConflictingException("The email cannot be blank.");
+        }
+        if (userDTO.roles == null || !areRolesSupported(userDTO.roles)) {
+          throw new ConflictingException("Roles are blank or some role is unsupported.");
+        }
+        Role[] userRoles = getFilteredRolesFromDTO(userDTO.roles);
+        if (userRoles.length > 0) {
+          String pass = RandomStringUtils.randomAlphanumeric(10);
+          User userBO = userService.create(userDTO.email, pass, userDTO.name, null, null, partnerBO,
+              userRoles);
+          emailPassword.put(userDTO.email, pass);
+          partnerBO.addUser(userBO);
+        }
       }
     }
 
