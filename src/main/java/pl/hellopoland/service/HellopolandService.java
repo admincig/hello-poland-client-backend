@@ -53,9 +53,10 @@ public class HellopolandService extends ServiceSuperclass {
       throw new ConflictingException("The partner commission is out of range: 0 - 100.");
     }
     var usersDTOs = partner.users;
-    if (usersDTOs == null || usersDTOs.isEmpty() || !isAtLeastOneUsher(usersDTOs)) {
-      throw new ConflictingException("Wymagany jest co najmniej jeden uzytkownik z rolą biletera.");
-    }
+    // if (usersDTOs == null || usersDTOs.isEmpty() || !isAtLeastOneUsher(usersDTOs)) {
+    // throw new ConflictingException("Wymagany jest co najmniej jeden uzytkownik z rolą
+    // biletera.");
+    // }
 
     // 1. creating a partner and the user in hpl:
     var partnerBO = new Partner();
@@ -65,7 +66,8 @@ public class HellopolandService extends ServiceSuperclass {
     partnerBO.setHptToken("temporaryToken");
     partnerBO.setEmail(partner.email);
     String password = RandomStringUtils.randomAlphanumeric(10);
-    userService.create(partner.email, password, null, null, null, partnerBO, UserRole.Role.PARTNER);
+    userService.create(partner.email, password, null, null, null, partnerBO, UserRole.Role.PARTNER,
+        UserRole.Role.USHER);
     var emailPassword = new HashMap<String, String>();
     emailPassword.put(partner.email, password);
 
