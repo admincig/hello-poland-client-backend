@@ -45,6 +45,19 @@ public class MarketSightEventRestService {
     return service.getList(config, fromDate, toDate, language);
   }
 
+  @GET
+  @Path("/search")
+  public PagedCollection search(@QueryParam("city") String city,
+      @QueryParam("fromDate") @DateFormat Date fromDate,
+      @QueryParam("toDate") @DateFormat Date toDate,
+      @HeaderParam("Accept-Language") String language) {
+    var config = new SightEventPagedCollectionConfig();
+    config.onlyActive();
+    config.onlyPublished();
+    config.setCity(city);
+    return service.getList(config, fromDate, toDate, language);
+  }
+
   @POST
   @Path("/search")
   public PagedCollection search(SightEventPagedCollectionConfig config,
@@ -56,7 +69,6 @@ public class MarketSightEventRestService {
     config.onlyPublished();
     config.setCity(city);
     return service.getList(config, fromDate, toDate, language);
-    // return service.getList(config, language);
   }
 
   @GET
