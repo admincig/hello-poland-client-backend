@@ -52,7 +52,7 @@ public class HellopolandService extends ServiceSuperclass {
         || partner.commission.compareTo(new BigDecimal("100")) == 1) {
       throw new ConflictingException("The partner commission is out of range: 0 - 100.");
     }
-    var usersDTOs = partner.users;
+    // var usersDTOs = partner.users;
     // if (usersDTOs == null || usersDTOs.isEmpty() || !isAtLeastOneUsher(usersDTOs)) {
     // throw new ConflictingException("Wymagany jest co najmniej jeden uzytkownik z rolą
     // biletera.");
@@ -68,10 +68,12 @@ public class HellopolandService extends ServiceSuperclass {
     String password = RandomStringUtils.randomAlphanumeric(10);
     userService.create(partner.email, password, null, null, null, partnerBO, UserRole.Role.PARTNER,
         UserRole.Role.USHER);
+    partner.password = password;
     var emailPassword = new HashMap<String, String>();
     emailPassword.put(partner.email, password);
 
     // 2. creating users (excluded ushers) of the partner in hpl:
+    var usersDTOs = partner.users;
     for (UserDTO userDTO : usersDTOs) {
       if (StringUtils.isBlank(userDTO.email)) {
         throw new ConflictingException("The email cannot be blank.");
