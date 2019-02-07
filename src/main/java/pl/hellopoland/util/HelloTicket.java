@@ -27,6 +27,7 @@ import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
+import pl.hellopoland.dto.UserAuthDTO;
 import pl.hellopoland.dto.booking.BookingDTO;
 import pl.hellopoland.dto.booking.TicketDTO;
 import pl.hellopoland.dto.booking.TicketOrderDTO;
@@ -351,6 +352,11 @@ public class HelloTicket {
               e);
       throw new ConflictingException("Brak wydarzenia w danym dniu");
     }
+  }
+
+  public void changePartnerPassword(UserAuthDTO userAuthDTO, String hptToken) {
+    // TODO Auto-generated method stub
+
   }
 
 }

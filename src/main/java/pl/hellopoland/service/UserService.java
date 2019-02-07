@@ -6,12 +6,15 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
 import pl.hellopoland.bo.Partner;
+import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserLocation;
 import pl.hellopoland.bo.UserRole;
 import pl.hellopoland.bo.UserRole.Role;
+import pl.hellopoland.dto.UserAuthDTO;
 import pl.hellopoland.exception.UnauthorizedException;
 import pl.hellopoland.security.password.PasswordEncoder;
+import pl.hellopoland.util.HelloTicket;
 
 @LocalBean
 @Stateless
@@ -72,4 +75,12 @@ public class UserService extends ServiceSuperclass {
     return em.createQuery("from User where email=:email", User.class).setParameter("email", email)
         .getResultStream().findFirst();
   }
+
+  public void changePassword(UserAuthDTO userAuthDTO) {
+    getLoggedUser().setPassword(passwordEncoder.encode(userAuthDTO.password));
+    Portal hpt = getPortal("Hello Ticket Cloud");
+    HelloTicket ht = new HelloTicket(hpt.getUrl());
+    ht.changePartnerPassword(userAuthDTO, getLoggedPartner().getHptToken());
+  }
+
 }
