@@ -24,7 +24,7 @@ import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.dto.RoleDTO;
 import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
-import pl.hellopoland.exception.email.EmailSendingException;
+import pl.hellopoland.exception.email.EmailSendingRollbackException;
 import pl.hellopoland.util.HelloTicket;
 
 @LocalBean
@@ -52,11 +52,6 @@ public class HellopolandService extends ServiceSuperclass {
         || partner.commission.compareTo(new BigDecimal("100")) == 1) {
       throw new ConflictingException("The partner commission is out of range: 0 - 100.");
     }
-    // var usersDTOs = partner.users;
-    // if (usersDTOs == null || usersDTOs.isEmpty() || !isAtLeastOneUsher(usersDTOs)) {
-    // throw new ConflictingException("Wymagany jest co najmniej jeden uzytkownik z rolą
-    // biletera.");
-    // }
 
     // 1. creating a partner and the user in hpl:
     var partnerBO = new Partner();
@@ -110,7 +105,7 @@ public class HellopolandService extends ServiceSuperclass {
             "Twój login to " + key + ", hasło to " + value);
       } catch (MessagingException | UnsupportedEncodingException e) {
         logger.log(System.Logger.Level.ERROR, e.getLocalizedMessage());
-        throw new EmailSendingException();
+        throw new EmailSendingRollbackException();
       }
     });
 
