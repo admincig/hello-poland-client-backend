@@ -24,7 +24,7 @@ import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.dto.RoleDTO;
 import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
-import pl.hellopoland.exception.email.EmailSendingException;
+import pl.hellopoland.exception.email.EmailSendingRollbackException;
 import pl.hellopoland.util.HelloTicket;
 
 @LocalBean
@@ -52,10 +52,6 @@ public class HellopolandService extends ServiceSuperclass {
         || partner.commission.compareTo(new BigDecimal("100")) == 1) {
       throw new ConflictingException("The partner commission is out of range: 0 - 100.");
     }
-    var usersDTOs = partner.users;
-    if (usersDTOs == null || usersDTOs.isEmpty() || !isAtLeastOneUsher(usersDTOs)) {
-      throw new ConflictingException("Wymagany jest co najmniej jeden uzytkownik z rolą biletera.");
-    }
 
     // 1. creating a partner and the user in hpl:
     var partnerBO = new Partner();
@@ -65,25 +61,30 @@ public class HellopolandService extends ServiceSuperclass {
     partnerBO.setHptToken("temporaryToken");
     partnerBO.setEmail(partner.email);
     String password = RandomStringUtils.randomAlphanumeric(10);
-    userService.create(partner.email, password, null, null, null, partnerBO, UserRole.Role.PARTNER);
+    userService.create(partner.email, password, null, null, null, partnerBO, UserRole.Role.PARTNER,
+        UserRole.Role.USHER);
+    partner.password = password;
     var emailPassword = new HashMap<String, String>();
     emailPassword.put(partner.email, password);
 
     // 2. creating users (excluded ushers) of the partner in hpl:
-    for (UserDTO userDTO : usersDTOs) {
-      if (StringUtils.isBlank(userDTO.email)) {
-        throw new ConflictingException("The email cannot be blank.");
-      }
-      if (userDTO.roles == null || !areRolesSupported(userDTO.roles)) {
-        throw new ConflictingException("Roles are blank or some role is unsupported.");
-      }
-      Role[] userRoles = getFilteredRolesFromDTO(userDTO.roles);
-      if (userRoles.length > 0) {
-        String pass = RandomStringUtils.randomAlphanumeric(10);
-        User userBO =
-            userService.create(userDTO.email, pass, userDTO.name, null, null, partnerBO, userRoles);
-        emailPassword.put(userDTO.email, pass);
-        partnerBO.addUser(userBO);
+    var usersDTOs = partner.users;
+    if (usersDTOs != null && !usersDTOs.isEmpty()) {
+      for (UserDTO userDTO : usersDTOs) {
+        if (StringUtils.isBlank(userDTO.email)) {
+          throw new ConflictingException("The email cannot be blank.");
+        }
+        if (userDTO.roles == null || !areRolesSupported(userDTO.roles)) {
+          throw new ConflictingException("Roles are blank or some role is unsupported.");
+        }
+        Role[] userRoles = getFilteredRolesFromDTO(userDTO.roles);
+        if (userRoles.length > 0) {
+          String pass = RandomStringUtils.randomAlphanumeric(10);
+          User userBO = userService.create(userDTO.email, pass, userDTO.name, null, null, partnerBO,
+              userRoles);
+          emailPassword.put(userDTO.email, pass);
+          partnerBO.addUser(userBO);
+        }
       }
     }
 
@@ -104,7 +105,7 @@ public class HellopolandService extends ServiceSuperclass {
             "Twój login to " + key + ", hasło to " + value);
       } catch (MessagingException | UnsupportedEncodingException e) {
         logger.log(System.Logger.Level.ERROR, e.getLocalizedMessage());
-        throw new EmailSendingException();
+        throw new EmailSendingRollbackException();
       }
     });
 
