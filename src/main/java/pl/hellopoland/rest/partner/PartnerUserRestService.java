@@ -7,6 +7,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.rest.dto.UserORO;
 import pl.hellopoland.service.api.partner.UserServicePartnerAPI;
 
@@ -23,6 +24,12 @@ public class PartnerUserRestService {
   @Path("/me")
   public UserORO me() {
     return service.me();
+  }
+
+  @GET
+  @Path("/ushers")
+  public PagedCollection getUshers() {
+    return service.getUshers();
   }
 
 }
