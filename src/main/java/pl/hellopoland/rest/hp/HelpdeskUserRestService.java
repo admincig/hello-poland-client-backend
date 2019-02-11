@@ -8,7 +8,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import pl.hellopoland.rest.dto.UserORO;
-import pl.hellopoland.service.api.market.UserServiceMarketAPI;
+import pl.hellopoland.service.api.hp.UserServiceHelpdeskAPI;
 
 @Path("/helpdesk/users")
 @RequestScoped
@@ -17,7 +17,7 @@ import pl.hellopoland.service.api.market.UserServiceMarketAPI;
 public class HelpdeskUserRestService {
 
   @Inject
-  UserServiceMarketAPI service;
+  UserServiceHelpdeskAPI service;
 
   @GET
   @Path("/me")
