@@ -17,7 +17,7 @@ import pl.hellopoland.security.CurrentUser;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @DeclareRoles({"root", "admin"})
-public class PartnerAuthenticationRestService {
+public class HelpdeskAuthenticationRestService {
 
   @Inject
   private SecurityContext securityContext;
