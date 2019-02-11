@@ -10,7 +10,7 @@ import javax.ws.rs.core.MediaType;
 import pl.hellopoland.rest.dto.UserORO;
 import pl.hellopoland.service.api.market.UserServiceMarketAPI;
 
-@Path("/market/users")
+@Path("/helpdesk/users")
 @RequestScoped
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
