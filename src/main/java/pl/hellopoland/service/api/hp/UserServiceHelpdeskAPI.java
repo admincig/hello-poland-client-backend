@@ -13,7 +13,7 @@ public class UserServiceHelpdeskAPI {
   @Inject
   UserService service;
 
-  @RolesAllowed("user")
+  @RolesAllowed("admin")
   public UserORO me() {
     User bo = service.me();
     var dto = new UserORO(bo);
