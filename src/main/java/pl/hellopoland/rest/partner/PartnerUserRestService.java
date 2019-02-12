@@ -31,6 +31,9 @@ public class PartnerUserRestService {
   @PATCH
   @Path("/me/password")
   public Response changePassword(UserAuthDTO user) {
+    if (user.oldPassword.equals(user.password)) {
+      return Response.notModified("The new password is equal to the old password.").build();
+    }
     service.changePassword(user);
     return Response.ok().build();
   }

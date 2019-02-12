@@ -203,27 +203,6 @@ public class HelloTicket {
     return resp;
   }
 
-  private JsonStructure patch(String path, String json, String authToken) throws IOException {
-    URL url = new URL(this.url + path);
-    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-    logger.log(System.Logger.Level.INFO,
-        "Sending PATCH request to url: " + url + " with body: " + json);
-    conn.setRequestMethod("PATCH");
-    conn.setRequestProperty("Authorization", "Bearer " + authToken);
-    if (json != null) {
-      conn.setDoOutput(true);
-      var os = conn.getOutputStream();
-      PrintWriter printWriter = new PrintWriter(os);
-      printWriter.append(json);
-      printWriter.close();
-    }
-    var is = conn.getInputStream();
-    var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
-    logger.log(System.Logger.Level.INFO, "Server responded with body: " + resp);
-    return resp;
-  }
-
   private int delete(String path, String authToken) throws IOException {
     URL url = new URL(this.url + path);
     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -378,7 +357,7 @@ public class HelloTicket {
   public void changePartnerPassword(UserAuthDTO userAuthDTO, String hptToken) {
     try {
       String json = JsonbConfig.getInstance().toJson(userAuthDTO);
-      patch("/v1/users/password", json, hptToken);
+      put("/v1/users/password", json, hptToken);
     } catch (Exception e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
     }

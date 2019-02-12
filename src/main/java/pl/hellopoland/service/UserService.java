@@ -13,6 +13,7 @@ import pl.hellopoland.bo.UserRole;
 import pl.hellopoland.bo.UserRole.Role;
 import pl.hellopoland.dto.UserAuthDTO;
 import pl.hellopoland.exception.UnauthorizedException;
+import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.security.password.PasswordEncoder;
 import pl.hellopoland.util.HelloTicket;
 
@@ -77,10 +78,14 @@ public class UserService extends ServiceSuperclass {
   }
 
   public void changePassword(UserAuthDTO userAuthDTO) {
-    getLoggedUser().setPassword(passwordEncoder.encode(userAuthDTO.password));
-    Portal hpt = getPortal("Hello Ticket Cloud");
-    HelloTicket ht = new HelloTicket(hpt.getUrl());
-    ht.changePartnerPassword(userAuthDTO, getLoggedPartner().getHptToken());
+    if (passwordEncoder.matches(userAuthDTO.oldPassword, getLoggedUser().getPassword())) {
+      getLoggedUser().setPassword(passwordEncoder.encode(userAuthDTO.password));
+      Portal hpt = getPortal("Hello Ticket Cloud");
+      HelloTicket ht = new HelloTicket(hpt.getUrl());
+      ht.changePartnerPassword(userAuthDTO, getLoggedPartner().getHptToken());
+    } else {
+      throw new ConflictingException("Incorrect old password.");
+    }
   }
 
 }
