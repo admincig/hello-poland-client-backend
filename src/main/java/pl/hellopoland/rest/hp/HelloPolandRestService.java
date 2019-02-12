@@ -16,7 +16,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import pl.hellopoland.annotation.DateFormat;
 import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.service.api.hp.HellopolandServiceAPI;
-import pl.hellopoland.service.api.partner.AnalyticsServicePartnerAPI;
 
 @RequestScoped
 @Path("/hp")
@@ -25,9 +24,6 @@ import pl.hellopoland.service.api.partner.AnalyticsServicePartnerAPI;
 public class HelloPolandRestService {
   @Inject
   private HellopolandServiceAPI service;
-
-  @Inject
-  AnalyticsServicePartnerAPI analyticsService;
 
   @POST
   @Path("/partners")
@@ -39,7 +35,7 @@ public class HelloPolandRestService {
   @Path("/orders")
   public Response downloadOrdersCsv(@QueryParam("fromDate") @DateFormat Date fromDate,
       @QueryParam("toDate") @DateFormat Date toDate) {
-    File report = analyticsService.getOrdersCsvFile(fromDate, toDate);
+    File report = service.getOrdersCsvFile(fromDate, toDate);
     ResponseBuilder response = Response.ok(report);
     response.header("Content-Disposition", "attachment;filename=" + report.getName());
     return response.build();
