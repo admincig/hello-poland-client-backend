@@ -7,22 +7,22 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import pl.hellopoland.rest.dto.UserORO;
+import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.api.partner.UserServicePartnerAPI;
 
-@Path("/partner/users")
+@Path("/partner")
 @RequestScoped
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class PartnerUserRestService {
+public class PartnerRestService {
 
   @Inject
   private UserServicePartnerAPI service;
 
   @GET
-  @Path("/me")
-  public UserORO me() {
-    return service.me();
+  @Path("/ushers")
+  public PagedCollection getUshers() {
+    return service.getUshers();
   }
 
 }
