@@ -120,10 +120,11 @@ public class DbFiller extends ServiceSuperclass {
   }
 
   private void createUsers() {
+    userHelloPoland =
+        createUser("Hello Poland - admin", "admin@hellopoland.pl", "hellopoland", null, Role.ADMIN);
     userHelloPoland = createPartner("Hello Poland",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.",
-        Integer.valueOf(properties.getProperty("przelewy24.posId")), BigDecimal.TEN, Role.PARTNER,
-        Role.ADMIN);
+        Integer.valueOf(properties.getProperty("przelewy24.posId")), BigDecimal.TEN, Role.PARTNER);
     userZoo = createPartner("Zoo",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiJDOTU1NTI0MDk2REU0MjlEQjBGODM1NTA1RUI5MzAxNzkzQzE4NEJBQzM2NTFBNzI2MDFCRDNGMUFEQTkyQzAzIn0.",
         Integer.valueOf(properties.getProperty("przelewy24.posId")), new BigDecimal("3.5"),
@@ -140,21 +141,26 @@ public class DbFiller extends ServiceSuperclass {
 
   private User createPartner(String partnerName, String token, Integer p24Id, BigDecimal commission,
       Role... roles) {
-    Partner helloPolandPartner = new Partner();
-    helloPolandPartner.setName(partnerName + " Partner");
-    helloPolandPartner.setHptToken(token);
-    helloPolandPartner.setP24Id(p24Id);
-    helloPolandPartner.setCommission(commission);
+    Partner partner = new Partner();
+    partner.setName(partnerName + " Partner");
+    partner.setHptToken(token);
+    partner.setP24Id(p24Id);
+    partner.setCommission(commission);
     String email = partnerName.toLowerCase().replaceAll(" ", "") + "@"
         + partnerName.toLowerCase().replaceAll(" ", "") + ".pl";
-    helloPolandPartner.setEmail(email);
+    partner.setEmail(email);
 
+    return createUser(null, email, partnerName.toLowerCase().replaceAll(" ", ""), partner, roles);
+  }
+
+  private User createUser(String name, String email, String password, Partner partner,
+      Role... roles) {
     User user = new User(roles);
+    user.setName(name);
     user.setEmail(email);
-    user.setPassword(passwordEncoder.encode(partnerName.toLowerCase().replaceAll(" ", "")));
-    user.setPartner(helloPolandPartner);
+    user.setPassword(passwordEncoder.encode(password));
+    user.setPartner(partner);
     em.persist(user);
-
     return user;
   }
 
