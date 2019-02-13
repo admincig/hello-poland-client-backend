@@ -5,6 +5,9 @@ import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.nio.file.Paths;
 import java.text.Collator;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -259,7 +262,7 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public void fetchTicketPoolDefinitions(Collection<SightEvent> bos,
-      List<SightEventDTO> sightEventDtos, boolean showDeletedTPD, boolean checkDate) {
+      List<SightEventDTO> sightEventDtos, boolean showDeletedTPD) {
 
     if (hasAnyHptCloudEvent(bos)) {
       var pairedByIds = pairBosWithDtos(bos, sightEventDtos);
@@ -274,10 +277,6 @@ public class SightEventService extends ServiceSuperclass {
         if (!showDeletedTPD) {
           poolDefinitions =
               poolDefinitions.stream().filter(tpd -> !tpd.deleted).collect(Collectors.toList());
-        }
-        if (checkDate) {
-          poolDefinitions = poolDefinitions.stream().filter(tpd -> isInFuture(tpd, null))
-              .collect(Collectors.toList());
         }
         List<TicketDefinitionDTO> ticketDefinitions = new ArrayList<>();
         poolDefinitions.forEach(p -> ticketDefinitions.addAll(p.ticketDefinitions));
@@ -424,8 +423,19 @@ public class SightEventService extends ServiceSuperclass {
   public boolean isAvailable(SightEventDTO dto, Date fromDate, Date toDate) {
     List<TicketPoolDefinitionDTO> tpds = dto.ticketPoolDefinitions;
     if (tpds != null && !tpds.isEmpty()) {
+
+
+
+      var a =
+          tpds.stream().filter(tpd -> !tpd.deleted && isInDateRange(tpd, fromDate, toDate)).count();
+
+      var b = tpds.stream().filter(tpd -> !tpd.deleted && isInDateRange(tpd, fromDate, toDate)
+          && ticketAreAvailable(dto, tpd, fromDate, toDate)).count();
+
+
+
       return !tpds.stream()
-          .filter(tpd -> !tpd.deleted && isInFuture(tpd, fromDate)
+          .filter(tpd -> !tpd.deleted && isInDateRange(tpd, fromDate, toDate)
               && ticketAreAvailable(dto, tpd, fromDate, toDate))
           .collect(Collectors.toList()).isEmpty();
     }
@@ -435,11 +445,15 @@ public class SightEventService extends ServiceSuperclass {
   private boolean ticketAreAvailable(SightEventDTO dto, TicketPoolDefinitionDTO tpd, Date fromDate,
       Date toDate) {
     AvailableTicketNumberAssociationDTO availableTickets = null;
-    if (fromDate == null || toDate == null) {
+    if (toDate == null) {
       if (tpd.isCyclic) {
+        // if (tpd.frequencyData.endDate == null) {
         return true;
+        // }
+        // availableTickets = checkAvailability(dto.id, tpd.startDate, tpd.frequencyData.endDate);
+      } else {
+        availableTickets = checkAvailability(dto.id, tpd.startDate, null);
       }
-      availableTickets = checkAvailability(dto.id, tpd.startDate, null);
     } else {
       availableTickets = checkAvailability(dto.id, fromDate, toDate);
     }
@@ -449,15 +463,22 @@ public class SightEventService extends ServiceSuperclass {
             .count() != 0l;
   }
 
-  private boolean isInFuture(TicketPoolDefinitionDTO tpd, Date fromDate) {
-    fromDate = fromDate == null ? new Date() : fromDate;
+  private boolean isInDateRange(TicketPoolDefinitionDTO tpd, Date fromDate, Date toDate) {
+    if (fromDate != null) {
+      LocalDateTime fromDateLD =
+          fromDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().atTime(LocalTime.now());
+      fromDate = Date.from(fromDateLD.atZone(ZoneId.systemDefault()).toInstant());
+    } else {
+      fromDate = new Date();
+    }
     var tpdStartDate = tpd.startDate;
     if (tpd.isCyclic) {
-      return fromDate.before(tpdStartDate)
+      return (fromDate.before(tpdStartDate)
           || ((tpd.frequencyData.endDate != null ? fromDate.before(tpd.frequencyData.endDate)
-              : true));
+              : true)))
+          && (toDate != null ? toDate.after(tpdStartDate) : true);
     }
-    return fromDate.before(tpdStartDate);
+    return fromDate.before(tpdStartDate) && (toDate != null ? toDate.after(tpdStartDate) : true);
   }
 
   public void stopSale(Long sightId, Long ticketPoolDefId, Date date) {
