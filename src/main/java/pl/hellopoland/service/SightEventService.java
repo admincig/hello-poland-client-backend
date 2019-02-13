@@ -276,8 +276,8 @@ public class SightEventService extends ServiceSuperclass {
               poolDefinitions.stream().filter(tpd -> !tpd.deleted).collect(Collectors.toList());
         }
         if (checkDate) {
-          poolDefinitions =
-              poolDefinitions.stream().filter(tpd -> isInFuture(tpd)).collect(Collectors.toList());
+          poolDefinitions = poolDefinitions.stream().filter(tpd -> isInFuture(tpd, null))
+              .collect(Collectors.toList());
         }
         List<TicketDefinitionDTO> ticketDefinitions = new ArrayList<>();
         poolDefinitions.forEach(p -> ticketDefinitions.addAll(p.ticketDefinitions));
@@ -424,8 +424,9 @@ public class SightEventService extends ServiceSuperclass {
   public boolean isAvailable(SightEventDTO dto, Date fromDate, Date toDate) {
     List<TicketPoolDefinitionDTO> tpds = dto.ticketPoolDefinitions;
     if (tpds != null && !tpds.isEmpty()) {
-      return !tpds.stream().filter(
-          tpd -> !tpd.deleted && isInFuture(tpd) && ticketAreAvailable(dto, tpd, fromDate, toDate))
+      return !tpds.stream()
+          .filter(tpd -> !tpd.deleted && isInFuture(tpd, fromDate)
+              && ticketAreAvailable(dto, tpd, fromDate, toDate))
           .collect(Collectors.toList()).isEmpty();
     }
     return false;
@@ -433,27 +434,30 @@ public class SightEventService extends ServiceSuperclass {
 
   private boolean ticketAreAvailable(SightEventDTO dto, TicketPoolDefinitionDTO tpd, Date fromDate,
       Date toDate) {
-    if (tpd.isCyclic && fromDate == null && toDate == null) {
-      return true;
+    AvailableTicketNumberAssociationDTO availableTickets = null;
+    if (fromDate == null || toDate == null) {
+      if (tpd.isCyclic) {
+        return true;
+      }
+      availableTickets = checkAvailability(dto.id, tpd.startDate, null);
+    } else {
+      availableTickets = checkAvailability(dto.id, fromDate, toDate);
     }
-    var availableTickets =
-        checkAvailability(dto.id, fromDate == null ? new Date() : fromDate, toDate);
-    // checkAvailability(dto.id, fromDate == null ? tpd.startDate : fromDate, toDate);
-
     return availableTickets.ticketPoolDefinitions.stream()
         .filter(f -> f.availableTicketsNumber != 0).count() != 0l
         || availableTickets.ticketPools.stream().filter(f -> f.availableTicketsNumber != 0)
             .count() != 0l;
   }
 
-  private boolean isInFuture(TicketPoolDefinitionDTO tpd) {
-    var now = new Date();
+  private boolean isInFuture(TicketPoolDefinitionDTO tpd, Date fromDate) {
+    fromDate = fromDate == null ? new Date() : fromDate;
     var tpdStartDate = tpd.startDate;
     if (tpd.isCyclic) {
-      return now.before(tpdStartDate)
-          || ((tpd.frequencyData.endDate != null ? now.before(tpd.frequencyData.endDate) : true));
+      return fromDate.before(tpdStartDate)
+          || ((tpd.frequencyData.endDate != null ? fromDate.before(tpd.frequencyData.endDate)
+              : true));
     }
-    return now.before(tpdStartDate);
+    return fromDate.before(tpdStartDate);
   }
 
   public void stopSale(Long sightId, Long ticketPoolDefId, Date date) {
