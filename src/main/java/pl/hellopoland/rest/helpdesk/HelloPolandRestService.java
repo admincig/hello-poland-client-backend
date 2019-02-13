@@ -1,4 +1,4 @@
-package pl.hellopoland.rest.hp;
+package pl.hellopoland.rest.helpdesk;
 
 import java.io.File;
 import java.util.Date;
@@ -18,7 +18,7 @@ import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.service.api.hp.HellopolandServiceAPI;
 
 @RequestScoped
-@Path("/hp")
+@Path("/helpdesk")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class HelloPolandRestService {

@@ -1,4 +1,4 @@
-package pl.hellopoland.rest.hp;
+package pl.hellopoland.rest.helpdesk;
 
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 import static pl.hellopoland.security.UserAuthDTO.ofCurrentUser;
