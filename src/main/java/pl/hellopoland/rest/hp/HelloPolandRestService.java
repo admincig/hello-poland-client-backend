@@ -33,6 +33,7 @@ public class HelloPolandRestService {
 
   @GET
   @Path("/orders")
+  @Produces(MediaType.APPLICATION_OCTET_STREAM)
   public Response downloadOrdersCsv(@QueryParam("fromDate") @DateFormat Date fromDate,
       @QueryParam("toDate") @DateFormat Date toDate) {
     File report = service.getOrdersCsvFile(fromDate, toDate);
