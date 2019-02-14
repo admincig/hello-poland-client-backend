@@ -313,6 +313,8 @@ public class HelloTicket {
 
   public AvailableTicketNumberAssociationDTO checkAvailabilityOfTicketsForSightEvent(
       SightEvent sightEvent, Date date) {
+    logger.log(System.Logger.Level.INFO,
+        "[sightEventId=" + sightEvent.getId() + " and date=" + date + "]");
     try {
       var dateFormat = new SimpleDateFormat("yyyy-MM-dd");
       String dateString = dateFormat.format(date);
@@ -321,7 +323,8 @@ public class HelloTicket {
               + "&date=" + dateString, AUTH_TOKEN).toString(),
           AvailableTicketNumberAssociationDTO.class);
     } catch (JsonbException | IOException e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      logger.log(System.Logger.Level.WARNING,
+          "Failed [sightEventId=" + sightEvent.getId() + " and date=" + date + "]", e);
       return null;
     }
   }

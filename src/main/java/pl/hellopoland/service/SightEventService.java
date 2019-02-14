@@ -431,9 +431,14 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   private boolean ticketAreAvailable(SightEventDTO dto, TicketPoolDefinitionDTO tpd) {
+    logger.log(Level.INFO,
+        "SightEventDTO [id=" + dto.id + "], TicketPoolDefinitionDTO [id=" + tpd.id + "]");
     if (tpd.isCyclic) {
+      logger.log(Level.INFO, "TicketPoolDefinitionDTO [id=" + tpd.id + "] is cyclic");
       return true;
     }
+    logger.log(Level.INFO, "TicketPoolDefinitionDTO [id=" + tpd.id + "] is non cyclic [startDate="
+        + tpd.startDate + "]");
     var availableTickets = checkAvailability(dto.id, tpd.startDate);
 
     return availableTickets.ticketPoolDefinitions.stream()
