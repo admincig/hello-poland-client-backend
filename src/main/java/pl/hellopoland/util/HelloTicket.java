@@ -27,6 +27,7 @@ import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
+import pl.hellopoland.dto.UserAuthDTO;
 import pl.hellopoland.dto.booking.BookingDTO;
 import pl.hellopoland.dto.booking.TicketDTO;
 import pl.hellopoland.dto.booking.TicketOrderDTO;
@@ -350,6 +351,15 @@ public class HelloTicket {
                   + ticketPoolDefId + " and date=" + SimpleDateFormat.getInstance().format(date),
               e);
       throw new ConflictingException("Brak wydarzenia w danym dniu");
+    }
+  }
+
+  public void changePartnerPassword(UserAuthDTO userAuthDTO, String hptToken) {
+    try {
+      String json = JsonbConfig.getInstance().toJson(userAuthDTO);
+      put("/v1/users/password", json, hptToken);
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
     }
   }
 
