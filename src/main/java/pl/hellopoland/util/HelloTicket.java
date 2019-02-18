@@ -313,7 +313,9 @@ public class HelloTicket {
 
   public AvailableTicketNumberAssociationDTO checkAvailabilityOfTicketsForSightEvent(
       SightEvent sightEvent, Date fromDate, Date toDate) {
-    fromDate = fromDate == null ? new Date() : fromDate;
+    if (fromDate == null) {
+      fromDate = new Date();
+    }
     try {
       var dateFormat = new SimpleDateFormat("yyyy-MM-dd");
       return JsonbConfig.getInstance()

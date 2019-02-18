@@ -5,8 +5,6 @@ import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.nio.file.Paths;
 import java.text.Collator;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -423,17 +421,6 @@ public class SightEventService extends ServiceSuperclass {
   public boolean isAvailable(SightEventDTO dto, Date fromDate, Date toDate) {
     List<TicketPoolDefinitionDTO> tpds = dto.ticketPoolDefinitions;
     if (tpds != null && !tpds.isEmpty()) {
-
-
-
-      var a =
-          tpds.stream().filter(tpd -> !tpd.deleted && isInDateRange(tpd, fromDate, toDate)).count();
-
-      var b = tpds.stream().filter(tpd -> !tpd.deleted && isInDateRange(tpd, fromDate, toDate)
-          && ticketAreAvailable(dto, tpd, fromDate, toDate)).count();
-
-
-
       return !tpds.stream()
           .filter(tpd -> !tpd.deleted && isInDateRange(tpd, fromDate, toDate)
               && ticketAreAvailable(dto, tpd, fromDate, toDate))
@@ -464,11 +451,7 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   private boolean isInDateRange(TicketPoolDefinitionDTO tpd, Date fromDate, Date toDate) {
-    if (fromDate != null) {
-      LocalDateTime fromDateLD =
-          fromDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().atTime(LocalTime.now());
-      fromDate = Date.from(fromDateLD.atZone(ZoneId.systemDefault()).toInstant());
-    } else {
+    if (fromDate == null) {
       fromDate = new Date();
     }
     var tpdStartDate = tpd.startDate;
@@ -478,7 +461,10 @@ public class SightEventService extends ServiceSuperclass {
               : true)))
           && (toDate != null ? toDate.after(tpdStartDate) : true);
     }
-    return fromDate.before(tpdStartDate) && (toDate != null ? toDate.after(tpdStartDate) : true);
+
+    return ((tpd.wholeDay && fromDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+        .isEqual(tpdStartDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()))
+        || fromDate.before(tpdStartDate)) && (toDate != null ? toDate.after(tpdStartDate) : true);
   }
 
   public void stopSale(Long sightId, Long ticketPoolDefId, Date date) {

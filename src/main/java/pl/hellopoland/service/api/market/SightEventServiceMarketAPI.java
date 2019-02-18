@@ -1,5 +1,7 @@
 package pl.hellopoland.service.api.market;
 
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -41,9 +43,11 @@ public class SightEventServiceMarketAPI {
     }
     List<SightEventDTO> dtos =
         bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
+
     service.fetchTicketPoolDefinitions(bos.items, dtos, false);
-    List<SightEventDTO> list =
-        dtos.stream().filter(dto -> service.isAvailable(dto, fromDate, toDate)).map(dto -> {
+
+    List<SightEventDTO> list = dtos.stream().filter(dto -> service.isAvailable(dto,
+        getFromDateWithCurrentTime(fromDate), getToDateForEndDay(toDate))).map(dto -> {
           dto.ticketPoolDefinitions = null;
           return dto;
         }).collect(Collectors.toList());
@@ -76,8 +80,25 @@ public class SightEventServiceMarketAPI {
   @PermitAll
   public AvailableTicketNumberAssociationORO checkAvailability(Long sightEventId, Date fromDate,
       Date toDate) {
-    return new AvailableTicketNumberAssociationORO(
-        service.checkAvailability(sightEventId, fromDate, toDate));
+    return new AvailableTicketNumberAssociationORO(service.checkAvailability(sightEventId,
+        getFromDateWithCurrentTime(fromDate), getToDateForEndDay(toDate)));
+  }
+
+  private Date getFromDateWithCurrentTime(Date fromDate) {
+    Date fromDateCurrentTime = fromDate != null
+        ? Date.from(fromDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+            .atTime(LocalTime.now()).atZone(ZoneId.systemDefault()).toInstant())
+        : new Date();
+    return fromDateCurrentTime;
+  }
+
+  private Date getToDateForEndDay(Date toDate) {
+    Date toDateEndDay =
+        toDate != null
+            ? Date.from(toDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+                .atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant())
+            : null;
+    return toDateEndDay;
   }
 
 }
