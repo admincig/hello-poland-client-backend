@@ -1,5 +1,6 @@
 package pl.hellopoland.service;
 
+import java.util.List;
 import java.util.Optional;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -12,6 +13,7 @@ import pl.hellopoland.bo.UserLocation;
 import pl.hellopoland.bo.UserRole;
 import pl.hellopoland.bo.UserRole.Role;
 import pl.hellopoland.dto.UserAuthDTO;
+import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.exception.UnauthorizedException;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.security.password.PasswordEncoder;
@@ -22,6 +24,8 @@ import pl.hellopoland.util.HelloTicket;
 public class UserService extends ServiceSuperclass {
   @Inject
   private PasswordEncoder passwordEncoder;
+  @Inject
+  private PartnerService partnerService;
 
   public User me() {
     return Optional.ofNullable(getLoggedUser()).orElseThrow(UnauthorizedException::new);
@@ -86,6 +90,13 @@ public class UserService extends ServiceSuperclass {
     } else {
       throw new ConflictingException("Incorrect old password.");
     }
+  }
+
+  public List<UserDTO> getUshers() {
+    Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
+    Portal hpt = getPortal("Hello Ticket Cloud");
+    HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
+    return helloTicket.getUshersForPartner(partner.getHptToken());
   }
 
 }
