@@ -102,6 +102,10 @@ public class User extends ModelSuperclass {
     this.roles.add(ur);
   }
 
+  public boolean hasRole(UserRole.Role role) {
+    return roles.stream().anyMatch(ur -> ur.getRole().equals(role));
+  }
+
   public Partner getPartner() {
     return partner;
   }
@@ -109,4 +113,5 @@ public class User extends ModelSuperclass {
   public void setPartner(Partner partner) {
     this.partner = partner;
   }
+
 }

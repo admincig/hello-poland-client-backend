@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import pl.hellopoland.service.AnalyticsService;
 
 @Stateless
-public class AnalitycsServicePartnerAPI {
+public class AnalyticsServicePartnerAPI {
   @Inject
   AnalyticsService service;
 

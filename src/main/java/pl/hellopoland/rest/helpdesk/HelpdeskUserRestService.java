@@ -1,4 +1,4 @@
-package pl.hellopoland.rest.hp;
+package pl.hellopoland.rest.helpdesk;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;

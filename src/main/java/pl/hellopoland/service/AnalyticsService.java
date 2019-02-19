@@ -16,6 +16,7 @@ import pl.hellopoland.bo.Order;
 import pl.hellopoland.bo.OrderDateEntry;
 import pl.hellopoland.bo.OrderDetails;
 import pl.hellopoland.bo.OrderEntry;
+import pl.hellopoland.bo.UserRole;
 
 @LocalBean
 @Stateless
@@ -38,7 +39,8 @@ public class AnalyticsService extends ServiceSuperclass {
         "NAZWA UŻUTKOWNIKA", "TELEON", "ADRES EMAIL", "NAZWA OFERTY", "DATA OFERTY",
         "ILOŚĆ I NAZWA BILETÓW");
 
-    var orders = orderService.getOrdersInDateRange(fromDate, toDate, getLoggedPartner());
+    var orders = orderService.getOrdersInDateRange(fromDate, toDate,
+        getLoggedUser().hasRole(UserRole.Role.ADMIN) ? null : getLoggedPartner());
     for (OrderEntry oe : orders) {
       OrderDateEntry dateEntry = oe.getDateEntry();
       Order order = dateEntry.getSightEntry().getOrder();
