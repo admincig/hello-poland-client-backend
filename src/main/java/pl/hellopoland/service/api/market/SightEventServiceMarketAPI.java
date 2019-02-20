@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.SightEventDTO;
+import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.dto.AvailableTicketNumberAssociationORO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.SightEventService;
@@ -35,6 +36,9 @@ public class SightEventServiceMarketAPI {
   @PermitAll
   public PagedCollection getList(SightEventPagedCollectionConfig config, Date fromDate, Date toDate,
       String language) {
+    if (toDate.before(fromDate)) {
+      throw new ConflictingException("toDate[" + toDate + "] is before fromDate[" + fromDate + "]");
+    }
     config.setOrderColumn("name");
     config.setOrderDirection("asc");
     PagedEntityCollection<SightEvent> bos = service.getList(config);

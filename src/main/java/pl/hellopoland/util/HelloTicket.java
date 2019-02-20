@@ -326,7 +326,7 @@ public class HelloTicket {
               AvailableTicketNumberAssociationDTO.class);
     } catch (JsonbException | IOException e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
-      return null;
+      throw new ConflictingException(e.getLocalizedMessage());
     }
   }
 
