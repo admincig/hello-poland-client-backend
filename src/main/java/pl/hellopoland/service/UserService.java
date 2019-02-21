@@ -81,7 +81,7 @@ public class UserService extends ServiceSuperclass {
         .getResultStream().findFirst();
   }
 
-  public void changePassword(UserAuthDTO userAuthDTO) {
+  public void changePasswordForLoggedPartner(UserAuthDTO userAuthDTO) {
     if (passwordEncoder.matches(userAuthDTO.oldPassword, getLoggedUser().getPassword())) {
       getLoggedUser().setPassword(passwordEncoder.encode(userAuthDTO.password));
       Portal hpt = getPortal("Hello Ticket Cloud");
@@ -90,6 +90,12 @@ public class UserService extends ServiceSuperclass {
     } else {
       throw new ConflictingException("Incorrect old password.");
     }
+  }
+
+  public void changePasswordForUsher(long usherId, UserAuthDTO userAuthDTO) {
+    Portal hpt = getPortal("Hello Ticket Cloud");
+    HelloTicket ht = new HelloTicket(hpt.getUrl());
+    ht.changeUsherPassword(usherId, userAuthDTO, getLoggedPartner().getHptToken());
   }
 
   public List<UserDTO> getUshers() {

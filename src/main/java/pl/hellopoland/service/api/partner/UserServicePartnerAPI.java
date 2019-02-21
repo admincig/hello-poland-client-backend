@@ -23,8 +23,13 @@ public class UserServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
-  public void changePassword(UserAuthDTO user) {
-    service.changePassword(user);
+  public void changePasswordForLoggedPartner(UserAuthDTO userDTO) {
+    service.changePasswordForLoggedPartner(userDTO);
+  }
+
+  @RolesAllowed("partner")
+  public void changePasswordForUsher(long usherId, UserAuthDTO usherDTO) {
+    service.changePasswordForUsher(usherId, usherDTO);
   }
 
   @RolesAllowed("partner")
