@@ -9,6 +9,8 @@ public class OrderDetails {
   private String lastName;
   private String email;
   private String phone;
+  private String street;
+  private String zipCode;
   private String city;
   private String country;
 
@@ -42,6 +44,22 @@ public class OrderDetails {
 
   public void setPhone(String phone) {
     this.phone = phone;
+  }
+
+  public String getStreet() {
+    return street;
+  }
+
+  public void setStreet(String street) {
+    this.street = street;
+  }
+
+  public String getZipCode() {
+    return zipCode;
+  }
+
+  public void setZipCode(String zipCode) {
+    this.zipCode = zipCode;
   }
 
   public String getCity() {
