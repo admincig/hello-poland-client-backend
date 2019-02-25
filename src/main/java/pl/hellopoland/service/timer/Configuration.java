@@ -25,4 +25,9 @@ public class Configuration {
   public GoogleAPIConnector googleAPIConnector() {
     return new GoogleAPIConnector();
   }
+
+  public static void main(String... strings) {
+    var p = new PasswordEncoder().encode("hp-bileter");
+    System.out.println(p);
+  }
 }
