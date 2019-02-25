@@ -358,9 +358,20 @@ public class HelloTicket {
   public void changePartnerPassword(UserAuthDTO userAuthDTO, String hptToken) {
     try {
       String json = JsonbConfig.getInstance().toJson(userAuthDTO);
-      put("/v1/users/password", json, hptToken);
+      put("/v1/users/me/password", json, hptToken);
     } catch (Exception e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
+      throw new ConflictingException("Zmiana hasła w zewnętrznym systemie nie powiodła się");
+    }
+  }
+
+  public void changeUsherPassword(long usherId, UserAuthDTO userAuthDTO, String hptToken) {
+    try {
+      String json = JsonbConfig.getInstance().toJson(userAuthDTO);
+      put("/v1/users/" + usherId + "/password", json, hptToken);
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      throw new ConflictingException("Zmiana hasła w zewnętrznym systemie nie powiodła się");
     }
   }
 
