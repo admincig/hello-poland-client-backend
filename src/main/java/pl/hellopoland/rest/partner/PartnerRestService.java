@@ -29,6 +29,12 @@ public class PartnerRestService {
     return service.getUshers();
   }
 
+  @GET
+  @Path("/ushers/{id}")
+  public Response getUsher(@PathParam("id") long usherId) {
+    return Response.ok(service.getUsher(usherId)).build();
+  }
+
   @PATCH
   @Path("/ushers/{id}/password")
   public Response changePasswordForUsher(@PathParam("id") long usherId, UserAuthDTO usherDTO) {

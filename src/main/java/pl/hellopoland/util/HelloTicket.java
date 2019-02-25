@@ -331,7 +331,7 @@ public class HelloTicket {
   public PartnerDTO addPartner(PartnerDTO dto) {
     try {
       Jsonb jsonb = JsonbConfig.getInstance();
-      JsonStructure json = post("/v1/partners", jsonb.toJson(dto), AUTH_TOKEN);
+      JsonStructure json = post("/v1/helpdesk/partners", jsonb.toJson(dto), AUTH_TOKEN);
       return jsonb.fromJson(json.toString(), PartnerDTO.class);
     } catch (Exception e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
@@ -378,7 +378,7 @@ public class HelloTicket {
   public List<UserDTO> getUshersForPartner(String partnerAuthToken) {
     try {
       final Jsonb jsonb = JsonbConfig.getInstance();
-      JsonStructure json = get("/v1/users/ushers", partnerAuthToken);
+      JsonStructure json = get("/v1/partners/ushers", partnerAuthToken);
       JsonArray jsonArray = (JsonArray) json;
       List<UserDTO> dtos = new ArrayList<>();
       jsonArray.forEach(p -> {
@@ -386,6 +386,16 @@ public class HelloTicket {
         dtos.add(dto);
       });
       return dtos;
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      return null;
+    }
+  }
+
+  public UserDTO getUsherForPartner(long usherId, String partnerAuthToken) {
+    try {
+      return JsonbConfig.getInstance().fromJson(
+          get("/v1/partners/ushers/" + usherId, partnerAuthToken).toString(), UserDTO.class);
     } catch (Exception e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
       return null;
