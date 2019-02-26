@@ -43,6 +43,7 @@ public class SightEventServiceMarketAPI {
     service.fetchTicketPoolDefinitions(bos.items, dtos, false, true);
     List<SightEventDTO> list = dtos.stream().filter(dto -> service.isAvailable(dto)).map(dto -> {
       dto.ticketPoolDefinitions = null;
+      dto.partnerAffiliateCode = null;
       return dto;
     }).collect(Collectors.toList());
     return new PagedCollection(list, bos.config);
@@ -65,6 +66,7 @@ public class SightEventServiceMarketAPI {
         }
       }
       var dto = DtoMapper.getFullDTO(bo);
+      dto.partnerAffiliateCode = null;
       service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), false, true);
       return service.isAvailable(dto) ? dto : null;
     }
