@@ -63,6 +63,7 @@ public class SightServiceMarketAPI {
       sEservice.fetchTicketPoolDefinitions(bo.getSightEvents(), dto.sightEvents, false, true);
       dto.sightEvents = dto.sightEvents.stream().filter(se -> sEservice.isAvailable(se)).map(se -> {
         se.ticketPoolDefinitions = null;
+        se.partnerAffiliateCode = null;
         return se;
       }).collect(Collectors.toList());
       dto.minPrice = dto.sightEvents.stream().min(Comparator.comparing(seDto -> seDto.minPrice))
