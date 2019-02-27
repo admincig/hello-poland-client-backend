@@ -37,8 +37,9 @@ public class AnalyticsService extends ServiceSuperclass {
         PATH + "orders_" + RandomStringUtils.randomAlphanumeric(10) + ".csv");
     // csv file header:
     writeCsvRow(csvFile.toPath(), "DATA ZAMÓWIENIA", "ID PARTNERA HP", "ID PARTNERA P24",
-        "NAZWA PARTNERA", "WARTOŚĆ", "WALUTA", "NR TRANSAKCJI P24", "NAZWA UŻUTKOWNIKA", "TELEON",
-        "ADRES EMAIL", "NAZWA OFERTY", "DATA OFERTY", "ILOŚĆ I NAZWA BILETÓW");
+        "NAZWA PARTNERA", "AFILIACJA", "WARTOŚĆ", "WALUTA", "NR TRANSAKCJI P24",
+        "NAZWA UŻUTKOWNIKA", "TELEON", "ADRES EMAIL", "NAZWA OFERTY", "DATA OFERTY",
+        "ILOŚĆ I NAZWA BILETÓW");
 
     var orders = orderService.getOrdersInDateRange(fromDate, toDate,
         getLoggedUser().hasRole(UserRole.Role.ADMIN) ? null : getLoggedPartner());
@@ -50,6 +51,7 @@ public class AnalyticsService extends ServiceSuperclass {
 
       writeCsvRow(csvFile.toPath(), DATE_FORMATER.format(order.getDate()),
           String.valueOf(partner.getId()), String.valueOf(partner.getP24Id()), partner.getName(),
+          String.valueOf(oe.getPartnerAffiliateCode() != null),
           String.valueOf((oe.getUnitPrice() * oe.getQuantity()) / 100d), order.getP24Currency(),
           order.getP24OrderId(), oDetails.getFirstName() + " " + oDetails.getLastName(),
           oDetails.getPhone(), oDetails.getEmail(),
