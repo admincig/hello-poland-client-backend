@@ -35,6 +35,7 @@ import pl.hellopoland.dto.booking.TicketOrderDTO;
 import pl.hellopoland.exception.badrequest.BadRequestException;
 import pl.hellopoland.exception.conflict.CannotDeleteSightEventFromExternalSystemException;
 import pl.hellopoland.exception.conflict.ConflictingException;
+import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.rest.JsonbConfig;
 
 public class HelloTicket {
@@ -398,7 +399,7 @@ public class HelloTicket {
           get("/v1/partners/ushers/" + usherId, partnerAuthToken).toString(), UserDTO.class);
     } catch (Exception e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
-      return null;
+      throw new ResourceNotFoundException();
     }
   }
 
