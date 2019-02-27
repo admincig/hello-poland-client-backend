@@ -51,7 +51,7 @@ public class AnalyticsService extends ServiceSuperclass {
 
       writeCsvRow(csvFile.toPath(), DATE_FORMATER.format(order.getDate()),
           String.valueOf(partner.getId()), String.valueOf(partner.getP24Id()), partner.getName(),
-          String.valueOf(oe.getPartnerAffiliateCode() != null),
+          oe.getPartnerAffiliateCode() != null ? "afiliacja" : "",
           String.valueOf((oe.getUnitPrice() * oe.getQuantity()) / 100d), order.getP24Currency(),
           order.getP24OrderId(), oDetails.getFirstName() + " " + oDetails.getLastName(),
           oDetails.getPhone(), oDetails.getEmail(),

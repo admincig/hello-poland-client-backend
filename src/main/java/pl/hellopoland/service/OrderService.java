@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -99,6 +100,14 @@ public class OrderService extends ServiceSuperclass {
             oe.setDateEntry(dateEntry);
             oe.setExternalDefinitionId(ticket.getExternalId());
             oe.setPoolId(ticket.getPoolId());
+            if (oeIRO.partnerAffiliateCode != null
+                && !oeIRO.partnerAffiliateCode.equals(sightEvent.getPartner().getAffiliateCode())) {
+              logger.log(Level.ERROR,
+                  "Kod afiliacyjny zamówienia [" + oeIRO.partnerAffiliateCode
+                      + "] niezgodny z kodem afiliacyjnym partnera [id="
+                      + sightEvent.getPartner().getId() + "]");
+              throw new ConflictingException("Niezgodny kod afiliacyjny");
+            }
             oe.setPartnerAffiliateCode(oeIRO.partnerAffiliateCode);
             em.persist(oe);
           }
