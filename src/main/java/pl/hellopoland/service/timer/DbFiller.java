@@ -121,36 +121,34 @@ public class DbFiller extends ServiceSuperclass {
 
   private void createUsers() {
     userHelloPoland =
-        createUser("Hello Poland - admin", "admin@hellopoland.pl", "hellopoland", null, Role.ADMIN);
-    userHelloPoland = createPartner("Hello Poland",
+        createUser("Hello Poland - admin", "hp-admin@fream.pl", "hp-admin", null, Role.ADMIN);
+    userHelloPoland = createPartner("Hello Poland", "hp-partner@fream.pl", "hp-partner",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.",
         Integer.valueOf(properties.getProperty("przelewy24.posId")), BigDecimal.TEN, Role.PARTNER);
-    userZoo = createPartner("Zoo",
+    userZoo = createPartner("Zoo", "zoo@zoo.plQQ", "zoo",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiJDOTU1NTI0MDk2REU0MjlEQjBGODM1NTA1RUI5MzAxNzkzQzE4NEJBQzM2NTFBNzI2MDFCRDNGMUFEQTkyQzAzIn0.",
         Integer.valueOf(properties.getProperty("przelewy24.posId")), new BigDecimal("3.5"),
         Role.PARTNER);
-    userKolejkowo = createPartner("Kolejkowo",
+    userKolejkowo = createPartner("Kolejkowo", "kolejkowo@kolejkowo.plQQ", "kolejkowo",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiI0MDc5MTkyRkI2NTQyQTYyRjc3QTcwNDZDRDU1QkJGNUM5NDAzNkE0MjRFRDI4RTM0MEYwODNCRDE1MDRFODZBIn0.",
         Integer.valueOf(properties.getProperty("przelewy24.posId")), new BigDecimal("5"),
         Role.PARTNER);
-    userStadionGd = createPartner("Stadion Gdański",
+    userStadionGd = createPartner("Stadion Gdański", "stadiongdansk@stadiongdansk.plQQ", "stadion",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiIyODQyODcyRThEQ0EzMENFNkJBOTk5REMzQjBGODJFNUNFOTNFNzA5RTJEMjlGMEQ4NjFFOTU4QjMxQ0QwQzREIn0.",
         Integer.valueOf(properties.getProperty("przelewy24.posId")), new BigDecimal("4"),
         Role.PARTNER);
   }
 
-  private User createPartner(String partnerName, String token, Integer p24Id, BigDecimal commission,
-      Role... roles) {
+  private User createPartner(String partnerName, String email, String password, String token,
+      Integer p24Id, BigDecimal commission, Role... roles) {
     Partner partner = new Partner();
     partner.setName(partnerName + " Partner");
     partner.setHptToken(token);
     partner.setP24Id(p24Id);
     partner.setCommission(commission);
-    String email = partnerName.toLowerCase().replaceAll(" ", "") + "@"
-        + partnerName.toLowerCase().replaceAll(" ", "") + ".pl";
     partner.setEmail(email);
 
-    return createUser(null, email, partnerName.toLowerCase().replaceAll(" ", ""), partner, roles);
+    return createUser(null, email, password, partner, roles);
   }
 
   private User createUser(String name, String email, String password, Partner partner,
