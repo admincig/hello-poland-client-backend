@@ -64,7 +64,7 @@ public class MarketSightEventRestService {
   @GET
   @Path("/filters")
   public FiltersContainerDTO getFilters() {
-    return filterService.getForAvailableSightEvents();
+    return filterService.getForSightEvents();
   }
 
   @GET
