@@ -364,17 +364,17 @@ public class DtoMapper {
   public static P24PassageTransactionParamsDTO getP24PassageTransactionParamsDTO(Order o) {
     var dto = new P24PassageTransactionParamsDTO();
     OrderDetails od = o.getDetails();
-    dto.address = "";
+    dto.address = od.getStreet();
+    dto.zip = od.getZipCode();
     dto.city = od.getCity() != null ? od.getCity() : "";
+    dto.country = "PL";
     dto.client = (od.getFirstName() == null && od.getLastName() == null) ? ""
         : od.getFirstName() + " " + od.getLastName();
-    dto.country = "PL";
-    dto.currency = "PLN";
     dto.email = od.getEmail() != null ? od.getEmail() : "";
-    dto.language = "pl";
     dto.phone = od.getPhone() != null ? od.getPhone() : "";
+    dto.language = "pl";
+    dto.currency = "PLN";
     dto.sessionId = o.getHash();
-    dto.zip = "";
     dto.description = "Hello Poland, " + o.getHash();
     dto.merchantId = Integer.valueOf(PROPERTIES.getProperty("przelewy24.merchantId"));
     dto.urlStatus = getAckPaymentURL(o);

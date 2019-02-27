@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -35,6 +36,7 @@ import pl.hellopoland.dto.AvailableTicketNumberAssociationDTO;
 import pl.hellopoland.dto.PushDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
+import pl.hellopoland.dto.TicketPoolDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.AccessDeniedException;
@@ -444,10 +446,20 @@ public class SightEventService extends ServiceSuperclass {
     } else {
       availableTickets = checkAvailability(dto.id, fromDate, toDate);
     }
-    return availableTickets.ticketPoolDefinitions.stream()
-        .filter(f -> f.availableTicketsNumber != 0).count() != 0l
-        || availableTickets.ticketPools.stream().filter(f -> f.availableTicketsNumber != 0)
-            .count() != 0l;
+
+    Stream<TicketPoolDefinitionDTO> s1 =
+        availableTickets.ticketPoolDefinitions.stream().filter(tp -> tp.ticketDefinitions.stream()
+            .filter(td -> !td.availableTicketsNumber.equals(Integer.valueOf(0))).count() != 0);
+    Stream<TicketPoolDTO> s2 =
+        availableTickets.ticketPools.stream().filter(tp -> tp.ticketDefinitions.stream()
+            .filter(td -> !td.availableTicketsNumber.equals(Integer.valueOf(0))).count() != 0);
+
+    return s1.count() != 0l || s2.count() != 0l;
+
+    // return availableTickets.ticketPoolDefinitions.stream()
+    // .filter(f -> f.availableTicketsNumber != 0).count() != 0l
+    // || availableTickets.ticketPools.stream().filter(f -> f.availableTicketsNumber != 0)
+    // .count() != 0l;
   }
 
   private boolean isInDateRange(TicketPoolDefinitionDTO tpd, Date fromDate, Date toDate) {

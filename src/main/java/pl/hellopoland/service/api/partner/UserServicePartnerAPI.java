@@ -4,6 +4,8 @@ import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.User;
+import pl.hellopoland.dto.UserAuthDTO;
+import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.rest.dto.UserORO;
 import pl.hellopoland.service.UserService;
 
@@ -19,4 +21,20 @@ public class UserServicePartnerAPI {
     var dto = new UserORO(bo);
     return dto;
   }
+
+  @RolesAllowed("partner")
+  public void changePasswordForLoggedPartner(UserAuthDTO userDTO) {
+    service.changePasswordForLoggedPartner(userDTO);
+  }
+
+  @RolesAllowed("partner")
+  public void changePasswordForUsher(long usherId, UserAuthDTO usherDTO) {
+    service.changePasswordForUsher(usherId, usherDTO);
+  }
+
+  @RolesAllowed("partner")
+  public PagedCollection getUshers() {
+    return new PagedCollection(service.getUshers(), null);
+  }
+
 }

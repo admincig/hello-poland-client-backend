@@ -27,6 +27,8 @@ import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
+import pl.hellopoland.dto.UserAuthDTO;
+import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.dto.booking.BookingDTO;
 import pl.hellopoland.dto.booking.TicketDTO;
 import pl.hellopoland.dto.booking.TicketOrderDTO;
@@ -354,6 +356,43 @@ public class HelloTicket {
                   + ticketPoolDefId + " and date=" + SimpleDateFormat.getInstance().format(date),
               e);
       throw new ConflictingException("Brak wydarzenia w danym dniu");
+    }
+  }
+
+  public void changePartnerPassword(UserAuthDTO userAuthDTO, String hptToken) {
+    try {
+      String json = JsonbConfig.getInstance().toJson(userAuthDTO);
+      put("/v1/users/me/password", json, hptToken);
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      throw new ConflictingException("Zmiana hasła w zewnętrznym systemie nie powiodła się");
+    }
+  }
+
+  public void changeUsherPassword(long usherId, UserAuthDTO userAuthDTO, String hptToken) {
+    try {
+      String json = JsonbConfig.getInstance().toJson(userAuthDTO);
+      put("/v1/users/" + usherId + "/password", json, hptToken);
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      throw new ConflictingException("Zmiana hasła w zewnętrznym systemie nie powiodła się");
+    }
+  }
+
+  public List<UserDTO> getUshersForPartner(String partnerAuthToken) {
+    try {
+      final Jsonb jsonb = JsonbConfig.getInstance();
+      JsonStructure json = get("/v1/users/ushers", partnerAuthToken);
+      JsonArray jsonArray = (JsonArray) json;
+      List<UserDTO> dtos = new ArrayList<>();
+      jsonArray.forEach(p -> {
+        var dto = jsonb.fromJson(p.toString(), UserDTO.class);
+        dtos.add(dto);
+      });
+      return dtos;
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      return null;
     }
   }
 

@@ -6,35 +6,36 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PATCH;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import pl.hellopoland.dto.UserAuthDTO;
-import pl.hellopoland.rest.dto.UserORO;
+import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.api.partner.UserServicePartnerAPI;
 
-@Path("/partner/users")
+@Path("/partner")
 @RequestScoped
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class PartnerUserRestService {
+public class PartnerRestService {
 
   @Inject
   private UserServicePartnerAPI service;
 
   @GET
-  @Path("/me")
-  public UserORO me() {
-    return service.me();
+  @Path("/ushers")
+  public PagedCollection getUshers() {
+    return service.getUshers();
   }
 
   @PATCH
-  @Path("/me/password")
-  public Response changePassword(UserAuthDTO userDTO) {
-    if (userDTO.oldPassword.equals(userDTO.password)) {
+  @Path("/ushers/{id}/password")
+  public Response changePasswordForUsher(@PathParam("id") long usherId, UserAuthDTO usherDTO) {
+    if (usherDTO.oldPassword.equals(usherDTO.password)) {
       return Response.notModified("The new password is equal to the old password.").build();
     }
-    service.changePasswordForLoggedPartner(userDTO);
+    service.changePasswordForUsher(usherId, usherDTO);
     return Response.ok().build();
   }
 

@@ -16,6 +16,8 @@ import pl.hellopoland.bo.Order;
 import pl.hellopoland.bo.OrderDateEntry;
 import pl.hellopoland.bo.OrderDetails;
 import pl.hellopoland.bo.OrderEntry;
+import pl.hellopoland.bo.Partner;
+import pl.hellopoland.bo.UserRole;
 
 @LocalBean
 @Stateless
@@ -34,17 +36,20 @@ public class AnalyticsService extends ServiceSuperclass {
     final File csvFile = fileDescriptorService.createEmptyFileOnDisc(
         PATH + "orders_" + RandomStringUtils.randomAlphanumeric(10) + ".csv");
     // csv file header:
-    writeCsvRow(csvFile.toPath(), "DATA ZAMÓWIENIA", "WARTOŚĆ", "WALUTA", "NR TRANSAKCJI P24",
-        "NAZWA UŻUTKOWNIKA", "TELEON", "ADRES EMAIL", "NAZWA OFERTY", "DATA OFERTY",
-        "ILOŚĆ I NAZWA BILETÓW");
+    writeCsvRow(csvFile.toPath(), "DATA ZAMÓWIENIA", "ID PARTNERA HP", "ID PARTNERA P24",
+        "NAZWA PARTNERA", "WARTOŚĆ", "WALUTA", "NR TRANSAKCJI P24", "NAZWA UŻUTKOWNIKA", "TELEON",
+        "ADRES EMAIL", "NAZWA OFERTY", "DATA OFERTY", "ILOŚĆ I NAZWA BILETÓW");
 
-    var orders = orderService.getOrdersInDateRange(fromDate, toDate, getLoggedPartner());
+    var orders = orderService.getOrdersInDateRange(fromDate, toDate,
+        getLoggedUser().hasRole(UserRole.Role.ADMIN) ? null : getLoggedPartner());
     for (OrderEntry oe : orders) {
       OrderDateEntry dateEntry = oe.getDateEntry();
+      Partner partner = dateEntry.getSightEntry().getSightEvent().getPartner();
       Order order = dateEntry.getSightEntry().getOrder();
       OrderDetails oDetails = order.getDetails();
 
       writeCsvRow(csvFile.toPath(), DATE_FORMATER.format(order.getDate()),
+          String.valueOf(partner.getId()), String.valueOf(partner.getP24Id()), partner.getName(),
           String.valueOf((oe.getUnitPrice() * oe.getQuantity()) / 100d), order.getP24Currency(),
           order.getP24OrderId(), oDetails.getFirstName() + " " + oDetails.getLastName(),
           oDetails.getPhone(), oDetails.getEmail(),

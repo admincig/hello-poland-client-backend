@@ -36,7 +36,7 @@ public class SightEventServiceMarketAPI {
   @PermitAll
   public PagedCollection getList(SightEventPagedCollectionConfig config, Date fromDate, Date toDate,
       String language) {
-    if (toDate.before(fromDate)) {
+    if (fromDate != null && toDate != null && toDate.before(fromDate)) {
       throw new ConflictingException("toDate[" + toDate + "] is before fromDate[" + fromDate + "]");
     }
     config.setOrderColumn("name");
