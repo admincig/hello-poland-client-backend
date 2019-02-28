@@ -29,7 +29,8 @@ public class FilterMarketAPI {
     var config = new SightEventPagedCollectionConfig();
     config.onlyActive();
     config.onlyPublished();
-    var sightEvents = (Collection<SightEventDTO>) sightEventAPI.getList(config, null).items;
+    var sightEvents =
+        (Collection<SightEventDTO>) sightEventAPI.getList(config, null, null, null).items;
     return service
         .getForSightEvents(sightEvents.stream().map(se -> se.id).collect(Collectors.toSet()));
   }
