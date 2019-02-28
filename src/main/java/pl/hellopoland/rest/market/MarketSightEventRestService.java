@@ -35,23 +35,40 @@ public class MarketSightEventRestService {
 
   @GET
   public PagedCollection getList(@QueryParam("city") String city,
+      @QueryParam("fromDate") @DateFormat Date fromDate,
+      @QueryParam("toDate") @DateFormat Date toDate,
       @HeaderParam("Accept-Language") String language) {
     var config = new SightEventPagedCollectionConfig();
     config.onlyActive();
     config.onlyPublished();
     config.setCity(city);
-    return service.getList(config, language);
+    return service.getList(config, fromDate, toDate, language);
+  }
+
+  @GET
+  @Path("/search")
+  public PagedCollection search(@QueryParam("city") String city,
+      @QueryParam("fromDate") @DateFormat Date fromDate,
+      @QueryParam("toDate") @DateFormat Date toDate,
+      @HeaderParam("Accept-Language") String language) {
+    var config = new SightEventPagedCollectionConfig();
+    config.onlyActive();
+    config.onlyPublished();
+    config.setCity(city);
+    return service.getList(config, fromDate, toDate, language);
   }
 
   @POST
   @Path("/search")
   public PagedCollection search(SightEventPagedCollectionConfig config,
-      @QueryParam("city") String city, @HeaderParam("Accept-Language") String language) {
+      @QueryParam("fromDate") @DateFormat Date fromDate,
+      @QueryParam("toDate") @DateFormat Date toDate, @QueryParam("city") String city,
+      @HeaderParam("Accept-Language") String language) {
     config.onlyActive();
     config.onlyActive();
     config.onlyPublished();
     config.setCity(city);
-    return service.getList(config, language);
+    return service.getList(config, fromDate, toDate, language);
   }
 
   @GET
@@ -71,7 +88,7 @@ public class MarketSightEventRestService {
   @Path("/{id}/available-tickets")
   public AvailableTicketNumberAssociationORO checkAvailability(@PathParam("id") Long id,
       @QueryParam("date") @DateFormat final Date date) {
-    return service.checkAvailability(id, date);
+    return service.checkAvailability(id, date, null);
   }
 
 }

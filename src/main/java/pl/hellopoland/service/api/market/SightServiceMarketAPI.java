@@ -23,7 +23,7 @@ public class SightServiceMarketAPI {
   SightService service;
 
   @Inject
-  SightEventService sEservice;
+  SightEventService sightEventService;
 
   @Inject
   private TranslationService translationService;
@@ -60,11 +60,12 @@ public class SightServiceMarketAPI {
         }
       }
       var dto = DtoMapper.getFullDTO(bo);
-      sEservice.fetchTicketPoolDefinitions(bo.getSightEvents(), dto.sightEvents, false, true);
-      dto.sightEvents = dto.sightEvents.stream().filter(se -> sEservice.isAvailable(se)).map(se -> {
-        se.ticketPoolDefinitions = null;
-        return se;
-      }).collect(Collectors.toList());
+      sightEventService.fetchTicketPoolDefinitions(bo.getSightEvents(), dto.sightEvents, false);
+      dto.sightEvents = dto.sightEvents.stream()
+          .filter(se -> sightEventService.isAvailable(se, null, null)).map(se -> {
+            se.ticketPoolDefinitions = null;
+            return se;
+          }).collect(Collectors.toList());
       dto.minPrice = dto.sightEvents.stream().min(Comparator.comparing(seDto -> seDto.minPrice))
           .map(seDto -> seDto.minPrice).orElse(null);
       return dto;
