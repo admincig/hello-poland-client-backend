@@ -47,14 +47,14 @@ public class MarketSightEventRestService {
 
   @GET
   @Path("/search")
-  public PagedCollection search(@QueryParam("city") String city,
+  public PagedCollection search(@QueryParam("searchQuery") String searchQuery,
       @QueryParam("fromDate") @DateFormat Date fromDate,
       @QueryParam("toDate") @DateFormat Date toDate,
       @HeaderParam("Accept-Language") String language) {
     var config = new SightEventPagedCollectionConfig();
     config.onlyActive();
     config.onlyPublished();
-    config.setCity(city);
+    config.setSearchQuery(searchQuery);
     return service.getList(config, fromDate, toDate, language);
   }
 

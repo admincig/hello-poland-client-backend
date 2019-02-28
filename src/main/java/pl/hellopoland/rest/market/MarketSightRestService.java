@@ -48,12 +48,12 @@ public class MarketSightRestService {
 
   @GET
   @Path("/search")
-  public PagedCollection search(@QueryParam("city") String city,
+  public PagedCollection search(@QueryParam("searchQuery") String searchQuery,
       @HeaderParam("Accept-Language") String language) {
     var config = new SightPagedCollectionConfig();
     config.onlyActive();
     config.onlyPublished();
-    config.setCity(city);
+    config.setSearchQuery(searchQuery);
     return service.getList(config, language);
   }
 
