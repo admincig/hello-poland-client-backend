@@ -403,4 +403,16 @@ public class HelloTicket {
     }
   }
 
+  public UserDTO updateUsherForPartner(UserDTO usher, String partnerAuthToken) {
+    String usherJson = JsonbConfig.getInstance().toJson(usher);
+    try {
+      return JsonbConfig.getInstance().fromJson(
+          put("/v1/partners/ushers/" + usher.id, usherJson, partnerAuthToken).toString(),
+          UserDTO.class);
+    } catch (IOException e) {
+      logger.log(Level.ERROR, e);
+      throw new ResourceNotFoundException();
+    }
+  }
+
 }

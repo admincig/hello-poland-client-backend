@@ -43,4 +43,9 @@ public class UserServicePartnerAPI {
     return service.getUsher(usherId);
   }
 
+  @RolesAllowed("partner")
+  public UserDTO updateUsher(UserDTO usher) {
+    return service.updateUsher(usher);
+  }
+
 }
