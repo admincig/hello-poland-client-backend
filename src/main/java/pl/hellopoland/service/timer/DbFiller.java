@@ -111,7 +111,7 @@ public class DbFiller extends ServiceSuperclass {
     logger.log(Logger.Level.INFO, "DbFiller started");
     createPortals();
     createUsers();
-    // createImageCollectors();
+    createImageCollectors();
     createLocations();
     createSights();
     createSightEvents();
