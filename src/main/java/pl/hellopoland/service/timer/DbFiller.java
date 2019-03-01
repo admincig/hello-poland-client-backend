@@ -147,7 +147,6 @@ public class DbFiller extends ServiceSuperclass {
     partner.setP24Id(p24Id);
     partner.setCommission(commission);
     partner.setEmail(email);
-
     return createUser(null, email, password, partner, roles);
   }
 

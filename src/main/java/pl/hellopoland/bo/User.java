@@ -37,10 +37,8 @@ public class User extends ModelSuperclass {
   private String picture;
   @Embedded
   private UserLocation location;
-
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = EAGER)
   private List<UserRole> roles;
-
   @ManyToOne(cascade = PERSIST)
   private Partner partner;
 
