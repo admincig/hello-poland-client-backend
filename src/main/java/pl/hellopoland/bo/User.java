@@ -41,6 +41,7 @@ public class User extends ModelSuperclass {
   private List<UserRole> roles;
   @ManyToOne(cascade = PERSIST)
   private Partner partner;
+  private String hptToken;
 
   public String getEmail() {
     return email;
@@ -110,6 +111,14 @@ public class User extends ModelSuperclass {
 
   public void setPartner(Partner partner) {
     this.partner = partner;
+  }
+
+  public String getHptToken() {
+    return hptToken;
+  }
+
+  public void setHptToken(String hptToken) {
+    this.hptToken = hptToken;
   }
 
 }

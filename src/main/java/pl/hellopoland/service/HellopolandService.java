@@ -25,7 +25,6 @@ import pl.hellopoland.dto.RoleDTO;
 import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.email.EmailSendingRollbackException;
-import pl.hellopoland.security.CurrentUser;
 import pl.hellopoland.util.HelloTicket;
 
 @LocalBean
@@ -35,8 +34,6 @@ public class HellopolandService extends ServiceSuperclass {
   private UserService userService;
   @Inject
   private EmailService emailService;
-  @Inject
-  private CurrentUser currentUser;
 
   final Set<UserRole.Role> excluded_roles =
       Set.of(UserRole.Role.ROOT, UserRole.Role.ADMIN, UserRole.Role.PARTNER);
@@ -95,7 +92,7 @@ public class HellopolandService extends ServiceSuperclass {
     try {
       Portal hpt = getPortal("Hello Ticket Cloud");
       var ht = new HelloTicket(hpt.getUrl());
-      var hptPartner = ht.addPartner(partner, currentUser.getAccessToken());
+      var hptPartner = ht.addPartner(partner, getLoggedUser().getHptToken());
       partnerBO.setHptToken(hptPartner.token);
     } catch (Exception e) {
       throw new ConflictingException("Nie udało się stworzyć partnera w zewnętrznym systemie", e);
