@@ -75,6 +75,7 @@ public class SightEventServiceMarketAPI {
         }
       }
       var dto = DtoMapper.getFullDTO(bo);
+      dto.partnerAffiliateCode = null;
       service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), false);
       return service.isAvailable(dto, null, null) ? dto : null;
     }

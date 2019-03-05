@@ -132,6 +132,7 @@ public class DtoMapper {
     dto.sightId = bo.getSight() != null ? bo.getSight().getId() : null;
     dto.blocked = bo.isBlocked();
     dto.published = bo.isPublished();
+    dto.partnerAffiliateCode = bo.getPartner().getAffiliateCode();
     return dto;
   }
 

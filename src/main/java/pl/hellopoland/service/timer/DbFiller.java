@@ -122,9 +122,11 @@ public class DbFiller extends ServiceSuperclass {
   private void createUsers() {
     userHelloPoland = createUser("Hello Poland - admin", "admin@hello-poland.pl",
         "RozwazneWakacjeNaSkrajuWszechswiata", null, Role.ADMIN);
-    userHelloPoland = createPartner("Hello Poland",
+    userHelloPoland = createPartner("Hello Poland", "biuro@hello-poland.pl",
+        "RozwazneWakacjeNaSkrajuWszechswiata",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.",
-        Integer.valueOf(properties.getProperty("przelewy24.posId")), BigDecimal.TEN, Role.PARTNER);
+        Integer.valueOf(properties.getProperty("przelewy24.posId")), BigDecimal.TEN, "zaqwsx",
+        Role.PARTNER);
     // userZoo = createPartner("Zoo",
     // "eyJhbGciOiJub25lIn0.eyJzdWIiOiJDOTU1NTI0MDk2REU0MjlEQjBGODM1NTA1RUI5MzAxNzkzQzE4NEJBQzM2NTFBNzI2MDFCRDNGMUFEQTkyQzAzIn0.",
     // Integer.valueOf(properties.getProperty("przelewy24.merchantId")), new BigDecimal("3.5"),
@@ -139,17 +141,16 @@ public class DbFiller extends ServiceSuperclass {
     // Role.PARTNER);
   }
 
-  private User createPartner(String partnerName, String token, Integer p24Id, BigDecimal commission,
-      Role... roles) {
-    var email = "biuro@hello-poland.pl";
-    Partner helloPolandPartner = new Partner();
-    helloPolandPartner.setName(partnerName + " Partner");
-    helloPolandPartner.setHptToken(token);
-    helloPolandPartner.setP24Id(p24Id);
-    helloPolandPartner.setCommission(commission);
-    helloPolandPartner.setEmail(email);
-    return createUser(null, email, "RozwazneWakacjeNaSkrajuWszechswiata", helloPolandPartner,
-        roles);
+  private User createPartner(String partnerName, String email, String password, String token,
+      Integer p24Id, BigDecimal commission, String affiliateCode, Role... roles) {
+    Partner partner = new Partner();
+    partner.setName(partnerName + " Partner");
+    partner.setHptToken(token);
+    partner.setP24Id(p24Id);
+    partner.setCommission(commission);
+    partner.setEmail(email);
+    partner.setAffiliateCode(affiliateCode);
+    return createUser(null, email, password, partner, roles);
   }
 
   private User createUser(String name, String email, String password, Partner partner,

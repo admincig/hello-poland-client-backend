@@ -27,6 +27,7 @@ public class OrderEntry extends ModelSuperclass {
   private Long poolId;
   @ElementCollection
   private List<String> numbers;
+  private String partnerAffiliateCode;
 
   public Integer getQuantity() {
     return quantity;
@@ -90,6 +91,14 @@ public class OrderEntry extends ModelSuperclass {
 
   public void setExternalDefinitionId(Long externalDefinitionId) {
     this.externalDefinitionId = externalDefinitionId;
+  }
+
+  public String getPartnerAffiliateCode() {
+    return partnerAffiliateCode;
+  }
+
+  public void setPartnerAffiliateCode(String partnerAffiliateCode) {
+    this.partnerAffiliateCode = partnerAffiliateCode;
   }
 
   public Integer getSum() {
