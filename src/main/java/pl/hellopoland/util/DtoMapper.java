@@ -365,8 +365,8 @@ public class DtoMapper {
   public static P24PassageTransactionParamsDTO getP24PassageTransactionParamsDTO(Order o) {
     var dto = new P24PassageTransactionParamsDTO();
     OrderDetails od = o.getDetails();
-    dto.address = od.getStreet();
-    dto.zip = od.getZipCode();
+    dto.address = od.getStreet() != null ? od.getStreet() : "";
+    dto.zip = od.getZipCode() != null ? od.getZipCode() : "";
     dto.city = od.getCity() != null ? od.getCity() : "";
     dto.country = "PL";
     dto.client = (od.getFirstName() == null && od.getLastName() == null) ? ""

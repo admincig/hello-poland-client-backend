@@ -314,17 +314,21 @@ public class HelloTicket {
   }
 
   public AvailableTicketNumberAssociationDTO checkAvailabilityOfTicketsForSightEvent(
-      SightEvent sightEvent, Date date) {
+      SightEvent sightEvent, Date fromDate, Date toDate) {
+    if (fromDate == null) {
+      fromDate = new Date();
+    }
     try {
       var dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-      String dateString = dateFormat.format(date);
-      return JsonbConfig.getInstance().fromJson(
-          get("/v1/available-ticket-number-associations/?sightEventId=" + sightEvent.getHptId()
-              + "&date=" + dateString, AUTH_TOKEN).toString(),
-          AvailableTicketNumberAssociationDTO.class);
+      return JsonbConfig.getInstance()
+          .fromJson(get("/v1/available-ticket-number-associations/?sightEventId="
+              + sightEvent.getHptId() + "&fromDate=" + dateFormat.format(fromDate)
+              + (toDate != null ? ("&toDate=" + dateFormat.format(toDate)) : ""), AUTH_TOKEN)
+                  .toString(),
+              AvailableTicketNumberAssociationDTO.class);
     } catch (JsonbException | IOException e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
-      return null;
+      throw new ConflictingException(e.getLocalizedMessage());
     }
   }
 

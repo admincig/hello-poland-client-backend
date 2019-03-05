@@ -5,6 +5,7 @@ import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.nio.file.Paths;
 import java.text.Collator;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -261,7 +262,7 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public void fetchTicketPoolDefinitions(Collection<SightEvent> bos,
-      List<SightEventDTO> sightEventDtos, boolean showDeletedTPD, boolean checkDate) {
+      List<SightEventDTO> sightEventDtos, boolean showDeletedTPD) {
 
     if (hasAnyHptCloudEvent(bos)) {
       var pairedByIds = pairBosWithDtos(bos, sightEventDtos);
@@ -276,10 +277,6 @@ public class SightEventService extends ServiceSuperclass {
         if (!showDeletedTPD) {
           poolDefinitions =
               poolDefinitions.stream().filter(tpd -> !tpd.deleted).collect(Collectors.toList());
-        }
-        if (checkDate) {
-          poolDefinitions =
-              poolDefinitions.stream().filter(tpd -> isDateOK(tpd)).collect(Collectors.toList());
         }
         List<TicketDefinitionDTO> ticketDefinitions = new ArrayList<>();
         poolDefinitions.forEach(p -> ticketDefinitions.addAll(p.ticketDefinitions));
@@ -355,10 +352,11 @@ public class SightEventService extends ServiceSuperclass {
     return grouped;
   }
 
-  public AvailableTicketNumberAssociationDTO checkAvailability(Long sightEventId, Date date) {
+  public AvailableTicketNumberAssociationDTO checkAvailability(Long sightEventId, Date fromDate,
+      Date toDate) {
     HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
     AvailableTicketNumberAssociationDTO associationDTO =
-        hpt.checkAvailabilityOfTicketsForSightEvent(get(sightEventId), date);
+        hpt.checkAvailabilityOfTicketsForSightEvent(get(sightEventId), fromDate, toDate);
 
     var tdExternalIds = new ArrayList<Long>();
 
@@ -422,21 +420,32 @@ public class SightEventService extends ServiceSuperclass {
     logger.log(Level.INFO, "SightEvent [id=" + bo.getId() + "] doesn't have a pdf file ");
   }
 
-  public boolean isAvailable(SightEventDTO dto) {
+  public boolean isAvailable(SightEventDTO dto, Date fromDate, Date toDate) {
     List<TicketPoolDefinitionDTO> tpds = dto.ticketPoolDefinitions;
     if (tpds != null && !tpds.isEmpty()) {
       return !tpds.stream()
-          .filter(tpd -> !tpd.deleted && isDateOK(tpd) && ticketAreAvailable(dto, tpd))
+          .filter(tpd -> !tpd.deleted && isInDateRange(tpd, fromDate, toDate)
+              && ticketAreAvailable(dto, tpd, fromDate, toDate))
           .collect(Collectors.toList()).isEmpty();
     }
     return false;
   }
 
-  private boolean ticketAreAvailable(SightEventDTO dto, TicketPoolDefinitionDTO tpd) {
-    if (tpd.isCyclic) {
-      return true;
+  private boolean ticketAreAvailable(SightEventDTO dto, TicketPoolDefinitionDTO tpd, Date fromDate,
+      Date toDate) {
+    AvailableTicketNumberAssociationDTO availableTickets = null;
+    if (toDate == null) {
+      if (tpd.isCyclic) {
+        // if (tpd.frequencyData.endDate == null) {
+        return true;
+        // }
+        // availableTickets = checkAvailability(dto.id, tpd.startDate, tpd.frequencyData.endDate);
+      } else {
+        availableTickets = checkAvailability(dto.id, tpd.startDate, null);
+      }
+    } else {
+      availableTickets = checkAvailability(dto.id, fromDate, toDate);
     }
-    var availableTickets = checkAvailability(dto.id, tpd.startDate);
 
     Stream<TicketPoolDefinitionDTO> s1 =
         availableTickets.ticketPoolDefinitions.stream().filter(tp -> tp.ticketDefinitions.stream()
@@ -453,14 +462,21 @@ public class SightEventService extends ServiceSuperclass {
     // .count() != 0l;
   }
 
-  private boolean isDateOK(TicketPoolDefinitionDTO tpd) {
-    var now = new Date();
+  private boolean isInDateRange(TicketPoolDefinitionDTO tpd, Date fromDate, Date toDate) {
+    if (fromDate == null) {
+      fromDate = new Date();
+    }
     var tpdStartDate = tpd.startDate;
     if (tpd.isCyclic) {
-      return now.before(tpdStartDate)
-          || ((tpd.frequencyData.endDate != null ? now.before(tpd.frequencyData.endDate) : true));
+      return (fromDate.before(tpdStartDate)
+          || ((tpd.frequencyData.endDate != null ? fromDate.before(tpd.frequencyData.endDate)
+              : true)))
+          && (toDate != null ? toDate.after(tpdStartDate) : true);
     }
-    return now.before(tpdStartDate);
+
+    return ((tpd.wholeDay && fromDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+        .isEqual(tpdStartDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()))
+        || fromDate.before(tpdStartDate)) && (toDate != null ? toDate.after(tpdStartDate) : true);
   }
 
   public void stopSale(Long sightId, Long ticketPoolDefId, Date date) {
