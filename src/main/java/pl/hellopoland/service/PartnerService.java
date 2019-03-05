@@ -10,8 +10,8 @@ public class PartnerService extends ServiceSuperclass {
 
   public Partner findByUserEmail(String email) {
     return em.createQuery(
-        "select partner from User user join user.partner partner where user.email=:email",
-        Partner.class).setParameter("email", email).getSingleResult();
+        "select partner from User user join user.partner partner where lower(user.email) = :email",
+        Partner.class).setParameter("email", email.toLowerCase()).getSingleResult();
   }
 
   public Partner findByToken(String token) {
