@@ -7,6 +7,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import pl.hellopoland.enums.LanguageVersion;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(name = "translation_key_language_unique",
@@ -14,10 +15,6 @@ import javax.validation.constraints.NotNull;
 public class Translation extends ModelSuperclass {
   private static final long serialVersionUID = 4888676435527982407L;
   public static final String KEY_DELIMITER = "|";
-
-  public enum LanguageVersion {
-    PL, DE, EN;
-  }
 
   @NotBlank
   private String key;

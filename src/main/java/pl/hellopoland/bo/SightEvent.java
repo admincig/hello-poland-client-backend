@@ -17,6 +17,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
+import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.util.Imaged;
 import pl.hellopoland.util.Located;
 
@@ -27,68 +28,46 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
 
   @NotNull
   private String name;
-
   private Date date;
-
   private Boolean generalAdmission;
-
   @ManyToOne
   private ImageCollector mainImage;
-
   @OneToMany
   @JoinTable(name = "sightevent_images",
       joinColumns = {@JoinColumn(name = "sightevent_id", referencedColumnName = "id")},
       inverseJoinColumns = {
           @JoinColumn(name = "imagecollector_id", referencedColumnName = "id", unique = true)})
   private Collection<ImageCollector> images;
-
   @OneToMany(mappedBy = "sightEvent")
   private Collection<TicketDefinition> tickets;
-
   @ManyToMany
   private Set<Agreement> agreements;
-
   private String lead;
-
   @Column(columnDefinition = "varchar(2500)")
   private String description;
-
   private Integer duration;
-
   private Integer minPrice;
-
   private Float score;
-
   @Embedded
   private Location location;
-
   private String email;
-
   private String phone;
-
   @ManyToOne
   private FileDescriptor pdfAttachment;
-
   @OneToMany(mappedBy = "sightEvent")
   private Collection<OpeningHours> openingHours;
-
   @ManyToOne
   private Portal portal;
-
   @ManyToOne(fetch = FetchType.EAGER)
   private Sight sight;
-
   @ManyToOne
   private Partner partner;
-
   @NotNull
   private Long hptId;
-
   private boolean active = true;
-
   private boolean published;
-
   private boolean blocked;
+  private LanguageVersion defaultLanguage;
 
   public String getName() {
     return name;
@@ -303,6 +282,14 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
 
   public void setBlocked(boolean blocked) {
     this.blocked = blocked;
+  }
+
+  public LanguageVersion getDefaultLanguage() {
+    return defaultLanguage;
+  }
+
+  public void setDefaultLanguage(LanguageVersion defaultLanguage) {
+    this.defaultLanguage = defaultLanguage;
   }
 
 }

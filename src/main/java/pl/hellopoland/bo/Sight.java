@@ -15,6 +15,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.util.Imaged;
 import pl.hellopoland.util.Located;
 
@@ -25,48 +26,34 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
 
   @Column
   private String name;
-
   private String lead;
-
   @Column(columnDefinition = "varchar(2500)")
   private String description;
-
   private Float score;
-
   @ManyToOne
   private ImageCollector mainImage;
-
   @OneToMany
   @JoinTable(name = "sight_images",
       joinColumns = {@JoinColumn(name = "sight_id", referencedColumnName = "id")},
       inverseJoinColumns = {
           @JoinColumn(name = "imagecollector_id", referencedColumnName = "id", unique = true)})
   private Collection<ImageCollector> images;
-
   private String email;
-
   private String phone;
-
   @Embedded
   private Location location;
-
   @ManyToOne
   private Partner partner;
-
   private boolean active = true;
-
   @OneToMany(mappedBy = "sight")
   private List<SightEvent> sightEvents;
-
   @OneToMany(mappedBy = "sight")
   private List<OpeningHours> openingHours;
-
   @ManyToMany
   private Set<Agreement> agreements;
-
   private boolean published;
-
   private boolean blocked;
+  private LanguageVersion defaultLanguage;
 
   public Sight() {}
 
@@ -218,6 +205,14 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
 
   public void setBlocked(boolean blocked) {
     this.blocked = blocked;
+  }
+
+  public LanguageVersion getDefaultLanguage() {
+    return defaultLanguage;
+  }
+
+  public void setDefaultLanguage(LanguageVersion defaultLanguage) {
+    this.defaultLanguage = defaultLanguage;
   }
 
 }

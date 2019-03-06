@@ -1,10 +1,12 @@
 package pl.hellopoland.rest.partner;
 
+import java.util.Optional;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -14,6 +16,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.lang3.StringUtils;
 import pl.hellopoland.dto.SightDTO;
+import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.api.partner.SightServicePartnerAPI;
 
@@ -27,11 +31,14 @@ public class PartnerSightRestService {
   private SightServicePartnerAPI service;
 
   @POST
-  public SightDTO add(SightDTO dto, @QueryParam("language") String language) {
-    if (dto.id != null) {
-      return service.createLanguageVesrion(dto, language);
+  public SightDTO add(SightDTO dto, @HeaderParam("Content-Language") String language) {
+    if (dto.id == null) {
+      LanguageVersion defLang = Optional.ofNullable(LanguageVersion.getLanuageVersion(language))
+          .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+      dto.defaultLanguage = defLang.getLanuage();
+      return service.create(dto);
     }
-    return service.create(dto);
+    return service.createLanguageVesrion(dto, language);
   }
 
   @GET

@@ -13,8 +13,8 @@ import javax.ejb.Stateless;
 import org.apache.commons.lang3.StringUtils;
 import pl.hellopoland.bo.ModelSuperclass;
 import pl.hellopoland.bo.Translation;
-import pl.hellopoland.bo.Translation.LanguageVersion;
 import pl.hellopoland.dto.DTOSuperclass;
+import pl.hellopoland.enums.LanguageVersion;
 
 @LocalBean
 @Stateless
@@ -135,7 +135,7 @@ public class TranslationService extends ServiceSuperclass {
     try {
       lang = LanguageVersion.valueOf(language.toUpperCase());
     } catch (IllegalArgumentException e) {
-      lang = LanguageVersion.EN;
+      lang = LanguageVersion.EN_GB;
     }
     return em
         .createQuery("from Translation t where t.key like :key and language = :language",

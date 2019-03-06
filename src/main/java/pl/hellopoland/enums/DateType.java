@@ -1,4 +1,4 @@
-package pl.hellopoland.bo;
+package pl.hellopoland.enums;
 
 public enum DateType {
   UNDEFINED,
