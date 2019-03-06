@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.ejb.LocalBean;
@@ -15,6 +16,7 @@ import pl.hellopoland.bo.ModelSuperclass;
 import pl.hellopoland.bo.Translation;
 import pl.hellopoland.dto.DTOSuperclass;
 import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.exception.conflict.ConflictingException;
 
 @LocalBean
 @Stateless
@@ -28,15 +30,19 @@ public class TranslationService extends ServiceSuperclass {
 
   public <T extends ModelSuperclass, D extends DTOSuperclass> T createEntityLanguageVersion(T bo,
       D dto, String language) {
+    LanguageVersion langVersion = Optional.ofNullable(LanguageVersion.getLanuageVersion(language))
+        .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
     Predicate<? super Field> predicate = f -> (f.getType().equals(String.class)
         && !EXCLUDED_FIELDS_NAMES.contains(bo.getClass().getSimpleName() + "." + f.getName()));
 
     List<Field> dtoStringFields = Arrays.asList(dto.getClass().getFields()).stream()
         .filter(predicate).collect(Collectors.toList());
+
+    // ???? what for?
     var translations = new ArrayList<Translation>();
     for (Field field : dtoStringFields) {
       var translation = new Translation();
-      translation.putLanguage(language);
+      translation.setLanguage(langVersion);
       translation.generateKey(bo, field.getName());
       try {
         translation.setValue((String) field.get(dto));
@@ -45,6 +51,7 @@ public class TranslationService extends ServiceSuperclass {
       }
       em.persist(translation);
       em.flush();
+      // ???? what for?
       translations.add(translation);
     }
     return translateEntity(bo, language, true);

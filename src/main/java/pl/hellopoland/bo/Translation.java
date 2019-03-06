@@ -51,14 +51,4 @@ public class Translation extends ModelSuperclass {
     setKey(bo.getClass().getSimpleName() + KEY_DELIMITER + bo.getId() + KEY_DELIMITER + fieldName);
   }
 
-  public void putLanguage(String language) {
-    var langVersions = LanguageVersion.values();
-    for (int i = 0; i < langVersions.length; i++) {
-      if (langVersions[i].name().equals(language.toUpperCase())) {
-        setLanguage(langVersions[i]);
-        break;
-      }
-    }
-  }
-
 }
