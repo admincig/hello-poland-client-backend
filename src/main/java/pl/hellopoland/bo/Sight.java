@@ -10,6 +10,8 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
@@ -53,6 +55,7 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
   private Set<Agreement> agreements;
   private boolean published;
   private boolean blocked;
+  @Enumerated(EnumType.STRING)
   private LanguageVersion defaultLanguage;
 
   public Sight() {}

@@ -2,7 +2,6 @@ package pl.hellopoland.service;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -26,33 +25,32 @@ public class TranslationService extends ServiceSuperclass {
    * The list of the names of the fields excluded from translation.
    */
   private static final List<String> EXCLUDED_FIELDS_NAMES =
-      List.of("Sight.email", "Sight.phone", "Agreement.linkUrl");
+      List.of("Sight.email", "Sight.phone", "Sight.defaultLanguage", "SightEvent.email",
+          "SightEvent.phone", "SightEvent.defaultLanguage", "Agreement.linkUrl");
 
   public <T extends ModelSuperclass, D extends DTOSuperclass> T createEntityLanguageVersion(T bo,
       D dto, String language) {
     LanguageVersion langVersion = Optional.ofNullable(LanguageVersion.getLanuageVersion(language))
         .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+
     Predicate<? super Field> predicate = f -> (f.getType().equals(String.class)
         && !EXCLUDED_FIELDS_NAMES.contains(bo.getClass().getSimpleName() + "." + f.getName()));
 
     List<Field> dtoStringFields = Arrays.asList(dto.getClass().getFields()).stream()
         .filter(predicate).collect(Collectors.toList());
 
-    // ???? what for?
-    var translations = new ArrayList<Translation>();
     for (Field field : dtoStringFields) {
       var translation = new Translation();
       translation.setLanguage(langVersion);
       translation.generateKey(bo, field.getName());
       try {
+        bo.getClass().getDeclaredField(field.getName());
         translation.setValue((String) field.get(dto));
-      } catch (IllegalArgumentException | IllegalAccessException e) {
+      } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException e) {
         continue;
       }
       em.persist(translation);
       em.flush();
-      // ???? what for?
-      translations.add(translation);
     }
     return translateEntity(bo, language, true);
   }

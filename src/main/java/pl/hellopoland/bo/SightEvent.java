@@ -10,6 +10,8 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -67,6 +69,7 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
   private boolean active = true;
   private boolean published;
   private boolean blocked;
+  @Enumerated(EnumType.STRING)
   private LanguageVersion defaultLanguage;
 
   public String getName() {

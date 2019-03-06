@@ -76,7 +76,6 @@ public class SightService extends ServiceSuperclass {
     if (partner == null) {
       partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
     }
-    // bo.generateRandomScore();
     bo.setPartner(partner);
     imageService.update(bo, dto.mainImage == null ? null : dto.mainImage.original);
     em.persist(bo);
@@ -102,7 +101,7 @@ public class SightService extends ServiceSuperclass {
         sightEventBos.forEach(se -> se.setAgreements(agreementBos));
       }
     }
-    return get(bo.getId());
+    return createLanguageVesrion(DtoMapper.getDTO(bo), dto.defaultLanguage);
   }
 
   public Sight createLanguageVesrion(SightDTO dto, String language) {
