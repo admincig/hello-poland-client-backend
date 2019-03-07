@@ -49,8 +49,13 @@ public class TranslationService extends ServiceSuperclass {
       } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException e) {
         continue;
       }
-      em.persist(translation);
-      em.flush();
+      try {
+        em.persist(translation);
+        em.flush();
+      } catch (Exception e) {
+        throw new ConflictingException(
+            "Can not create a new language version because it already exists");
+      }
     }
     return translateEntity(bo, language, true);
   }
