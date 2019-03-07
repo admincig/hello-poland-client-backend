@@ -54,7 +54,7 @@ public class DtoMapper {
     target.setEmail(source.email);
     target.setPhone(source.phone);
     target.setScore(source.score);
-    target.setDefaultLanguage(LanguageVersion.getLanuageVersion(source.defaultLanguage));
+    target.setDefaultLanguage(LanguageVersion.getForCreateEntity(source.defaultLanguage));
     if (source.blocked != null) {
       target.setBlocked(source.blocked);
     }
@@ -266,7 +266,7 @@ public class DtoMapper {
     target.setGeneralAdmission(source.generalAdmission);
     target.setHptId(source.id);
     target.setScore(source.score);
-    target.setDefaultLanguage(LanguageVersion.getLanuageVersion(source.defaultLanguage));
+    target.setDefaultLanguage(LanguageVersion.getForCreateEntity(source.defaultLanguage));
     if (source.blocked != null) {
       target.setBlocked(source.blocked);
     }
