@@ -52,7 +52,7 @@ public class SightServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
-  public SightDTO updateLanguageVersion(SightDTO dto, String language) {
+  public SightDTO updateLanguageVersion(SightDTO dto, LanguageVersion language) {
     return DtoMapper.getFullDTO(service.updateLanguageVersionForLoggedUser(dto, language));
   }
 
@@ -83,8 +83,8 @@ public class SightServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
-  public SightDTO changeDefaultLanguage(Long id, LanguageVersion defaultLang) {
-    Sight bo = service.changeDefaultLanguage(id, defaultLang);
+  public SightDTO changeDefaultLanguage(Long id, LanguageVersion language) {
+    Sight bo = service.changeDefaultLanguage(id, language);
     SightDTO dto = DtoMapper.getFullDTO(bo);
     return dto;
   }

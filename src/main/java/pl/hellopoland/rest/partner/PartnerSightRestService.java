@@ -32,7 +32,7 @@ public class PartnerSightRestService {
 
   @POST
   public SightDTO add(SightDTO dto, @HeaderParam("Content-Language") String language) {
-    LanguageVersion lang = Optional.ofNullable(LanguageVersion.getForCreateEntity(language))
+    LanguageVersion lang = Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
         .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
     if (dto.id == null) {
       dto.defaultLanguage = lang.getLanuage();
@@ -58,7 +58,9 @@ public class PartnerSightRestService {
       @HeaderParam("Content-Language") String language) {
     dto.id = id;
     if (StringUtils.isNotBlank(language)) {
-      return service.updateLanguageVersion(dto, language);
+      LanguageVersion lang = Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
+          .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+      return service.updateLanguageVersion(dto, lang);
     }
     return service.update(dto);
   }
@@ -93,9 +95,9 @@ public class PartnerSightRestService {
   @Path("/{id}/defLang")
   public SightDTO changeDefaultLanguage(@PathParam("id") Long id,
       @HeaderParam("Content-Language") String language) {
-    LanguageVersion defLang = Optional.ofNullable(LanguageVersion.getForCreateEntity(language))
+    LanguageVersion lang = Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
         .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
-    return service.changeDefaultLanguage(id, defLang);
+    return service.changeDefaultLanguage(id, lang);
   }
 
 }

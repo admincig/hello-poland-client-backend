@@ -195,7 +195,8 @@ public class SightEventService extends ServiceSuperclass {
     return bo;
   }
 
-  public SightEvent updateLanguageVersionForLoggedUser(SightEventDTO dto, String language) {
+  public SightEvent updateLanguageVersionForLoggedUser(SightEventDTO dto,
+      LanguageVersion language) {
     return translationService.updateEntityLanguageVersion(getForLoggedUser(dto.id), dto, language);
   }
 

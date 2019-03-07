@@ -43,7 +43,7 @@ public class PartnerAgreementRestService {
 
   @POST
   public AgreementDTO create(AgreementDTO dto, @HeaderParam("Content-Language") String language) {
-    LanguageVersion lang = Optional.ofNullable(LanguageVersion.getForCreateEntity(language))
+    LanguageVersion lang = Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
         .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
     if (dto.id != null) {
       return service.createLanguageVersion(dto, lang);
@@ -63,7 +63,9 @@ public class PartnerAgreementRestService {
       @QueryParam("language") String language) {
     dto.id = id;
     if (StringUtils.isNotBlank(language)) {
-      return service.updateLanguageVersion(dto, language);
+      LanguageVersion lang = Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
+          .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+      return service.updateLanguageVersion(dto, lang);
     }
     return service.update(dto);
   }

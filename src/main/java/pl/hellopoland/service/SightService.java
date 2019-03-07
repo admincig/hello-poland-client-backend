@@ -23,6 +23,7 @@ import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.ExceptionFactory;
+import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.PagedEntityCollection;
@@ -231,7 +232,7 @@ public class SightService extends ServiceSuperclass {
     return getActiveForLoggedUser(dto.id);
   }
 
-  public Sight updateLanguageVersionForLoggedUser(SightDTO dto, String language) {
+  public Sight updateLanguageVersionForLoggedUser(SightDTO dto, LanguageVersion language) {
     return translationService.updateEntityLanguageVersion(getForLoggedPartner(dto.id), dto,
         language);
   }
@@ -259,11 +260,17 @@ public class SightService extends ServiceSuperclass {
         .orElseThrow(ResourceNotFoundException::new);
   }
 
-  public Sight changeDefaultLanguage(Long id, LanguageVersion defaultLang) {
-    var bo = getForLoggedPartner(id);
-    bo.setDefaultLanguage(defaultLang);
+  public Sight changeDefaultLanguage(Long id, LanguageVersion language) {
+    Sight bo = getForLoggedPartner(id);
+    if (!translationService.isTranslated(bo, language)) {
+      throw new ConflictingException(
+          "Can not change the default language. Translation for language " + language.getLanuage()
+              + "doesn't exists");
+    }
+    bo.setDefaultLanguage(language);
+    Sight translation = translationService.translateEntity(bo, language, false);
 
-
+    // TODO: not finished!!!
     return null;
   }
 

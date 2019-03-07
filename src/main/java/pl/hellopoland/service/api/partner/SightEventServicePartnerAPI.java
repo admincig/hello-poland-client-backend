@@ -51,7 +51,7 @@ public class SightEventServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
-  public SightEventDTO updateLanguageVersion(SightEventDTO dto, String language) {
+  public SightEventDTO updateLanguageVersion(SightEventDTO dto, LanguageVersion language) {
     return DtoMapper.getFullDTO(service.updateLanguageVersionForLoggedUser(dto, language));
   }
 

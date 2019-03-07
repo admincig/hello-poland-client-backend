@@ -9,7 +9,7 @@ public enum LanguageVersion {
     this.language = language;
   }
 
-  public static LanguageVersion getForCreateEntity(String language) {
+  public static LanguageVersion getForCreateAndUpdateEntity(String language) {
     if (language == null || language.equals("")) {
       return null;
     }

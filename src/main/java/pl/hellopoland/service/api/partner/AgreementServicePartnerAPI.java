@@ -48,7 +48,7 @@ public class AgreementServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
-  public AgreementDTO updateLanguageVersion(AgreementDTO dto, String language) {
+  public AgreementDTO updateLanguageVersion(AgreementDTO dto, LanguageVersion language) {
     return DtoMapper.getDTO(service.updateLanguageVersion(dto, language));
   }
 

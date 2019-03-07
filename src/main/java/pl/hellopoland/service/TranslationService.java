@@ -54,11 +54,11 @@ public class TranslationService extends ServiceSuperclass {
             "Can not create a new language version because it already exists");
       }
     }
-    return translateEntity(bo, language.getLanuage(), true);
+    return translateEntity(bo, language, true);
   }
 
   public <T extends ModelSuperclass, D extends DTOSuperclass> T updateEntityLanguageVersion(T bo,
-      D dto, String language) {
+      D dto, LanguageVersion language) {
     var translations = getTranslations(bo, language);
     for (Translation t : translations) {
       var key = t.getKey();
@@ -76,12 +76,12 @@ public class TranslationService extends ServiceSuperclass {
     return translateEntity(bo, language, true);
   }
 
-  public <T extends ModelSuperclass> T translateEntity(T bo, String language,
+  public <T extends ModelSuperclass> T translateEntity(T bo, LanguageVersion language,
       boolean fetchColections) {
     if (fetchColections) {
       fetchColections(bo);
     }
-    var translations = getTranslations(bo, getLanguageSymbol(language));
+    var translations = getTranslations(bo, language);
     em.detach(bo);
     for (Translation translation : translations) {
       if (StringUtils.isNotBlank(translation.getValue())) {
@@ -99,12 +99,22 @@ public class TranslationService extends ServiceSuperclass {
     return bo;
   }
 
-  public <T extends ModelSuperclass> List<T> translateEntities(Collection<T> bos, String language,
-      boolean fetchColections) {
+  public <T extends ModelSuperclass> List<T> translateEntities(Collection<T> bos,
+      LanguageVersion language, boolean fetchColections) {
     return bos.stream().map(bo -> {
       bo = translateEntity(bo, language, fetchColections);
       return bo;
     }).collect(Collectors.toList());
+  }
+
+  public <T extends ModelSuperclass> boolean isTranslated(T bo, LanguageVersion language) {
+    return em.createQuery(
+        "select count(t) from Translation t where t.key like :key and language = :language limit 1",
+        Long.class)
+        .setParameter("key",
+            bo.getClass().getSimpleName() + Translation.KEY_DELIMITER + bo.getId()
+                + Translation.KEY_DELIMITER + "%")
+        .setParameter("language", language).getSingleResult().intValue() > 0;
   }
 
   private <T extends ModelSuperclass> void fetchColections(T bo) {
@@ -137,19 +147,14 @@ public class TranslationService extends ServiceSuperclass {
         }).forEach(collection -> collection.size());
   }
 
-  private List<Translation> getTranslations(ModelSuperclass bo, String language) {
-    LanguageVersion lang;
-    try {
-      lang = LanguageVersion.valueOf(language.toUpperCase());
-    } catch (IllegalArgumentException e) {
-      lang = LanguageVersion.EN_GB;
-    }
+  private List<Translation> getTranslations(ModelSuperclass bo, LanguageVersion language) {
     return em
         .createQuery("from Translation t where t.key like :key and language = :language",
             Translation.class)
-        .setParameter("key", bo.getClass().getSimpleName() + Translation.KEY_DELIMITER + bo.getId()
-            + Translation.KEY_DELIMITER + "%")
-        .setParameter("language", lang).getResultList();
+        .setParameter("key",
+            bo.getClass().getSimpleName() + Translation.KEY_DELIMITER + bo.getId()
+                + Translation.KEY_DELIMITER + "%")
+        .setParameter("language", language).getResultList();
   }
 
   private String getLanguageSymbol(String language) {

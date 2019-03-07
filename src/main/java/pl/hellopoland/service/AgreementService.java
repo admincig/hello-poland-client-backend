@@ -57,7 +57,7 @@ public class AgreementService extends ServiceSuperclass {
     return getForLoggedUser(updated.getId());
   }
 
-  public Agreement updateLanguageVersion(AgreementDTO dto, String language) {
+  public Agreement updateLanguageVersion(AgreementDTO dto, LanguageVersion language) {
     return translationService.updateEntityLanguageVersion(getForLoggedUser(dto.id), dto, language);
   }
 
