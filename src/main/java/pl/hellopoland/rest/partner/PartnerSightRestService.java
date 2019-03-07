@@ -32,13 +32,13 @@ public class PartnerSightRestService {
 
   @POST
   public SightDTO add(SightDTO dto, @HeaderParam("Content-Language") String language) {
-    LanguageVersion defLang = Optional.ofNullable(LanguageVersion.getForCreateEntity(language))
+    LanguageVersion lang = Optional.ofNullable(LanguageVersion.getForCreateEntity(language))
         .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
     if (dto.id == null) {
-      dto.defaultLanguage = defLang.getLanuage();
+      dto.defaultLanguage = lang.getLanuage();
       return service.create(dto);
     }
-    return service.createLanguageVesrion(dto, language);
+    return service.createLanguageVesrion(dto, lang);
   }
 
   @GET

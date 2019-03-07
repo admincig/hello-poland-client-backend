@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.SightEventDTO;
+import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.util.DtoMapper;
@@ -38,7 +39,7 @@ public class SightEventServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
-  public SightEventDTO createLanguageVesrion(SightEventDTO dto, String language) {
+  public SightEventDTO createLanguageVesrion(SightEventDTO dto, LanguageVersion language) {
     return DtoMapper.getFullDTO(service.createLanguageVesrion(dto, language));
   }
 

@@ -102,10 +102,10 @@ public class SightService extends ServiceSuperclass {
         sightEventBos.forEach(se -> se.setAgreements(agreementBos));
       }
     }
-    return createLanguageVesrion(DtoMapper.getDTO(bo), dto.defaultLanguage);
+    return createLanguageVesrion(DtoMapper.getDTO(bo), bo.getDefaultLanguage());
   }
 
-  public Sight createLanguageVesrion(SightDTO dto, String language) {
+  public Sight createLanguageVesrion(SightDTO dto, LanguageVersion language) {
     return translationService.createEntityLanguageVersion(getForLoggedPartner(dto.id), dto,
         language);
   }

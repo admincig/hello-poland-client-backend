@@ -38,6 +38,7 @@ import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
+import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.AccessDeniedException;
 import pl.hellopoland.util.DtoMapper;
@@ -151,7 +152,7 @@ public class SightEventService extends ServiceSuperclass {
       bo.setOpeningHours(oHoursList);
     }
     logger.log(Logger.Level.INFO, "Saved new sight event: " + bo.getName());
-    return createLanguageVesrion(DtoMapper.getDTO(bo), partner, dto.defaultLanguage);
+    return createLanguageVesrion(DtoMapper.getDTO(bo), partner, bo.getDefaultLanguage());
   }
 
   private ArrayList<OpeningHours> getOpeningHoursCollectionFromDTO(SightEventDTO dto) {
@@ -161,12 +162,13 @@ public class SightEventService extends ServiceSuperclass {
         .orElse(null);
   }
 
-  private SightEvent createLanguageVesrion(SightEventDTO dto, Partner partner, String language) {
+  private SightEvent createLanguageVesrion(SightEventDTO dto, Partner partner,
+      LanguageVersion language) {
     return translationService.createEntityLanguageVersion(getForPartner(dto.id, partner), dto,
         language);
   }
 
-  public SightEvent createLanguageVesrion(SightEventDTO dto, String language) {
+  public SightEvent createLanguageVesrion(SightEventDTO dto, LanguageVersion language) {
     return translationService.createEntityLanguageVersion(getForLoggedUser(dto.id), dto, language);
   }
 
