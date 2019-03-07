@@ -121,6 +121,7 @@ public class SightEventService extends ServiceSuperclass {
     if (!sight.getPartner().equals(partner)) {
       throw new AccessDeniedException();
     }
+    var defLang = dto.defaultLanguage;
     dto.generalAdmission = Boolean.TRUE.equals(dto.generalAdmission);
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
@@ -148,9 +149,9 @@ public class SightEventService extends ServiceSuperclass {
       });
       bo.setOpeningHours(oHoursList);
     }
-
+    dto.defaultLanguage = defLang;
     logger.log(Logger.Level.INFO, "Saved new sight event: " + bo.getName());
-    return bo;
+    return createLanguageVesrion(DtoMapper.getDTO(bo), dto.defaultLanguage);
   }
 
   private ArrayList<OpeningHours> getOpeningHoursCollectionFromDTO(SightEventDTO dto) {

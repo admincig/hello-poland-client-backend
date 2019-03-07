@@ -1,6 +1,7 @@
 package pl.hellopoland.rest.partner;
 
 import java.util.Date;
+import java.util.Optional;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -17,6 +18,8 @@ import org.apache.commons.lang3.StringUtils;
 import pl.hellopoland.annotation.DateTimeFormat;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.SightEventDTO;
+import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.api.partner.SightEventServicePartnerAPI;
 
@@ -36,10 +39,13 @@ public class PartnerSightEventRestService {
 
   @POST
   public SightEventDTO create(SightEventDTO dto, @QueryParam("language") String language) {
-    if (dto.id != null) {
-      return service.createLanguageVesrion(dto, language);
+    LanguageVersion defLang = Optional.ofNullable(LanguageVersion.getLanuageVersion(language))
+        .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+    if (dto.id == null) {
+      dto.defaultLanguage = defLang.getLanuage();
+      return service.create(dto);
     }
-    return service.create(dto);
+    return service.createLanguageVesrion(dto, language);
   }
 
   @PUT
