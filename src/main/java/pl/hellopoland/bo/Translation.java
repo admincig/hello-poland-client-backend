@@ -1,5 +1,6 @@
 package pl.hellopoland.bo;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -18,6 +19,7 @@ public class Translation extends ModelSuperclass {
 
   @NotBlank
   private String key;
+  @Column(columnDefinition = "varchar(2500)")
   private String value;
   @NotNull
   @Enumerated(EnumType.STRING)

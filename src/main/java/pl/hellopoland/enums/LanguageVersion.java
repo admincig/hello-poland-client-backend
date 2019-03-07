@@ -9,8 +9,20 @@ public enum LanguageVersion {
     this.language = language;
   }
 
-  public static LanguageVersion getLanuageVersion(String language) {
-    if (language == null) {
+  public static LanguageVersion getForCreateEntity(String language) {
+    if (language == null || language.equals("")) {
+      return null;
+    }
+    for (var lang : LanguageVersion.values()) {
+      if (lang.language.equals(language)) {
+        return lang;
+      }
+    }
+    return null;
+  }
+
+  public static LanguageVersion getForTranslationEntity(String language) {
+    if (language == null || language.equals("")) {
       return null;
     }
     for (var lang : LanguageVersion.values()) {

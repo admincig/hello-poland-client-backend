@@ -405,6 +405,7 @@ public class DbFiller extends ServiceSuperclass {
     var se = new SightEvent();
     se.generateRandomScore();
     dto.score = se.getScore();
+    dto.defaultLanguage = "pl-PL";
     return sService.create(dto, partner);
   }
 

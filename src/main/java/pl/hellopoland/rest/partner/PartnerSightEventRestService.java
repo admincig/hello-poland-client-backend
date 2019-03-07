@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -38,8 +39,8 @@ public class PartnerSightEventRestService {
   }
 
   @POST
-  public SightEventDTO create(SightEventDTO dto, @QueryParam("language") String language) {
-    LanguageVersion defLang = Optional.ofNullable(LanguageVersion.getLanuageVersion(language))
+  public SightEventDTO create(SightEventDTO dto, @HeaderParam("Content-Language") String language) {
+    LanguageVersion defLang = Optional.ofNullable(LanguageVersion.getForCreateEntity(language))
         .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
     if (dto.id == null) {
       dto.defaultLanguage = defLang.getLanuage();
@@ -51,7 +52,7 @@ public class PartnerSightEventRestService {
   @PUT
   @Path("/{id}")
   public SightEventDTO update(@PathParam("id") Long id, SightEventDTO dto,
-      @QueryParam("language") String language) {
+      @HeaderParam("Content-Language") String language) {
     dto.id = id;
     if (StringUtils.isNotBlank(language)) {
       return service.updateLanguageVersion(dto, language);

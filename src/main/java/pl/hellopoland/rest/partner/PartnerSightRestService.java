@@ -12,7 +12,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.lang3.StringUtils;
 import pl.hellopoland.dto.SightDTO;
@@ -32,7 +31,7 @@ public class PartnerSightRestService {
 
   @POST
   public SightDTO add(SightDTO dto, @HeaderParam("Content-Language") String language) {
-    LanguageVersion defLang = Optional.ofNullable(LanguageVersion.getLanuageVersion(language))
+    LanguageVersion defLang = Optional.ofNullable(LanguageVersion.getForCreateEntity(language))
         .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
     if (dto.id == null) {
       dto.defaultLanguage = defLang.getLanuage();
@@ -55,7 +54,7 @@ public class PartnerSightRestService {
   @PUT
   @Path("/{id}")
   public SightDTO update(@PathParam("id") Long id, SightDTO dto,
-      @QueryParam("language") String language) {
+      @HeaderParam("Content-Language") String language) {
     dto.id = id;
     if (StringUtils.isNotBlank(language)) {
       return service.updateLanguageVersion(dto, language);

@@ -30,7 +30,7 @@ public class TranslationService extends ServiceSuperclass {
 
   public <T extends ModelSuperclass, D extends DTOSuperclass> T createEntityLanguageVersion(T bo,
       D dto, String language) {
-    LanguageVersion langVersion = Optional.ofNullable(LanguageVersion.getLanuageVersion(language))
+    LanguageVersion langVersion = Optional.ofNullable(LanguageVersion.getForCreateEntity(language))
         .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
 
     Predicate<? super Field> predicate = f -> (f.getType().equals(String.class)
