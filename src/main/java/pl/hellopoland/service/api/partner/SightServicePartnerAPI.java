@@ -7,6 +7,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.dto.SightDTO;
+import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.SightService;
 import pl.hellopoland.util.DtoMapper;
@@ -78,6 +79,13 @@ public class SightServicePartnerAPI {
   public SightDTO removeImageFromGallery(Long id, Long imgId) {
     Sight bo = service.removeImageFromGallery(id, imgId);
     var dto = DtoMapper.getFullDTO(bo);
+    return dto;
+  }
+
+  @RolesAllowed("partner")
+  public SightDTO changeDefaultLanguage(Long id, LanguageVersion defaultLang) {
+    Sight bo = service.changeDefaultLanguage(id, defaultLang);
+    SightDTO dto = DtoMapper.getFullDTO(bo);
     return dto;
   }
 

@@ -21,6 +21,7 @@ import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.config.SightPagedCollectionConfig;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.dto.SightEventDTO;
+import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.ExceptionFactory;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.util.DtoMapper;
@@ -256,6 +257,14 @@ public class SightService extends ServiceSuperclass {
     return em.createQuery("from Sight where partner = :partner and id = :id", Sight.class)
         .setParameter("partner", partner).setParameter("id", sightId).getResultStream().findFirst()
         .orElseThrow(ResourceNotFoundException::new);
+  }
+
+  public Sight changeDefaultLanguage(Long id, LanguageVersion defaultLang) {
+    var bo = getForLoggedPartner(id);
+    bo.setDefaultLanguage(defaultLang);
+
+
+    return null;
   }
 
 }

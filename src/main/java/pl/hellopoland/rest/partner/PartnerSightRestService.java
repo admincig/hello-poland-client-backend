@@ -7,6 +7,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -87,4 +88,14 @@ public class PartnerSightRestService {
   public SightDTO uploadImage(@PathParam("id") Long id, @PathParam("imgId") Long imgId) {
     return service.removeImageFromGallery(id, imgId);
   }
+
+  @PATCH
+  @Path("/{id}/defLang")
+  public SightDTO changeDefaultLanguage(@PathParam("id") Long id,
+      @HeaderParam("Content-Language") String language) {
+    LanguageVersion defLang = Optional.ofNullable(LanguageVersion.getForCreateEntity(language))
+        .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+    return service.changeDefaultLanguage(id, defLang);
+  }
+
 }
