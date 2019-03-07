@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.SightEventDTO;
+import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.dto.AvailableTicketNumberAssociationORO;
 import pl.hellopoland.rest.dto.PagedCollection;
@@ -35,14 +36,14 @@ public class SightEventServiceMarketAPI {
 
   @PermitAll
   public PagedCollection getList(SightEventPagedCollectionConfig config, Date fromDate, Date toDate,
-      String language) {
+      LanguageVersion language) {
     if (fromDate != null && toDate != null && toDate.before(fromDate)) {
       throw new ConflictingException("toDate[" + toDate + "] is before fromDate[" + fromDate + "]");
     }
     config.setOrderColumn("name");
     config.setOrderDirection("asc");
     PagedEntityCollection<SightEvent> bos = service.getList(config);
-    if (language != null && !language.toLowerCase().contains("pl")) {
+    if (language != null) {
       bos.items = translationService.translateEntities(bos.items, language, false);
     }
     List<SightEventDTO> dtos =
@@ -59,10 +60,10 @@ public class SightEventServiceMarketAPI {
   }
 
   @PermitAll
-  public SightEventDTO get(Long id, String language) {
+  public SightEventDTO get(Long id, LanguageVersion language) {
     SightEvent bo = service.get(id);
     if (bo.isPublished()) {
-      if (language != null && !language.toLowerCase().contains("pl")) {
+      if (language != null) {
         bo = translationService.translateEntity(bo, language, true);
         var agreements = bo.getAgreements();
         var tickets = bo.getTickets();

@@ -1,6 +1,7 @@
 package pl.hellopoland.rest.market;
 
 import java.util.Date;
+import java.util.Optional;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -16,6 +17,8 @@ import pl.hellopoland.annotation.DateFormat;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.FiltersContainerDTO;
 import pl.hellopoland.dto.SightEventDTO;
+import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.dto.AvailableTicketNumberAssociationORO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.api.market.FilterMarketAPI;
@@ -38,11 +41,13 @@ public class MarketSightEventRestService {
       @QueryParam("fromDate") @DateFormat Date fromDate,
       @QueryParam("toDate") @DateFormat Date toDate,
       @HeaderParam("Accept-Language") String language) {
+    LanguageVersion lang = Optional.ofNullable(LanguageVersion.getForTranslationEntity(language))
+        .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
     var config = new SightEventPagedCollectionConfig();
     config.onlyActive();
     config.onlyPublished();
     config.setCity(city);
-    return service.getList(config, fromDate, toDate, language);
+    return service.getList(config, fromDate, toDate, lang);
   }
 
   @GET
@@ -51,12 +56,14 @@ public class MarketSightEventRestService {
       @QueryParam("city") String city, @QueryParam("fromDate") @DateFormat Date fromDate,
       @QueryParam("toDate") @DateFormat Date toDate,
       @HeaderParam("Accept-Language") String language) {
+    LanguageVersion lang = Optional.ofNullable(LanguageVersion.getForTranslationEntity(language))
+        .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
     var config = new SightEventPagedCollectionConfig();
     config.onlyActive();
     config.onlyPublished();
     config.setSearchQuery(searchQuery);
     config.setCity(city);
-    return service.getList(config, fromDate, toDate, language);
+    return service.getList(config, fromDate, toDate, lang);
   }
 
   @POST
@@ -65,18 +72,22 @@ public class MarketSightEventRestService {
       @QueryParam("fromDate") @DateFormat Date fromDate,
       @QueryParam("toDate") @DateFormat Date toDate, @QueryParam("city") String city,
       @HeaderParam("Accept-Language") String language) {
+    LanguageVersion lang = Optional.ofNullable(LanguageVersion.getForTranslationEntity(language))
+        .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
     config.onlyActive();
     config.onlyActive();
     config.onlyPublished();
     config.setCity(city);
-    return service.getList(config, fromDate, toDate, language);
+    return service.getList(config, fromDate, toDate, lang);
   }
 
   @GET
   @Path("/{id}")
   public SightEventDTO get(@PathParam("id") Long id,
       @HeaderParam("Accept-Language") String language) {
-    return service.get(id, language);
+    LanguageVersion lang = Optional.ofNullable(LanguageVersion.getForTranslationEntity(language))
+        .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+    return service.get(id, lang);
   }
 
   @GET

@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.config.SightPagedCollectionConfig;
 import pl.hellopoland.dto.SightDTO;
+import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.service.SightService;
@@ -29,11 +30,11 @@ public class SightServiceMarketAPI {
   private TranslationService translationService;
 
   @PermitAll
-  public PagedCollection getList(SightPagedCollectionConfig config, String language) {
+  public PagedCollection getList(SightPagedCollectionConfig config, LanguageVersion language) {
     config.setOrderColumn("name");
     config.setOrderDirection("asc");
     PagedEntityCollection<Sight> bos = service.getList(config);
-    if (language != null && !language.toLowerCase().contains("pl")) {
+    if (language != null) {
       bos.items = translationService.translateEntities(bos.items, language, false);
     }
     var dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
@@ -41,13 +42,13 @@ public class SightServiceMarketAPI {
   }
 
   @PermitAll
-  public SightDTO get(Long id, String language) {
+  public SightDTO get(Long id, LanguageVersion language) {
     Sight bo = service.get(id);
     if (bo.isPublished()) {
       bo.setSightEvents(bo.getSightEvents().stream()
           .filter(se -> se.isActive() && se.isPublished() && !se.isBlocked())
           .collect(Collectors.toList()));
-      if (language != null && !language.toLowerCase().contains("pl")) {
+      if (language != null) {
         bo = translationService.translateEntity(bo, language, true);
         var agreements = bo.getAgreements();
         var sightEvents = bo.getSightEvents();

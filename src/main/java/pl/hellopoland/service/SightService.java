@@ -271,6 +271,9 @@ public class SightService extends ServiceSuperclass {
     Sight translation = translationService.translateEntity(bo, language, false);
 
     // TODO: not finished!!!
+    // 1. w TranslationService rozroznic sprawdzanie czy istnieje tlumaczenie
+    // do celow zmiany defLang od tego do pobierania tlumaczenia encji na get() lub getList()
+    // w miare mozliwosci uniknac podwojnego wyciagania z bazy tlumaczenia dla danej encji
     return null;
   }
 
