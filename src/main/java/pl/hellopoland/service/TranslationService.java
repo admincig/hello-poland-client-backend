@@ -5,7 +5,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.ejb.LocalBean;
@@ -29,9 +28,7 @@ public class TranslationService extends ServiceSuperclass {
           "SightEvent.phone", "SightEvent.defaultLanguage", "Agreement.linkUrl");
 
   public <T extends ModelSuperclass, D extends DTOSuperclass> T createEntityLanguageVersion(T bo,
-      D dto, String language) {
-    LanguageVersion langVersion = Optional.ofNullable(LanguageVersion.getForCreateEntity(language))
-        .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+      D dto, LanguageVersion language) {
 
     Predicate<? super Field> predicate = f -> (f.getType().equals(String.class)
         && !EXCLUDED_FIELDS_NAMES.contains(bo.getClass().getSimpleName() + "." + f.getName()));
@@ -41,7 +38,7 @@ public class TranslationService extends ServiceSuperclass {
 
     for (Field field : dtoStringFields) {
       var translation = new Translation();
-      translation.setLanguage(langVersion);
+      translation.setLanguage(language);
       translation.generateKey(bo, field.getName());
       try {
         bo.getClass().getDeclaredField(field.getName());
@@ -57,7 +54,7 @@ public class TranslationService extends ServiceSuperclass {
             "Can not create a new language version because it already exists");
       }
     }
-    return translateEntity(bo, language, true);
+    return translateEntity(bo, language.getLanuage(), true);
   }
 
   public <T extends ModelSuperclass, D extends DTOSuperclass> T updateEntityLanguageVersion(T bo,
