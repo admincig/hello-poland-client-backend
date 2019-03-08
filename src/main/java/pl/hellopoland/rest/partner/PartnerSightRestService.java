@@ -49,8 +49,10 @@ public class PartnerSightRestService {
 
   @GET
   @Path("/{id}")
-  public SightDTO get(@PathParam("id") Long id) {
-    return service.get(id);
+  public SightDTO get(@PathParam("id") Long id,
+      @HeaderParam("Accept-Language") String acceptLanguage,
+      @HeaderParam("Content-Language") String contentLanguage) {
+    return service.get(id, contentLanguage != null ? contentLanguage : acceptLanguage);
   }
 
   @PUT

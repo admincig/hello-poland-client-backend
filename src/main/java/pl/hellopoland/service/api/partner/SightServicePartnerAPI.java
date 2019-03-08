@@ -37,8 +37,9 @@ public class SightServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
-  public SightDTO get(Long id) {
-    Sight bo = service.getActiveForLoggedUser(id);
+  public SightDTO get(Long id, String contentLanguageSymbol) {
+    LanguageVersion lang = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
+    Sight bo = service.getActiveForLoggedUser(id, lang);
     return DtoMapper.getFullDTO(bo);
   }
 

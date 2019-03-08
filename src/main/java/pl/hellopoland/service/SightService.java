@@ -204,6 +204,18 @@ public class SightService extends ServiceSuperclass {
         .setParameter("id", id).setParameter("partner", getLoggedPartner()).getSingleResult();
   }
 
+  public Sight getActiveForLoggedUser(Long id, LanguageVersion language) {
+    var bo = getActiveForLoggedUser(id);
+    if (language == null) {
+      return bo;
+    }
+    return getLanguageVersion(bo, language);
+  }
+
+  private Sight getLanguageVersion(Sight bo, LanguageVersion language) {
+    return translationService.translateEntity(bo, language, true);
+  }
+
   public Sight updateForLoggedUser(SightDTO dto) {
     Sight bo = getActiveForLoggedUser(dto.id);
     DtoMapper.copy(dto, bo);
