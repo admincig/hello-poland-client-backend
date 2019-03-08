@@ -99,6 +99,8 @@ public class DtoMapper {
     dto.published = bo.isPublished();
     dto.defaultLanguage =
         bo.getDefaultLanguage() != null ? bo.getDefaultLanguage().getLanuage() : null;
+    dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
+        .map(lang -> lang.getLanuage()).collect(Collectors.toSet());
     return dto;
   }
 
@@ -139,6 +141,8 @@ public class DtoMapper {
     dto.partnerAffiliateCode = bo.getPartner().getAffiliateCode();
     dto.defaultLanguage =
         bo.getDefaultLanguage() != null ? bo.getDefaultLanguage().getLanuage() : null;
+    dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
+        .map(lang -> lang.getLanuage()).collect(Collectors.toSet());
     return dto;
   }
 

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -17,6 +18,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.util.Imaged;
 import pl.hellopoland.util.Located;
@@ -55,8 +57,15 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
   private Set<Agreement> agreements;
   private boolean published;
   private boolean blocked;
+  @NotNull
+  @Column(length = 5, nullable = false)
   @Enumerated(EnumType.STRING)
   private LanguageVersion defaultLanguage;
+  @NotNull
+  @Column(nullable = false)
+  @ElementCollection
+  @Enumerated(EnumType.STRING)
+  private Set<LanguageVersion> availableLanguageVersions;
 
   public Sight() {}
 
@@ -216,6 +225,14 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
 
   public void setDefaultLanguage(LanguageVersion defaultLanguage) {
     this.defaultLanguage = defaultLanguage;
+  }
+
+  public Set<LanguageVersion> getAvailableLanguageVersions() {
+    return availableLanguageVersions;
+  }
+
+  public void setAvailableLanguageVersions(Set<LanguageVersion> availableLanguageVersions) {
+    this.availableLanguageVersions = availableLanguageVersions;
   }
 
 }

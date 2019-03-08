@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.ejb.DependsOn;
 import javax.ejb.Singleton;
@@ -25,6 +26,7 @@ import pl.hellopoland.dto.FrequencyTypeDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
+import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.security.password.PasswordEncoder;
 import pl.hellopoland.service.ImageService;
 import pl.hellopoland.service.ServiceSuperclass;
@@ -299,6 +301,8 @@ public class DbFiller extends ServiceSuperclass {
     bo.setLocation(location);
     bo.setBlocked(blocked);
     bo.setPublished(published);
+    bo.setDefaultLanguage(LanguageVersion.PL_PL);
+    bo.setAvailableLanguageVersions(Set.of(LanguageVersion.PL_PL));
     em.persist(bo);
     return bo;
   }

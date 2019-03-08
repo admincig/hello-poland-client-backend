@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.Random;
 import java.util.Set;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -69,8 +70,15 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
   private boolean active = true;
   private boolean published;
   private boolean blocked;
+  @NotNull
+  @Column(length = 5, nullable = false)
   @Enumerated(EnumType.STRING)
   private LanguageVersion defaultLanguage;
+  @NotNull
+  @Column(nullable = false)
+  @ElementCollection
+  @Enumerated(EnumType.STRING)
+  private Set<LanguageVersion> availableLanguageVersions;
 
   public String getName() {
     return name;
@@ -293,6 +301,14 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
 
   public void setDefaultLanguage(LanguageVersion defaultLanguage) {
     this.defaultLanguage = defaultLanguage;
+  }
+
+  public Set<LanguageVersion> getAvailableLanguageVersions() {
+    return availableLanguageVersions;
+  }
+
+  public void setAvailableLanguageVersions(Set<LanguageVersion> availableLanguageVersions) {
+    this.availableLanguageVersions = availableLanguageVersions;
   }
 
 }
