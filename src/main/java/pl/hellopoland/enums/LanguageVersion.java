@@ -21,6 +21,9 @@ public enum LanguageVersion {
     return null;
   }
 
+  // TODO:
+  // to correct the situation when the string consists of comma separated language symbols or
+  // statistical weights!!
   public static LanguageVersion getForTranslationEntity(String language) {
     if (language == null || language.equals("")) {
       return null;

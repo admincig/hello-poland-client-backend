@@ -21,8 +21,7 @@ public class SightServicePartnerAPI {
   @RolesAllowed("partner")
   public SightDTO create(SightDTO dto) {
     Sight bo = service.create(dto, null);
-    dto = DtoMapper.getFullDTO(bo);
-    return dto;
+    return DtoMapper.getFullDTO(bo);
   }
 
   @RolesAllowed("partner")
@@ -40,15 +39,13 @@ public class SightServicePartnerAPI {
   @RolesAllowed("partner")
   public SightDTO get(Long id) {
     Sight bo = service.getActiveForLoggedUser(id);
-    var dto = DtoMapper.getFullDTO(bo);
-    return dto;
+    return DtoMapper.getFullDTO(bo);
   }
 
   @RolesAllowed("partner")
   public SightDTO update(SightDTO dto) {
     Sight bo = service.updateForLoggedUser(dto);
-    dto = DtoMapper.getFullDTO(bo);
-    return dto;
+    return DtoMapper.getFullDTO(bo);
   }
 
   @RolesAllowed("partner")
@@ -64,29 +61,25 @@ public class SightServicePartnerAPI {
   @RolesAllowed("partner")
   public SightDTO uploadMainImage(Long id, byte[] icon) {
     Sight bo = service.uploadMainImageForLoggedUser(id, icon);
-    var dto = DtoMapper.getFullDTO(bo);
-    return dto;
+    return DtoMapper.getFullDTO(bo);
   }
 
   @RolesAllowed("partner")
   public SightDTO uploadImage(Long id, byte[] icon) {
     Sight bo = service.addImageToSightGallery(id, icon);
-    var dto = DtoMapper.getFullDTO(bo);
-    return dto;
+    return DtoMapper.getFullDTO(bo);
   }
 
   @RolesAllowed("partner")
   public SightDTO removeImageFromGallery(Long id, Long imgId) {
     Sight bo = service.removeImageFromGallery(id, imgId);
-    var dto = DtoMapper.getFullDTO(bo);
-    return dto;
+    return DtoMapper.getFullDTO(bo);
   }
 
   @RolesAllowed("partner")
   public SightDTO changeDefaultLanguage(Long id, LanguageVersion language) {
     Sight bo = service.changeDefaultLanguage(id, language);
-    SightDTO dto = DtoMapper.getFullDTO(bo);
-    return dto;
+    return DtoMapper.getFullDTO(bo);
   }
 
 }

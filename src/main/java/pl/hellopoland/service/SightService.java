@@ -25,6 +25,7 @@ import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.ExceptionFactory;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
+import pl.hellopoland.util.BeanUtils;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.PagedEntityCollection;
 
@@ -267,14 +268,11 @@ public class SightService extends ServiceSuperclass {
           "Can not change the default language. Translation for language " + language.getLanuage()
               + "doesn't exists");
     }
+    Sight translation = translationService.translateEntity(bo, language, true);
     bo.setDefaultLanguage(language);
-    Sight translation = translationService.translateEntity(bo, language, false);
-
-    // TODO: not finished!!!
-    // 1. w TranslationService rozroznic sprawdzanie czy istnieje tlumaczenie
-    // do celow zmiany defLang od tego do pobierania tlumaczenia encji na get() lub getList()
-    // w miare mozliwosci uniknac podwojnego wyciagania z bazy tlumaczenia dla danej encji
-    return null;
+    bo = BeanUtils.copyNotNullProperties(translation, bo);
+    em.merge(bo);
+    return bo;
   }
 
 }

@@ -108,13 +108,13 @@ public class TranslationService extends ServiceSuperclass {
   }
 
   public <T extends ModelSuperclass> boolean isTranslated(T bo, LanguageVersion language) {
-    return em.createQuery(
-        "select count(t) from Translation t where t.key like :key and language = :language limit 1",
-        Long.class)
+    return em
+        .createQuery("from Translation t where t.key like :key and language = :language",
+            Translation.class)
         .setParameter("key",
             bo.getClass().getSimpleName() + Translation.KEY_DELIMITER + bo.getId()
                 + Translation.KEY_DELIMITER + "%")
-        .setParameter("language", language).getSingleResult().intValue() > 0;
+        .setParameter("language", language).setMaxResults(1).getResultList().size() == 1;
   }
 
   private <T extends ModelSuperclass> void fetchColections(T bo) {

@@ -32,8 +32,9 @@ public class PartnerSightRestService {
 
   @POST
   public SightDTO add(SightDTO dto, @HeaderParam("Content-Language") String language) {
-    LanguageVersion lang = Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
-        .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+    LanguageVersion lang =
+        Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
+            .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
     if (dto.id == null) {
       dto.defaultLanguage = lang.getLanuage();
       return service.create(dto);
@@ -58,8 +59,9 @@ public class PartnerSightRestService {
       @HeaderParam("Content-Language") String language) {
     dto.id = id;
     if (StringUtils.isNotBlank(language)) {
-      LanguageVersion lang = Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
-          .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+      LanguageVersion lang =
+          Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
+              .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
       return service.updateLanguageVersion(dto, lang);
     }
     return service.update(dto);
@@ -92,11 +94,12 @@ public class PartnerSightRestService {
   }
 
   @PATCH
-  @Path("/{id}/defLang")
+  @Path("/{id}/defaultLanguage")
   public SightDTO changeDefaultLanguage(@PathParam("id") Long id,
       @HeaderParam("Content-Language") String language) {
-    LanguageVersion lang = Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
-        .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+    LanguageVersion lang =
+        Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
+            .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
     return service.changeDefaultLanguage(id, lang);
   }
 

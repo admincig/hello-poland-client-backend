@@ -36,9 +36,8 @@ public class MarketSightRestService {
   @GET
   public PagedCollection get(@QueryParam("city") String city,
       @HeaderParam("Accept-Language") String language) {
-    LanguageVersion lang =
-        Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
-            .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+    LanguageVersion lang = Optional.ofNullable(LanguageVersion.getForTranslationEntity(language))
+        .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
     var config = new SightPagedCollectionConfig();
     config.onlyActive();
     config.onlyPublished();
@@ -49,9 +48,8 @@ public class MarketSightRestService {
   @GET
   @Path("/{id}")
   public SightDTO get(@PathParam("id") Long id, @HeaderParam("Accept-Language") String language) {
-    LanguageVersion lang =
-        Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
-            .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+    LanguageVersion lang = Optional.ofNullable(LanguageVersion.getForTranslationEntity(language))
+        .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
     return service.get(id, lang);
   }
 
@@ -59,9 +57,8 @@ public class MarketSightRestService {
   @Path("/search")
   public PagedCollection search(@QueryParam("searchQuery") String searchQuery,
       @QueryParam("city") String city, @HeaderParam("Accept-Language") String language) {
-    LanguageVersion lang =
-        Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
-            .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+    LanguageVersion lang = Optional.ofNullable(LanguageVersion.getForTranslationEntity(language))
+        .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
     var config = new SightPagedCollectionConfig();
     config.onlyActive();
     config.onlyPublished();
@@ -74,9 +71,8 @@ public class MarketSightRestService {
   @Path("/search")
   public PagedCollection search(SightPagedCollectionConfig config, @QueryParam("city") String city,
       @HeaderParam("Accept-Language") String language) {
-    LanguageVersion lang =
-        Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
-            .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+    LanguageVersion lang = Optional.ofNullable(LanguageVersion.getForTranslationEntity(language))
+        .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
     config.onlyActive();
     config.onlyPublished();
     config.setCity(city);

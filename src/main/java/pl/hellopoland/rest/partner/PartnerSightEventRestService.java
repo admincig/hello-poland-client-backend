@@ -8,6 +8,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -40,8 +41,9 @@ public class PartnerSightEventRestService {
 
   @POST
   public SightEventDTO create(SightEventDTO dto, @HeaderParam("Content-Language") String language) {
-    LanguageVersion lang = Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
-        .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+    LanguageVersion lang =
+        Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
+            .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
     if (dto.id == null) {
       dto.defaultLanguage = lang.getLanuage();
       return service.create(dto);
@@ -55,8 +57,9 @@ public class PartnerSightEventRestService {
       @HeaderParam("Content-Language") String language) {
     dto.id = id;
     if (StringUtils.isNotBlank(language)) {
-      LanguageVersion lang = Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
-          .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+      LanguageVersion lang =
+          Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
+              .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
       return service.updateLanguageVersion(dto, lang);
     }
     return service.update(dto);
@@ -119,6 +122,16 @@ public class PartnerSightEventRestService {
   public void stopSale(@PathParam("id") Long id, @QueryParam("tpdId") Long tpdId,
       @QueryParam("date") @DateTimeFormat Date date) {
     service.stopSale(id, tpdId, date);
+  }
+
+  @PATCH
+  @Path("/{id}/defaultLanguage")
+  public SightEventDTO changeDefaultLanguage(@PathParam("id") Long id,
+      @HeaderParam("Content-Language") String language) {
+    LanguageVersion lang =
+        Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
+            .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+    return service.changeDefaultLanguage(id, lang);
   }
 
 }

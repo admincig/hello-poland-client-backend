@@ -41,6 +41,7 @@ import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.AccessDeniedException;
+import pl.hellopoland.util.BeanUtils;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PagedEntityCollection;
@@ -492,6 +493,20 @@ public class SightEventService extends ServiceSuperclass {
     var bo = getForLoggedUser(sightId);
     HelloTicket ht = new HelloTicket(bo.getPortal().getUrl());
     ht.stopSale(getLoggedPartner().getHptToken(), bo.getHptId(), ticketPoolDefId, date);
+  }
+
+  public SightEvent changeDefaultLanguage(Long id, LanguageVersion language) {
+    SightEvent bo = getForLoggedUser(id);
+    if (!translationService.isTranslated(bo, language)) {
+      throw new ConflictingException(
+          "Can not change the default language. Translation for language " + language.getLanuage()
+              + "doesn't exists");
+    }
+    SightEvent translation = translationService.translateEntity(bo, language, true);
+    bo.setDefaultLanguage(language);
+    bo = BeanUtils.copyNotNullProperties(translation, bo);
+    em.merge(bo);
+    return bo;
   }
 
 }

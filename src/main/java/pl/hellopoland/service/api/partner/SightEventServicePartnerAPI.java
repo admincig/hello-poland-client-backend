@@ -34,8 +34,7 @@ public class SightEventServicePartnerAPI {
   @RolesAllowed("partner")
   public SightEventDTO create(SightEventDTO dto) {
     SightEvent bo = service.create(dto, null);
-    dto = DtoMapper.getFullDTO(bo);
-    return dto;
+    return DtoMapper.getFullDTO(bo);
   }
 
   @RolesAllowed("partner")
@@ -46,8 +45,7 @@ public class SightEventServicePartnerAPI {
   @RolesAllowed("partner")
   public SightEventDTO update(SightEventDTO dto) {
     SightEvent bo = service.updateForLoggedUser(dto);
-    dto = DtoMapper.getFullDTO(bo);
-    return dto;
+    return DtoMapper.getFullDTO(bo);
   }
 
   @RolesAllowed("partner")
@@ -87,8 +85,7 @@ public class SightEventServicePartnerAPI {
   @RolesAllowed("partner")
   public SightEventDTO removeImageFromGallery(Long id, Long imgId) {
     SightEvent bo = service.removeImageFromGallery(id, imgId);
-    var dto = DtoMapper.getFullDTO(bo);
-    return dto;
+    return DtoMapper.getFullDTO(bo);
   }
 
   @RolesAllowed("partner")
@@ -107,6 +104,12 @@ public class SightEventServicePartnerAPI {
   @RolesAllowed("partner")
   public void stopSale(Long sightId, Long ticketPoolDefId, Date date) {
     service.stopSale(sightId, ticketPoolDefId, date);
+  }
+
+  @RolesAllowed("partner")
+  public SightEventDTO changeDefaultLanguage(Long id, LanguageVersion language) {
+    SightEvent bo = service.changeDefaultLanguage(id, language);
+    return DtoMapper.getFullDTO(bo);
   }
 
 }
