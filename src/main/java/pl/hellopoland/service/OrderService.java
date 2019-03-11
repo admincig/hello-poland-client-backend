@@ -4,10 +4,10 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -29,12 +29,12 @@ import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.TicketDefinition;
-import pl.hellopoland.bo.User;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
+import pl.hellopoland.rest.dto.OrderIRO;
+import pl.hellopoland.rest.dto.OrderIRO.OrderEntryIRO;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PaymentUtils;
-import pl.hellopoland.util.Triplet;
 
 @LocalBean
 @Stateless
@@ -46,28 +46,29 @@ public class OrderService extends ServiceSuperclass {
   @Inject
   AgreementService aService;
 
-  public Order create(Collection<Triplet<Long, Date, Integer>> triplets, OrderDetails details) {
-    User user = getLoggedUser();
-
+  public Order create(OrderIRO iro) {
     Order o = new Order();
     o.generateHash();
-    o.setUser(user);
-    o.setDetails(details);
+    o.setUser(getLoggedUser());
+    o.setDetails(iro.details);
     em.persist(o);
 
-    Map<Long, List<Triplet<Long, Date, Integer>>> tripletsGroupedByTicketId =
-        triplets.stream().collect(groupingBy(t -> t.first));
-    Set<Long> ticketsIds = tripletsGroupedByTicketId.keySet();
+    Set<Long> ticketsIds = iro.entries.stream().collect(groupingBy(oeIRO -> oeIRO.id)).keySet();
+
     List<TicketDefinition> tickets = em.createQuery(
         "from TicketDefinition t join fetch t.sightEvent s where t.id in (:ids) order by s.id asc",
         TicketDefinition.class).setParameter("ids", ticketsIds).getResultList();
+
     if (tickets.size() < ticketsIds.size()) {
       throw new ResourceNotFoundException();
     }
-    Map<SightEvent, List<TicketDefinition>> ticketsGroupedBySight =
-        tickets.stream().collect(groupingBy(TicketDefinition::getSightEvent));
+
     Map<Long, TicketDefinition> ticketIdToObject =
         tickets.stream().collect(toMap(TicketDefinition::getId, t -> t));
+
+    Map<SightEvent, List<TicketDefinition>> ticketsGroupedBySight =
+        tickets.stream().collect(groupingBy(TicketDefinition::getSightEvent));
+
     for (Map.Entry<SightEvent, List<TicketDefinition>> entry : ticketsGroupedBySight.entrySet()) {
       OrderSightEntry ose = new OrderSightEntry();
       ose.setOrder(o);
@@ -76,28 +77,38 @@ public class OrderService extends ServiceSuperclass {
       em.persist(ose);
       ose.setAgreements(new ArrayList<>(sightEvent.getAgreements()));
       em.flush();
+
       List<Long> ticketsOfSight =
           entry.getValue().stream().map(TicketDefinition::getId).collect(toList());
-      Map<Date, List<Triplet<Long, Date, Integer>>> inSightGroupedByDate = triplets.stream()
-          .filter(trip -> ticketsOfSight.contains(trip.first)).collect(groupingBy(t -> t.second));
 
-      for (Map.Entry<Date, List<Triplet<Long, Date, Integer>>> inSightOnDate : inSightGroupedByDate
-          .entrySet()) {
+      Map<Date, List<OrderEntryIRO>> inSightGroupedByDate =
+          iro.entries.stream().filter(oeIRO -> ticketsOfSight.contains(oeIRO.id))
+              .collect(groupingBy(oeIRO -> oeIRO.date));
+
+      for (Map.Entry<Date, List<OrderEntryIRO>> inSightOnDate : inSightGroupedByDate.entrySet()) {
         if (!inSightOnDate.getValue().isEmpty()) {
           OrderDateEntry dateEntry = new OrderDateEntry();
           dateEntry.setDate(inSightOnDate.getKey());
           dateEntry.setSightEntry(ose);
           em.persist(dateEntry);
-
-          for (Triplet<Long, Date, Integer> trip : inSightOnDate.getValue()) {
-            TicketDefinition ticket = ticketIdToObject.get(trip.first);
+          for (OrderEntryIRO oeIRO : inSightOnDate.getValue()) {
+            TicketDefinition ticket = ticketIdToObject.get(oeIRO.id);
             OrderEntry oe = new OrderEntry();
             oe.setName(ticket.getName());
-            oe.setQuantity(trip.third);
+            oe.setQuantity(oeIRO.quantity);
             oe.setUnitPrice(ticket.getPrice());
             oe.setDateEntry(dateEntry);
             oe.setExternalDefinitionId(ticket.getExternalId());
             oe.setPoolId(ticket.getPoolId());
+            if (oeIRO.partnerAffiliateCode != null
+                && !oeIRO.partnerAffiliateCode.equals(sightEvent.getPartner().getAffiliateCode())) {
+              logger.log(Level.ERROR,
+                  "Kod afiliacyjny zamówienia [" + oeIRO.partnerAffiliateCode
+                      + "] niezgodny z kodem afiliacyjnym partnera [id="
+                      + sightEvent.getPartner().getId() + "]");
+              throw new ConflictingException("Niezgodny kod afiliacyjny");
+            }
+            oe.setPartnerAffiliateCode(oeIRO.partnerAffiliateCode);
             em.persist(oe);
           }
         }

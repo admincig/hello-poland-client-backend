@@ -48,7 +48,7 @@ public class UserService extends ServiceSuperclass {
   private User create(String email, String password, String name, String picture,
       UserLocation location) {
     User bo = new User(Role.USER);
-    bo.setEmail(email);
+    bo.setEmail(email.toLowerCase());
     bo.setName(name);
     bo.setPassword(password);
     bo.setPicture(picture);
@@ -61,7 +61,7 @@ public class UserService extends ServiceSuperclass {
   public User create(String email, String decodedPassword, String name, String picture,
       UserLocation location, Partner partner, UserRole.Role... roles) {
     User bo = new User(roles);
-    bo.setEmail(email);
+    bo.setEmail(email.toLowerCase());
     bo.setName(name);
     bo.setPassword(passwordEncoder.encode(decodedPassword));
     bo.setPicture(picture);
@@ -72,13 +72,13 @@ public class UserService extends ServiceSuperclass {
   }
 
   public User findOneByEmail(String email) {
-    return em.createQuery("from User where email=:email", User.class).setParameter("email", email)
-        .getSingleResult();
+    return em.createQuery("from User where lower(email) = :email", User.class)
+        .setParameter("email", email.toLowerCase()).getSingleResult();
   }
 
   public Optional<User> findByEmail(String email) {
-    return em.createQuery("from User where email=:email", User.class).setParameter("email", email)
-        .getResultStream().findFirst();
+    return em.createQuery("from User where lower(email) = :email", User.class)
+        .setParameter("email", email.toLowerCase()).getResultStream().findFirst();
   }
 
   public void changePasswordForLoggedPartner(UserAuthDTO userAuthDTO) {
@@ -103,6 +103,18 @@ public class UserService extends ServiceSuperclass {
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
     return helloTicket.getUshersForPartner(partner.getHptToken());
+  }
+
+  public UserDTO getUsher(long usherId) {
+    Portal hpt = getPortal("Hello Ticket Cloud");
+    HelloTicket ht = new HelloTicket(hpt.getUrl());
+    return ht.getUsherForPartner(usherId, getLoggedPartner().getHptToken());
+  }
+
+  public UserDTO updateUsher(UserDTO usher) {
+    Portal hpt = getPortal("Hello Ticket Cloud");
+    HelloTicket ht = new HelloTicket(hpt.getUrl());
+    return ht.updateUsherForPartner(usher, getLoggedPartner().getHptToken());
   }
 
 }

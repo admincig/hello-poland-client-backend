@@ -7,6 +7,7 @@ import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.TicketDefinition;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
+import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.AccessDeniedException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.util.HelloTicket;
@@ -25,8 +26,6 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
 
   public TicketPoolDefinitionDTO add(TicketPoolDefinitionDTO dto, Partner partner) {
     final Long sightEventId = dto.sightEventId;
-    Portal portal = getPortal("Hello Ticket Cloud");
-    HelloTicket hpt = new HelloTicket(portal.getUrl());
     SightEvent se = sightEventService.get(dto.sightEventId);
     if (se == null) {
       throw new ResourceNotFoundException();
@@ -34,8 +33,10 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     if (se.getPartner() != partner) {
       throw new AccessDeniedException();
     }
-    // SightEvent se = sightEventService.getForPartner(dto.sightEventId, partner);
+    validateDates(dto);
     dto.sightEventId = se.getHptId();
+    Portal portal = getPortal("Hello Ticket Cloud");
+    HelloTicket hpt = new HelloTicket(portal.getUrl());
     dto = hpt.addTicketPoolDefinition(dto, partner.getHptToken());
     dto.sightEventId = sightEventId;
     if (dto.ticketDefinitions != null) {
@@ -45,6 +46,30 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
       });
     }
     return dto;
+  }
+
+  private void validateDates(TicketPoolDefinitionDTO tpdDTO) {
+    if (tpdDTO.endDate != null && tpdDTO.startDate.after(tpdDTO.endDate)) {
+      throw new ConflictingException("Ticket pool definition's startDate after endDate.");
+    }
+    if (tpdDTO.entryEndDate != null && tpdDTO.entryStartDate != null
+        && tpdDTO.entryStartDate.after(tpdDTO.entryEndDate)) {
+      throw new ConflictingException("Ticket pool definition's entryStartDate after entryEndDate.");
+    }
+    if (tpdDTO.entryStartDate != null && tpdDTO.startDate != null
+        && tpdDTO.entryStartDate.after(tpdDTO.startDate)) {
+      throw new ConflictingException("Ticket pool definition's entryStartDate after startDate.");
+    }
+    var frequencyData = tpdDTO.frequencyData;
+    if (frequencyData != null && frequencyData.endDate != null
+        && tpdDTO.startDate.after(frequencyData.endDate)) {
+      throw new ConflictingException("Ticket pool definition's startDate after frequency endDate.");
+    }
+    if (frequencyData != null && frequencyData.endDate != null && frequencyData.startDate != null
+        && frequencyData.startDate.after(frequencyData.endDate)) {
+      throw new ConflictingException(
+          "Ticket pool definition's frequency startDate after frequency endDate.");
+    }
   }
 
   public TicketPoolDefinitionDTO get(Long id) {

@@ -45,6 +45,8 @@ public class Partner extends ModelSuperclass {
   @Column(nullable = false)
   private String email;
 
+  private String affiliateCode;
+
   public Integer getP24Id() {
     return p24Id;
   }
@@ -114,6 +116,14 @@ public class Partner extends ModelSuperclass {
 
   public void setEmail(String email) {
     this.email = email;
+  }
+
+  public String getAffiliateCode() {
+    return affiliateCode;
+  }
+
+  public void setAffiliateCode(String affiliateCode) {
+    this.affiliateCode = affiliateCode;
   }
 
 }

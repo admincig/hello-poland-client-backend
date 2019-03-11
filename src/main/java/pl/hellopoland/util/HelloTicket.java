@@ -35,6 +35,7 @@ import pl.hellopoland.dto.booking.TicketOrderDTO;
 import pl.hellopoland.exception.badrequest.BadRequestException;
 import pl.hellopoland.exception.conflict.CannotDeleteSightEventFromExternalSystemException;
 import pl.hellopoland.exception.conflict.ConflictingException;
+import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.rest.JsonbConfig;
 
 public class HelloTicket {
@@ -335,7 +336,7 @@ public class HelloTicket {
   public PartnerDTO addPartner(PartnerDTO dto, String hptToken) {
     try {
       Jsonb jsonb = JsonbConfig.getInstance();
-      JsonStructure json = post("/v1/partners", jsonb.toJson(dto), hptToken);
+      JsonStructure json = post("/v1/helpdesk/partners", jsonb.toJson(dto), AUTH_TOKEN);
       return jsonb.fromJson(json.toString(), PartnerDTO.class);
     } catch (Exception e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
@@ -382,7 +383,7 @@ public class HelloTicket {
   public List<UserDTO> getUshersForPartner(String partnerAuthToken) {
     try {
       final Jsonb jsonb = JsonbConfig.getInstance();
-      JsonStructure json = get("/v1/users/ushers", partnerAuthToken);
+      JsonStructure json = get("/v1/partners/ushers", partnerAuthToken);
       JsonArray jsonArray = (JsonArray) json;
       List<UserDTO> dtos = new ArrayList<>();
       jsonArray.forEach(p -> {
@@ -393,6 +394,28 @@ public class HelloTicket {
     } catch (Exception e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
       return null;
+    }
+  }
+
+  public UserDTO getUsherForPartner(long usherId, String partnerAuthToken) {
+    try {
+      return JsonbConfig.getInstance().fromJson(
+          get("/v1/partners/ushers/" + usherId, partnerAuthToken).toString(), UserDTO.class);
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      throw new ResourceNotFoundException();
+    }
+  }
+
+  public UserDTO updateUsherForPartner(UserDTO usher, String partnerAuthToken) {
+    String usherJson = JsonbConfig.getInstance().toJson(usher);
+    try {
+      return JsonbConfig.getInstance().fromJson(
+          put("/v1/partners/ushers/" + usher.id, usherJson, partnerAuthToken).toString(),
+          UserDTO.class);
+    } catch (IOException e) {
+      logger.log(Level.ERROR, e);
+      throw new ResourceNotFoundException();
     }
   }
 
