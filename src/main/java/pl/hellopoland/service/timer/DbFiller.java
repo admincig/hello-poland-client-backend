@@ -410,6 +410,7 @@ public class DbFiller extends ServiceSuperclass {
     se.generateRandomScore();
     dto.score = se.getScore();
     dto.defaultLanguage = "pl-PL";
+    dto.availableLanguageVersions = Set.of(LanguageVersion.PL_PL.getLanuage());
     return sService.create(dto, partner);
   }
 

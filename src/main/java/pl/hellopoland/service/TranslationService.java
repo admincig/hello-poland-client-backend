@@ -54,7 +54,19 @@ public class TranslationService extends ServiceSuperclass {
             "Can not create a new language version because it already exists");
       }
     }
+    addTranslatedVersion(bo, language);
     return translateEntity(bo, language, true);
+  }
+
+  private <T extends ModelSuperclass> void addTranslatedVersion(T bo, LanguageVersion language) {
+    try {
+      bo.getClass().getMethod("addAvailableLanguageVersion", LanguageVersion.class).invoke(bo,
+          language);
+      em.flush();
+    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+        | NoSuchMethodException | SecurityException e) {
+      e.printStackTrace();
+    }
   }
 
   public <T extends ModelSuperclass, D extends DTOSuperclass> T updateEntityLanguageVersion(T bo,

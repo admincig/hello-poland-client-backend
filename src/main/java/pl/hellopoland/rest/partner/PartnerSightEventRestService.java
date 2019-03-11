@@ -2,6 +2,7 @@ package pl.hellopoland.rest.partner;
 
 import java.util.Date;
 import java.util.Optional;
+import java.util.Set;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -46,6 +47,7 @@ public class PartnerSightEventRestService {
             .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
     if (dto.id == null) {
       dto.defaultLanguage = lang.getLanuage();
+      dto.availableLanguageVersions = Set.of(lang.getLanuage());
       return service.create(dto);
     }
     return service.createLanguageVesrion(dto, lang);

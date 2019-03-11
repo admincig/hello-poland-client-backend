@@ -55,6 +55,8 @@ public class DtoMapper {
     target.setPhone(source.phone);
     target.setScore(source.score);
     target.setDefaultLanguage(LanguageVersion.getForCreateAndUpdateEntity(source.defaultLanguage));
+    target.setAvailableLanguageVersions(source.availableLanguageVersions.stream()
+        .map(ver -> LanguageVersion.getForCreateAndUpdateEntity(ver)).collect(Collectors.toSet()));
     if (source.blocked != null) {
       target.setBlocked(source.blocked);
     }
@@ -97,8 +99,7 @@ public class DtoMapper {
     dto.score = bo.getScore();
     dto.blocked = bo.isBlocked();
     dto.published = bo.isPublished();
-    dto.defaultLanguage =
-        bo.getDefaultLanguage() != null ? bo.getDefaultLanguage().getLanuage() : null;
+    dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
     dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
         .map(lang -> lang.getLanuage()).collect(Collectors.toSet());
     return dto;
@@ -139,8 +140,7 @@ public class DtoMapper {
     dto.blocked = bo.isBlocked();
     dto.published = bo.isPublished();
     dto.partnerAffiliateCode = bo.getPartner().getAffiliateCode();
-    dto.defaultLanguage =
-        bo.getDefaultLanguage() != null ? bo.getDefaultLanguage().getLanuage() : null;
+    dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
     dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
         .map(lang -> lang.getLanuage()).collect(Collectors.toSet());
     return dto;
@@ -271,6 +271,8 @@ public class DtoMapper {
     target.setHptId(source.id);
     target.setScore(source.score);
     target.setDefaultLanguage(LanguageVersion.getForCreateAndUpdateEntity(source.defaultLanguage));
+    target.setAvailableLanguageVersions(source.availableLanguageVersions.stream()
+        .map(ver -> LanguageVersion.getForCreateAndUpdateEntity(ver)).collect(Collectors.toSet()));
     if (source.blocked != null) {
       target.setBlocked(source.blocked);
     }

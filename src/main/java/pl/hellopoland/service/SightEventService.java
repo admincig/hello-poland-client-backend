@@ -124,11 +124,13 @@ public class SightEventService extends ServiceSuperclass {
       throw new AccessDeniedException();
     }
     var defLang = dto.defaultLanguage;
+    var availableLanguageVersions = dto.availableLanguageVersions;
     dto.generalAdmission = Boolean.TRUE.equals(dto.generalAdmission);
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
     dto = helloTicket.addSightEvent(dto, partner.getHptToken());
     dto.defaultLanguage = defLang;
+    dto.availableLanguageVersions = availableLanguageVersions;
     SightEvent bo = new SightEvent();
     DtoMapper.copy(dto, bo);
     iService.update(bo, dto.mainImage == null ? null : dto.mainImage.original);

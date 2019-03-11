@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -22,9 +23,10 @@ import javax.validation.constraints.NotNull;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.util.Imaged;
 import pl.hellopoland.util.Located;
+import pl.hellopoland.util.Translated;
 
 @Entity
-public class Sight extends ModelSuperclass implements Located, Imaged {
+public class Sight extends ModelSuperclass implements Located, Imaged, Translated {
 
   private static final long serialVersionUID = -6821312294116712881L;
 
@@ -219,20 +221,32 @@ public class Sight extends ModelSuperclass implements Located, Imaged {
     this.blocked = blocked;
   }
 
+  @Override
   public LanguageVersion getDefaultLanguage() {
     return defaultLanguage;
   }
 
+  @Override
   public void setDefaultLanguage(LanguageVersion defaultLanguage) {
     this.defaultLanguage = defaultLanguage;
   }
 
+  @Override
   public Set<LanguageVersion> getAvailableLanguageVersions() {
     return availableLanguageVersions;
   }
 
+  @Override
   public void setAvailableLanguageVersions(Set<LanguageVersion> availableLanguageVersions) {
     this.availableLanguageVersions = availableLanguageVersions;
+  }
+
+  @Override
+  public void addAvailableLanguageVersion(LanguageVersion languageVersion) {
+    if (availableLanguageVersions == null) {
+      availableLanguageVersions = new HashSet<>();
+    }
+    availableLanguageVersions.add(languageVersion);
   }
 
 }
