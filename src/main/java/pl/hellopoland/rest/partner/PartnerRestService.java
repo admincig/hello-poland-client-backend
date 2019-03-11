@@ -46,9 +46,6 @@ public class PartnerRestService {
   @PATCH
   @Path("/ushers/{id}/password")
   public Response changePasswordForUsher(@PathParam("id") long usherId, UserAuthDTO usherDTO) {
-    if (usherDTO.oldPassword.equals(usherDTO.password)) {
-      return Response.notModified("The new password is equal to the old password.").build();
-    }
     service.changePasswordForUsher(usherId, usherDTO);
     return Response.ok().build();
   }
