@@ -9,12 +9,15 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
+import javax.interceptor.AroundInvoke;
+import javax.interceptor.InvocationContext;
 import org.apache.commons.lang3.StringUtils;
 import pl.hellopoland.bo.ModelSuperclass;
 import pl.hellopoland.bo.Translation;
 import pl.hellopoland.dto.DTOSuperclass;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
+import pl.hellopoland.util.Translated;
 
 @LocalBean
 @Stateless
@@ -26,6 +29,33 @@ public class TranslationService extends ServiceSuperclass {
   private static final List<String> EXCLUDED_FIELDS_NAMES =
       List.of("Sight.email", "Sight.phone", "Sight.defaultLanguage", "SightEvent.email",
           "SightEvent.phone", "SightEvent.defaultLanguage", "Agreement.linkUrl");
+
+  /**
+   * Checks whether the entity object implements interface Translated.
+   */
+  @SuppressWarnings("unchecked")
+  @AroundInvoke
+  public Object intercept(InvocationContext ctx) throws Exception {
+    Translated param = null;
+    Collection<Translated> collectionParam = null;
+    for (int i = 0; i < ctx.getParameters().length; i++) {
+      try {
+        param = (Translated) ctx.getParameters()[i];
+        break;
+      } catch (ClassCastException e1) {
+        try {
+          collectionParam = (Collection<Translated>) ctx.getParameters()[i];
+          break;
+        } catch (ClassCastException e2) {
+          continue;
+        }
+      }
+    }
+    if (param == null && collectionParam == null) {
+      throw new ConflictingException("Entity does not implement interface Translated");
+    }
+    return ctx.proceed();
+  }
 
   public <T extends ModelSuperclass, D extends DTOSuperclass> T createEntityLanguageVersion(T bo,
       D dto, LanguageVersion language) {
@@ -54,11 +84,12 @@ public class TranslationService extends ServiceSuperclass {
             "Can not create a new language version because it already exists");
       }
     }
-    addTranslatedVersion(bo, language);
+    addAvailableLanguageVersion(bo, language);
     return translateEntity(bo, language, true);
   }
 
-  private <T extends ModelSuperclass> void addTranslatedVersion(T bo, LanguageVersion language) {
+  private <T extends ModelSuperclass> void addAvailableLanguageVersion(T bo,
+      LanguageVersion language) {
     try {
       bo.getClass().getMethod("addAvailableLanguageVersion", LanguageVersion.class).invoke(bo,
           language);
