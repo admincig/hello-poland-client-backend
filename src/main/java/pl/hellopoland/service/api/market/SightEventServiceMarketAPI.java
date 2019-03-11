@@ -4,7 +4,6 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
@@ -36,16 +35,14 @@ public class SightEventServiceMarketAPI {
 
   @PermitAll
   public PagedCollection getList(SightEventPagedCollectionConfig config, Date fromDate, Date toDate,
-      LanguageVersion language) {
+      String contentLanguageSymbol) {
+    LanguageVersion language = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
     if (fromDate != null && toDate != null && toDate.before(fromDate)) {
       throw new ConflictingException("toDate[" + toDate + "] is before fromDate[" + fromDate + "]");
     }
     config.setOrderColumn("name");
     config.setOrderDirection("asc");
-    PagedEntityCollection<SightEvent> bos = service.getList(config);
-    if (language != null) {
-      bos.items = translationService.translateEntities(bos.items, language, false);
-    }
+    PagedEntityCollection<SightEvent> bos = service.getList(config, language);
     List<SightEventDTO> dtos =
         bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
 
@@ -60,17 +57,18 @@ public class SightEventServiceMarketAPI {
   }
 
   @PermitAll
-  public SightEventDTO get(Long id, LanguageVersion language) {
+  public SightEventDTO get(Long id, String contentLanguageSymbol) {
+    LanguageVersion language = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
     SightEvent bo = service.get(id);
     if (bo.isPublished()) {
       if (language != null) {
         bo = translationService.translateEntity(bo, language, true);
-        var agreements = bo.getAgreements();
+        // var agreements = bo.getAgreements();
+        // if (agreements != null && !agreements.isEmpty()) {
+        // bo.setAgreements(
+        // Set.copyOf(translationService.translateEntities(agreements, language, true)));
+        // }
         var tickets = bo.getTickets();
-        if (agreements != null && !agreements.isEmpty()) {
-          bo.setAgreements(
-              Set.copyOf(translationService.translateEntities(agreements, language, true)));
-        }
         if (tickets != null && !tickets.isEmpty()) {
           bo.setTickets(translationService.translateEntities(tickets, language, true));
         }

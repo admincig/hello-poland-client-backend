@@ -1,7 +1,6 @@
 package pl.hellopoland.service.api.market;
 
 import java.util.Comparator;
-import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
@@ -30,19 +29,18 @@ public class SightServiceMarketAPI {
   private TranslationService translationService;
 
   @PermitAll
-  public PagedCollection getList(SightPagedCollectionConfig config, LanguageVersion language) {
+  public PagedCollection getList(SightPagedCollectionConfig config, String contentLanguageSymbol) {
+    LanguageVersion language = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
     config.setOrderColumn("name");
     config.setOrderDirection("asc");
-    PagedEntityCollection<Sight> bos = service.getList(config);
-    if (language != null) {
-      bos.items = translationService.translateEntities(bos.items, language, false);
-    }
+    PagedEntityCollection<Sight> bos = service.getList(config, language);
     var dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
     return new PagedCollection(dtos, bos.config);
   }
 
   @PermitAll
-  public SightDTO get(Long id, LanguageVersion language) {
+  public SightDTO get(Long id, String contentLanguageSymbol) {
+    LanguageVersion language = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
     Sight bo = service.get(id);
     if (bo.isPublished()) {
       bo.setSightEvents(bo.getSightEvents().stream()
@@ -50,12 +48,12 @@ public class SightServiceMarketAPI {
           .collect(Collectors.toList()));
       if (language != null) {
         bo = translationService.translateEntity(bo, language, true);
-        var agreements = bo.getAgreements();
+        // var agreements = bo.getAgreements();
+        // if (agreements != null && !agreements.isEmpty()) {
+        // bo.setAgreements(
+        // Set.copyOf(translationService.translateEntities(agreements, language, true)));
+        // }
         var sightEvents = bo.getSightEvents();
-        if (agreements != null && !agreements.isEmpty()) {
-          bo.setAgreements(
-              Set.copyOf(translationService.translateEntities(agreements, language, true)));
-        }
         if (sightEvents != null && !sightEvents.isEmpty()) {
           bo.setSightEvents(translationService.translateEntities(sightEvents, language, true));
         }
@@ -73,7 +71,6 @@ public class SightServiceMarketAPI {
       return dto;
     }
     return null;
-
   }
 
 }

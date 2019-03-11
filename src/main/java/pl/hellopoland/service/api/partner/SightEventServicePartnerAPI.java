@@ -22,10 +22,12 @@ public class SightEventServicePartnerAPI {
   SightEventService service;
 
   @RolesAllowed("partner")
-  public PagedCollection getList(SightEventPagedCollectionConfig config) {
+  public PagedCollection getList(SightEventPagedCollectionConfig config,
+      String contentLanguageSymbol) {
+    LanguageVersion language = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
     config.onlyCurrentPartner(true);
     config.onlyActive();
-    PagedEntityCollection<SightEvent> bos = service.getList(config);
+    PagedEntityCollection<SightEvent> bos = service.getList(config, language);
     var dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
     service.fetchTicketPoolDefinitions(bos.items, dtos, true);
     return new PagedCollection(dtos, bos.config);
@@ -54,11 +56,10 @@ public class SightEventServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
-  public SightEventDTO get(Long id) {
-    SightEvent bo = service.getForLoggedUser(id);
-    var dto = DtoMapper.getFullDTO(bo);
-    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), true);
-    return dto;
+  public SightEventDTO get(Long id, String contentLanguageSymbol) {
+    LanguageVersion lang = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
+    SightEvent bo = service.getForLoggedUser(id, lang);
+    return DtoMapper.getFullDTO(bo);
   }
 
   @RolesAllowed("partner")

@@ -1,7 +1,6 @@
 package pl.hellopoland.rest.market;
 
 import java.util.Date;
-import java.util.Optional;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -17,8 +16,6 @@ import pl.hellopoland.annotation.DateFormat;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.FiltersContainerDTO;
 import pl.hellopoland.dto.SightEventDTO;
-import pl.hellopoland.enums.LanguageVersion;
-import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.dto.AvailableTicketNumberAssociationORO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.api.market.FilterMarketAPI;
@@ -40,14 +37,14 @@ public class MarketSightEventRestService {
   public PagedCollection getList(@QueryParam("city") String city,
       @QueryParam("fromDate") @DateFormat Date fromDate,
       @QueryParam("toDate") @DateFormat Date toDate,
-      @HeaderParam("Accept-Language") String language) {
-    LanguageVersion lang = Optional.ofNullable(LanguageVersion.getForTranslationEntity(language))
-        .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+      @HeaderParam("Accept-Language") String acceptLanguage,
+      @HeaderParam("Content-Language") String contentLanguage) {
     var config = new SightEventPagedCollectionConfig();
     config.onlyActive();
     config.onlyPublished();
     config.setCity(city);
-    return service.getList(config, fromDate, toDate, lang);
+    return service.getList(config, fromDate, toDate,
+        contentLanguage != null ? contentLanguage : acceptLanguage);
   }
 
   @GET
@@ -55,15 +52,15 @@ public class MarketSightEventRestService {
   public PagedCollection search(@QueryParam("searchQuery") String searchQuery,
       @QueryParam("city") String city, @QueryParam("fromDate") @DateFormat Date fromDate,
       @QueryParam("toDate") @DateFormat Date toDate,
-      @HeaderParam("Accept-Language") String language) {
-    LanguageVersion lang = Optional.ofNullable(LanguageVersion.getForTranslationEntity(language))
-        .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+      @HeaderParam("Accept-Language") String acceptLanguage,
+      @HeaderParam("Content-Language") String contentLanguage) {
     var config = new SightEventPagedCollectionConfig();
     config.onlyActive();
     config.onlyPublished();
     config.setSearchQuery(searchQuery);
     config.setCity(city);
-    return service.getList(config, fromDate, toDate, lang);
+    return service.getList(config, fromDate, toDate,
+        contentLanguage != null ? contentLanguage : acceptLanguage);
   }
 
   @POST
@@ -71,23 +68,22 @@ public class MarketSightEventRestService {
   public PagedCollection search(SightEventPagedCollectionConfig config,
       @QueryParam("fromDate") @DateFormat Date fromDate,
       @QueryParam("toDate") @DateFormat Date toDate, @QueryParam("city") String city,
-      @HeaderParam("Accept-Language") String language) {
-    LanguageVersion lang = Optional.ofNullable(LanguageVersion.getForTranslationEntity(language))
-        .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+      @HeaderParam("Accept-Language") String acceptLanguage,
+      @HeaderParam("Content-Language") String contentLanguage) {
     config.onlyActive();
     config.onlyActive();
     config.onlyPublished();
     config.setCity(city);
-    return service.getList(config, fromDate, toDate, lang);
+    return service.getList(config, fromDate, toDate,
+        contentLanguage != null ? contentLanguage : acceptLanguage);
   }
 
   @GET
   @Path("/{id}")
   public SightEventDTO get(@PathParam("id") Long id,
-      @HeaderParam("Accept-Language") String language) {
-    LanguageVersion lang = Optional.ofNullable(LanguageVersion.getForTranslationEntity(language))
-        .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
-    return service.get(id, lang);
+      @HeaderParam("Accept-Language") String acceptLanguage,
+      @HeaderParam("Content-Language") String contentLanguage) {
+    return service.get(id, contentLanguage != null ? contentLanguage : acceptLanguage);
   }
 
   @GET

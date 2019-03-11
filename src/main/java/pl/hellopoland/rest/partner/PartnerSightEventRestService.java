@@ -36,8 +36,10 @@ public class PartnerSightEventRestService {
   SightEventServicePartnerAPI service;
 
   @GET
-  public PagedCollection getList() {
-    return search(new SightEventPagedCollectionConfig());
+  public PagedCollection getList(@HeaderParam("Accept-Language") String acceptLanguage,
+      @HeaderParam("Content-Language") String contentLanguage) {
+    return service.getList(new SightEventPagedCollectionConfig(),
+        contentLanguage != null ? contentLanguage : acceptLanguage);
   }
 
   @POST
@@ -69,14 +71,18 @@ public class PartnerSightEventRestService {
 
   @POST
   @Path("/search")
-  public PagedCollection search(SightEventPagedCollectionConfig config) {
-    return service.getList(config);
+  public PagedCollection search(SightEventPagedCollectionConfig config,
+      @HeaderParam("Accept-Language") String acceptLanguage,
+      @HeaderParam("Content-Language") String contentLanguage) {
+    return service.getList(config, contentLanguage != null ? contentLanguage : acceptLanguage);
   }
 
   @GET
   @Path("/{id}")
-  public SightEventDTO get(@PathParam("id") Long id) {
-    return service.get(id);
+  public SightEventDTO get(@PathParam("id") Long id,
+      @HeaderParam("Accept-Language") String acceptLanguage,
+      @HeaderParam("Content-Language") String contentLanguage) {
+    return service.get(id, contentLanguage != null ? contentLanguage : acceptLanguage);
   }
 
   @DELETE

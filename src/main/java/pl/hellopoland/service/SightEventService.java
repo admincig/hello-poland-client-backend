@@ -71,11 +71,15 @@ public class SightEventService extends ServiceSuperclass {
   @Inject
   private TranslationService translationService;
 
-  public PagedEntityCollection<SightEvent> getList(SightEventPagedCollectionConfig config) {
+  public PagedEntityCollection<SightEvent> getList(SightEventPagedCollectionConfig config,
+      LanguageVersion language) {
     if (config.isCurrentPartner()) {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
     }
     List<SightEvent> sightEvents = getQuery(config).getResultList();
+    if (language != null) {
+      sightEvents = translationService.translateEntities(sightEvents, language, false);
+    }
     Collections.sort(sightEvents, sightEventNamesComparator(new Locale("pl_PL")));
 
     // List<SightEvent> sightEvents = getQuery(config).getResultList().stream()
@@ -261,6 +265,14 @@ public class SightEventService extends ServiceSuperclass {
   public SightEvent getForLoggedUser(Long id) {
     Partner partner = partnerService.getLoggedPartner();
     return getForPartner(id, partner);
+  }
+
+  public SightEvent getForLoggedUser(Long id, LanguageVersion language) {
+    var bo = getForLoggedUser(id);
+    if (language == null) {
+      return bo;
+    }
+    return translationService.translateEntity(bo, language, true);
   }
 
   public SightEvent getForPartner(Long sightEventId, Partner partner) {

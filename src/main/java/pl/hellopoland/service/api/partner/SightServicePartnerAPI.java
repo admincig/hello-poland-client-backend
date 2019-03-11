@@ -30,8 +30,9 @@ public class SightServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
-  public PagedCollection getList() {
-    List<Sight> bos = service.getActiveForPartner();
+  public PagedCollection getList(String contentLanguageSymbol) {
+    LanguageVersion language = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
+    List<Sight> bos = service.getActiveForPartner(language);
     var dtos = bos.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
     return new PagedCollection(dtos, null);
   }

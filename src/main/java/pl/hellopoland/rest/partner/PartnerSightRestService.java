@@ -45,8 +45,9 @@ public class PartnerSightRestService {
   }
 
   @GET
-  public PagedCollection getList() {
-    return service.getList();
+  public PagedCollection getList(@HeaderParam("Accept-Language") String acceptLanguage,
+      @HeaderParam("Content-Language") String contentLanguage) {
+    return service.getList(contentLanguage != null ? contentLanguage : acceptLanguage);
   }
 
   @GET

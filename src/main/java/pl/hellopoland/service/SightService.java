@@ -54,11 +54,15 @@ public class SightService extends ServiceSuperclass {
   @Inject
   private TranslationService translationService;
 
-  public PagedEntityCollection<Sight> getList(SightPagedCollectionConfig config) {
+  public PagedEntityCollection<Sight> getList(SightPagedCollectionConfig config,
+      LanguageVersion language) {
     if (config.isCurrentPartner()) {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
     }
     List<Sight> sights = getQuery(config).getResultList();
+    if (language != null) {
+      sights = translationService.translateEntities(sights, language, false);
+    }
     Collections.sort(sights, sightNamesComparator(new Locale("pl_PL")));
 
     return new PagedEntityCollection<>(sights, config);
@@ -132,6 +136,14 @@ public class SightService extends ServiceSuperclass {
     return em.createQuery(
         "from Sight sight where sight.active=true and sight.partner=:partner order by sight.id desc",
         Sight.class).setParameter("partner", partner).getResultList();
+  }
+
+  public List<Sight> getActiveForPartner(LanguageVersion language) {
+    var bos = getActiveForPartner();
+    if (language == null) {
+      return bos;
+    }
+    return translationService.translateEntities(bos, language, false);
   }
 
   public Sight update(Long id, SightDTO dto) {
@@ -209,10 +221,6 @@ public class SightService extends ServiceSuperclass {
     if (language == null) {
       return bo;
     }
-    return getLanguageVersion(bo, language);
-  }
-
-  private Sight getLanguageVersion(Sight bo, LanguageVersion language) {
     return translationService.translateEntity(bo, language, true);
   }
 

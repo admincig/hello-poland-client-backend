@@ -100,13 +100,13 @@ public class DtoMapper {
     dto.blocked = bo.isBlocked();
     dto.published = bo.isPublished();
     dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
-    dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
-        .map(lang -> lang.getLanuage()).collect(Collectors.toSet());
     return dto;
   }
 
   public static SightDTO getFullDTO(Sight bo) {
     SightDTO dto = getDTO(bo);
+    dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
+        .map(lang -> lang.getLanuage()).collect(Collectors.toSet());
     if (bo.getSightEvents() != null) {
       dto.sightEvents = bo.getSightEvents().stream().map(DtoMapper::getFullDTO).collect(toList());
     }
@@ -141,13 +141,13 @@ public class DtoMapper {
     dto.published = bo.isPublished();
     dto.partnerAffiliateCode = bo.getPartner().getAffiliateCode();
     dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
-    dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
-        .map(lang -> lang.getLanuage()).collect(Collectors.toSet());
     return dto;
   }
 
   public static SightEventDTO getFullDTO(SightEvent bo) {
     SightEventDTO dto = getDTO(bo);
+    dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
+        .map(lang -> lang.getLanuage()).collect(Collectors.toSet());
     if (bo.getImages() != null && !bo.getImages().isEmpty()) {
       dto.images = bo.getImages().stream().map(DtoMapper::getDTO).collect(toList());
     }
