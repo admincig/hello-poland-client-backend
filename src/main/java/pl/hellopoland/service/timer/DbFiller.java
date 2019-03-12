@@ -122,8 +122,9 @@ public class DbFiller extends ServiceSuperclass {
   }
 
   private void createUsers() {
-    userHelloPoland =
-        createUser("Hello Poland - admin", "hp-admin@fream.pl", "hp-admin", null, Role.ADMIN);
+    userHelloPoland = createUser("Hello Poland - admin", "hp-admin@fream.pl", "hp-admin",
+        "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJocC1hZG1pbkBmcmVhbS5wbCIsImF1dGgiOiJST0xFX0FETUlOIn0.ffo2GsvkbE72S4BMWEoXs2ZV9PIBkTaiFKX7DQr_Xm0pxXMrWSzI8TICovtwvi4RdEzsX4Xty8DNKXvkP12ciw",
+        null, Role.ADMIN);
     userHelloPoland = createPartner("Hello Poland", "hp-partner@fream.pl", "hp-partner",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.",
         Integer.valueOf(properties.getProperty("przelewy24.posId")), BigDecimal.TEN, "zaqwsx",
@@ -151,16 +152,17 @@ public class DbFiller extends ServiceSuperclass {
     partner.setCommission(commission);
     partner.setEmail(email);
     partner.setAffiliateCode(affiliateCode);
-    return createUser(null, email, password, partner, roles);
+    return createUser(null, email, password, null, partner, roles);
   }
 
-  private User createUser(String name, String email, String password, Partner partner,
-      Role... roles) {
+  private User createUser(String name, String email, String password, String hptToken,
+      Partner partner, Role... roles) {
     User user = new User(roles);
     user.setName(name);
     user.setEmail(email);
     user.setPassword(passwordEncoder.encode(password));
     user.setPartner(partner);
+    user.setHptToken(hptToken);
     em.persist(user);
     return user;
   }

@@ -333,7 +333,7 @@ public class HelloTicket {
     }
   }
 
-  public PartnerDTO addPartner(PartnerDTO dto) {
+  public PartnerDTO addPartner(PartnerDTO dto, String hptToken) {
     try {
       Jsonb jsonb = JsonbConfig.getInstance();
       JsonStructure json = post("/v1/helpdesk/partners", jsonb.toJson(dto), AUTH_TOKEN);

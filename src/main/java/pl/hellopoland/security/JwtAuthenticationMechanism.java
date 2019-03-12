@@ -149,6 +149,7 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
       var user = new CurrentUser();
       user.setEmail(credential.getPrincipal());
       user.setRoles(credential.getAuthorities());
+      user.setAccessToken(token);
       authenticatedEvent.fire(user);
 
       authenticationStatus =
