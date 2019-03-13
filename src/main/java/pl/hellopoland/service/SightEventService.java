@@ -179,32 +179,35 @@ public class SightEventService extends ServiceSuperclass {
     return translationService.createEntityLanguageVersion(getForLoggedUser(dto.id), dto, language);
   }
 
-  public SightEvent updateForLoggedUser(SightEventDTO dto) {
+  public SightEvent updateForLoggedUser(SightEventDTO dto, LanguageVersion language) {
     SightEvent bo = getForLoggedUser(dto.id);
-    if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
-      Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
-      Portal hpt = getPortal("Hello Ticket Cloud");
-      HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
-      dto.id = bo.getHptId();
-      dto = helloTicket.updateSightEvent(dto, partner.getHptToken());
+    if (!translationService.isTranslated(bo, language)) {
+      throw new ConflictingException(
+          "Translation for language " + language.getLanuage() + "doesn't exists");
     }
-    DtoMapper.copy(dto, bo);
-    oHoursService.remove(bo.getOpeningHours());
-    ArrayList<OpeningHours> oHoursList = getOpeningHoursCollectionFromDTO(dto);
-    if (oHoursList != null && !oHoursList.isEmpty()) {
-      oHoursList.stream().forEach(oh -> {
-        oh.setSightEvent(bo);
-        oHoursService.persist(oh);
-      });
+    if (bo.getDefaultLanguage().equals(language)) {
+      if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
+        Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
+        Portal hpt = getPortal("Hello Ticket Cloud");
+        HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
+        dto.id = bo.getHptId();
+        dto = helloTicket.updateSightEvent(dto, partner.getHptToken());
+      }
+      DtoMapper.copy(dto, bo);
+      oHoursService.remove(bo.getOpeningHours());
+      ArrayList<OpeningHours> oHoursList = getOpeningHoursCollectionFromDTO(dto);
+      if (oHoursList != null && !oHoursList.isEmpty()) {
+        oHoursList.stream().forEach(oh -> {
+          oh.setSightEvent(bo);
+          oHoursService.persist(oh);
+        });
+      }
+      bo.setOpeningHours(null);
+      bo.setOpeningHours(oHoursList);
     }
-    bo.setOpeningHours(null);
-    bo.setOpeningHours(oHoursList);
-    return bo;
-  }
-
-  public SightEvent updateLanguageVersionForLoggedUser(SightEventDTO dto,
-      LanguageVersion language) {
-    return translationService.updateEntityLanguageVersion(getForLoggedUser(dto.id), dto, language);
+    // return bo;
+    // return translationService.updateEntityLanguageVersion(getForLoggedUser(dto.id), dto,
+    // language);
   }
 
   public List<SightEvent> getForPartner() {

@@ -45,14 +45,9 @@ public class SightEventServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
-  public SightEventDTO update(SightEventDTO dto) {
-    SightEvent bo = service.updateForLoggedUser(dto);
+  public SightEventDTO update(SightEventDTO dto, LanguageVersion language) {
+    SightEvent bo = service.updateForLoggedUser(dto, language);
     return DtoMapper.getFullDTO(bo);
-  }
-
-  @RolesAllowed("partner")
-  public SightEventDTO updateLanguageVersion(SightEventDTO dto, LanguageVersion language) {
-    return DtoMapper.getFullDTO(service.updateLanguageVersionForLoggedUser(dto, language));
   }
 
   @RolesAllowed("partner")

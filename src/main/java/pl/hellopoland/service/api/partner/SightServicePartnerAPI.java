@@ -45,14 +45,9 @@ public class SightServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
-  public SightDTO update(SightDTO dto) {
-    Sight bo = service.updateForLoggedUser(dto);
+  public SightDTO update(SightDTO dto, LanguageVersion language) {
+    Sight bo = service.updateForLoggedUser(dto, language);
     return DtoMapper.getFullDTO(bo);
-  }
-
-  @RolesAllowed("partner")
-  public SightDTO updateLanguageVersion(SightDTO dto, LanguageVersion language) {
-    return DtoMapper.getFullDTO(service.updateLanguageVersionForLoggedUser(dto, language));
   }
 
   @RolesAllowed("partner")

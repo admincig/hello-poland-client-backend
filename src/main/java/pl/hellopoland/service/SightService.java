@@ -224,36 +224,38 @@ public class SightService extends ServiceSuperclass {
     return translationService.translateEntity(bo, language, true);
   }
 
-  public Sight updateForLoggedUser(SightDTO dto) {
+  public Sight updateForLoggedUser(SightDTO dto, LanguageVersion language) {
     Sight bo = getActiveForLoggedPartner(dto.id);
-    DtoMapper.copy(dto, bo);
-    if (bo.isBlocked()) {
-      bo.setPublished(false);
+    if (!translationService.isTranslated(bo, language)) {
+      throw new ConflictingException(
+          "Translation for language " + language.getLanuage() + "doesn't exists");
     }
-    oHoursService.remove(bo.getOpeningHours());
-    ArrayList<OpeningHours> oHoursList = getOpeningHoursCollectionFromDTO(dto);
-    if (oHoursList != null && !oHoursList.isEmpty()) {
-      oHoursList.stream().forEach(oh -> {
-        oh.setSight(bo);
-        oHoursService.persist(oh);
-      });
-    }
-    bo.setOpeningHours(null);
-    bo.setOpeningHours(oHoursList);
-    var agreements = dto.agreements;
-    if (agreements != null && !agreements.isEmpty()) {
-      var agreementBos = Set.copyOf(agreementService.getForLoggedUser(
-          agreements.stream().map(agrDto -> agrDto.id).collect(Collectors.toSet())));
-      bo.setAgreements(agreementBos);
-      var sightEventBos = bo.getSightEvents();
-      if (sightEventBos != null && !sightEventBos.isEmpty()) {
-        sightEventBos.forEach(se -> se.setAgreements(agreementBos));
+    if (bo.getDefaultLanguage().equals(language)) {
+      DtoMapper.copy(dto, bo);
+      if (bo.isBlocked()) {
+        bo.setPublished(false);
+      }
+      oHoursService.remove(bo.getOpeningHours());
+      ArrayList<OpeningHours> oHoursList = getOpeningHoursCollectionFromDTO(dto);
+      if (oHoursList != null && !oHoursList.isEmpty()) {
+        oHoursList.stream().forEach(oh -> {
+          oh.setSight(bo);
+          oHoursService.persist(oh);
+        });
+      }
+      bo.setOpeningHours(null);
+      bo.setOpeningHours(oHoursList);
+      var agreements = dto.agreements;
+      if (agreements != null && !agreements.isEmpty()) {
+        var agreementBos = Set.copyOf(agreementService.getForLoggedUser(
+            agreements.stream().map(agrDto -> agrDto.id).collect(Collectors.toSet())));
+        bo.setAgreements(agreementBos);
+        var sightEventBos = bo.getSightEvents();
+        if (sightEventBos != null && !sightEventBos.isEmpty()) {
+          sightEventBos.forEach(se -> se.setAgreements(agreementBos));
+        }
       }
     }
-    return getActiveForLoggedPartner(dto.id);
-  }
-
-  public Sight updateLanguageVersionForLoggedUser(SightDTO dto, LanguageVersion language) {
     return translationService.updateEntityLanguageVersion(getForLoggedPartner(dto.id), dto,
         language);
   }

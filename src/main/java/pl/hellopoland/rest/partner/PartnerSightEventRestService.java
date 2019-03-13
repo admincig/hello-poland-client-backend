@@ -57,17 +57,17 @@ public class PartnerSightEventRestService {
   }
 
   @PUT
-  @Path("/{id}")
-  public SightEventDTO update(@PathParam("id") Long id, SightEventDTO dto,
-      @HeaderParam("Content-Language") String language) {
-    dto.id = id;
-    if (StringUtils.isNotBlank(language)) {
-      LanguageVersion lang =
-          Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
-              .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
-      return service.updateLanguageVersion(dto, lang);
+  @Path("/{id}/languageVersion/{language}")
+  public SightEventDTO update(@PathParam("id") Long id, @PathParam("language") String language,
+      SightEventDTO dto) {
+    if (StringUtils.isBlank(language)) {
+      throw new ConflictingException("Language is required");
     }
-    return service.update(dto);
+    LanguageVersion lang =
+        Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
+            .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+    dto.id = id;
+    return service.update(dto, lang);
   }
 
   @POST
