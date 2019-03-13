@@ -88,18 +88,6 @@ public class TranslationService extends ServiceSuperclass {
     return translateEntity(bo, language, true);
   }
 
-  private <T extends ModelSuperclass> void addAvailableLanguageVersion(T bo,
-      LanguageVersion language) {
-    try {
-      bo.getClass().getMethod("addAvailableLanguageVersion", LanguageVersion.class).invoke(bo,
-          language);
-      em.flush();
-    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
-        | NoSuchMethodException | SecurityException e) {
-      e.printStackTrace();
-    }
-  }
-
   public <T extends ModelSuperclass, D extends DTOSuperclass> T updateEntityLanguageVersion(T bo,
       D dto, LanguageVersion language) {
     var translations = getTranslations(bo, language);
@@ -148,6 +136,20 @@ public class TranslationService extends ServiceSuperclass {
       bo = translateEntity(bo, language, fetchColections);
       return bo;
     }).collect(Collectors.toList());
+  }
+
+  public <T extends ModelSuperclass> void deleteEntity(T bo, LanguageVersion language) {
+    try {
+      if ((boolean) bo.getClass().getMethod("deleteAvailableLanguageVersion", LanguageVersion.class)
+          .invoke(bo, language)) {
+        em.flush();
+        getTranslations(bo, language).stream().forEach(t -> t.setDeleted(true));
+      }
+    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+        | NoSuchMethodException | SecurityException e) {
+      e.printStackTrace();
+      throw new ConflictingException(e.getLocalizedMessage());
+    }
   }
 
   public <T extends ModelSuperclass> boolean isTranslated(T bo, LanguageVersion language) {
@@ -200,9 +202,16 @@ public class TranslationService extends ServiceSuperclass {
         .setParameter("language", language).getResultList();
   }
 
-  private String getLanguageSymbol(String language) {
-    int indexOfDelimiter = language.indexOf("-");
-    return language.substring(0, indexOfDelimiter == -1 ? language.length() : indexOfDelimiter);
+  private <T extends ModelSuperclass> void addAvailableLanguageVersion(T bo,
+      LanguageVersion language) {
+    try {
+      bo.getClass().getMethod("addAvailableLanguageVersion", LanguageVersion.class).invoke(bo,
+          language);
+      em.flush();
+    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+        | NoSuchMethodException | SecurityException e) {
+      e.printStackTrace();
+    }
   }
 
 }

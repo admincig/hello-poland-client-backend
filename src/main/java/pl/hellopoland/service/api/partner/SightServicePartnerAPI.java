@@ -61,6 +61,11 @@ public class SightServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
+  public void delete(Long id, LanguageVersion language) {
+    service.deleteForLoggedUser(id, language);
+  }
+
+  @RolesAllowed("partner")
   public SightDTO uploadMainImage(Long id, byte[] icon) {
     Sight bo = service.uploadMainImageForLoggedUser(id, icon);
     return DtoMapper.getFullDTO(bo);

@@ -190,34 +190,34 @@ public class SightService extends ServiceSuperclass {
   }
 
   public Sight uploadMainImageForLoggedUser(Long id, byte[] icon) {
-    Sight bo = getActiveForLoggedUser(id);
+    Sight bo = getActiveForLoggedPartner(id);
     bo.setMainImage(
         imageService.validateAndStoreImageCollector(new ByteArrayInputStream(icon), "jpeg", null));
     return bo;
   }
 
   public Sight addImageToSightGallery(Long id, byte[] img) {
-    Sight bo = getActiveForLoggedUser(id);
+    Sight bo = getActiveForLoggedPartner(id);
     bo.addImage(
         imageService.validateAndStoreImageCollector(new ByteArrayInputStream(img), "jpeg", null));
     return bo;
   }
 
   public Sight removeImageFromGallery(Long id, Long imgId) {
-    Sight bo = getActiveForLoggedUser(id);
+    Sight bo = getActiveForLoggedPartner(id);
     ImageCollector img = imageService.get(imgId);
     bo.removeImage(img);
     return bo;
   }
 
-  public Sight getActiveForLoggedUser(Long id) {
+  public Sight getActiveForLoggedPartner(Long id) {
     return em
         .createQuery("from Sight where id=:id and active=true and partner=:partner", Sight.class)
         .setParameter("id", id).setParameter("partner", getLoggedPartner()).getSingleResult();
   }
 
   public Sight getActiveForLoggedUser(Long id, LanguageVersion language) {
-    var bo = getActiveForLoggedUser(id);
+    var bo = getActiveForLoggedPartner(id);
     if (language == null) {
       return bo;
     }
@@ -225,7 +225,7 @@ public class SightService extends ServiceSuperclass {
   }
 
   public Sight updateForLoggedUser(SightDTO dto) {
-    Sight bo = getActiveForLoggedUser(dto.id);
+    Sight bo = getActiveForLoggedPartner(dto.id);
     DtoMapper.copy(dto, bo);
     if (bo.isBlocked()) {
       bo.setPublished(false);
@@ -250,7 +250,7 @@ public class SightService extends ServiceSuperclass {
         sightEventBos.forEach(se -> se.setAgreements(agreementBos));
       }
     }
-    return getActiveForLoggedUser(dto.id);
+    return getActiveForLoggedPartner(dto.id);
   }
 
   public Sight updateLanguageVersionForLoggedUser(SightDTO dto, LanguageVersion language) {
@@ -266,12 +266,20 @@ public class SightService extends ServiceSuperclass {
   }
 
   public void deleteForLoggedUser(Long id) {
-    Sight bo = getActiveForLoggedUser(id);
+    Sight bo = getActiveForLoggedPartner(id);
     if (hasActiveSightEvents(bo.getSightEvents())) {
       throw exceptionFactory.sightHasAssignedSightEventsException();
     } else {
       bo.setActive(false);
     }
+  }
+
+  public void deleteForLoggedUser(Long id, LanguageVersion language) {
+    Sight bo = getActiveForLoggedPartner(id);
+    if (bo.getDefaultLanguage().equals(language)) {
+      throw new ConflictingException("Deleting default language version is forbidden.");
+    }
+    translationService.deleteEntity(bo, language);
   }
 
   private Sight getForLoggedPartner(Long sightId) {

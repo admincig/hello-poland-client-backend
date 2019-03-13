@@ -24,6 +24,7 @@ public class Translation extends ModelSuperclass {
   @NotNull
   @Enumerated(EnumType.STRING)
   private LanguageVersion language;
+  private boolean deleted;
 
   public String getKey() {
     return key;
@@ -47,6 +48,14 @@ public class Translation extends ModelSuperclass {
 
   public void setLanguage(LanguageVersion language) {
     this.language = language;
+  }
+
+  public boolean isDeleted() {
+    return deleted;
+  }
+
+  public void setDeleted(boolean deleted) {
+    this.deleted = deleted;
   }
 
   public void generateKey(ModelSuperclass bo, String fieldName) {

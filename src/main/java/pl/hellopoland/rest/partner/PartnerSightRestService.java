@@ -78,6 +78,15 @@ public class PartnerSightRestService {
     service.delete(id);
   }
 
+  @DELETE
+  @Path("/{id}/languageVersion/{language}")
+  public void delete(@PathParam("id") Long id, @PathParam("language") String language) {
+    LanguageVersion lang =
+        Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
+            .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+    service.delete(id, lang);
+  }
+
   @PUT
   @Path("/{id}/mainImage")
   @Consumes({"image/jpeg", "image/jpg"})

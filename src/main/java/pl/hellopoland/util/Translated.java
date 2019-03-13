@@ -12,5 +12,7 @@ public interface Translated {
 
   void setAvailableLanguageVersions(Set<LanguageVersion> availableLanguageVersions);
 
-  void addAvailableLanguageVersion(LanguageVersion languageVersion);
+  boolean addAvailableLanguageVersion(LanguageVersion languageVersion);
+
+  boolean deleteAvailableLanguageVersion(LanguageVersion languageVersion);
 }

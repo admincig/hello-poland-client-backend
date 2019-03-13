@@ -242,11 +242,19 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
   }
 
   @Override
-  public void addAvailableLanguageVersion(LanguageVersion languageVersion) {
+  public boolean addAvailableLanguageVersion(LanguageVersion languageVersion) {
     if (availableLanguageVersions == null) {
       availableLanguageVersions = new HashSet<>();
     }
-    availableLanguageVersions.add(languageVersion);
+    return availableLanguageVersions.add(languageVersion);
+  }
+
+  @Override
+  public boolean deleteAvailableLanguageVersion(LanguageVersion languageVersion) {
+    if (availableLanguageVersions == null) {
+      availableLanguageVersions = new HashSet<>();
+    }
+    return availableLanguageVersions.remove(languageVersion);
   }
 
 }
