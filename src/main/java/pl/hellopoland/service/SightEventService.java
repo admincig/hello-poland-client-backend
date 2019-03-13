@@ -205,9 +205,7 @@ public class SightEventService extends ServiceSuperclass {
       bo.setOpeningHours(null);
       bo.setOpeningHours(oHoursList);
     }
-    // return bo;
-    // return translationService.updateEntityLanguageVersion(getForLoggedUser(dto.id), dto,
-    // language);
+    return translationService.updateEntityLanguageVersion(getForLoggedUser(dto.id), dto, language);
   }
 
   public List<SightEvent> getForPartner() {
