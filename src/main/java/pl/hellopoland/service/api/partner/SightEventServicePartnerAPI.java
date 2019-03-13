@@ -68,6 +68,11 @@ public class SightEventServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
+  public void delete(Long id, LanguageVersion language) {
+    service.deleteForLoggedUser(id, language);
+  }
+
+  @RolesAllowed("partner")
   public SightEventDTO uploadMainImage(Long id, byte[] icon) {
     SightEvent bo = service.uploadMainImageForLoggedUser(id, icon);
     var dto = DtoMapper.getFullDTO(bo);

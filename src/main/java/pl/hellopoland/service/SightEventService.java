@@ -285,9 +285,12 @@ public class SightEventService extends ServiceSuperclass {
     delete(id);
   }
 
+  public void deleteForLoggedUser(Long id, LanguageVersion language) {
+    translationService.deleteEntity(getForLoggedUser(id), language);
+  }
+
   public void fetchTicketPoolDefinitions(Collection<SightEvent> bos,
       List<SightEventDTO> sightEventDtos, boolean showDeletedTPD) {
-
     if (hasAnyHptCloudEvent(bos)) {
       var pairedByIds = pairBosWithDtos(bos, sightEventDtos);
       var groupedByPartner = groupByPartner(pairedByIds);
