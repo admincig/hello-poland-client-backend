@@ -275,11 +275,7 @@ public class SightService extends ServiceSuperclass {
   }
 
   public void deleteForLoggedUser(Long id, LanguageVersion language) {
-    Sight bo = getActiveForLoggedPartner(id);
-    if (bo.getDefaultLanguage().equals(language)) {
-      throw new ConflictingException("Deleting default language version is forbidden.");
-    }
-    translationService.deleteEntity(bo, language);
+    translationService.deleteEntity(getActiveForLoggedPartner(id), language);
   }
 
   private Sight getForLoggedPartner(Long sightId) {

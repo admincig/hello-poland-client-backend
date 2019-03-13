@@ -15,6 +15,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.enums.LanguageVersion;
@@ -80,11 +81,12 @@ public class PartnerSightRestService {
 
   @DELETE
   @Path("/{id}/languageVersion/{language}")
-  public void delete(@PathParam("id") Long id, @PathParam("language") String language) {
+  public Response delete(@PathParam("id") Long id, @PathParam("language") String language) {
     LanguageVersion lang =
         Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
             .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
     service.delete(id, lang);
+    return Response.ok().build();
   }
 
   @PUT

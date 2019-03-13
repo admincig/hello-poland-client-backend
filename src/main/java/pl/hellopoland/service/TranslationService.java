@@ -17,6 +17,7 @@ import pl.hellopoland.bo.Translation;
 import pl.hellopoland.dto.DTOSuperclass;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
+import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.util.Translated;
 
 @LocalBean
@@ -140,11 +141,16 @@ public class TranslationService extends ServiceSuperclass {
 
   public <T extends ModelSuperclass> void deleteEntity(T bo, LanguageVersion language) {
     try {
+      if (((LanguageVersion) bo.getClass().getMethod("getDefaultLanguage").invoke(bo))
+          .equals(language)) {
+        throw new ConflictingException("Deleting default language version is forbidden.");
+      }
       if ((boolean) bo.getClass().getMethod("deleteAvailableLanguageVersion", LanguageVersion.class)
           .invoke(bo, language)) {
         em.flush();
         getTranslations(bo, language).stream().forEach(t -> t.setDeleted(true));
       }
+      throw new ResourceNotFoundException();
     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
         | NoSuchMethodException | SecurityException e) {
       e.printStackTrace();

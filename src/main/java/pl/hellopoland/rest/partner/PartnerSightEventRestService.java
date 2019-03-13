@@ -17,6 +17,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import pl.hellopoland.annotation.DateTimeFormat;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
@@ -89,6 +90,16 @@ public class PartnerSightEventRestService {
   @Path("/{id}")
   public void delete(@PathParam("id") Long id) {
     service.delete(id);
+  }
+
+  @DELETE
+  @Path("/{id}/languageVersion/{language}")
+  public Response delete(@PathParam("id") Long id, @PathParam("language") String language) {
+    LanguageVersion lang =
+        Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
+            .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+    service.delete(id, lang);
+    return Response.ok().build();
   }
 
   @PUT
