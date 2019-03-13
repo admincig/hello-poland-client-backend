@@ -54,9 +54,15 @@ public class DtoMapper {
     target.setEmail(source.email);
     target.setPhone(source.phone);
     target.setScore(source.score);
-    target.setDefaultLanguage(LanguageVersion.getForCreateAndUpdateEntity(source.defaultLanguage));
-    target.setAvailableLanguageVersions(source.availableLanguageVersions.stream()
-        .map(ver -> LanguageVersion.getForCreateAndUpdateEntity(ver)).collect(Collectors.toSet()));
+    if (source.defaultLanguage != null) {
+      target
+          .setDefaultLanguage(LanguageVersion.getForCreateAndUpdateEntity(source.defaultLanguage));
+    }
+    if (source.availableLanguageVersions != null && !source.availableLanguageVersions.isEmpty()) {
+      target.setAvailableLanguageVersions(source.availableLanguageVersions.stream()
+          .map(ver -> LanguageVersion.getForCreateAndUpdateEntity(ver))
+          .collect(Collectors.toSet()));
+    }
     if (source.blocked != null) {
       target.setBlocked(source.blocked);
     }
@@ -270,9 +276,15 @@ public class DtoMapper {
     target.setGeneralAdmission(source.generalAdmission);
     target.setHptId(source.id);
     target.setScore(source.score);
-    target.setDefaultLanguage(LanguageVersion.getForCreateAndUpdateEntity(source.defaultLanguage));
-    target.setAvailableLanguageVersions(source.availableLanguageVersions.stream()
-        .map(ver -> LanguageVersion.getForCreateAndUpdateEntity(ver)).collect(Collectors.toSet()));
+    if (source.defaultLanguage != null) {
+      target
+          .setDefaultLanguage(LanguageVersion.getForCreateAndUpdateEntity(source.defaultLanguage));
+    }
+    if (source.availableLanguageVersions != null && !source.availableLanguageVersions.isEmpty()) {
+      target.setAvailableLanguageVersions(source.availableLanguageVersions.stream()
+          .map(ver -> LanguageVersion.getForCreateAndUpdateEntity(ver))
+          .collect(Collectors.toSet()));
+    }
     if (source.blocked != null) {
       target.setBlocked(source.blocked);
     }
