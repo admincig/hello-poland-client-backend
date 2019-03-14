@@ -93,7 +93,7 @@ public class HellopolandService extends ServiceSuperclass {
     try {
       Portal hpt = getPortal("Hello Ticket Cloud");
       var ht = new HelloTicket(hpt.getUrl());
-      var hptPartner = ht.addPartner(partner);
+      var hptPartner = ht.addPartner(partner, getLoggedUser().getHptToken());
       partnerBO.setHptToken(hptPartner.token);
     } catch (Exception e) {
       throw new ConflictingException("Nie udało się stworzyć partnera w zewnętrznym systemie", e);

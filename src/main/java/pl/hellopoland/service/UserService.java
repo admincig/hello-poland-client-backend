@@ -105,4 +105,16 @@ public class UserService extends ServiceSuperclass {
     return helloTicket.getUshersForPartner(partner.getHptToken());
   }
 
+  public UserDTO getUsher(long usherId) {
+    Portal hpt = getPortal("Hello Ticket Cloud");
+    HelloTicket ht = new HelloTicket(hpt.getUrl());
+    return ht.getUsherForPartner(usherId, getLoggedPartner().getHptToken());
+  }
+
+  public UserDTO updateUsher(UserDTO usher) {
+    Portal hpt = getPortal("Hello Ticket Cloud");
+    HelloTicket ht = new HelloTicket(hpt.getUrl());
+    return ht.updateUsherForPartner(usher, getLoggedPartner().getHptToken());
+  }
+
 }
