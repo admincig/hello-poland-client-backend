@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Set;
+import java.util.HashSet;
 import javax.annotation.PostConstruct;
 import javax.ejb.DependsOn;
 import javax.ejb.Singleton;
@@ -33,6 +33,7 @@ import pl.hellopoland.service.ServiceSuperclass;
 import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.service.TicketDefinitionService;
 import pl.hellopoland.service.TicketPoolDefinitionService;
+import pl.hellopoland.service.TranslationService;
 import pl.hellopoland.util.DtoMapper;
 
 @Startup
@@ -42,18 +43,16 @@ public class DbFiller extends ServiceSuperclass {
 
   @Inject
   SightEventService sService;
-
   @Inject
   ImageService imgService;
-
   @Inject
   TicketPoolDefinitionService tpdService;
-
   @Inject
   TicketDefinitionService tdService;
-
   @Inject
   private PasswordEncoder passwordEncoder;
+  @Inject
+  private TranslationService translationService;
 
   private User userHelloPoland;
   private User userZoo;
@@ -289,6 +288,8 @@ public class DbFiller extends ServiceSuperclass {
             + "zajęcia terenowe w obrębie obiektów geoturystycznych Kielc\r\n"
             + "imprezy i wydarzenia geoedukacyjne",
         userHelloPoland.getPartner(), geoparkKielceLocation, false, true);
+
+    createSightsEnglishVersion(hpWroc, hpKielce, geoparkKielce, zeromKielce, zooWro, stadGd, kol);
   }
 
   private Sight createSight(ImageCollector mainImage, String name, String lead, String description,
@@ -304,9 +305,20 @@ public class DbFiller extends ServiceSuperclass {
     bo.setBlocked(blocked);
     bo.setPublished(published);
     bo.setDefaultLanguage(LanguageVersion.PL_PL);
-    bo.setAvailableLanguageVersions(Set.of(LanguageVersion.PL_PL));
+    bo.setAvailableLanguageVersions(new HashSet<>(Arrays.asList(LanguageVersion.PL_PL)));
     em.persist(bo);
+    translationService.createEntityLanguageVersion(bo, DtoMapper.getDTO(bo), LanguageVersion.PL_PL);
     return bo;
+  }
+
+  private void createSightsEnglishVersion(Sight... sights) {
+    for (Sight s : sights) {
+      var dto = DtoMapper.getDTO(s);
+      s.setName("EN " + s.getName());
+      s.setDescription("EN " + s.getDescription());
+      s.setLead("EN " + s.getLead());
+      translationService.createEntityLanguageVersion(s, dto, LanguageVersion.EN_GB);
+    }
   }
 
   private void createSightEvents() {
@@ -393,6 +405,9 @@ public class DbFiller extends ServiceSuperclass {
     kolEvent = createSightEvent(kol1Img, "Zwiedzanie Kolejkowa",
         "Czynne 365 dni w roku, również w niedziele i święta w godzinach 10:00–18:00.", null, true,
         kol.getId(), kolLocation, userKolejkowo.getPartner(), false, true);
+
+    createSightEventsEnglishVersion(afrEvent, kolEvent, meczPCEvent, parkSzczEvent, zwStadEvent,
+        zwZooEvent, zwKielcEvent, zeromEvent, geoparkKielcEvent);
   }
 
   private SightEvent createSightEvent(ImageCollector mainImage, String name, String description,
@@ -412,8 +427,19 @@ public class DbFiller extends ServiceSuperclass {
     se.generateRandomScore();
     dto.score = se.getScore();
     dto.defaultLanguage = "pl-PL";
-    dto.availableLanguageVersions = Set.of(LanguageVersion.PL_PL.getLanuage());
+    dto.availableLanguageVersions =
+        new HashSet<>(Arrays.asList(LanguageVersion.PL_PL.getLanuage()));
     return sService.create(dto, partner);
+  }
+
+  private void createSightEventsEnglishVersion(SightEvent... sightEvents) {
+    for (SightEvent se : sightEvents) {
+      var dto = DtoMapper.getDTO(se);
+      se.setName("EN " + se.getName());
+      se.setDescription("EN " + se.getDescription());
+      se.setLead("EN " + se.getLead());
+      translationService.createEntityLanguageVersion(se, dto, LanguageVersion.EN_GB);
+    }
   }
 
   private void createTicketPoolDefinitions() {

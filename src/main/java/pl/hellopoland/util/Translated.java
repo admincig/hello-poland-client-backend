@@ -3,6 +3,9 @@ package pl.hellopoland.util;
 import java.util.Set;
 import pl.hellopoland.enums.LanguageVersion;
 
+/**
+ * This interface should be implemented by entities to be translated into different languages.
+ */
 public interface Translated {
   LanguageVersion getDefaultLanguage();
 
