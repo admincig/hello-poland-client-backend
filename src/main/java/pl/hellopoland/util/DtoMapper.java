@@ -354,12 +354,15 @@ public class DtoMapper {
 
   private static Integer getTargetAmount(OrderEntry oe) {
     // return oe.getUnitPrice() * oe.getQuantity();
-    var total = new BigDecimal(oe.getUnitPrice() * oe.getQuantity());
     var hundred = new BigDecimal("100");
-    var commission = hundred
-        .subtract(oe.getDateEntry().getSightEntry().getSightEvent().getPartner().getCommission())
-        .divide(new BigDecimal("100"));
-    return total.multiply(commission).setScale(0, RoundingMode.HALF_EVEN).intValue();
+    var total = new BigDecimal(oe.getUnitPrice() * oe.getQuantity());
+    var commission = oe.getDateEntry().getSightEntry().getSightEvent().getPartner().getCommission();
+    var commissionVal = total.multiply(commission).divide(hundred);
+    return total.subtract(commissionVal).setScale(0, RoundingMode.HALF_EVEN).intValue();
+    // var commission = hundred
+    // .subtract(oe.getDateEntry().getSightEntry().getSightEvent().getPartner().getCommission())
+    // .divide(new BigDecimal("100"));
+    // return total.multiply(commission).setScale(0, RoundingMode.HALF_EVEN).intValue();
   }
 
   public static P24PassageTransactionParamsDTO getP24PassageTransactionParamsDTO(Order o) {
