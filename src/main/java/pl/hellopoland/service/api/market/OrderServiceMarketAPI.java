@@ -26,7 +26,7 @@ public class OrderServiceMarketAPI {
 
   @PermitAll
   public P24PassageCartDTO create(OrderIRO iro) {
-    return DtoMapper.getP24PassageCartDTO(service.create(iro));
+    return DtoMapper.getDTO(service.create(iro));
   }
 
   @PermitAll
