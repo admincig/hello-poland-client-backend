@@ -17,6 +17,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import pl.hellopoland.annotation.DateFormat;
 import pl.hellopoland.dto.PartnerDTO;
+import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.service.api.hp.HellopolandServiceAPI;
 
 @RequestScoped
@@ -48,6 +49,9 @@ public class HelloPolandRestService {
   @Path("/sight-events/{id}/promotion/{value}")
   public Response setSightEventPromotion(@PathParam("id") Long id,
       @PathParam("value") Integer promotion) {
+    if (promotion.compareTo(1) < 0 || promotion.compareTo(3) > 0) {
+      throw new ConflictingException("The 'value' parameter can be only 1 or 2 or 3.");
+    }
     service.setSightEventPromotion(id, promotion);
     return Response.ok().build();
   }
