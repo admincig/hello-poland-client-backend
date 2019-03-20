@@ -74,11 +74,14 @@ public class SightEventService extends ServiceSuperclass {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
     }
     List<SightEvent> sightEvents = getQuery(config).getResultList();
-    Collections.sort(sightEvents, sightEventNamesComparator(new Locale("pl_PL")));
-
-    // List<SightEvent> sightEvents = getQuery(config).getResultList().stream()
-    // .sorted(sightEventDatesComparator()).collect(toList());
+    Collections.sort(sightEvents, sightEventPromotionComparator()
+        .thenComparing(sightEventNamesComparator(new Locale("pl_PL"))));
     return new PagedEntityCollection<>(sightEvents, config);
+  }
+
+  private Comparator<SightEvent> sightEventPromotionComparator() {
+    return Comparator.nullsLast(Comparator.comparing(SightEvent::getPromotion,
+        Comparator.nullsLast(Comparator.naturalOrder())));
   }
 
   private Comparator<SightEvent> sightEventNamesComparator(Locale locale) {
@@ -483,6 +486,15 @@ public class SightEventService extends ServiceSuperclass {
     var bo = getForLoggedUser(sightId);
     HelloTicket ht = new HelloTicket(bo.getPortal().getUrl());
     ht.stopSale(getLoggedPartner().getHptToken(), bo.getHptId(), ticketPoolDefId, date);
+  }
+
+  public void setSightEventPromotion(Long id, Integer promotion) {
+    var bo = Optional.ofNullable(get(id))
+        .orElseThrow(() -> new ConflictingException("Resource not found"));
+    bo.setPromotion(promotion);
+    em.createQuery("from SightEvent where promotion = :promotion", SightEvent.class)
+        .setParameter("promotion", promotion).getResultStream()
+        .forEach(se -> se.setPromotion(null));
   }
 
 }

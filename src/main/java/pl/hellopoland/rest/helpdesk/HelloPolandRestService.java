@@ -4,8 +4,10 @@ import java.io.File;
 import java.util.Date;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.websocket.server.PathParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -40,6 +42,14 @@ public class HelloPolandRestService {
     ResponseBuilder response = Response.ok(report);
     response.header("Content-Disposition", "attachment;filename=" + report.getName());
     return response.build();
+  }
+
+  @PATCH
+  @Path("/sight-events/{id}/promotion/{value}")
+  public Response setSightEventPromotion(@PathParam("id") Long id,
+      @PathParam("value") Integer promotion) {
+    service.setSightEventPromotion(id, promotion);
+    return Response.ok().build();
   }
 
 }

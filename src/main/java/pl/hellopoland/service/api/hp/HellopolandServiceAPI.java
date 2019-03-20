@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.service.AnalyticsService;
 import pl.hellopoland.service.HellopolandService;
+import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.util.DtoMapper;
 
 @Stateless
@@ -15,7 +16,9 @@ public class HellopolandServiceAPI {
   @Inject
   private HellopolandService service;
   @Inject
-  AnalyticsService analyticsService;
+  private AnalyticsService analyticsService;
+  @Inject
+  private SightEventService seService;
 
   @RolesAllowed("admin")
   public PartnerDTO addPartner(PartnerDTO partner) {
@@ -25,6 +28,11 @@ public class HellopolandServiceAPI {
   @RolesAllowed("admin")
   public File getOrdersCsvFile(Date fromDate, Date toDate) {
     return analyticsService.getOrdersCsvFile(fromDate, toDate);
+  }
+
+  @RolesAllowed("admin")
+  public void setSightEventPromotion(Long id, Integer promotion) {
+    seService.setSightEventPromotion(id, promotion);
   }
 
 }
