@@ -81,7 +81,6 @@ public class SightEventService extends ServiceSuperclass {
       sightEvents = translationService.translateEntities(sightEvents, language, false);
     }
     Collections.sort(sightEvents, sightEventNamesComparator(new Locale("pl_PL")));
-
     // List<SightEvent> sightEvents = getQuery(config).getResultList().stream()
     // .sorted(sightEventDatesComparator()).collect(toList());
     return new PagedEntityCollection<>(sightEvents, config);

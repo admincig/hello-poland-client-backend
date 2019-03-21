@@ -34,7 +34,14 @@ public class SightServiceMarketAPI {
     config.setOrderColumn("name");
     config.setOrderDirection("asc");
     PagedEntityCollection<Sight> bos = service.getList(config, language);
-    var dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
+    var dtos = bos.items.stream().map(bo -> {
+      var dto = DtoMapper.getDTO(bo);
+      dto.language = bo.getDefaultLanguage().getLanuage();
+      return dto;
+    }).collect(Collectors.toList());
+    if (language != null) {
+      dtos.forEach(dto -> dto.language = language.getLanuage());
+    }
     return new PagedCollection(dtos, bos.config);
   }
 
@@ -57,8 +64,11 @@ public class SightServiceMarketAPI {
         if (sightEvents != null && !sightEvents.isEmpty()) {
           bo.setSightEvents(translationService.translateEntities(sightEvents, language, true));
         }
+      } else {
+        language = bo.getDefaultLanguage();
       }
       var dto = DtoMapper.getFullDTO(bo);
+      dto.language = language.getLanuage();
       sightEventService.fetchTicketPoolDefinitions(bo.getSightEvents(), dto.sightEvents, false);
       dto.sightEvents = dto.sightEvents.stream()
           .filter(se -> sightEventService.isAvailable(se, null, null)).map(se -> {
