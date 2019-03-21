@@ -346,7 +346,7 @@ public class HelloTicket {
 
   public void stopSale(String hptToken, Long sightEventHptId, Long ticketPoolDefId, Date date) {
     try {
-      var dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+      var dateFormat = new SimpleDateFormat("yyyy-MM-dd");
       String dateString = dateFormat.format(date);
       delete("/v1/sight-events/" + sightEventHptId + "/sale?tpdId=" + ticketPoolDefId + "&date="
           + dateString, hptToken);

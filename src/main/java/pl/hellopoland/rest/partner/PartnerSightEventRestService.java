@@ -14,7 +14,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.lang3.StringUtils;
-import pl.hellopoland.annotation.DateTimeFormat;
+import pl.hellopoland.annotation.DateFormat;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.rest.dto.PagedCollection;
@@ -108,7 +108,7 @@ public class PartnerSightEventRestService {
   @DELETE
   @Path("/{id}/sale")
   public void stopSale(@PathParam("id") Long id, @QueryParam("tpdId") Long tpdId,
-      @QueryParam("date") @DateTimeFormat Date date) {
+      @QueryParam("date") @DateFormat Date date) {
     service.stopSale(id, tpdId, date);
   }
 
