@@ -59,7 +59,9 @@ public class OrderService extends ServiceSuperclass {
     o.setDetails(iro.details);
     em.persist(o);
 
-    Set<Long> ticketsIds = iro.entries.stream().collect(groupingBy(oeIRO -> oeIRO.id)).keySet();
+    Set<Long> ticketsIds =
+        iro.entries.stream().filter(oe -> oe.quantity != null && oe.quantity.compareTo(0) > 0)
+            .collect(groupingBy(oeIRO -> oeIRO.id)).keySet();
 
     List<TicketDefinition> tickets = em.createQuery(
         "from TicketDefinition t join fetch t.sightEvent s where t.id in (:ids) order by s.id asc",
