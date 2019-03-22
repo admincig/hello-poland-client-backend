@@ -148,9 +148,10 @@ public class TranslationService extends ServiceSuperclass {
       if ((boolean) bo.getClass().getMethod("deleteAvailableLanguageVersion", LanguageVersion.class)
           .invoke(bo, language)) {
         em.flush();
-        getTranslations(bo, language).stream().forEach(t -> t.setDeleted(true));
+        getTranslations(bo, language).forEach(t -> t.setDeleted(true));
+      } else {
+        throw new ResourceNotFoundException();
       }
-      throw new ResourceNotFoundException();
     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
         | NoSuchMethodException | SecurityException e) {
       e.printStackTrace();
