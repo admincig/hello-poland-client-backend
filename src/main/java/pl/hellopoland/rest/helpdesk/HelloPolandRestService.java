@@ -16,8 +16,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import pl.hellopoland.annotation.DateFormat;
+import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
+import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.api.hp.HellopolandServiceAPI;
 
 @RequestScoped
@@ -43,6 +45,12 @@ public class HelloPolandRestService {
     ResponseBuilder response = Response.ok(report);
     response.header("Content-Disposition", "attachment;filename=" + report.getName());
     return response.build();
+  }
+
+  @GET
+  @Path("/sight-events")
+  public PagedCollection getSightEvents() {
+    return service.getSightEvents(new SightEventPagedCollectionConfig());
   }
 
   @PATCH
