@@ -127,6 +127,7 @@ public class DtoMapper {
     dto.blocked = bo.isBlocked();
     dto.published = bo.isPublished();
     dto.partnerAffiliateCode = bo.getPartner().getAffiliateCode();
+    dto.promotion = bo.getPromotion();
     return dto;
   }
 
