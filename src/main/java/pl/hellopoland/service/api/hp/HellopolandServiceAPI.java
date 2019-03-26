@@ -17,7 +17,7 @@ public class HellopolandServiceAPI {
   @Inject
   AnalyticsService analyticsService;
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"admin", "salesman"})
   public PartnerDTO addPartner(PartnerDTO partner) {
     return DtoMapper.getFullDTO(service.addPartner(partner));
   }

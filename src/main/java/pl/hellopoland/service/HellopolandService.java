@@ -35,8 +35,8 @@ public class HellopolandService extends ServiceSuperclass {
   @Inject
   private EmailService emailService;
 
-  final Set<UserRole.Role> excluded_roles =
-      Set.of(UserRole.Role.ROOT, UserRole.Role.ADMIN, UserRole.Role.PARTNER);
+  final Set<UserRole.Role> excluded_roles = Set.of(UserRole.Role.ROOT, UserRole.Role.ADMIN,
+      UserRole.Role.PARTNER, UserRole.Role.SALESMAN);
 
   public Partner addPartner(PartnerDTO partner) {
     if (StringUtils.isBlank(partner.email)) {
