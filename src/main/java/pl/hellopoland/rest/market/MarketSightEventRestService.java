@@ -37,12 +37,14 @@ public class MarketSightEventRestService {
   public PagedCollection getList(@QueryParam("city") String city,
       @QueryParam("fromDate") @DateFormat Date fromDate,
       @QueryParam("toDate") @DateFormat Date toDate,
-      @HeaderParam("Accept-Language") String language) {
+      @HeaderParam("Accept-Language") String acceptLanguage,
+      @HeaderParam("Content-Language") String contentLanguage) {
     var config = new SightEventPagedCollectionConfig();
     config.onlyActive();
     config.onlyPublished();
     config.setCity(city);
-    return service.getList(config, fromDate, toDate, language);
+    return service.getList(config, fromDate, toDate,
+        contentLanguage != null ? contentLanguage : acceptLanguage);
   }
 
   @GET
@@ -50,13 +52,15 @@ public class MarketSightEventRestService {
   public PagedCollection search(@QueryParam("searchQuery") String searchQuery,
       @QueryParam("city") String city, @QueryParam("fromDate") @DateFormat Date fromDate,
       @QueryParam("toDate") @DateFormat Date toDate,
-      @HeaderParam("Accept-Language") String language) {
+      @HeaderParam("Accept-Language") String acceptLanguage,
+      @HeaderParam("Content-Language") String contentLanguage) {
     var config = new SightEventPagedCollectionConfig();
     config.onlyActive();
     config.onlyPublished();
     config.setSearchQuery(searchQuery);
     config.setCity(city);
-    return service.getList(config, fromDate, toDate, language);
+    return service.getList(config, fromDate, toDate,
+        contentLanguage != null ? contentLanguage : acceptLanguage);
   }
 
   @POST
@@ -64,19 +68,22 @@ public class MarketSightEventRestService {
   public PagedCollection search(SightEventPagedCollectionConfig config,
       @QueryParam("fromDate") @DateFormat Date fromDate,
       @QueryParam("toDate") @DateFormat Date toDate, @QueryParam("city") String city,
-      @HeaderParam("Accept-Language") String language) {
+      @HeaderParam("Accept-Language") String acceptLanguage,
+      @HeaderParam("Content-Language") String contentLanguage) {
     config.onlyActive();
     config.onlyActive();
     config.onlyPublished();
     config.setCity(city);
-    return service.getList(config, fromDate, toDate, language);
+    return service.getList(config, fromDate, toDate,
+        contentLanguage != null ? contentLanguage : acceptLanguage);
   }
 
   @GET
   @Path("/{id}")
   public SightEventDTO get(@PathParam("id") Long id,
-      @HeaderParam("Accept-Language") String language) {
-    return service.get(id, language);
+      @HeaderParam("Accept-Language") String acceptLanguage,
+      @HeaderParam("Content-Language") String contentLanguage) {
+    return service.get(id, contentLanguage != null ? contentLanguage : acceptLanguage);
   }
 
   @GET

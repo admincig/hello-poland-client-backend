@@ -4,7 +4,6 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
@@ -12,6 +11,7 @@ import javax.inject.Inject;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.SightEventDTO;
+import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.dto.AvailableTicketNumberAssociationORO;
 import pl.hellopoland.rest.dto.PagedCollection;
@@ -35,19 +35,22 @@ public class SightEventServiceMarketAPI {
 
   @PermitAll
   public PagedCollection getList(SightEventPagedCollectionConfig config, Date fromDate, Date toDate,
-      String language) {
+      String contentLanguageSymbol) {
+    LanguageVersion language = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
     if (fromDate != null && toDate != null && toDate.before(fromDate)) {
       throw new ConflictingException("toDate[" + toDate + "] is before fromDate[" + fromDate + "]");
     }
     config.setOrderColumn("name");
     config.setOrderDirection("asc");
-    PagedEntityCollection<SightEvent> bos = service.getList(config);
-    if (language != null && !language.toLowerCase().contains("pl")) {
-      bos.items = translationService.translateEntities(bos.items, language, false);
+    PagedEntityCollection<SightEvent> bos = service.getList(config, language);
+    List<SightEventDTO> dtos = bos.items.stream().map(bo -> {
+      var dto = DtoMapper.getDTO(bo);
+      dto.language = bo.getDefaultLanguage().getLanuage();
+      return dto;
+    }).collect(Collectors.toList());
+    if (language != null) {
+      dtos.forEach(dto -> dto.language = language.getLanuage());
     }
-    List<SightEventDTO> dtos =
-        bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
-
     service.fetchTicketPoolDefinitions(bos.items, dtos, false);
 
     List<SightEventDTO> list = dtos.stream().filter(dto -> service.isAvailable(dto,
@@ -59,23 +62,27 @@ public class SightEventServiceMarketAPI {
   }
 
   @PermitAll
-  public SightEventDTO get(Long id, String language) {
+  public SightEventDTO get(Long id, String contentLanguageSymbol) {
+    LanguageVersion language = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
     SightEvent bo = service.get(id);
     if (bo.isPublished()) {
-      if (language != null && !language.toLowerCase().contains("pl")) {
+      if (language != null) {
         bo = translationService.translateEntity(bo, language, true);
-        var agreements = bo.getAgreements();
+        // var agreements = bo.getAgreements();
+        // if (agreements != null && !agreements.isEmpty()) {
+        // bo.setAgreements(
+        // Set.copyOf(translationService.translateEntities(agreements, language, true)));
+        // }
         var tickets = bo.getTickets();
-        if (agreements != null && !agreements.isEmpty()) {
-          bo.setAgreements(
-              Set.copyOf(translationService.translateEntities(agreements, language, true)));
-        }
         if (tickets != null && !tickets.isEmpty()) {
           bo.setTickets(translationService.translateEntities(tickets, language, true));
         }
+      } else {
+        language = bo.getDefaultLanguage();
       }
       var dto = DtoMapper.getFullDTO(bo);
       dto.partnerAffiliateCode = null;
+      dto.language = language.getLanuage();
       service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), false);
       return service.isAvailable(dto, null, null) ? dto : null;
     }

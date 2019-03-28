@@ -35,6 +35,7 @@ import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.UserDTO;
+import pl.hellopoland.enums.LanguageVersion;
 
 public class DtoMapper {
 
@@ -47,6 +48,15 @@ public class DtoMapper {
     target.setEmail(source.email);
     target.setPhone(source.phone);
     target.setScore(source.score);
+    if (source.defaultLanguage != null) {
+      target
+          .setDefaultLanguage(LanguageVersion.getForCreateAndUpdateEntity(source.defaultLanguage));
+    }
+    if (source.availableLanguageVersions != null && !source.availableLanguageVersions.isEmpty()) {
+      target.setAvailableLanguageVersions(source.availableLanguageVersions.stream()
+          .map(ver -> LanguageVersion.getForCreateAndUpdateEntity(ver))
+          .collect(Collectors.toSet()));
+    }
     if (source.blocked != null) {
       target.setBlocked(source.blocked);
     }
@@ -89,11 +99,14 @@ public class DtoMapper {
     dto.score = bo.getScore();
     dto.blocked = bo.isBlocked();
     dto.published = bo.isPublished();
+    dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
     return dto;
   }
 
   public static SightDTO getFullDTO(Sight bo) {
     SightDTO dto = getDTO(bo);
+    dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
+        .map(lang -> lang.getLanuage()).collect(Collectors.toSet());
     if (bo.getSightEvents() != null) {
       dto.sightEvents = bo.getSightEvents().stream().map(DtoMapper::getFullDTO).collect(toList());
     }
@@ -127,11 +140,14 @@ public class DtoMapper {
     dto.blocked = bo.isBlocked();
     dto.published = bo.isPublished();
     dto.partnerAffiliateCode = bo.getPartner().getAffiliateCode();
+    dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
     return dto;
   }
 
   public static SightEventDTO getFullDTO(SightEvent bo) {
     SightEventDTO dto = getDTO(bo);
+    dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
+        .map(lang -> lang.getLanuage()).collect(Collectors.toSet());
     if (bo.getImages() != null && !bo.getImages().isEmpty()) {
       dto.images = bo.getImages().stream().map(DtoMapper::getDTO).collect(toList());
     }
@@ -254,6 +270,15 @@ public class DtoMapper {
     target.setGeneralAdmission(source.generalAdmission);
     target.setHptId(source.id);
     target.setScore(source.score);
+    if (source.defaultLanguage != null) {
+      target
+          .setDefaultLanguage(LanguageVersion.getForCreateAndUpdateEntity(source.defaultLanguage));
+    }
+    if (source.availableLanguageVersions != null && !source.availableLanguageVersions.isEmpty()) {
+      target.setAvailableLanguageVersions(source.availableLanguageVersions.stream()
+          .map(ver -> LanguageVersion.getForCreateAndUpdateEntity(ver))
+          .collect(Collectors.toSet()));
+    }
     if (source.blocked != null) {
       target.setBlocked(source.blocked);
     }
