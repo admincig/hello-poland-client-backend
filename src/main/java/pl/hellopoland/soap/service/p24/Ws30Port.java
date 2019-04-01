@@ -19,7 +19,7 @@ public interface Ws30Port {
 
   @WebMethod
   @WebResult(partName = "return")
-  public MerchantRegisterResult MerchantRegister(
+  public MerchantRegisterResult merchantRegister(
       @WebParam(name = "login", partName = "login") Integer login,
       @WebParam(name = "pass", partName = "pass") String pass,
       @WebParam(name = "merchant", partName = "merchant") MerchantRegisterRequest merchant);
