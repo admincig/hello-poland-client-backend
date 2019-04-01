@@ -42,8 +42,8 @@ public class AnalyticsService extends ServiceSuperclass {
     // csv file header:
     writeCsvRow(csvFile.toPath(), "DATA ZAMÓWIENIA", "ID PARTNERA HP", "ID PARTNERA P24",
         "NAZWA PARTNERA", "AFILIACJA", "WARTOŚĆ", "PROWIZJA", "WALUTA", "NR TRANSAKCJI P24",
-        "NAZWA UŻUTKOWNIKA", "TELEON", "ADRES EMAIL", "PLATFORMA", "ZALOGOWANY", "NAZWA OFERTY",
-        "DATA OFERTY", "ILOŚĆ", "NAZWA BILETÓW");
+        "TYTUŁ PRZELEWU P24", "NAZWA UŻUTKOWNIKA", "TELEON", "ADRES EMAIL", "PLATFORMA",
+        "ZALOGOWANY", "NAZWA OFERTY", "DATA OFERTY", "ILOŚĆ", "NAZWA BILETÓW");
 
     var orders = orderService.getOrdersInDateRange(fromDate, toDate,
         getLoggedUser().hasRole(UserRole.Role.ADMIN) ? null : getLoggedPartner());
@@ -65,7 +65,7 @@ public class AnalyticsService extends ServiceSuperclass {
           String.valueOf(partner.getId()), String.valueOf(partner.getP24Id()), partner.getName(),
           oe.getPartnerAffiliateCode() != null ? "afiliacja" : "",
           String.valueOf(total).replace(".", ","), String.valueOf(commissionVal).replace(".", ","),
-          order.getP24Currency(), order.getP24OrderId(),
+          order.getP24Currency(), order.getP24OrderId(), order.getP24Statement(),
           oDetails.getFirstName() + " " + oDetails.getLastName(), oDetails.getPhone(),
           oDetails.getEmail(), oDetails.getPlatform().name(),
           String.valueOf(oDetails.isUserLogged()), sightEvent.getName(),
