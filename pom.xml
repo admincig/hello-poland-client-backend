@@ -19,6 +19,29 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.jboss.ws.cxf</groupId>
+			<artifactId>jbossws-cxf-client</artifactId>
+			<version>5.2.4.Final</version>
+			<exclusions>
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		
+		
+		
+		
+		
+<dependency>
+    <groupId>xmlbeans</groupId>
+    <artifactId>xmlbeans</artifactId>
+    <version>1.0</version>
+</dependency>
+
+		
+		<dependency>
 			<groupId>javax</groupId>
 			<artifactId>javaee-api</artifactId>
 			<version>8.0</version>
@@ -181,5 +204,9 @@
 			<id>fream-nexus-releases</id>
 			<url>https://packages.fream.pl/repository/maven-fream-releases</url>
 		</repository>
+		<repository>
+            <id>redhat ga</id>
+            <url>https://maven.repository.redhat.com/ga</url>
+        </repository>
 	</repositories>
 </project>
