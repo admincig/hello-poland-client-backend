@@ -56,7 +56,9 @@ public class OrderService extends ServiceSuperclass {
     Order o = new Order();
     o.generateHash();
     o.setUser(getLoggedUser());
-    o.setDetails(iro.details);
+    var details = iro.details;
+    details.setUserLogged(getLoggedUser() != null);
+    o.setDetails(details);
     em.persist(o);
 
     Set<Long> ticketsIds =
