@@ -42,7 +42,7 @@ public class AnalyticsService extends ServiceSuperclass {
     // csv file header:
     writeCsvRow(csvFile.toPath(), "DATA ZAMÓWIENIA", "ID PARTNERA HP", "ID PARTNERA P24",
         "NAZWA PARTNERA", "AFILIACJA", "WARTOŚĆ", "PROWIZJA", "WALUTA", "NR TRANSAKCJI P24",
-        "NAZWA UŻUTKOWNIKA", "TELEON", "ADRES EMAIL", "PATFORMA", "ZALOGOWANY", "NAZWA OFERTY",
+        "NAZWA UŻUTKOWNIKA", "TELEON", "ADRES EMAIL", "PLATFORMA", "ZALOGOWANY", "NAZWA OFERTY",
         "DATA OFERTY", "ILOŚĆ", "NAZWA BILETÓW");
 
     var orders = orderService.getOrdersInDateRange(fromDate, toDate,
