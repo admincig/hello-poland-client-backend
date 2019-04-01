@@ -3,6 +3,8 @@ package pl.hellopoland.service;
 import java.io.File;
 import java.io.IOException;
 import java.lang.System.Logger.Level;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -16,7 +18,9 @@ import pl.hellopoland.bo.Order;
 import pl.hellopoland.bo.OrderDateEntry;
 import pl.hellopoland.bo.OrderDetails;
 import pl.hellopoland.bo.OrderEntry;
+import pl.hellopoland.bo.OrderSightEntry;
 import pl.hellopoland.bo.Partner;
+import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.UserRole;
 
 @LocalBean
@@ -37,7 +41,7 @@ public class AnalyticsService extends ServiceSuperclass {
         PATH + "orders_" + RandomStringUtils.randomAlphanumeric(10) + ".csv");
     // csv file header:
     writeCsvRow(csvFile.toPath(), "DATA ZAMÓWIENIA", "ID PARTNERA HP", "ID PARTNERA P24",
-        "NAZWA PARTNERA", "AFILIACJA", "WARTOŚĆ", "WALUTA", "NR TRANSAKCJI P24",
+        "NAZWA PARTNERA", "AFILIACJA", "WARTOŚĆ", "PROWIZJA", "WALUTA", "NR TRANSAKCJI P24",
         "NAZWA UŻUTKOWNIKA", "TELEON", "ADRES EMAIL", "NAZWA OFERTY", "DATA OFERTY", "ILOŚĆ",
         "NAZWA BILETÓW");
 
@@ -45,21 +49,27 @@ public class AnalyticsService extends ServiceSuperclass {
         getLoggedUser().hasRole(UserRole.Role.ADMIN) ? null : getLoggedPartner());
     for (OrderEntry oe : orders) {
       OrderDateEntry dateEntry = oe.getDateEntry();
-      Partner partner = dateEntry.getSightEntry().getSightEvent().getPartner();
-      Order order = dateEntry.getSightEntry().getOrder();
+      OrderSightEntry sightEntry = dateEntry.getSightEntry();
+      SightEvent sightEvent = sightEntry.getSightEvent();
+      Partner partner = sightEvent.getPartner();
+      Order order = sightEntry.getOrder();
       OrderDetails oDetails = order.getDetails();
+      BigDecimal commission = partner.getCommission();
+
+      var hundred = new BigDecimal("100");
+      var total = new BigDecimal(oe.getUnitPrice() * oe.getQuantity()).divide(hundred);
+      BigDecimal commissionVal =
+          total.multiply(commission).divide(hundred).setScale(2, RoundingMode.HALF_EVEN);
 
       writeCsvRow(csvFile.toPath(), DATE_FORMATER.format(order.getDate()),
           String.valueOf(partner.getId()), String.valueOf(partner.getP24Id()), partner.getName(),
           oe.getPartnerAffiliateCode() != null ? "afiliacja" : "",
-          String.valueOf((oe.getUnitPrice() * oe.getQuantity()) / 100d).replace(".", ","),
+          String.valueOf(total).replace(".", ","), String.valueOf(commissionVal).replace(".", ","),
           order.getP24Currency(), order.getP24OrderId(),
           oDetails.getFirstName() + " " + oDetails.getLastName(), oDetails.getPhone(),
-          oDetails.getEmail(), dateEntry.getSightEntry().getSightEvent().getName(),
-          DATE_FORMATER.format(dateEntry.getDate()), String.valueOf(oe.getQuantity()),
-          oe.getName());
+          oDetails.getEmail(), sightEvent.getName(), DATE_FORMATER.format(dateEntry.getDate()),
+          String.valueOf(oe.getQuantity()), oe.getName());
     }
-
     return csvFile;
   }
 

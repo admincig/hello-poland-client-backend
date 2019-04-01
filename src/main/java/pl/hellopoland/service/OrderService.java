@@ -5,14 +5,18 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -26,6 +30,8 @@ import pl.hellopoland.bo.OrderDetails;
 import pl.hellopoland.bo.OrderEntry;
 import pl.hellopoland.bo.OrderSightEntry;
 import pl.hellopoland.bo.Partner;
+import pl.hellopoland.bo.PassageCart;
+import pl.hellopoland.bo.PassageCartEntry;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.TicketDefinition;
@@ -46,14 +52,16 @@ public class OrderService extends ServiceSuperclass {
   @Inject
   AgreementService aService;
 
-  public Order create(OrderIRO iro) {
+  public PassageCart create(OrderIRO iro) {
     Order o = new Order();
     o.generateHash();
     o.setUser(getLoggedUser());
     o.setDetails(iro.details);
     em.persist(o);
 
-    Set<Long> ticketsIds = iro.entries.stream().collect(groupingBy(oeIRO -> oeIRO.id)).keySet();
+    Set<Long> ticketsIds =
+        iro.entries.stream().filter(oe -> oe.quantity != null && oe.quantity.compareTo(0) > 0)
+            .collect(groupingBy(oeIRO -> oeIRO.id)).keySet();
 
     List<TicketDefinition> tickets = em.createQuery(
         "from TicketDefinition t join fetch t.sightEvent s where t.id in (:ids) order by s.id asc",
@@ -119,7 +127,7 @@ public class OrderService extends ServiceSuperclass {
     } catch (Exception e) {
       throw new ConflictingException("Nie udało się złożyć zamówienia w zewnętrznym systemie", e);
     }
-    return o;
+    return getP24PassageCart(o);
   }
 
   // em.refreshes are because of strange NPEs
@@ -139,6 +147,82 @@ public class OrderService extends ServiceSuperclass {
           break;
       }
     }
+  }
+
+  private PassageCart getP24PassageCart(Order o) {
+    var passageCart = new PassageCart(o);
+    passageCart.setSandbox(Boolean.parseBoolean(properties.getProperty("przelewy24.isSandbox")));
+    List<OrderEntry> orderEntries = gatherOrderEntries(o.getEntries());
+    var amount = orderEntries.stream()
+        .collect(Collectors.summingInt(oe -> oe.getUnitPrice() * oe.getQuantity()));
+    passageCart.setAmount(amount);
+    passageCart.setCountry("PL");
+    var currency = "PLN";
+    passageCart.setCurrency(currency);
+    passageCart.setDescription("Hello Poland, " + o.getHash());
+    passageCart.setLanguage("pl");
+    var merchantId = Integer.valueOf(properties.getProperty("przelewy24.merchantId"));
+    passageCart.setMerchantId(merchantId);
+    passageCart.setSign(getP24Sign(o.getHash(), merchantId, amount, currency));
+    passageCart.setUrlStatus(getAckPaymentURL(o));
+    var passageCartEntries = new HashSet<PassageCartEntry>();
+    orderEntries.forEach(oe -> {
+      var cartEntry = new PassageCartEntry(oe);
+      cartEntry.setPassageCart(passageCart);
+      cartEntry.setDescription("Hello Poland, " + o.getHash());
+      passageCartEntries.add(cartEntry);
+    });
+    passageCart.setCartEntries(passageCartEntries);
+    var hpCommissionEntry = getHpCommissionEntry(amount, passageCart.getCartEntries(), o.getHash());
+    hpCommissionEntry.setPassageCart(passageCart);
+    passageCart.setHpCommissionEntry(hpCommissionEntry);
+    em.persist(passageCart);
+    return passageCart;
+  }
+
+  private static List<OrderEntry> gatherOrderEntries(Collection<OrderSightEntry> collection) {
+    List<OrderEntry> orderEntries = new ArrayList<>();
+    for (OrderSightEntry se : collection) {
+      for (OrderDateEntry de : se.getEntries()) {
+        orderEntries.addAll(de.getEntries());
+      }
+    }
+    return orderEntries;
+  }
+
+  private String getAckPaymentURL(Order o) {
+    var url = properties.getProperty("base.url");
+    if (!url.endsWith("/")) {
+      url = url.concat("/");
+    }
+    return url.concat("market/orders/" + o.getHash() + "/ackPayment");
+  }
+
+  private String getP24Sign(String orderHash, Integer merchantId, Integer amount, String currency) {
+    var delimiter = "|";
+    var signBuilder = new StringBuilder();
+    signBuilder.append(orderHash).append(delimiter);
+    signBuilder.append(merchantId).append(delimiter);
+    signBuilder.append(amount).append(delimiter);
+    signBuilder.append(currency).append(delimiter);
+    signBuilder.append(properties.getProperty("przelewy24.crc"));
+    return PaymentUtils.MD5(signBuilder.toString());
+  }
+
+  private PassageCartEntry getHpCommissionEntry(Integer amount,
+      Set<PassageCartEntry> passageCartEntries, String orderHash) {
+    var hpCommission = new PassageCartEntry();
+    hpCommission.setName("Hello-Poland prowizja");
+    hpCommission.setDescription("HP prowizja do zamówienia " + orderHash);
+    hpCommission.setNumber(0l);
+    hpCommission.setQuantity(1);
+    Integer targetAmount = amount
+        - passageCartEntries.stream().collect(Collectors.summingInt(f -> f.getTargetAmount()));
+    hpCommission.setTargetAmount(targetAmount);
+    hpCommission.setPrice(targetAmount);
+    hpCommission.setTargetPosId(Integer.parseInt(properties.getProperty("przelewy24.posId")));
+    hpCommission.setCommission(BigDecimal.ZERO);
+    return hpCommission;
   }
 
   private void confirmInExternalAPI(Order o) {

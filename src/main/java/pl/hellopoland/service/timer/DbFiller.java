@@ -6,6 +6,8 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.ejb.DependsOn;
 import javax.ejb.Singleton;
@@ -25,12 +27,15 @@ import pl.hellopoland.dto.FrequencyTypeDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
+import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.security.password.PasswordEncoder;
 import pl.hellopoland.service.ImageService;
 import pl.hellopoland.service.ServiceSuperclass;
 import pl.hellopoland.service.SightEventService;
+import pl.hellopoland.service.SightService;
 import pl.hellopoland.service.TicketDefinitionService;
 import pl.hellopoland.service.TicketPoolDefinitionService;
+import pl.hellopoland.service.TranslationService;
 import pl.hellopoland.util.DtoMapper;
 
 @Startup
@@ -39,19 +44,19 @@ import pl.hellopoland.util.DtoMapper;
 public class DbFiller extends ServiceSuperclass {
 
   @Inject
-  SightEventService sService;
-
+  SightService sService;
+  @Inject
+  SightEventService seService;
   @Inject
   ImageService imgService;
-
   @Inject
   TicketPoolDefinitionService tpdService;
-
   @Inject
   TicketDefinitionService tdService;
-
   @Inject
   private PasswordEncoder passwordEncoder;
+  @Inject
+  private TranslationService translationService;
 
   private User userHelloPoland;
   private User userZoo;
@@ -303,8 +308,27 @@ public class DbFiller extends ServiceSuperclass {
     bo.setLocation(location);
     bo.setBlocked(blocked);
     bo.setPublished(published);
+    bo.setDefaultLanguage(LanguageVersion.PL_PL);
+    bo.setAvailableLanguageVersions(new HashSet<>(Arrays.asList(LanguageVersion.PL_PL)));
     em.persist(bo);
+    var dto = DtoMapper.getDTO(bo);
+    dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
+        .map(lang -> lang.getLanuage()).collect(Collectors.toSet());
+    translationService.createEntityLanguageVersion(bo, dto, LanguageVersion.PL_PL);
     return bo;
+  }
+
+  private void createSightsEnglishVersion(Sight... sights) {
+    for (Sight s : sights) {
+      s.setName("EN " + s.getName());
+      s.setDescription("EN " + s.getDescription());
+      s.setLead("EN " + s.getLead());
+      var dto = DtoMapper.getDTO(s);
+      dto.availableLanguageVersions = s.getAvailableLanguageVersions().stream()
+          .map(lang -> lang.getLanuage()).collect(Collectors.toSet());
+      translationService.createEntityLanguageVersion(sService.get(s.getId()), dto,
+          LanguageVersion.EN_GB);
+    }
   }
 
   private void createSightEvents() {
@@ -409,7 +433,23 @@ public class DbFiller extends ServiceSuperclass {
     var se = new SightEvent();
     se.generateRandomScore();
     dto.score = se.getScore();
-    return sService.create(dto, partner);
+    dto.defaultLanguage = "pl-PL";
+    dto.availableLanguageVersions =
+        new HashSet<>(Arrays.asList(LanguageVersion.PL_PL.getLanuage()));
+    return seService.create(dto, partner);
+  }
+
+  private void createSightEventsEnglishVersion(SightEvent... sightEvents) {
+    for (SightEvent se : sightEvents) {
+      se.setName("EN " + se.getName());
+      se.setDescription("EN " + se.getDescription());
+      se.setLead("EN " + se.getLead());
+      var dto = DtoMapper.getDTO(se);
+      dto.availableLanguageVersions = se.getAvailableLanguageVersions().stream()
+          .map(lang -> lang.getLanuage()).collect(Collectors.toSet());
+      translationService.createEntityLanguageVersion(seService.get(se.getId()), dto,
+          LanguageVersion.EN_GB);
+    }
   }
 
   private void createTicketPoolDefinitions() {

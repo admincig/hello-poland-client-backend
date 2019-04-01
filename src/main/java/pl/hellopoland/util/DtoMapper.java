@@ -2,12 +2,8 @@ package pl.hellopoland.util;
 
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -16,12 +12,10 @@ import pl.hellopoland.bo.FileDescriptor;
 import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.Location;
 import pl.hellopoland.bo.OpeningHours;
-import pl.hellopoland.bo.Order;
-import pl.hellopoland.bo.OrderDateEntry;
 import pl.hellopoland.bo.OrderDetails;
-import pl.hellopoland.bo.OrderEntry;
-import pl.hellopoland.bo.OrderSightEntry;
 import pl.hellopoland.bo.Partner;
+import pl.hellopoland.bo.PassageCart;
+import pl.hellopoland.bo.PassageCartEntry;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.TicketDefinition;
@@ -41,6 +35,7 @@ import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.UserDTO;
+import pl.hellopoland.enums.LanguageVersion;
 
 public class DtoMapper {
 
@@ -53,6 +48,15 @@ public class DtoMapper {
     target.setEmail(source.email);
     target.setPhone(source.phone);
     target.setScore(source.score);
+    if (source.defaultLanguage != null) {
+      target
+          .setDefaultLanguage(LanguageVersion.getForCreateAndUpdateEntity(source.defaultLanguage));
+    }
+    if (source.availableLanguageVersions != null && !source.availableLanguageVersions.isEmpty()) {
+      target.setAvailableLanguageVersions(source.availableLanguageVersions.stream()
+          .map(ver -> LanguageVersion.getForCreateAndUpdateEntity(ver))
+          .collect(Collectors.toSet()));
+    }
     if (source.blocked != null) {
       target.setBlocked(source.blocked);
     }
@@ -95,11 +99,14 @@ public class DtoMapper {
     dto.score = bo.getScore();
     dto.blocked = bo.isBlocked();
     dto.published = bo.isPublished();
+    dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
     return dto;
   }
 
   public static SightDTO getFullDTO(Sight bo) {
     SightDTO dto = getDTO(bo);
+    dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
+        .map(lang -> lang.getLanuage()).collect(Collectors.toSet());
     if (bo.getSightEvents() != null) {
       dto.sightEvents = bo.getSightEvents().stream().map(DtoMapper::getFullDTO).collect(toList());
     }
@@ -133,11 +140,14 @@ public class DtoMapper {
     dto.blocked = bo.isBlocked();
     dto.published = bo.isPublished();
     dto.partnerAffiliateCode = bo.getPartner().getAffiliateCode();
+    dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
     return dto;
   }
 
   public static SightEventDTO getFullDTO(SightEvent bo) {
     SightEventDTO dto = getDTO(bo);
+    dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
+        .map(lang -> lang.getLanuage()).collect(Collectors.toSet());
     if (bo.getImages() != null && !bo.getImages().isEmpty()) {
       dto.images = bo.getImages().stream().map(DtoMapper::getDTO).collect(toList());
     }
@@ -260,6 +270,15 @@ public class DtoMapper {
     target.setGeneralAdmission(source.generalAdmission);
     target.setHptId(source.id);
     target.setScore(source.score);
+    if (source.defaultLanguage != null) {
+      target
+          .setDefaultLanguage(LanguageVersion.getForCreateAndUpdateEntity(source.defaultLanguage));
+    }
+    if (source.availableLanguageVersions != null && !source.availableLanguageVersions.isEmpty()) {
+      target.setAvailableLanguageVersions(source.availableLanguageVersions.stream()
+          .map(ver -> LanguageVersion.getForCreateAndUpdateEntity(ver))
+          .collect(Collectors.toSet()));
+    }
     if (source.blocked != null) {
       target.setBlocked(source.blocked);
     }
@@ -277,138 +296,57 @@ public class DtoMapper {
     target.setAvailableTicketsNumber(source.availableTicketsNumber);
   }
 
-  public static P24PassageCartDTO getP24PassageCartDTO(Order o) {
-    var passageCart = new ArrayList<P24PassageCartEntryDTO>();
-    var p24Params = getP24PassageTransactionParamsDTO(o);
-    List<OrderEntry> orderEntries = gatherOrderEntries(o.getEntries());
-    orderEntries.forEach(oe -> {
-      var cartEntry = getP24PassageCartEntryDTO(oe);
-      cartEntry.description = "Hello Poland, " + o.getHash();
-      passageCart.add(cartEntry);
-    });
-    p24Params.amount = orderEntries.stream()
-        .collect(Collectors.summingInt(oe -> oe.getUnitPrice() * oe.getQuantity()));
-    // p24Params.amount =
-    // passageCart.stream().collect(Collectors.summingInt(f -> f.price * f.quantity));
-    p24Params.sign = getP24Sign(p24Params);
+
+  public static P24PassageCartDTO getDTO(PassageCart p24PassageCart) {
     var dto = new P24PassageCartDTO();
-    dto.isSandbox = Boolean.parseBoolean(PROPERTIES.getProperty("przelewy24.isSandbox"));
-    dto.transactionParams = p24Params;
-    passageCart.add(getHPCommissionPassageCart(p24Params.amount, passageCart, o.getHash()));
-    // p24Params.passageCart = organizeByPosId(passageCart);
-    p24Params.passageCart = passageCart;
+    dto.isSandbox = p24PassageCart.isSandbox();
+    dto.transactionParams = getParams(p24PassageCart);
     return dto;
   }
 
-  private static ArrayList<P24PassageCartEntryDTO> organizeByPosId(
-      ArrayList<P24PassageCartEntryDTO> passageCart) {
-    var cart = new ArrayList<P24PassageCartEntryDTO>();
-    passageCart.stream().collect(Collectors.groupingBy(c -> c.targetPosId)).forEach((k, v) -> {
-      if (v.size() == 1) {
-        cart.add(v.get(0));
-      } else {
-        var c = new P24PassageCartEntryDTO();
-        c.description = v.get(0).description;
-        c.targetPosId = k;
-        c.name = "tickets";
-        c.quantity = 1;
-        c.price = v.stream().collect(Collectors.summingInt(cdto -> cdto.price));
-        c.targetAmount = v.stream().collect(Collectors.summingInt(cdto -> cdto.targetAmount));
-        cart.add(c);
-      }
-    });
-    return cart;
-  }
-
-  private static P24PassageCartEntryDTO getHPCommissionPassageCart(Integer amount,
-      ArrayList<P24PassageCartEntryDTO> passageCart, String orderHash) {
-    var dto = new P24PassageCartEntryDTO();
-    dto.name = "Hello-Poland prowizja";
-    dto.description = "HP prowizja do zamówienia " + orderHash;
-    dto.number = 0l;
-    dto.quantity = 1;
-    dto.targetAmount =
-        amount - passageCart.stream().collect(Collectors.summingInt(f -> f.targetAmount));
-    dto.price = dto.targetAmount;
-    dto.targetPosId = Integer.parseInt(PROPERTIES.getProperty("przelewy24.posId"));
-    return dto;
-  }
-
-  public static P24PassageCartEntryDTO getP24PassageCartEntryDTO(OrderEntry oe) {
-    var dto = new P24PassageCartEntryDTO();
-    dto.name = oe.getName();
-    dto.number = oe.getExternalId();
-    dto.quantity = 1;
-    // dto.quantity = oe.getQuantity();
-    dto.targetAmount = getTargetAmount(oe);
-    dto.price = dto.targetAmount;
-    // dto.price = getUnitPrice(dto.quantity, dto.targetAmount);
-    dto.targetPosId = oe.getDateEntry().getSightEntry().getSightEvent().getPartner().getP24Id();
-    return dto;
-  }
-
-  private static Integer getUnitPrice(Integer quantity, Integer targetAmount) {
-    return new BigDecimal(targetAmount).divide(new BigDecimal(quantity))
-        .setScale(0, RoundingMode.HALF_EVEN).intValue();
-  }
-
-  private static Integer getTargetAmount(OrderEntry oe) {
-    // return oe.getUnitPrice() * oe.getQuantity();
-    var total = new BigDecimal(oe.getUnitPrice() * oe.getQuantity());
-    var hundred = new BigDecimal("100");
-    var commission = hundred
-        .subtract(oe.getDateEntry().getSightEntry().getSightEvent().getPartner().getCommission())
-        .divide(new BigDecimal("100"));
-    return total.multiply(commission).setScale(0, RoundingMode.HALF_EVEN).intValue();
-  }
-
-  public static P24PassageTransactionParamsDTO getP24PassageTransactionParamsDTO(Order o) {
-    var dto = new P24PassageTransactionParamsDTO();
+  private static P24PassageTransactionParamsDTO getParams(PassageCart p24PassageCart) {
+    var o = p24PassageCart.getOrder();
     OrderDetails od = o.getDetails();
+
+    var dto = new P24PassageTransactionParamsDTO();
+    dto.amount = p24PassageCart.getAmount();
+    dto.country = p24PassageCart.getCountry();
+    dto.currency = p24PassageCart.getCurrency();
+    dto.description = p24PassageCart.getDescription();
+    dto.language = p24PassageCart.getLanguage();
+    dto.merchantId = p24PassageCart.getMerchantId();
+    dto.sign = p24PassageCart.getSign();
+    dto.urlStatus = p24PassageCart.getUrlStatus();
     dto.address = od.getStreet() != null ? od.getStreet() : "";
-    dto.zip = od.getZipCode() != null ? od.getZipCode() : "";
     dto.city = od.getCity() != null ? od.getCity() : "";
-    dto.country = "PL";
     dto.client = (od.getFirstName() == null && od.getLastName() == null) ? ""
         : od.getFirstName() + " " + od.getLastName();
     dto.email = od.getEmail() != null ? od.getEmail() : "";
     dto.phone = od.getPhone() != null ? od.getPhone() : "";
-    dto.language = "pl";
-    dto.currency = "PLN";
     dto.sessionId = o.getHash();
-    dto.description = "Hello Poland, " + o.getHash();
-    dto.merchantId = Integer.valueOf(PROPERTIES.getProperty("przelewy24.merchantId"));
-    dto.urlStatus = getAckPaymentURL(o);
+    dto.zip = od.getZipCode() != null ? od.getZipCode() : "";
+
+    var passageCartEntries = new ArrayList<P24PassageCartEntryDTO>();
+    p24PassageCart.getCartEntries().forEach(ce -> {
+      passageCartEntries.add(getP24PassageCartEntryDTO(ce));
+    });
+    passageCartEntries.add(getP24PassageCartEntryDTO(p24PassageCart.getHpCommissionEntry()));
+
+    dto.passageCart = passageCartEntries;
     return dto;
   }
 
-  private static String getP24Sign(P24PassageTransactionParamsDTO dto) {
-    var delimiter = "|";
-    var signBuilder = new StringBuilder();
-    signBuilder.append(dto.sessionId).append(delimiter);
-    signBuilder.append(dto.merchantId).append(delimiter);
-    signBuilder.append(dto.amount).append(delimiter);
-    signBuilder.append(dto.currency).append(delimiter);
-    signBuilder.append(PROPERTIES.getProperty("przelewy24.crc"));
-    return PaymentUtils.MD5(signBuilder.toString());
-  }
-
-  private static List<OrderEntry> gatherOrderEntries(Collection<OrderSightEntry> collection) {
-    List<OrderEntry> returnList = new ArrayList<>();
-    for (OrderSightEntry se : collection) {
-      for (OrderDateEntry de : se.getEntries()) {
-        returnList.addAll(de.getEntries());
-      }
-    }
-    return returnList;
-  }
-
-  private static String getAckPaymentURL(Order o) {
-    var url = PROPERTIES.getProperty("base.url");
-    if (!url.endsWith("/")) {
-      url = url.concat("/");
-    }
-    return url.concat("market/orders/" + o.getHash() + "/ackPayment");
+  private static P24PassageCartEntryDTO getP24PassageCartEntryDTO(
+      PassageCartEntry passageCartEntry) {
+    var dto = new P24PassageCartEntryDTO();
+    dto.description = passageCartEntry.getDescription();
+    dto.name = passageCartEntry.getName();
+    dto.number = passageCartEntry.getNumber();
+    dto.price = passageCartEntry.getPrice();
+    dto.quantity = passageCartEntry.getQuantity();
+    dto.targetAmount = passageCartEntry.getTargetAmount();
+    dto.targetPosId = passageCartEntry.getTargetPosId();
+    return dto;
   }
 
   public static AgreementDTO getDTO(Agreement bo) {

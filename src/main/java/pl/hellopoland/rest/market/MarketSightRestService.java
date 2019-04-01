@@ -32,40 +32,45 @@ public class MarketSightRestService {
 
   @GET
   public PagedCollection get(@QueryParam("city") String city,
-      @HeaderParam("Accept-Language") String language) {
+      @HeaderParam("Accept-Language") String acceptLanguage,
+      @HeaderParam("Content-Language") String contentLanguage) {
     var config = new SightPagedCollectionConfig();
     config.onlyActive();
     config.onlyPublished();
     config.setCity(city);
-    return service.getList(config, language);
+    return service.getList(config, contentLanguage != null ? contentLanguage : acceptLanguage);
   }
 
   @GET
   @Path("/{id}")
-  public SightDTO get(@PathParam("id") Long id, @HeaderParam("Accept-Language") String language) {
-    return service.get(id, language);
+  public SightDTO get(@PathParam("id") Long id,
+      @HeaderParam("Accept-Language") String acceptLanguage,
+      @HeaderParam("Content-Language") String contentLanguage) {
+    return service.get(id, contentLanguage != null ? contentLanguage : acceptLanguage);
   }
 
   @GET
   @Path("/search")
   public PagedCollection search(@QueryParam("searchQuery") String searchQuery,
-      @QueryParam("city") String city, @HeaderParam("Accept-Language") String language) {
+      @QueryParam("city") String city, @HeaderParam("Accept-Language") String acceptLanguage,
+      @HeaderParam("Content-Language") String contentLanguage) {
     var config = new SightPagedCollectionConfig();
     config.onlyActive();
     config.onlyPublished();
     config.setSearchQuery(searchQuery);
     config.setCity(city);
-    return service.getList(config, language);
+    return service.getList(config, contentLanguage != null ? contentLanguage : acceptLanguage);
   }
 
   @POST
   @Path("/search")
   public PagedCollection search(SightPagedCollectionConfig config, @QueryParam("city") String city,
-      @HeaderParam("Accept-Language") String language) {
+      @HeaderParam("Accept-Language") String acceptLanguage,
+      @HeaderParam("Content-Language") String contentLanguage) {
     config.onlyActive();
     config.onlyPublished();
     config.setCity(city);
-    return service.getList(config, language);
+    return service.getList(config, contentLanguage != null ? contentLanguage : acceptLanguage);
   }
 
   @GET

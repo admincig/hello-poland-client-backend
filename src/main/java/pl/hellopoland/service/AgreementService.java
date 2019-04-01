@@ -7,6 +7,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.Agreement;
 import pl.hellopoland.dto.AgreementDTO;
+import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.util.DtoMapper;
 
 @LocalBean
@@ -39,7 +40,7 @@ public class AgreementService extends ServiceSuperclass {
     return bo;
   }
 
-  public Agreement createLanguageVersion(AgreementDTO dto, String language) {
+  public Agreement createLanguageVersion(AgreementDTO dto, LanguageVersion language) {
     return translationService.createEntityLanguageVersion(getForLoggedUser(dto.id), dto, language);
   }
 
@@ -56,7 +57,7 @@ public class AgreementService extends ServiceSuperclass {
     return getForLoggedUser(updated.getId());
   }
 
-  public Agreement updateLanguageVersion(AgreementDTO dto, String language) {
+  public Agreement updateLanguageVersion(AgreementDTO dto, LanguageVersion language) {
     return translationService.updateEntityLanguageVersion(getForLoggedUser(dto.id), dto, language);
   }
 

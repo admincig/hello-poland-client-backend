@@ -1,5 +1,6 @@
 package pl.hellopoland.bo;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -7,6 +8,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import pl.hellopoland.enums.LanguageVersion;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(name = "translation_key_language_unique",
@@ -15,16 +17,14 @@ public class Translation extends ModelSuperclass {
   private static final long serialVersionUID = 4888676435527982407L;
   public static final String KEY_DELIMITER = "|";
 
-  public enum LanguageVersion {
-    PL, DE, EN;
-  }
-
   @NotBlank
   private String key;
+  @Column(columnDefinition = "varchar(2500)")
   private String value;
   @NotNull
   @Enumerated(EnumType.STRING)
   private LanguageVersion language;
+  private boolean deleted;
 
   public String getKey() {
     return key;
@@ -50,18 +50,16 @@ public class Translation extends ModelSuperclass {
     this.language = language;
   }
 
-  public void generateKey(ModelSuperclass bo, String fieldName) {
-    setKey(bo.getClass().getSimpleName() + KEY_DELIMITER + bo.getId() + KEY_DELIMITER + fieldName);
+  public boolean isDeleted() {
+    return deleted;
   }
 
-  public void putLanguage(String language) {
-    var langVersions = LanguageVersion.values();
-    for (int i = 0; i < langVersions.length; i++) {
-      if (langVersions[i].name().equals(language.toUpperCase())) {
-        setLanguage(langVersions[i]);
-        break;
-      }
-    }
+  public void setDeleted(boolean deleted) {
+    this.deleted = deleted;
+  }
+
+  public void generateKey(ModelSuperclass bo, String fieldName) {
+    setKey(bo.getClass().getSimpleName() + KEY_DELIMITER + bo.getId() + KEY_DELIMITER + fieldName);
   }
 
 }
