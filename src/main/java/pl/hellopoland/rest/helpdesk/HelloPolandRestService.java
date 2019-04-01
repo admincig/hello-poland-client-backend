@@ -5,6 +5,7 @@ import java.util.Date;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
@@ -61,6 +62,13 @@ public class HelloPolandRestService {
       throw new ConflictingException("The 'value' parameter can be only 1 or 2 or 3.");
     }
     service.setSightEventPromotion(id, promotion);
+    return Response.ok().build();
+  }
+
+  @DELETE
+  @Path("/sight-events/{id}/promotion")
+  public Response setSightEventPromotion(@PathParam("id") Long id) {
+    service.removeSightEventPromotion(id);
     return Response.ok().build();
   }
 

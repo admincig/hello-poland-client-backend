@@ -489,14 +489,24 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public void setSightEventPromotion(Long id, Integer promotion) {
-    var bo = Optional.ofNullable(get(id))
-        .orElseThrow(() -> new ConflictingException("Resource not found"));
+    var bo = getOrThrow(id);
     em.createQuery("from SightEvent where promotion = :promotion", SightEvent.class)
         .setParameter("promotion", promotion).getResultList().forEach(se -> {
           se.setPromotion(null);
           em.flush();
         });
     bo.setPromotion(promotion);
+  }
+
+  public void removeSightEventPromotion(Long id) {
+    var bo = getOrThrow(id);
+    bo.setPromotion(null);
+  }
+
+  private SightEvent getOrThrow(Long id) throws ConflictingException {
+    var bo = Optional.ofNullable(get(id))
+        .orElseThrow(() -> new ConflictingException("Resource not found"));
+    return bo;
   }
 
 }

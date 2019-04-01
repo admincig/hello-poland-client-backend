@@ -48,4 +48,9 @@ public class HellopolandServiceAPI {
     seService.setSightEventPromotion(id, promotion);
   }
 
+  @RolesAllowed("admin")
+  public void removeSightEventPromotion(Long id) {
+    seService.removeSightEventPromotion(id);
+  }
+
 }
