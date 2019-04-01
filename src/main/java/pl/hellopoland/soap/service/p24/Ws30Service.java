@@ -7,11 +7,11 @@ import java.net.URL;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebEndpoint;
+import javax.xml.ws.WebServiceClient;
 import javax.xml.ws.WebServiceFeature;
 
-// @WebServiceClient(name = SoapConstants.SERVICE_NAME, targetNamespace =
-// SoapConstants.NAMESPACE_URI,
-// wsdlLocation = SoapConstants.WSDL_LOCATION)
+@WebServiceClient(name = SoapConstants.SERVICE_NAME, targetNamespace = SoapConstants.NAMESPACE_URI,
+    wsdlLocation = SoapConstants.WSDL_LOCATION)
 public class Ws30Service extends Service {
   private final static Logger logger = System.getLogger(Ws30Service.class.getName());
   private final static URL WSDL_LOCATION_URL;
@@ -32,7 +32,7 @@ public class Ws30Service extends Service {
   }
 
   public Ws30Service() {
-    super(WSDL_LOCATION_URL, new QName(SoapConstants.NAMESPACE_URI, "ws30Service"));
+    super(WSDL_LOCATION_URL, new QName(SoapConstants.NAMESPACE_URI, SoapConstants.SERVICE_NAME));
   }
 
   @WebEndpoint(name = SoapConstants.PORT_TYPE)

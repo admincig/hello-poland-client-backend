@@ -1,9 +1,12 @@
 package pl.hellopoland.soap.object.p24;
 
+import java.io.Serializable;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-public class MerchantRegisterRequest {
+public class MerchantRegisterRequest implements Serializable {
+  private static final long serialVersionUID = 6436845648588027603L;
+
   @NotNull
   // Rodzaj działalności, wartości dopuszczalne w tabeli „Rodzaj działaności”
   public Integer business_type;
