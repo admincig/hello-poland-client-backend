@@ -14,6 +14,7 @@ import javax.ejb.Stateless;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
+import io.github.biezhi.webp.WebpIO;
 import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.ImageVariant;
 import pl.hellopoland.bo.ImageVariant.Variant;
@@ -80,6 +81,14 @@ public class ImageService extends ServiceSuperclass {
     try {
       final File file = fileDescriptorService.createEmptyFileOnDisc(path + hash + "." + extension);
       ImageIO.write(buffImage, extension, file);
+      extension = "webp";
+      final File webpFile =
+          fileDescriptorService.createEmptyFileOnDisc(path + hash + "." + extension);
+
+      WebpIO.create().toWEBP(file, webpFile);
+
+
+
       logger.log(Logger.Level.DEBUG, "Saved file of size" + size);
     } catch (Exception ioe) {
       throw new RuntimeException("File NOT stored", ioe);
