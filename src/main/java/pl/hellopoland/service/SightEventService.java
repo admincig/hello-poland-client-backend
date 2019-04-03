@@ -286,7 +286,7 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public void deleteForLoggedUser(Long id, LanguageVersion language) {
-    translationService.deleteEntity(getForLoggedUser(id), language);
+    translationService.deleteEntityTranslations(getForLoggedUser(id), language);
   }
 
   public void fetchTicketPoolDefinitions(Collection<SightEvent> bos,
