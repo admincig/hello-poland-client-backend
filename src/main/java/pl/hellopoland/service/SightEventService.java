@@ -203,6 +203,7 @@ public class SightEventService extends ServiceSuperclass {
       }
       bo.setOpeningHours(null);
       bo.setOpeningHours(oHoursList);
+      em.flush();
     }
     return translationService.updateEntityLanguageVersion(bo, dto, language);
   }
