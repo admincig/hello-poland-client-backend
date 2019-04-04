@@ -10,6 +10,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -43,8 +44,11 @@ public class RestService {
   @Produces({MediaType.APPLICATION_JSON, "image/png", "image/jpg"})
   public Response download(@PathParam("name") String name) {
     File file = imageService.getImage(name);
+    CacheControl cc = new CacheControl();
+    cc.setMaxAge(31536000);
+    cc.setPrivate(true);
     String extension = file.getName().substring(file.getName().lastIndexOf('.') + 1);
-    return Response.ok().entity(file).type("image/" + extension).build();
+    return Response.ok().entity(file).cacheControl(cc).type("image/" + extension).build();
   }
 
   @GET

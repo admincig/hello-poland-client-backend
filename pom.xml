@@ -18,14 +18,11 @@
 	</properties>
 
 	<dependencies>
-	
-	<dependency>
-    <groupId>io.github.biezhi</groupId>
-    <artifactId>webp-io</artifactId>
-    <version>0.0.5</version>
-</dependency>
-	
-	
+		<dependency>
+		    <groupId>io.github.biezhi</groupId>
+		    <artifactId>webp-io</artifactId>
+		    <version>0.0.5</version>
+		</dependency>
 		<dependency>
 			<groupId>javax</groupId>
 			<artifactId>javaee-api</artifactId>

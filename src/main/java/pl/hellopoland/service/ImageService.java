@@ -52,22 +52,37 @@ public class ImageService extends ServiceSuperclass {
     var collector = new ImageCollector();
     collector.setImageURL(url);
     em.persist(collector);
-    collector.setQvga(storeImageVariant(scaleImage(buffImage, 320), extension,
-        ImageVariant.Variant.QVGA, collector));
-    collector.setVga(storeImageVariant(scaleImage(buffImage, 640), extension,
-        ImageVariant.Variant.VGA, collector));
-    collector.setXga(storeImageVariant(scaleImage(buffImage, 1024), extension,
-        ImageVariant.Variant.XGA, collector));
-    collector.setSxga(storeImageVariant(scaleImage(buffImage, 1280), extension,
-        ImageVariant.Variant.SXGA, collector));
-    collector.setHd(storeImageVariant(scaleImage(buffImage, 720), extension,
-        ImageVariant.Variant.HD, collector));
-    collector.setFhd(storeImageVariant(scaleImage(buffImage, 1920), extension,
-        ImageVariant.Variant.FHD, collector));
-    collector.setFourK(storeImageVariant(scaleImage(buffImage, 3840), extension,
-        ImageVariant.Variant.FOURK, collector));
-    collector.setOrginal(
-        storeImageVariant(buffImage, extension, ImageVariant.Variant.ORIGINAL, collector));
+    var qvga = storeImageVariant(scaleImage(buffImage, 320), extension, ImageVariant.Variant.QVGA,
+        collector);
+    var vga = storeImageVariant(scaleImage(buffImage, 640), extension, ImageVariant.Variant.VGA,
+        collector);
+    var xga = storeImageVariant(scaleImage(buffImage, 1024), extension, ImageVariant.Variant.XGA,
+        collector);
+    var sxga = storeImageVariant(scaleImage(buffImage, 1280), extension, ImageVariant.Variant.SXGA,
+        collector);
+    var hd = storeImageVariant(scaleImage(buffImage, 720), extension, ImageVariant.Variant.HD,
+        collector);
+    var fhd = storeImageVariant(scaleImage(buffImage, 1920), extension, ImageVariant.Variant.FHD,
+        collector);
+    var fourK = storeImageVariant(scaleImage(buffImage, 3840), extension,
+        ImageVariant.Variant.FOURK, collector);
+    var orginal = storeImageVariant(buffImage, extension, ImageVariant.Variant.ORIGINAL, collector);
+    collector.setQvga(qvga);
+    collector.setVga(vga);
+    collector.setXga(xga);
+    collector.setSxga(sxga);
+    collector.setHd(hd);
+    collector.setFhd(fhd);
+    collector.setFourK(fourK);
+    collector.setOrginal(orginal);
+    collector.setQvgaWebp(storeWebpImageVariant(qvga));
+    collector.setVgaWebp(storeWebpImageVariant(vga));
+    collector.setXgaWebp(storeWebpImageVariant(xga));
+    collector.setSxgaWebp(storeWebpImageVariant(sxga));
+    collector.setHdWebp(storeWebpImageVariant(hd));
+    collector.setFhdWebp(storeWebpImageVariant(fhd));
+    collector.setFourKWebp(storeWebpImageVariant(fourK));
+    collector.setOrginalWebp(storeWebpImageVariant(orginal));
     return collector;
   }
 
@@ -76,30 +91,38 @@ public class ImageService extends ServiceSuperclass {
     String hash = UUID.randomUUID().toString().replace('-', 'x');
     String path = properties.getProperty("dms.root.path") + File.separator + hash.substring(0, 1)
         + File.separator + hash.substring(1, 2) + File.separator;
-
     int size = 0;
     try {
       final File file = fileDescriptorService.createEmptyFileOnDisc(path + hash + "." + extension);
       ImageIO.write(buffImage, extension, file);
-      extension = "webp";
-      final File webpFile =
-          fileDescriptorService.createEmptyFileOnDisc(path + hash + "." + extension);
-
-      WebpIO.create().toWEBP(file, webpFile);
-
-
-
-      logger.log(Logger.Level.DEBUG, "Saved file of size" + size);
+      logger.log(Logger.Level.DEBUG, "Saved file " + extension + " of size" + size);
     } catch (Exception ioe) {
       throw new RuntimeException("File NOT stored", ioe);
     }
-
     ImageVariant image = new ImageVariant();
     image.setPath(path);
     image.setHash(hash);
     image.setExtension(extension);
     image.setCollector(collector);
     image.setVariant(variant);
+    em.persist(image);
+    return image;
+  }
+
+  private ImageVariant storeWebpImageVariant(ImageVariant source) {
+    final var path = source.getPath();
+    final var hash = source.getHash();
+    final String extension = "webp";
+    final File webpFile =
+        fileDescriptorService.createEmptyFileOnDisc(path + hash + "." + extension);
+    WebpIO.create().toWEBP(new File(path + hash + "." + source.getExtension()), webpFile);
+    logger.log(Logger.Level.DEBUG, "Saved file webp");
+    ImageVariant image = new ImageVariant();
+    image.setPath(path);
+    image.setHash(hash);
+    image.setExtension(extension);
+    image.setCollector(source.getCollector());
+    image.setVariant(ImageVariant.Variant.valueOf(source.getVariant().name() + "_WEBP"));
     em.persist(image);
     return image;
   }
