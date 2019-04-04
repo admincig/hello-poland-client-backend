@@ -40,6 +40,7 @@ public class Order extends ModelSuperclass {
   private Date date = new Date();
   private String p24OrderId;
   private String p24Currency;
+  private String p24Statement;
 
   public Collection<OrderSightEntry> getEntries() {
     return entries;
@@ -103,6 +104,14 @@ public class Order extends ModelSuperclass {
 
   public void setP24Currency(String p24Currency) {
     this.p24Currency = p24Currency;
+  }
+
+  public String getP24Statement() {
+    return p24Statement;
+  }
+
+  public void setP24Statement(String p24Statement) {
+    this.p24Statement = p24Statement;
   }
 
   public Integer getSum() {

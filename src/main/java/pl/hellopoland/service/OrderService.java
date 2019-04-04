@@ -56,7 +56,9 @@ public class OrderService extends ServiceSuperclass {
     Order o = new Order();
     o.generateHash();
     o.setUser(getLoggedUser());
-    o.setDetails(iro.details);
+    var details = iro.details;
+    details.setUserLogged(getLoggedUser() != null);
+    o.setDetails(details);
     em.persist(o);
 
     Set<Long> ticketsIds =
@@ -320,7 +322,7 @@ public class OrderService extends ServiceSuperclass {
     signBuilder.append(ackMap.get("p24_currency")).append("|");
     signBuilder.append(properties.getProperty("przelewy24.crc"));
     String p24_sign = PaymentUtils.MD5(signBuilder.toString());
-
+    String p24_statement = ackMap.get("p24_statement");
     ackMap.remove("p24_method");
     ackMap.remove("p24_statement");
     ackMap.put("p24_sign", p24_sign);
@@ -339,6 +341,7 @@ public class OrderService extends ServiceSuperclass {
       logger.log(Logger.Level.INFO, "transaction confirmed. successful");
       order.setP24OrderId(ackMap.get("p24_order_id"));
       order.setP24Currency(ackMap.get("p24_currency"));
+      order.setP24Statement(p24_statement);
       confirm(order);
     } else {
       logger.log(Logger.Level.WARNING, "transaction problem.");
