@@ -36,7 +36,7 @@ public enum LanguageVersion {
   }
 
   public static LanguageVersion getForTranslationEntity(String language) {
-    if (language == null || language.equals("")) {
+    if (language == null || language.equals("") || language.length() < 2) {
       return null;
     }
     var languageRange = Locale.LanguageRange.parse(language);
