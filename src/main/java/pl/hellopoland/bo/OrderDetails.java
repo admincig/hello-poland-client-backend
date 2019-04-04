@@ -8,7 +8,7 @@ import javax.persistence.Enumerated;
 public class OrderDetails {
 
   public enum Platform {
-    ANDROID, IOS, WEB, WEB_MOBILE;
+    ANDROID, IOS, WEB, WEB_MOBILE, UNKNOWN;
   }
 
   private String firstName;
