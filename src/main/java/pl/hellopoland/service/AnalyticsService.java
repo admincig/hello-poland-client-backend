@@ -17,6 +17,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import pl.hellopoland.bo.Order;
 import pl.hellopoland.bo.OrderDateEntry;
 import pl.hellopoland.bo.OrderDetails;
+import pl.hellopoland.bo.OrderDetails.Platform;
 import pl.hellopoland.bo.OrderEntry;
 import pl.hellopoland.bo.OrderSightEntry;
 import pl.hellopoland.bo.Partner;
@@ -55,6 +56,7 @@ public class AnalyticsService extends ServiceSuperclass {
       Order order = sightEntry.getOrder();
       OrderDetails oDetails = order.getDetails();
       BigDecimal commission = partner.getCommission();
+      Platform platform = oDetails.getPlatform();
 
       var hundred = new BigDecimal("100");
       var total = new BigDecimal(oe.getUnitPrice() * oe.getQuantity()).divide(hundred);
@@ -67,7 +69,7 @@ public class AnalyticsService extends ServiceSuperclass {
           String.valueOf(total).replace(".", ","), String.valueOf(commissionVal).replace(".", ","),
           order.getP24Currency(), order.getP24OrderId(), order.getP24Statement(),
           oDetails.getFirstName() + " " + oDetails.getLastName(), oDetails.getPhone(),
-          oDetails.getEmail(), oDetails.getPlatform().name(),
+          oDetails.getEmail(), platform != null ? platform.name() : Platform.UNKNOWN.name(),
           String.valueOf(oDetails.isUserLogged()), sightEvent.getName(),
           DATE_FORMATER.format(dateEntry.getDate()), String.valueOf(oe.getQuantity()),
           oe.getName());
