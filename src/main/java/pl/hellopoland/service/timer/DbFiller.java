@@ -114,7 +114,8 @@ public class DbFiller extends ServiceSuperclass {
       return;
     }
     logger.log(Logger.Level.INFO, "DbFiller started");
-    logger.log(Logger.Level.INFO, "OS Architecture" + System.getProperty("os.arch").toLowerCase());
+    logger.log(Logger.Level.INFO, "OS architecture " + System.getProperty("os.arch").toLowerCase());
+    logger.log(Logger.Level.INFO, "OS name " + System.getProperty("os.name").toLowerCase());
     createPortals();
     createUsers();
     createImageCollectors();
