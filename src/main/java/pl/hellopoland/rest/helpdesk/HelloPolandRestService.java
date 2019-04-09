@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -50,8 +51,10 @@ public class HelloPolandRestService {
 
   @GET
   @Path("/sight-events")
-  public PagedCollection getSightEvents() {
-    return service.getSightEvents(new SightEventPagedCollectionConfig());
+  public PagedCollection getSightEvents(@HeaderParam("Accept-Language") String acceptLanguage,
+      @HeaderParam("Content-Language") String contentLanguage) {
+    return service.getSightEvents(new SightEventPagedCollectionConfig(),
+        contentLanguage != null ? contentLanguage : acceptLanguage);
   }
 
   @PATCH

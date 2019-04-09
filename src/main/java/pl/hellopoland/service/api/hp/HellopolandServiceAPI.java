@@ -37,9 +37,11 @@ public class HellopolandServiceAPI {
   }
 
   @RolesAllowed("admin")
-  public PagedCollection getSightEvents(SightEventPagedCollectionConfig config) {
+  public PagedCollection getSightEvents(SightEventPagedCollectionConfig config,
+      String contentLanguageSymbol) {
+    LanguageVersion language = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
     config.onlyActive();
-    PagedEntityCollection<SightEvent> bos = seService.getList(config, LanguageVersion.PL_PL);
+    PagedEntityCollection<SightEvent> bos = seService.getList(config, language);
     var dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
     return new PagedCollection(dtos, bos.config);
   }
