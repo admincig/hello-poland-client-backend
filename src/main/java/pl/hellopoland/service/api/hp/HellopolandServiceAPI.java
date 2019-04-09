@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.PartnerDTO;
+import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.AnalyticsService;
 import pl.hellopoland.service.HellopolandService;
@@ -38,7 +39,7 @@ public class HellopolandServiceAPI {
   @RolesAllowed("admin")
   public PagedCollection getSightEvents(SightEventPagedCollectionConfig config) {
     config.onlyActive();
-    PagedEntityCollection<SightEvent> bos = seService.getList(config);
+    PagedEntityCollection<SightEvent> bos = seService.getList(config, LanguageVersion.PL_PL);
     var dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
     return new PagedCollection(dtos, bos.config);
   }
