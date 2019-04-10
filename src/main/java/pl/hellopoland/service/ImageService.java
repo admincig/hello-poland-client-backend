@@ -14,12 +14,12 @@ import javax.ejb.Stateless;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
-import io.github.biezhi.webp.WebpIO;
 import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.ImageVariant;
 import pl.hellopoland.bo.ImageVariant.Variant;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.util.Imaged;
+import pl.hellopoland.util.webp.WebpIO;
 
 @LocalBean
 @Stateless
