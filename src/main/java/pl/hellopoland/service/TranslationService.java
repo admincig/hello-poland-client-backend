@@ -60,6 +60,9 @@ public class TranslationService extends ServiceSuperclass {
 
   public <T extends ModelSuperclass, D extends DTOSuperclass> T createEntityLanguageVersion(T bo,
       D dto, LanguageVersion language) {
+    if (isTranslated(bo, language)) {
+      removeTranslations(bo, language);
+    }
 
     Predicate<? super Field> predicate = f -> (f.getType().equals(String.class)
         && !EXCLUDED_FIELDS_NAMES.contains(bo.getClass().getSimpleName() + "." + f.getName()));
@@ -139,7 +142,7 @@ public class TranslationService extends ServiceSuperclass {
     }).collect(Collectors.toList());
   }
 
-  public <T extends ModelSuperclass> void deleteEntity(T bo, LanguageVersion language) {
+  public <T extends ModelSuperclass> void deleteEntityTranslations(T bo, LanguageVersion language) {
     try {
       if (((LanguageVersion) bo.getClass().getMethod("getDefaultLanguage").invoke(bo))
           .equals(language)) {
@@ -159,14 +162,17 @@ public class TranslationService extends ServiceSuperclass {
     }
   }
 
+  private <T extends ModelSuperclass> void removeTranslations(T bo, LanguageVersion language) {
+    em.createQuery("delete from Translation t where t.key like :key and language = :language")
+        .setParameter("key", getKey(bo)).setParameter("language", language).executeUpdate();
+  }
+
   public <T extends ModelSuperclass> boolean isTranslated(T bo, LanguageVersion language) {
     return em
         .createQuery("from Translation t where t.key like :key and language = :language",
             Translation.class)
-        .setParameter("key",
-            bo.getClass().getSimpleName() + Translation.KEY_DELIMITER + bo.getId()
-                + Translation.KEY_DELIMITER + "%")
-        .setParameter("language", language).setMaxResults(1).getResultList().size() == 1;
+        .setParameter("key", getKey(bo)).setParameter("language", language).setMaxResults(1)
+        .getResultList().size() == 1;
   }
 
   private <T extends ModelSuperclass> void fetchColections(T bo) {
@@ -203,10 +209,7 @@ public class TranslationService extends ServiceSuperclass {
     return em
         .createQuery("from Translation t where t.key like :key and language = :language",
             Translation.class)
-        .setParameter("key",
-            bo.getClass().getSimpleName() + Translation.KEY_DELIMITER + bo.getId()
-                + Translation.KEY_DELIMITER + "%")
-        .setParameter("language", language).getResultList();
+        .setParameter("key", getKey(bo)).setParameter("language", language).getResultList();
   }
 
   private <T extends ModelSuperclass> void addAvailableLanguageVersion(T bo,
@@ -219,6 +222,11 @@ public class TranslationService extends ServiceSuperclass {
         | NoSuchMethodException | SecurityException e) {
       e.printStackTrace();
     }
+  }
+
+  private String getKey(ModelSuperclass bo) {
+    return bo.getClass().getSimpleName() + Translation.KEY_DELIMITER + bo.getId()
+        + Translation.KEY_DELIMITER + "%";
   }
 
 }

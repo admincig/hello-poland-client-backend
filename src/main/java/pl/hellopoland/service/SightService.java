@@ -248,7 +248,7 @@ public class SightService extends ServiceSuperclass {
   }
 
   public void deleteForLoggedUser(Long id, LanguageVersion language) {
-    translationService.deleteEntity(getActiveForLoggedPartner(id), language);
+    translationService.deleteEntityTranslations(getActiveForLoggedPartner(id), language);
   }
 
   private Sight getForLoggedPartner(Long sightId) {

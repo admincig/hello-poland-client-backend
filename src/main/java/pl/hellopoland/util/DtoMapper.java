@@ -141,6 +141,7 @@ public class DtoMapper {
     dto.published = bo.isPublished();
     dto.partnerAffiliateCode = bo.getPartner().getAffiliateCode();
     dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
+    dto.promotion = bo.getPromotion();
     return dto;
   }
 
