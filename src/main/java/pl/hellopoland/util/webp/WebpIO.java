@@ -92,8 +92,8 @@ public class WebpIO {
    * @param dest normal image path
    */
   public void toNormalImage(File src, File dest) {
-    // String command = commandDir + (dest.getName().endsWith(".gif") ? "/gif2webp" : "/dwebp ")
-    String command = commandDir + (dest.getName().endsWith(".gif") ? "gif2webp" : "dwebp ")
+    String command = commandDir + (dest.getName().endsWith(".gif") ? "/gif2webp" : "/dwebp ")
+    // String command = commandDir + (dest.getName().endsWith(".gif") ? "gif2webp" : "dwebp ")
         + src.getPath() + " -o " + dest.getPath();
     this.executeCommand(command);
   }
@@ -116,8 +116,8 @@ public class WebpIO {
    */
   public void toWEBP(File src, File dest) {
     try {
-      // String command = commandDir + (src.getName().endsWith(".gif") ? "/gif2webp " : "/cwebp ")
-      String command = commandDir + (src.getName().endsWith(".gif") ? "gif2webp " : "cwebp ")
+      String command = commandDir + (src.getName().endsWith(".gif") ? "/gif2webp " : "/cwebp ")
+      // String command = commandDir + (src.getName().endsWith(".gif") ? "gif2webp " : "cwebp ")
           + src.getPath() + " -o " + dest.getPath();
       this.executeCommand(command);
     } catch (Exception e) {
