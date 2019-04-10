@@ -37,35 +37,34 @@ public class WebpIO {
     String osName = getOsName();
     String webpPath = "cwebp/" + osName;
 
-    // if (Boolean.TRUE.toString().equals(DEV_MODE.toUpperCase())) {
-    // this.commandDir = WebpIO.class.getResource("/").getPath() + webpPath;
-    this.commandDir = this.getClass().getResource("/" + webpPath).getPath();
-    System.out.println("");
-    // this.commandDir = this.getClass().getResource("/").getPath() + webpPath;
-    // return;
-    // }
-    //
-    // // copy to tmp dir
-    // File tmp = new File(webpTmpDir);
-    // if (!tmp.exists()) {
-    // tmp.mkdirs();
-    // }
-    //
-    // this.commandDir = tmp.getPath();
-    //
-    // String extension = getExtensionByOs(osName);
-    //
-    // InputStream dwebp = getInputStream("/" + webpPath + "/dwebp" + extension);
-    // InputStream cwebp = getInputStream("/" + webpPath + "/cwebp" + extension);
-    // InputStream gif2webp = getInputStream("/" + webpPath + "/gif2webp" + extension);
-    //
-    // try {
-    // copy(dwebp, new File(tmp.getPath() + "/dwebp" + extension));
-    // copy(cwebp, new File(tmp.getPath() + "/cwebp" + extension));
-    // copy(gif2webp, new File(tmp.getPath() + "/gif2webp" + extension));
-    // } catch (Exception e) {
-    // throw new WebpIOException(e);
-    // }
+    if (Boolean.TRUE.toString().equals(DEV_MODE.toUpperCase())) {
+      this.commandDir = WebpIO.class.getResource("/").getPath() + webpPath;
+      // this.commandDir = this.getClass().getResource("/" + webpPath).getPath();
+      this.commandDir = this.getClass().getResource("/").getPath() + webpPath;
+      return;
+    }
+
+    // copy to tmp dir
+    File tmp = new File(webpTmpDir);
+    if (!tmp.exists()) {
+      tmp.mkdirs();
+    }
+
+    this.commandDir = tmp.getPath();
+
+    String extension = getExtensionByOs(osName);
+
+    InputStream dwebp = getInputStream("/" + webpPath + "/dwebp" + extension);
+    InputStream cwebp = getInputStream("/" + webpPath + "/cwebp" + extension);
+    InputStream gif2webp = getInputStream("/" + webpPath + "/gif2webp" + extension);
+
+    try {
+      copy(dwebp, new File(tmp.getPath() + "/dwebp" + extension));
+      copy(cwebp, new File(tmp.getPath() + "/cwebp" + extension));
+      copy(gif2webp, new File(tmp.getPath() + "/gif2webp" + extension));
+    } catch (Exception e) {
+      throw new WebpIOException(e);
+    }
   }
 
   public static WebpIO create() {
