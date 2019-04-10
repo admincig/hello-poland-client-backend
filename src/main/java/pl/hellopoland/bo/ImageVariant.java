@@ -10,13 +10,14 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = "hash", name = "image_hash_unique"))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"hash", "extension"},
+    name = "image_hash_extension_unique"))
 public class ImageVariant extends ModelSuperclass {
 
   private static final long serialVersionUID = -1655719974465476465L;
 
   public enum Variant {
-    QVGA, VGA, XGA, SXGA, HD, FHD, FOURK, ORIGINAL
+    QVGA, QVGA_WEBP, VGA, VGA_WEBP, XGA, XGA_WEBP, SXGA, SXGA_WEBP, HD, HD_WEBP, FHD, FHD_WEBP, FOURK, FOURK_WEBP, ORIGINAL, ORIGINAL_WEBP
   }
 
   @NotNull

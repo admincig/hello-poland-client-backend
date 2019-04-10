@@ -33,6 +33,30 @@ public class ImageCollector extends ModelSuperclass {
   @OneToOne
   private ImageVariant fourK;
 
+  @OneToOne
+  private ImageVariant orginalWebp;
+
+  @OneToOne
+  private ImageVariant qvgaWebp;
+
+  @OneToOne
+  private ImageVariant vgaWebp;
+
+  @OneToOne
+  private ImageVariant hdWebp;
+
+  @OneToOne
+  private ImageVariant xgaWebp;
+
+  @OneToOne
+  private ImageVariant sxgaWebp;
+
+  @OneToOne
+  private ImageVariant fhdWebp;
+
+  @OneToOne
+  private ImageVariant fourKWebp;
+
   public String getImageURL() {
     return imageURL;
   }
@@ -103,6 +127,70 @@ public class ImageCollector extends ModelSuperclass {
 
   public void setFourK(ImageVariant fourK) {
     this.fourK = fourK;
+  }
+
+  public ImageVariant getOrginalWebp() {
+    return orginalWebp;
+  }
+
+  public void setOrginalWebp(ImageVariant orginalWebp) {
+    this.orginalWebp = orginalWebp;
+  }
+
+  public ImageVariant getQvgaWebp() {
+    return qvgaWebp;
+  }
+
+  public void setQvgaWebp(ImageVariant qvgaWebp) {
+    this.qvgaWebp = qvgaWebp;
+  }
+
+  public ImageVariant getVgaWebp() {
+    return vgaWebp;
+  }
+
+  public void setVgaWebp(ImageVariant vgaWebp) {
+    this.vgaWebp = vgaWebp;
+  }
+
+  public ImageVariant getHdWebp() {
+    return hdWebp;
+  }
+
+  public void setHdWebp(ImageVariant hdWebp) {
+    this.hdWebp = hdWebp;
+  }
+
+  public ImageVariant getXgaWebp() {
+    return xgaWebp;
+  }
+
+  public void setXgaWebp(ImageVariant xgaWebp) {
+    this.xgaWebp = xgaWebp;
+  }
+
+  public ImageVariant getSxgaWebp() {
+    return sxgaWebp;
+  }
+
+  public void setSxgaWebp(ImageVariant sxgaWebp) {
+    this.sxgaWebp = sxgaWebp;
+  }
+
+  public ImageVariant getFhdWebp() {
+    return fhdWebp;
+  }
+
+  public void setFhdWebp(ImageVariant fhdWebp) {
+    this.fhdWebp = fhdWebp;
+  }
+
+  public ImageVariant getFourKWebp() {
+    return fourKWebp;
+  }
+
+  public void setFourKWebp(ImageVariant fourKWebp) {
+    this.fourKWebp = fourKWebp;
   }
 
 }

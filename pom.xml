@@ -18,6 +18,11 @@
 	</properties>
 
 	<dependencies>
+<!-- 		<dependency> -->
+<!-- 		    <groupId>io.github.biezhi</groupId> -->
+<!-- 		    <artifactId>webp-io</artifactId> -->
+<!-- 		    <version>0.0.5</version> -->
+<!-- 		</dependency> -->
 		<dependency>
 			<groupId>javax</groupId>
 			<artifactId>javaee-api</artifactId>
@@ -27,7 +32,7 @@
 		<dependency>
 			<groupId>pl.hellopoland</groupId>
 			<artifactId>hellopoland-dto</artifactId>
-			<version>1.0.17</version>
+			<version>1.0.18</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.microprofile.health</groupId>
@@ -119,6 +124,7 @@
 				<filtering>true</filtering>
 				<excludes>
 					<exclude>**/*.jar</exclude>
+					<exclude>cwebp/**</exclude>
 				</excludes>
 			</resource>
 			<resource>
@@ -126,6 +132,7 @@
 				<filtering>false</filtering>
 				<includes>
 					<include>**/*.jar</include>
+					<include>cwebp/**</include>
 				</includes>
 			</resource>
 		</resources>
@@ -153,6 +160,7 @@
 											<filtering>false</filtering>
 											<includes>
 												<include>**/*.jar</include>
+												<include>cwebp/**</include>
 											</includes>
 										</resource>
 										<resource>
@@ -160,6 +168,7 @@
 											<filtering>true</filtering>
 											<excludes>
 												<exclude>**/*.jar</exclude>
+												<exclude>cwebp/**</exclude>
 											</excludes>
 										</resource>
 									</resources>
