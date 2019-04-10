@@ -80,10 +80,16 @@ public class SightEventService extends ServiceSuperclass {
     if (language != null) {
       sightEvents = translationService.translateEntities(sightEvents, language, false);
     }
-    Collections.sort(sightEvents, sightEventNamesComparator(new Locale("pl_PL")));
     // List<SightEvent> sightEvents = getQuery(config).getResultList().stream()
     // .sorted(sightEventDatesComparator()).collect(toList());
+    Collections.sort(sightEvents, sightEventPromotionComparator()
+        .thenComparing(sightEventNamesComparator(new Locale("pl_PL"))));
     return new PagedEntityCollection<>(sightEvents, config);
+  }
+
+  private Comparator<SightEvent> sightEventPromotionComparator() {
+    return Comparator.nullsLast(Comparator.comparing(SightEvent::getPromotion,
+        Comparator.nullsLast(Comparator.naturalOrder())));
   }
 
   private Comparator<SightEvent> sightEventNamesComparator(Locale locale) {
@@ -530,6 +536,27 @@ public class SightEventService extends ServiceSuperclass {
       HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
       helloTicket.updateSightEvent(DtoMapper.getDTO(bo), partner.getHptToken());
     }
+    return bo;
+  }
+
+  public void setSightEventPromotion(Long id, Integer promotion) {
+    var bo = getOrThrow(id);
+    em.createQuery("from SightEvent where promotion = :promotion", SightEvent.class)
+        .setParameter("promotion", promotion).getResultList().forEach(se -> {
+          se.setPromotion(null);
+          em.flush();
+        });
+    bo.setPromotion(promotion);
+  }
+
+  public void removeSightEventPromotion(Long id) {
+    var bo = getOrThrow(id);
+    bo.setPromotion(null);
+  }
+
+  private SightEvent getOrThrow(Long id) throws ConflictingException {
+    var bo = Optional.ofNullable(get(id))
+        .orElseThrow(() -> new ConflictingException("Resource not found"));
     return bo;
   }
 

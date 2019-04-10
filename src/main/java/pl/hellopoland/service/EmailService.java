@@ -1,23 +1,28 @@
 package pl.hellopoland.service;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.util.Properties;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
+import javax.mail.Address;
 import javax.mail.Authenticator;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
-import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import com.sun.mail.smtp.SMTPSendFailedException;
+import com.sun.mail.smtp.SMTPTransport;
 
 @LocalBean
 @Stateless
 public class EmailService extends ServiceSuperclass {
+  private final Logger logger = System.getLogger(this.getClass().getName());
   private static final String MAIL_PERSONAL = "Bilety Hello Poland";
   private static final String MAIL_USERNAME_PROPERTY = "mail.username";
   private static final String MAIL_PASSWORD_PROPERTY = "mail.password";
@@ -30,7 +35,8 @@ public class EmailService extends ServiceSuperclass {
 
   public void sendEmail(String recipientEmail, String subject, String msg)
       throws MessagingException, UnsupportedEncodingException {
-    var message = new MimeMessage(createSessionForEmail(getSessionProperties()));
+    var session = createSessionForEmail(getSessionProperties());
+    var message = new MimeMessage(session);
     try {
       message
           .setFrom(new InternetAddress(System.getProperty(MAIL_USERNAME_PROPERTY), MAIL_PERSONAL));
@@ -41,7 +47,23 @@ public class EmailService extends ServiceSuperclass {
       var multipart = new MimeMultipart();
       multipart.addBodyPart(mimeBodyPart);
       message.setContent(multipart);
-      Transport.send(message);
+      SMTPTransport transport = (SMTPTransport) session.getTransport("smtp");
+      transport.connect();
+      transport.setReportSuccess(true);
+      transport.sendMessage(message, message.getAllRecipients());
+    } catch (SMTPSendFailedException e) {
+      // Message has been sent.
+      logger.log(Level.INFO, e.getReturnCode());
+      logger.log(Level.INFO, e.getLocalizedMessage());
+      for (Address addr : e.getValidSentAddresses()) {
+        logger.log(Level.INFO, "Email has been sent to " + addr);
+      }
+      for (Address addr : e.getValidUnsentAddresses()) {
+        logger.log(Level.INFO, "Email has not been sent to" + addr);
+      }
+      for (Address addr : e.getInvalidAddresses()) {
+        logger.log(Level.INFO, "Email has not been sent to  " + addr);
+      }
     } catch (MessagingException | UnsupportedEncodingException e) {
       logger.log(System.Logger.Level.ERROR, "Sending an email failed: " + recipientEmail);
       logger.log(System.Logger.Level.ERROR, e.getLocalizedMessage());

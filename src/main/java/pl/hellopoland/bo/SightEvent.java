@@ -20,6 +20,8 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.util.Imaged;
@@ -27,6 +29,8 @@ import pl.hellopoland.util.Located;
 import pl.hellopoland.util.Translated;
 
 @Entity
+@Table(uniqueConstraints = {
+    @UniqueConstraint(name = "sightevent_promotion_unique", columnNames = {"promotion"})})
 public class SightEvent extends ModelSuperclass implements Located, Imaged, Translated {
 
   private static final long serialVersionUID = -34796485244638912L;
@@ -81,6 +85,8 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
   @ElementCollection
   @Enumerated(EnumType.STRING)
   private Set<LanguageVersion> availableLanguageVersions;
+
+  private Integer promotion;
 
   public String getName() {
     return name;
@@ -331,6 +337,14 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
       availableLanguageVersions = new HashSet<>();
     }
     return availableLanguageVersions.remove(languageVersion);
+  }
+
+  public Integer getPromotion() {
+    return promotion;
+  }
+
+  public void setPromotion(Integer promotion) {
+    this.promotion = promotion;
   }
 
 }

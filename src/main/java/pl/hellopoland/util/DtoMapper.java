@@ -141,6 +141,7 @@ public class DtoMapper {
     dto.published = bo.isPublished();
     dto.partnerAffiliateCode = bo.getPartner().getAffiliateCode();
     dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
+    dto.promotion = bo.getPromotion();
     return dto;
   }
 
@@ -218,13 +219,21 @@ public class DtoMapper {
     }
     ImageDTO dto = new ImageDTO();
     dto.original = bo.getOrginal().getDownloadUrl();
+    dto.originalWebp = bo.getOrginalWebp().getDownloadUrl();
     dto.fhd = bo.getFhd().getDownloadUrl();
+    dto.fhdWebp = bo.getFhdWebp().getDownloadUrl();
     dto.fourK = bo.getFourK().getDownloadUrl();
+    dto.fourKWebp = bo.getFourKWebp().getDownloadUrl();
     dto.hd = bo.getHd().getDownloadUrl();
+    dto.hdWebp = bo.getHdWebp().getDownloadUrl();
     dto.qvg = bo.getQvga().getDownloadUrl();
+    dto.qvgWebp = bo.getQvgaWebp().getDownloadUrl();
     dto.sxga = bo.getSxga().getDownloadUrl();
+    dto.sxgaWebp = bo.getSxgaWebp().getDownloadUrl();
     dto.vga = bo.getVga().getDownloadUrl();
+    dto.vgaWebp = bo.getVgaWebp().getDownloadUrl();
     dto.xga = bo.getXga().getDownloadUrl();
+    dto.xgaWebp = bo.getXgaWebp().getDownloadUrl();
     return dto;
   }
 
