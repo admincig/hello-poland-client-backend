@@ -13,7 +13,7 @@ import pl.hellopoland.util.GoogleAPIConnector;
 @DataSourceDefinition(
     name = "java:global/jdbc/hellopolandDS",
     className = "org.postgresql.xa.PGXADataSource",
-    serverName = "localhost",
+    serverName = "database",
     portNumber = 5432,
     databaseName = "hellopoland",
     user = "hellopoland",
