@@ -89,8 +89,14 @@ public class ImageService extends ServiceSuperclass {
   private ImageVariant storeImageVariant(BufferedImage buffImage, String extension, Variant variant,
       ImageCollector collector) {
     String hash = UUID.randomUUID().toString().replace('-', 'x');
-    String path = properties.getProperty("dms.root.path") + File.separator + hash.substring(0, 1)
-        + File.separator + hash.substring(1, 2) + File.separator;
+    String path = properties.getProperty("jboss.server.data.dir")
+        + File.separator
+        + "dms"
+        + File.separator
+        + hash.substring(0, 1)
+        + File.separator
+        + hash.substring(1, 2)
+        + File.separator;
     int size = 0;
     try {
       final File file = fileDescriptorService.createEmptyFileOnDisc(path + hash + "." + extension);

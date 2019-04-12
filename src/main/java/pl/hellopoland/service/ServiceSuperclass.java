@@ -11,9 +11,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -30,28 +27,22 @@ import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 
 public abstract class ServiceSuperclass {
 
-  private static Context namingContext;
   protected static Properties properties;
   private static Logger staticLogger = System.getLogger(ServiceSuperclass.class.getName());
 
   static {
     try {
-      namingContext = new InitialContext();
-    } catch (NamingException e) {
-      staticLogger.log(Logger.Level.WARNING, "Failed to get lookup context", e);
-    }
-
-    try {
       properties = System.getProperties();
       var copy = new HashMap<>(properties);
       properties.clear();
-      properties.load(ServiceSuperclass.class.getResourceAsStream("/etc/config.properties"));
-      properties.load(ServiceSuperclass.class
-          .getResourceAsStream("/etc/" + copy.get("user.name") + ".config.properties"));
-      if (copy.containsKey("local.properties")) {
-        properties.load(new FileInputStream(new File((String) copy.get("local.properties"))));
+      properties.load(ServiceSuperclass.class.getResourceAsStream("/runtime.properties"));
+      if (copy.containsKey("local.runtime.properties")) {
+        properties
+            .load(new FileInputStream(new File((String) copy.get("local.runtime.properties"))));
       }
       properties.putAll(copy);
+      staticLogger.log(Logger.Level.INFO,
+          properties.entrySet().stream().map(Object::toString).collect(Collectors.joining("\n")));
     } catch (IOException e) {
       staticLogger.log(Logger.Level.WARNING, "Failed to load properties", e);
     }
@@ -64,29 +55,6 @@ public abstract class ServiceSuperclass {
   protected EntityManager em;
 
   protected Logger logger = System.getLogger(this.getClass().getName());
-
-  // @Inject
-  // private JMSContext jms;
-  // protected boolean sendMessage(String queue, Serializable message) {
-  // Queue q = (Queue) lookup(queue);
-  // if (q == null) {
-  // return false;
-  // } else {
-  // JMSProducer producer = jms.createProducer();
-  // producer.setDeliveryMode(DeliveryMode.PERSISTENT);
-  // producer.send(q, message);
-  // return false;
-  // }
-  // }
-
-  protected Object lookup(String jndiName) {
-    try {
-      return namingContext.lookup(jndiName);
-    } catch (NamingException e) {
-      logger.log(Logger.Level.WARNING, "Failed to lookup " + jndiName, e);
-      return null;
-    }
-  }
 
   protected <E extends ModelSuperclass> TypedQuery<E> getQuery(PagedCollectionConfig<E> config) {
     String query = "from " + config.entityClass().getSimpleName() + " e " + config.joins();

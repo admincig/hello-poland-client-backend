@@ -107,10 +107,9 @@ public class DbFiller extends ServiceSuperclass {
 
   @PostConstruct
   public void fillDb() {
-    String hibernateStrategy = properties.get("hibernate.hbm2ddl.auto").toString();
-    if (!hibernateStrategy.startsWith("create")) {
-      logger.log(Logger.Level.INFO,
-          "omitting dbfiller because hibernate.hbm2ddl.auto isnt set to create");
+    Boolean run = Boolean.valueOf(properties.getProperty("db.filler.run"));
+    if (!run) {
+      logger.log(Logger.Level.INFO, "db filler disabled");
       return;
     }
     logger.log(Logger.Level.INFO, "DbFiller started");
