@@ -1,19 +1,25 @@
 package pl.hellopoland.rest.partner;
 
+import java.util.Optional;
+import java.util.Set;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import pl.hellopoland.dto.SightDTO;
+import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.api.partner.SightServicePartnerAPI;
 
@@ -27,39 +33,60 @@ public class PartnerSightRestService {
   private SightServicePartnerAPI service;
 
   @POST
-  public SightDTO add(SightDTO dto, @QueryParam("language") String language) {
-    if (dto.id != null) {
-      return service.createLanguageVesrion(dto, language);
+  public SightDTO add(SightDTO dto, @HeaderParam("Content-Language") String language) {
+    LanguageVersion lang =
+        Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
+            .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+    if (dto.id == null) {
+      dto.defaultLanguage = lang.getLanuage();
+      dto.availableLanguageVersions = Set.of(lang.getLanuage());
+      return service.create(dto);
     }
-    return service.create(dto);
+    return service.createLanguageVesrion(dto, lang);
   }
 
   @GET
-  public PagedCollection getList() {
-    return service.getList();
+  public PagedCollection getList(@HeaderParam("Accept-Language") String acceptLanguage,
+      @HeaderParam("Content-Language") String contentLanguage) {
+    return service.getList(contentLanguage != null ? contentLanguage : acceptLanguage);
   }
 
   @GET
   @Path("/{id}")
-  public SightDTO get(@PathParam("id") Long id) {
-    return service.get(id);
+  public SightDTO get(@PathParam("id") Long id,
+      @HeaderParam("Accept-Language") String acceptLanguage,
+      @HeaderParam("Content-Language") String contentLanguage) {
+    return service.get(id, contentLanguage != null ? contentLanguage : acceptLanguage);
   }
 
   @PUT
-  @Path("/{id}")
-  public SightDTO update(@PathParam("id") Long id, SightDTO dto,
-      @QueryParam("language") String language) {
-    dto.id = id;
-    if (StringUtils.isNotBlank(language)) {
-      return service.updateLanguageVersion(dto, language);
+  @Path("/{id}/languageVersion/{language}")
+  public SightDTO update(@PathParam("id") Long id, @PathParam("language") String language,
+      SightDTO dto) {
+    if (StringUtils.isBlank(language)) {
+      throw new ConflictingException("Language is required");
     }
-    return service.update(dto);
+    LanguageVersion lang =
+        Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
+            .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+    dto.id = id;
+    return service.update(dto, lang);
   }
 
   @DELETE
   @Path("/{id}")
   public void delete(@PathParam("id") Long id) {
     service.delete(id);
+  }
+
+  @DELETE
+  @Path("/{id}/languageVersion/{language}")
+  public Response delete(@PathParam("id") Long id, @PathParam("language") String language) {
+    LanguageVersion lang =
+        Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
+            .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+    service.delete(id, lang);
+    return Response.ok().build();
   }
 
   @PUT
@@ -81,4 +108,15 @@ public class PartnerSightRestService {
   public SightDTO uploadImage(@PathParam("id") Long id, @PathParam("imgId") Long imgId) {
     return service.removeImageFromGallery(id, imgId);
   }
+
+  @PATCH
+  @Path("/{id}/defaultLanguage")
+  public SightDTO changeDefaultLanguage(@PathParam("id") Long id,
+      @HeaderParam("Content-Language") String language) {
+    LanguageVersion lang =
+        Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
+            .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+    return service.changeDefaultLanguage(id, lang);
+  }
+
 }

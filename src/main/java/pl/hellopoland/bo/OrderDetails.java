@@ -1,9 +1,15 @@
 package pl.hellopoland.bo;
 
 import javax.persistence.Embeddable;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 
 @Embeddable
 public class OrderDetails {
+
+  public enum Platform {
+    ANDROID, IOS, WEB, WEB_MOBILE, UNKNOWN;
+  }
 
   private String firstName;
   private String lastName;
@@ -13,6 +19,9 @@ public class OrderDetails {
   private String zipCode;
   private String city;
   private String country;
+  @Enumerated(EnumType.STRING)
+  private Platform platform;
+  private boolean userLogged;
 
   public String getFirstName() {
     return firstName;
@@ -78,5 +87,20 @@ public class OrderDetails {
     this.country = country;
   }
 
+  public Platform getPlatform() {
+    return platform;
+  }
+
+  public void setPlatform(Platform platform) {
+    this.platform = platform;
+  }
+
+  public boolean isUserLogged() {
+    return userLogged;
+  }
+
+  public void setUserLogged(boolean userLogged) {
+    this.userLogged = userLogged;
+  }
 
 }

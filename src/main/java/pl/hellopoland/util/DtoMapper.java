@@ -35,6 +35,7 @@ import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.UserDTO;
+import pl.hellopoland.enums.LanguageVersion;
 
 public class DtoMapper {
 
@@ -47,6 +48,15 @@ public class DtoMapper {
     target.setEmail(source.email);
     target.setPhone(source.phone);
     target.setScore(source.score);
+    if (source.defaultLanguage != null) {
+      target
+          .setDefaultLanguage(LanguageVersion.getForCreateAndUpdateEntity(source.defaultLanguage));
+    }
+    if (source.availableLanguageVersions != null && !source.availableLanguageVersions.isEmpty()) {
+      target.setAvailableLanguageVersions(source.availableLanguageVersions.stream()
+          .map(ver -> LanguageVersion.getForCreateAndUpdateEntity(ver))
+          .collect(Collectors.toSet()));
+    }
     if (source.blocked != null) {
       target.setBlocked(source.blocked);
     }
@@ -89,11 +99,14 @@ public class DtoMapper {
     dto.score = bo.getScore();
     dto.blocked = bo.isBlocked();
     dto.published = bo.isPublished();
+    dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
     return dto;
   }
 
   public static SightDTO getFullDTO(Sight bo) {
     SightDTO dto = getDTO(bo);
+    dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
+        .map(lang -> lang.getLanuage()).collect(Collectors.toSet());
     if (bo.getSightEvents() != null) {
       dto.sightEvents = bo.getSightEvents().stream().map(DtoMapper::getFullDTO).collect(toList());
     }
@@ -127,11 +140,15 @@ public class DtoMapper {
     dto.blocked = bo.isBlocked();
     dto.published = bo.isPublished();
     dto.partnerAffiliateCode = bo.getPartner().getAffiliateCode();
+    dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
+    dto.promotion = bo.getPromotion();
     return dto;
   }
 
   public static SightEventDTO getFullDTO(SightEvent bo) {
     SightEventDTO dto = getDTO(bo);
+    dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
+        .map(lang -> lang.getLanuage()).collect(Collectors.toSet());
     if (bo.getImages() != null && !bo.getImages().isEmpty()) {
       dto.images = bo.getImages().stream().map(DtoMapper::getDTO).collect(toList());
     }
@@ -202,13 +219,37 @@ public class DtoMapper {
     }
     ImageDTO dto = new ImageDTO();
     dto.original = bo.getOrginal().getDownloadUrl();
+    if (bo.getOrginalWebp() != null) {
+      dto.originalWebp = bo.getOrginalWebp().getDownloadUrl();
+    }
     dto.fhd = bo.getFhd().getDownloadUrl();
+    if (bo.getFhdWebp() != null) {
+      dto.fhdWebp = bo.getFhdWebp().getDownloadUrl();
+    }
     dto.fourK = bo.getFourK().getDownloadUrl();
+    if (bo.getFourKWebp() != null) {
+      dto.fourKWebp = bo.getFourKWebp().getDownloadUrl();
+    }
     dto.hd = bo.getHd().getDownloadUrl();
+    if (bo.getHdWebp() != null) {
+      dto.hdWebp = bo.getHdWebp().getDownloadUrl();
+    }
     dto.qvg = bo.getQvga().getDownloadUrl();
+    if (bo.getQvgaWebp() != null) {
+      dto.qvgWebp = bo.getQvgaWebp().getDownloadUrl();
+    }
     dto.sxga = bo.getSxga().getDownloadUrl();
+    if (bo.getSxgaWebp() != null) {
+      dto.sxgaWebp = bo.getSxgaWebp().getDownloadUrl();
+    }
     dto.vga = bo.getVga().getDownloadUrl();
+    if (bo.getVgaWebp() != null) {
+      dto.vgaWebp = bo.getVgaWebp().getDownloadUrl();
+    }
     dto.xga = bo.getXga().getDownloadUrl();
+    if (bo.getXgaWebp() != null) {
+      dto.xgaWebp = bo.getXgaWebp().getDownloadUrl();
+    }
     return dto;
   }
 
@@ -254,6 +295,15 @@ public class DtoMapper {
     target.setGeneralAdmission(source.generalAdmission);
     target.setHptId(source.id);
     target.setScore(source.score);
+    if (source.defaultLanguage != null) {
+      target
+          .setDefaultLanguage(LanguageVersion.getForCreateAndUpdateEntity(source.defaultLanguage));
+    }
+    if (source.availableLanguageVersions != null && !source.availableLanguageVersions.isEmpty()) {
+      target.setAvailableLanguageVersions(source.availableLanguageVersions.stream()
+          .map(ver -> LanguageVersion.getForCreateAndUpdateEntity(ver))
+          .collect(Collectors.toSet()));
+    }
     if (source.blocked != null) {
       target.setBlocked(source.blocked);
     }

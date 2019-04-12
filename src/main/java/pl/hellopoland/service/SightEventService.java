@@ -38,8 +38,10 @@ import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
+import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.AccessDeniedException;
+import pl.hellopoland.util.BeanUtils;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PagedEntityCollection;
@@ -69,16 +71,25 @@ public class SightEventService extends ServiceSuperclass {
   @Inject
   private TranslationService translationService;
 
-  public PagedEntityCollection<SightEvent> getList(SightEventPagedCollectionConfig config) {
+  public PagedEntityCollection<SightEvent> getList(SightEventPagedCollectionConfig config,
+      LanguageVersion language) {
     if (config.isCurrentPartner()) {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
     }
     List<SightEvent> sightEvents = getQuery(config).getResultList();
-    Collections.sort(sightEvents, sightEventNamesComparator(new Locale("pl_PL")));
-
+    if (language != null) {
+      sightEvents = translationService.translateEntities(sightEvents, language, false);
+    }
     // List<SightEvent> sightEvents = getQuery(config).getResultList().stream()
     // .sorted(sightEventDatesComparator()).collect(toList());
+    Collections.sort(sightEvents, sightEventPromotionComparator()
+        .thenComparing(sightEventNamesComparator(new Locale("pl_PL"))));
     return new PagedEntityCollection<>(sightEvents, config);
+  }
+
+  private Comparator<SightEvent> sightEventPromotionComparator() {
+    return Comparator.nullsLast(Comparator.comparing(SightEvent::getPromotion,
+        Comparator.nullsLast(Comparator.naturalOrder())));
   }
 
   private Comparator<SightEvent> sightEventNamesComparator(Locale locale) {
@@ -121,10 +132,14 @@ public class SightEventService extends ServiceSuperclass {
     if (!sight.getPartner().equals(partner)) {
       throw new AccessDeniedException();
     }
+    var defLang = dto.defaultLanguage;
+    var availableLanguageVersions = dto.availableLanguageVersions;
     dto.generalAdmission = Boolean.TRUE.equals(dto.generalAdmission);
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
     dto = helloTicket.addSightEvent(dto, partner.getHptToken());
+    dto.defaultLanguage = defLang;
+    dto.availableLanguageVersions = availableLanguageVersions;
     SightEvent bo = new SightEvent();
     DtoMapper.copy(dto, bo);
     iService.update(bo, dto.mainImage == null ? null : dto.mainImage.original);
@@ -148,9 +163,8 @@ public class SightEventService extends ServiceSuperclass {
       });
       bo.setOpeningHours(oHoursList);
     }
-
     logger.log(Logger.Level.INFO, "Saved new sight event: " + bo.getName());
-    return bo;
+    return createLanguageVesrion(DtoMapper.getDTO(bo), partner, bo.getDefaultLanguage());
   }
 
   private ArrayList<OpeningHours> getOpeningHoursCollectionFromDTO(SightEventDTO dto) {
@@ -160,35 +174,44 @@ public class SightEventService extends ServiceSuperclass {
         .orElse(null);
   }
 
-  public SightEvent createLanguageVesrion(SightEventDTO dto, String language) {
+  private SightEvent createLanguageVesrion(SightEventDTO dto, Partner partner,
+      LanguageVersion language) {
+    return translationService.createEntityLanguageVersion(getForPartner(dto.id, partner), dto,
+        language);
+  }
+
+  public SightEvent createLanguageVesrion(SightEventDTO dto, LanguageVersion language) {
     return translationService.createEntityLanguageVersion(getForLoggedUser(dto.id), dto, language);
   }
 
-  public SightEvent updateForLoggedUser(SightEventDTO dto) {
+  public SightEvent updateForLoggedUser(SightEventDTO dto, LanguageVersion language) {
     SightEvent bo = getForLoggedUser(dto.id);
-    if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
-      Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
-      Portal hpt = getPortal("Hello Ticket Cloud");
-      HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
-      dto.id = bo.getHptId();
-      dto = helloTicket.updateSightEvent(dto, partner.getHptToken());
+    if (!translationService.isTranslated(bo, language)) {
+      throw new ConflictingException(
+          "Translation for language " + language.getLanuage() + "doesn't exists");
     }
-    DtoMapper.copy(dto, bo);
-    oHoursService.remove(bo.getOpeningHours());
-    ArrayList<OpeningHours> oHoursList = getOpeningHoursCollectionFromDTO(dto);
-    if (oHoursList != null && !oHoursList.isEmpty()) {
-      oHoursList.stream().forEach(oh -> {
-        oh.setSightEvent(bo);
-        oHoursService.persist(oh);
-      });
+    if (bo.getDefaultLanguage().equals(language)) {
+      if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
+        Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
+        Portal hpt = getPortal("Hello Ticket Cloud");
+        HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
+        dto.id = bo.getHptId();
+        dto = helloTicket.updateSightEvent(dto, partner.getHptToken());
+      }
+      DtoMapper.copy(dto, bo);
+      oHoursService.remove(bo.getOpeningHours());
+      ArrayList<OpeningHours> oHoursList = getOpeningHoursCollectionFromDTO(dto);
+      if (oHoursList != null && !oHoursList.isEmpty()) {
+        oHoursList.stream().forEach(oh -> {
+          oh.setSightEvent(bo);
+          oHoursService.persist(oh);
+        });
+      }
+      bo.setOpeningHours(null);
+      bo.setOpeningHours(oHoursList);
+      em.flush();
     }
-    bo.setOpeningHours(null);
-    bo.setOpeningHours(oHoursList);
-    return bo;
-  }
-
-  public SightEvent updateLanguageVersionForLoggedUser(SightEventDTO dto, String language) {
-    return translationService.updateEntityLanguageVersion(getForLoggedUser(dto.id), dto, language);
+    return translationService.updateEntityLanguageVersion(bo, dto, language);
   }
 
   public List<SightEvent> getForPartner() {
@@ -251,6 +274,14 @@ public class SightEventService extends ServiceSuperclass {
     return getForPartner(id, partner);
   }
 
+  public SightEvent getForLoggedUser(Long id, LanguageVersion language) {
+    var bo = getForLoggedUser(id);
+    if (language == null) {
+      return bo;
+    }
+    return translationService.translateEntity(bo, language, true);
+  }
+
   public SightEvent getForPartner(Long sightEventId, Partner partner) {
     return em.createQuery("from SightEvent where id=:id and partner=:partner", SightEvent.class)
         .setParameter("id", sightEventId).setParameter("partner", partner).getSingleResult();
@@ -261,9 +292,12 @@ public class SightEventService extends ServiceSuperclass {
     delete(id);
   }
 
+  public void deleteForLoggedUser(Long id, LanguageVersion language) {
+    translationService.deleteEntityTranslations(getForLoggedUser(id), language);
+  }
+
   public void fetchTicketPoolDefinitions(Collection<SightEvent> bos,
       List<SightEventDTO> sightEventDtos, boolean showDeletedTPD) {
-
     if (hasAnyHptCloudEvent(bos)) {
       var pairedByIds = pairBosWithDtos(bos, sightEventDtos);
       var groupedByPartner = groupByPartner(pairedByIds);
@@ -483,6 +517,47 @@ public class SightEventService extends ServiceSuperclass {
     var bo = getForLoggedUser(sightId);
     HelloTicket ht = new HelloTicket(bo.getPortal().getUrl());
     ht.stopSale(getLoggedPartner().getHptToken(), bo.getHptId(), ticketPoolDefId, date);
+  }
+
+  public SightEvent changeDefaultLanguage(Long id, LanguageVersion language) {
+    SightEvent bo = getForLoggedUser(id);
+    if (!translationService.isTranslated(bo, language)) {
+      throw new ConflictingException(
+          "Can not change the default language. Translation for language " + language.getLanuage()
+              + "doesn't exists");
+    }
+    SightEvent translation = translationService.translateEntity(bo, language, true);
+    bo.setDefaultLanguage(language);
+    bo = BeanUtils.copyNotNullProperties(translation, bo);
+    em.merge(bo);
+    if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
+      Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
+      Portal hpt = getPortal("Hello Ticket Cloud");
+      HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
+      helloTicket.updateSightEvent(DtoMapper.getDTO(bo), partner.getHptToken());
+    }
+    return bo;
+  }
+
+  public void setSightEventPromotion(Long id, Integer promotion) {
+    var bo = getOrThrow(id);
+    em.createQuery("from SightEvent where promotion = :promotion", SightEvent.class)
+        .setParameter("promotion", promotion).getResultList().forEach(se -> {
+          se.setPromotion(null);
+          em.flush();
+        });
+    bo.setPromotion(promotion);
+  }
+
+  public void removeSightEventPromotion(Long id) {
+    var bo = getOrThrow(id);
+    bo.setPromotion(null);
+  }
+
+  private SightEvent getOrThrow(Long id) throws ConflictingException {
+    var bo = Optional.ofNullable(get(id))
+        .orElseThrow(() -> new ConflictingException("Resource not found"));
+    return bo;
   }
 
 }

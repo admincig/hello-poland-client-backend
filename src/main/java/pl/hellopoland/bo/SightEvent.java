@@ -5,90 +5,88 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
+import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.util.Imaged;
 import pl.hellopoland.util.Located;
+import pl.hellopoland.util.Translated;
 
 @Entity
-public class SightEvent extends ModelSuperclass implements Located, Imaged {
+@Table(uniqueConstraints = {
+    @UniqueConstraint(name = "sightevent_promotion_unique", columnNames = {"promotion"})})
+public class SightEvent extends ModelSuperclass implements Located, Imaged, Translated {
 
   private static final long serialVersionUID = -34796485244638912L;
 
   @NotNull
   private String name;
-
   private Date date;
-
   private Boolean generalAdmission;
-
   @ManyToOne
   private ImageCollector mainImage;
-
   @OneToMany
   @JoinTable(name = "sightevent_images",
       joinColumns = {@JoinColumn(name = "sightevent_id", referencedColumnName = "id")},
       inverseJoinColumns = {
           @JoinColumn(name = "imagecollector_id", referencedColumnName = "id", unique = true)})
   private Collection<ImageCollector> images;
-
   @OneToMany(mappedBy = "sightEvent")
   private Collection<TicketDefinition> tickets;
-
   @ManyToMany
   private Set<Agreement> agreements;
-
   private String lead;
-
   @Column(columnDefinition = "varchar(2500)")
   private String description;
-
   private Integer duration;
-
   private Integer minPrice;
-
   private Float score;
-
   @Embedded
   private Location location;
-
   private String email;
-
   private String phone;
-
   @ManyToOne
   private FileDescriptor pdfAttachment;
-
   @OneToMany(mappedBy = "sightEvent")
   private Collection<OpeningHours> openingHours;
-
   @ManyToOne
   private Portal portal;
-
   @ManyToOne(fetch = FetchType.EAGER)
   private Sight sight;
-
   @ManyToOne
   private Partner partner;
-
   @NotNull
   private Long hptId;
-
   private boolean active = true;
-
   private boolean published;
-
   private boolean blocked;
+  @NotNull
+  @Column(length = 5, nullable = false)
+  @Enumerated(EnumType.STRING)
+  private LanguageVersion defaultLanguage;
+  @NotNull
+  @Column(nullable = false)
+  @ElementCollection
+  @Enumerated(EnumType.STRING)
+  private Set<LanguageVersion> availableLanguageVersions;
+
+  private Integer promotion;
 
   public String getName() {
     return name;
@@ -303,6 +301,50 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged {
 
   public void setBlocked(boolean blocked) {
     this.blocked = blocked;
+  }
+
+  @Override
+  public LanguageVersion getDefaultLanguage() {
+    return defaultLanguage;
+  }
+
+  @Override
+  public void setDefaultLanguage(LanguageVersion defaultLanguage) {
+    this.defaultLanguage = defaultLanguage;
+  }
+
+  @Override
+  public Set<LanguageVersion> getAvailableLanguageVersions() {
+    return availableLanguageVersions;
+  }
+
+  @Override
+  public void setAvailableLanguageVersions(Set<LanguageVersion> availableLanguageVersions) {
+    this.availableLanguageVersions = availableLanguageVersions;
+  }
+
+  @Override
+  public boolean addAvailableLanguageVersion(LanguageVersion languageVersion) {
+    if (availableLanguageVersions == null) {
+      availableLanguageVersions = new HashSet<>();
+    }
+    return availableLanguageVersions.add(languageVersion);
+  }
+
+  @Override
+  public boolean deleteAvailableLanguageVersion(LanguageVersion languageVersion) {
+    if (availableLanguageVersions == null) {
+      availableLanguageVersions = new HashSet<>();
+    }
+    return availableLanguageVersions.remove(languageVersion);
+  }
+
+  public Integer getPromotion() {
+    return promotion;
+  }
+
+  public void setPromotion(Integer promotion) {
+    this.promotion = promotion;
   }
 
 }
