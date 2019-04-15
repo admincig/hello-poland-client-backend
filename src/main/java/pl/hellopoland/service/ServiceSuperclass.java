@@ -41,7 +41,7 @@ public abstract class ServiceSuperclass {
             .load(new FileInputStream(new File((String) copy.get("local.runtime.properties"))));
       }
       properties.putAll(copy);
-      staticLogger.log(Logger.Level.INFO,
+      staticLogger.log(Logger.Level.DEBUG,
           properties.entrySet().stream().map(Object::toString).collect(Collectors.joining("\n")));
     } catch (IOException e) {
       staticLogger.log(Logger.Level.WARNING, "Failed to load properties", e);
