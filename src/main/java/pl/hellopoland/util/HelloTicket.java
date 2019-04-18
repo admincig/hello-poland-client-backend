@@ -168,9 +168,10 @@ public class HelloTicket {
 
   private JsonStructure post(String path, String json, String authToken) throws IOException {
     URL url = new URL(this.url + path);
-    var conn = url.openConnection();
+    var conn = (HttpURLConnection) url.openConnection();
     conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-    logger.log(System.Logger.Level.INFO,
+    logger.log(System.Logger.Level.INFO, "Sending POST request to url: " + url);
+    logger.log(System.Logger.Level.DEBUG,
         "Sending POST request to url: " + url + " with body: " + json);
     conn.setRequestProperty("Authorization", "Bearer " + authToken);
     conn.setDoOutput(true);
@@ -180,7 +181,8 @@ public class HelloTicket {
     printWriter.close();
     var is = conn.getInputStream();
     var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
-    logger.log(System.Logger.Level.INFO, "Server responded with body: " + resp);
+    logger.log(System.Logger.Level.INFO, "Server responded with code: " + conn.getResponseCode());
+    logger.log(System.Logger.Level.DEBUG, "Server responded with body: " + resp);
     return resp;
   }
 
@@ -188,7 +190,8 @@ public class HelloTicket {
     URL url = new URL(this.url + path);
     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
     conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-    logger.log(System.Logger.Level.INFO,
+    logger.log(System.Logger.Level.INFO, "Sending PUT request to url: " + url);
+    logger.log(System.Logger.Level.DEBUG,
         "Sending PUT request to url: " + url + " with body: " + json);
     conn.setRequestMethod("PUT");
     conn.setRequestProperty("Authorization", "Bearer " + authToken);
@@ -201,7 +204,8 @@ public class HelloTicket {
     }
     var is = conn.getInputStream();
     var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
-    logger.log(System.Logger.Level.INFO, "Server responded with body: " + resp);
+    logger.log(System.Logger.Level.INFO, "Server responded with code: " + conn.getResponseCode());
+    logger.log(System.Logger.Level.DEBUG, "Server responded with body: " + resp);
     return resp;
   }
 
