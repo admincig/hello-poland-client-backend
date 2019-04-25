@@ -227,7 +227,7 @@ public class OrderService extends ServiceSuperclass {
     return hpCommission;
   }
 
-  private void confirmInExternalAPI(Order o) {
+  public void confirmInExternalAPI(Order o) {
     logger.log(Logger.Level.INFO,
         "Checking if any of order sight entries ought to be confirmed in external API");
     var groupedByPortal =
@@ -394,6 +394,15 @@ public class OrderService extends ServiceSuperclass {
 
   public Status getStatus(String hash) {
     return findByHash(hash).getStatus();
+  }
+
+  public List<Order> getOrdersInDateRangeAndStatus(Date fromDate, Date toDate, Status status) {
+    return em
+        .createQuery(
+            "from Order where (:fromDate <= o.date and :toDate > date) and status = :status",
+            Order.class)
+        .setParameter("fromDate", fromDate).setParameter("toDate", new Date())
+        .setParameter("status", Status.CONFIRMED).getResultList();
   }
 
   public List<OrderEntry> getOrdersInDateRange(Date fromDate, Date toDate, Partner partner) {

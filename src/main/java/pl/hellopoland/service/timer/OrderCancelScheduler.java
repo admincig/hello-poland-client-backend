@@ -3,14 +3,16 @@ package pl.hellopoland.service.timer;
 import java.lang.System.Logger;
 import java.util.Calendar;
 import java.util.List;
+import javax.ejb.DependsOn;
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.inject.Inject;
-import pl.hellopoland.service.ServiceSuperclass;
 import pl.hellopoland.bo.Order;
 import pl.hellopoland.service.OrderService;
+import pl.hellopoland.service.ServiceSuperclass;
 
 @Singleton
+@DependsOn({"StartupP24OrdersConfirmation"})
 public class OrderCancelScheduler extends ServiceSuperclass {
 
   @Inject
