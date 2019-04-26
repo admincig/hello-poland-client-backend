@@ -428,4 +428,15 @@ public class OrderService extends ServiceSuperclass {
     return tQuery.getResultList();
   }
 
+  public void printTicketCopy(String p24Statement) {
+    var order = findByP24Statement(p24Statement);
+
+  }
+
+  private Order findByP24Statement(String p24Statement) {
+    return em.createQuery("from Order where p24Statement = :p24Statement", Order.class)
+        .setParameter("p24Statement", p24Statement).getResultStream().findFirst()
+        .orElseThrow(() -> new ResourceNotFoundException());
+  }
+
 }
