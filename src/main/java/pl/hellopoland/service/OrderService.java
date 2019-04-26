@@ -398,8 +398,7 @@ public class OrderService extends ServiceSuperclass {
 
   public List<Order> getOrdersInDateRangeAndStatus(Date fromDate, Date toDate, Status status) {
     return em
-        .createQuery(
-            "from Order where (:fromDate <= o.date and :toDate > date) and status = :status",
+        .createQuery("from Order where (:fromDate <= date and :toDate > date) and status = :status",
             Order.class)
         .setParameter("fromDate", fromDate).setParameter("toDate", new Date())
         .setParameter("status", Status.CONFIRMED).getResultList();
