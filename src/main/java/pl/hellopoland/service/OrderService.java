@@ -137,9 +137,7 @@ public class OrderService extends ServiceSuperclass {
     em.refresh(o);
     logger.log(Logger.Level.INFO,
         "Checking if any of order sight entries ought to be placed in external API");
-    var groupedByPortal =
-        o.getEntries().stream().filter(ose -> ose.getSightEvent().getPortal() != null)
-            .collect(groupingBy(ose -> ose.getSightEvent().getPortal()));
+    Map<Portal, List<OrderSightEntry>> groupedByPortal = groupByPortal(o);
     for (var entry : groupedByPortal.entrySet()) {
       Portal portal = entry.getKey();
       logger.log(Logger.Level.INFO, "Placing external order in " + portal.getName());
@@ -149,6 +147,11 @@ public class OrderService extends ServiceSuperclass {
           break;
       }
     }
+  }
+
+  private Map<Portal, List<OrderSightEntry>> groupByPortal(Order order) {
+    return order.getEntries().stream().filter(ose -> ose.getSightEvent().getPortal() != null)
+        .collect(groupingBy(ose -> ose.getSightEvent().getPortal()));
   }
 
   private PassageCart getP24PassageCart(Order o) {
@@ -230,9 +233,7 @@ public class OrderService extends ServiceSuperclass {
   private void confirmInExternalAPI(Order o) {
     logger.log(Logger.Level.INFO,
         "Checking if any of order sight entries ought to be confirmed in external API");
-    var groupedByPortal =
-        o.getEntries().stream().filter(ose -> ose.getSightEvent().getPortal() != null)
-            .collect(groupingBy(ose -> ose.getSightEvent().getPortal()));
+    Map<Portal, List<OrderSightEntry>> groupedByPortal = groupByPortal(o);
     for (var entry : groupedByPortal.entrySet()) {
       Portal portal = entry.getKey();
       logger.log(Logger.Level.INFO, "Confirming external order in " + portal.getName());
@@ -352,9 +353,7 @@ public class OrderService extends ServiceSuperclass {
   private void cancelInExternalAPI(Order order) {
     logger.log(Logger.Level.INFO,
         "Checking if any of order sight entries ought to be cancelled in external API");
-    Map<Portal, List<OrderSightEntry>> groupedByPortal =
-        order.getEntries().stream().filter(ose -> ose.getSightEvent().getPortal() != null)
-            .collect(groupingBy(ose -> ose.getSightEvent().getPortal()));
+    Map<Portal, List<OrderSightEntry>> groupedByPortal = groupByPortal(order);
     for (Map.Entry<Portal, List<OrderSightEntry>> entry : groupedByPortal.entrySet()) {
       Portal portal = entry.getKey();
       logger.log(Logger.Level.INFO, "Cancelling external order in " + portal.getName());
@@ -428,15 +427,35 @@ public class OrderService extends ServiceSuperclass {
     return tQuery.getResultList();
   }
 
-  public void printTicketCopy(String p24Statement) {
+  public void sendTicketCopy(String p24Statement) {
     var order = findByP24Statement(p24Statement);
-
+    sendTicketsCopyByExternalAPI(order);
   }
 
   private Order findByP24Statement(String p24Statement) {
     return em.createQuery("from Order where p24Statement = :p24Statement", Order.class)
         .setParameter("p24Statement", p24Statement).getResultStream().findFirst()
         .orElseThrow(() -> new ResourceNotFoundException());
+  }
+
+  private void sendTicketsCopyByExternalAPI(Order order) {
+    Map<Portal, List<OrderSightEntry>> groupedByPortal = groupByPortal(order);
+    for (var entry : groupedByPortal.entrySet()) {
+      Portal portal = entry.getKey();
+
+      switch (portal.getType()) {
+        case HELLOTICKET_CLOUD_1:
+          sendTicketsCopyByHpt(portal, entry.getValue());
+          break;
+      }
+    }
+  }
+
+  private void sendTicketsCopyByHpt(Portal portal, List<OrderSightEntry> ose) {
+    String serialNumber = ose.stream().map(OrderSightEntry::getSerialNumber).findFirst()
+        .orElseThrow(() -> new ResourceNotFoundException());
+    HelloTicket hpt = new HelloTicket(portal.getUrl());
+    hpt.sendTicketsCopy(serialNumber, getLoggedPartner().getHptToken());
   }
 
 }

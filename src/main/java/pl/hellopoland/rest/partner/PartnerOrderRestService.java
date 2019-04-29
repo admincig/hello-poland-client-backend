@@ -23,7 +23,7 @@ public class PartnerOrderRestService {
   @GET
   @Path("/print/{p24Statement}")
   public Response printPurchsedTickets(@PathParam("p24Statement") String p24Statement) {
-    service.printTicketCopy(p24Statement);
+    service.sendTicketCopy(p24Statement);
     return Response.ok().build();
   }
 

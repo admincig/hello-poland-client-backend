@@ -9,8 +9,8 @@ public class OrderServicePartnerAPI {
   private OrderService service;
 
   @RolesAllowed("partner")
-  public boolean printTicketCopy(String P24Statement) {
-    service.printTicketCopy(P24Statement);
+  public boolean sendTicketCopy(String P24Statement) {
+    service.sendTicketCopy(P24Statement);
   }
 
 }
