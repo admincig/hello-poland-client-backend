@@ -421,7 +421,7 @@ public class HelloTicket {
 
   public void sendTicketsCopy(String serialNumber, String partnerAuthToken) {
     try {
-      get("" + serialNumber +, partnerAuthToken);
+      get("/bookings/" + serialNumber + "/sendTicketCopy", partnerAuthToken);
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
