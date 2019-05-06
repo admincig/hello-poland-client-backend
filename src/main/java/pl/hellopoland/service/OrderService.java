@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -35,7 +36,9 @@ import pl.hellopoland.bo.PassageCartEntry;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.TicketDefinition;
+import pl.hellopoland.dto.EmailSendingReportDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
+import pl.hellopoland.exception.email.EmailSendingException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.rest.dto.OrderIRO;
 import pl.hellopoland.rest.dto.OrderIRO.OrderEntryIRO;
@@ -427,9 +430,17 @@ public class OrderService extends ServiceSuperclass {
     return tQuery.getResultList();
   }
 
-  public void sendTicketCopy(String p24Statement) {
+  public EmailSendingReportDTO sendTicketCopy(String p24Statement) {
     var order = findByP24Statement(p24Statement);
-    sendTicketsCopyByExternalAPI(order);
+    EmailSendingReportDTO report = sendTicketsCopyByExternalAPI(order);
+    String clientEmail = order.getDetails().getEmail();
+    Arrays.stream(report.validUnsentAddresses).filter(address -> clientEmail.equals(address))
+        .findAny().orElseThrow(() -> new EmailSendingException(
+            "Wystąpił błąd podczas wysyłania kopii biletów do " + clientEmail));
+    Arrays.stream(report.invalidAddresses).filter(address -> clientEmail.equals(address)).findAny()
+        .orElseThrow(() -> new EmailSendingException(
+            "Wystąpił błąd podczas wysyłania kopii biletów do " + clientEmail));
+    return report;
   }
 
   private Order findByP24Statement(String p24Statement) {
@@ -438,24 +449,24 @@ public class OrderService extends ServiceSuperclass {
         .orElseThrow(() -> new ResourceNotFoundException());
   }
 
-  private void sendTicketsCopyByExternalAPI(Order order) {
+  private EmailSendingReportDTO sendTicketsCopyByExternalAPI(Order order) {
     Map<Portal, List<OrderSightEntry>> groupedByPortal = groupByPortal(order);
     for (var entry : groupedByPortal.entrySet()) {
       Portal portal = entry.getKey();
 
       switch (portal.getType()) {
         case HELLOTICKET_CLOUD_1:
-          sendTicketsCopyByHpt(portal, entry.getValue());
-          break;
+          return sendTicketsCopyByHpt(portal, entry.getValue());
       }
     }
+    return null;
   }
 
-  private void sendTicketsCopyByHpt(Portal portal, List<OrderSightEntry> ose) {
+  private EmailSendingReportDTO sendTicketsCopyByHpt(Portal portal, List<OrderSightEntry> ose) {
     String serialNumber = ose.stream().map(OrderSightEntry::getSerialNumber).findFirst()
         .orElseThrow(() -> new ResourceNotFoundException());
     HelloTicket hpt = new HelloTicket(portal.getUrl());
-    hpt.sendTicketsCopy(serialNumber, getLoggedPartner().getHptToken());
+    return hpt.sendTicketsCopy(serialNumber, getLoggedPartner().getHptToken());
   }
 
 }

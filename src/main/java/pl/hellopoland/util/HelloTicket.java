@@ -23,6 +23,7 @@ import pl.hellopoland.bo.OrderEntry;
 import pl.hellopoland.bo.OrderSightEntry;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.dto.AvailableTicketNumberAssociationDTO;
+import pl.hellopoland.dto.EmailSendingReportDTO;
 import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
@@ -35,6 +36,7 @@ import pl.hellopoland.dto.booking.TicketOrderDTO;
 import pl.hellopoland.exception.badrequest.BadRequestException;
 import pl.hellopoland.exception.conflict.CannotDeleteSightEventFromExternalSystemException;
 import pl.hellopoland.exception.conflict.ConflictingException;
+import pl.hellopoland.exception.email.EmailSendingException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.rest.JsonbConfig;
 
@@ -419,14 +421,15 @@ public class HelloTicket {
     }
   }
 
-  public void sendTicketsCopy(String serialNumber, String partnerAuthToken) {
+  public EmailSendingReportDTO sendTicketsCopy(String serialNumber, String partnerAuthToken) {
     try {
-      get("/bookings/" + serialNumber + "/sendTicketCopy", partnerAuthToken);
-    } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      return JsonbConfig.getInstance().fromJson(
+          get("/bookings/" + serialNumber + "/sendTicketCopy", partnerAuthToken).toString(),
+          EmailSendingReportDTO.class);
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      throw new EmailSendingException();
     }
-
   }
 
 }
