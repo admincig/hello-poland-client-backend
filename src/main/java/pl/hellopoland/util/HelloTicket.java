@@ -425,7 +425,8 @@ public class HelloTicket {
   public EmailSendingReportDTO sendTicketsCopy(String serialNumber, String partnerAuthToken) {
     try {
       return JsonbConfig.getInstance().fromJson(
-          get("/bookings/" + serialNumber + "/sendTicketCopy", partnerAuthToken).toString(),
+          get("/v1/partners/bookings/" + serialNumber + "/sendTicketCopy", partnerAuthToken)
+              .toString(),
           EmailSendingReportDTO.class);
     } catch (Exception e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
