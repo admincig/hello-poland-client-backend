@@ -36,6 +36,8 @@ import pl.hellopoland.bo.PassageCartEntry;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.TicketDefinition;
+import pl.hellopoland.bo.User;
+import pl.hellopoland.bo.UserRole.Role;
 import pl.hellopoland.dto.EmailSendingReportDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.email.EmailSendingException;
@@ -453,7 +455,6 @@ public class OrderService extends ServiceSuperclass {
     Map<Portal, List<OrderSightEntry>> groupedByPortal = groupByPortal(order);
     for (var entry : groupedByPortal.entrySet()) {
       Portal portal = entry.getKey();
-
       switch (portal.getType()) {
         case HELLOTICKET_CLOUD_1:
           return sendTicketsCopyByHpt(portal, entry.getValue());
@@ -466,7 +467,11 @@ public class OrderService extends ServiceSuperclass {
     String serialNumber = ose.stream().map(OrderSightEntry::getSerialNumber).findFirst()
         .orElseThrow(() -> new ResourceNotFoundException());
     HelloTicket hpt = new HelloTicket(portal.getUrl());
-    return hpt.sendTicketsCopy(serialNumber, getLoggedPartner().getHptToken());
+    User loggedUser = getLoggedUser();
+    if (loggedUser.hasRole(Role.ADMIN)) {
+      return hpt.sendTicketsCopyByAdmin(serialNumber, loggedUser.getHptToken());
+    }
+    return hpt.sendTicketsCopyByPartner(serialNumber, loggedUser.getPartner().getHptToken());
   }
 
 }

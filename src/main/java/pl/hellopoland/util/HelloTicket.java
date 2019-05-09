@@ -422,11 +422,23 @@ public class HelloTicket {
     }
   }
 
-  public EmailSendingReportDTO sendTicketsCopy(String serialNumber, String partnerAuthToken) {
+  public EmailSendingReportDTO sendTicketsCopyByPartner(String serialNumber,
+      String partnerAuthToken) {
     try {
       return JsonbConfig.getInstance().fromJson(
           get("/v1/partners/bookings/" + serialNumber + "/sendTicketCopy", partnerAuthToken)
               .toString(),
+          EmailSendingReportDTO.class);
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      throw new EmailSendingException();
+    }
+  }
+
+  public EmailSendingReportDTO sendTicketsCopyByAdmin(String serialNumber, String hptToken) {
+    try {
+      return JsonbConfig.getInstance().fromJson(
+          get("/v1/helpdesk/bookings/" + serialNumber + "/sendTicketCopy", hptToken).toString(),
           EmailSendingReportDTO.class);
     } catch (Exception e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
