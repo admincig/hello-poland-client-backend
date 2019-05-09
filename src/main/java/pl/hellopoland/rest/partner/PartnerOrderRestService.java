@@ -21,7 +21,7 @@ public class PartnerOrderRestService {
   private OrderServicePartnerAPI service;
 
   @GET
-  @Path("/print/{p24Statement}")
+  @Path("/{p24Statement}/sendTicketCopy")
   public Response sendTicketCopy(@PathParam("p24Statement") String p24Statement) {
     service.sendTicketCopy(p24Statement);
     return Response.ok().build();
