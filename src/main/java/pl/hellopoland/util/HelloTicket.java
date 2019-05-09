@@ -450,11 +450,14 @@ public class HelloTicket {
     }
   }
 
-  public void addPdfToSightEvent(Long sightEventHptId, FileDescriptorDTO pdfDto,
+  public SightEventDTO addPdfToSightEvent(Long sightEventHptId, FileDescriptorDTO pdfDto,
       String partnerAuthToken) {
     String pdfJsonString = JsonbConfig.getInstance().toJson(pdfDto);
     try {
-      put("/v1/sight-events/" + sightEventHptId + "/pdf", pdfJsonString, partnerAuthToken);
+      return JsonbConfig.getInstance().fromJson(
+          put("/v1/sight-events/" + sightEventHptId + "/pdf", pdfJsonString, partnerAuthToken)
+              .toString(),
+          SightEventDTO.class);
     } catch (IOException e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
       throw new ConflictingException(
