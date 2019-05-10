@@ -13,7 +13,7 @@ public class OrderServicePartnerAPI {
   @Inject
   private OrderService service;
 
-  @RolesAllowed({"partner", "admin"})
+  @RolesAllowed("partner")
   public EmailSendingReportDTO sendTicketCopy(String P24Statement) {
     return service.sendTicketCopy(P24Statement);
   }

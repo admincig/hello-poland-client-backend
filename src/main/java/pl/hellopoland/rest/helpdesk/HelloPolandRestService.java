@@ -23,7 +23,6 @@ import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.api.hp.HellopolandServiceAPI;
-import pl.hellopoland.service.api.partner.OrderServicePartnerAPI;
 
 @RequestScoped
 @Path("/helpdesk")
@@ -32,8 +31,6 @@ import pl.hellopoland.service.api.partner.OrderServicePartnerAPI;
 public class HelloPolandRestService {
   @Inject
   private HellopolandServiceAPI service;
-  @Inject
-  private OrderServicePartnerAPI orderService;
 
   @POST
   @Path("/partners")
@@ -81,7 +78,7 @@ public class HelloPolandRestService {
   @GET
   @Path("/bookings/{p24Statement}/sendTicketCopy")
   public Response sendTicketCopy(@PathParam("p24Statement") String p24Statement) {
-    orderService.sendTicketCopy(p24Statement);
+    service.sendTicketCopy(p24Statement);
     return Response.ok().build();
   }
 
