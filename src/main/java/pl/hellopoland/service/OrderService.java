@@ -444,12 +444,16 @@ public class OrderService extends ServiceSuperclass {
     var order = findByP24Statement(p24Statement);
     EmailSendingReportDTO report = sendTicketsCopyByExternalAPI(order);
     String clientEmail = order.getDetails().getEmail();
-    Arrays.stream(report.validUnsentAddresses).filter(address -> clientEmail.equals(address))
-        .findAny().orElseThrow(() -> new EmailSendingException(
-            "Wystąpił błąd podczas wysyłania kopii biletów do " + clientEmail));
-    Arrays.stream(report.invalidAddresses).filter(address -> clientEmail.equals(address)).findAny()
-        .orElseThrow(() -> new EmailSendingException(
-            "Wystąpił błąd podczas wysyłania kopii biletów do " + clientEmail));
+    if (report.validUnsentAddresses != null && report.validUnsentAddresses.length > 0) {
+      Arrays.stream(report.validUnsentAddresses).filter(address -> clientEmail.equals(address))
+          .findAny().orElseThrow(() -> new EmailSendingException(
+              "Wystąpił błąd podczas wysyłania kopii biletów do " + clientEmail));
+    }
+    if (report.invalidAddresses != null && report.invalidAddresses.length > 0) {
+      Arrays.stream(report.invalidAddresses).filter(address -> clientEmail.equals(address))
+          .findAny().orElseThrow(() -> new EmailSendingException(
+              "Wystąpił błąd podczas wysyłania kopii biletów do " + clientEmail));
+    }
     return report;
   }
 
