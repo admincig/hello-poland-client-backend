@@ -75,4 +75,11 @@ public class HelloPolandRestService {
     return Response.ok().build();
   }
 
+  @GET
+  @Path("/bookings/{p24Statement}/sendTicketCopy")
+  public Response sendTicketCopy(@PathParam("p24Statement") String p24Statement) {
+    service.sendTicketCopy(p24Statement);
+    return Response.ok().build();
+  }
+
 }

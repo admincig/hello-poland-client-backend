@@ -33,6 +33,7 @@ public abstract class ServiceSuperclass {
   private static Context namingContext;
   protected static Properties properties;
   private static Logger staticLogger = System.getLogger(ServiceSuperclass.class.getName());
+  protected Logger logger = System.getLogger(this.getClass().getName());
 
   static {
     try {
@@ -62,8 +63,6 @@ public abstract class ServiceSuperclass {
   protected SecurityContext ctx;
   @PersistenceContext
   protected EntityManager em;
-
-  protected Logger logger = System.getLogger(this.getClass().getName());
 
   // @Inject
   // private JMSContext jms;

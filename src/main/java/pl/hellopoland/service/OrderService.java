@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -35,7 +36,11 @@ import pl.hellopoland.bo.PassageCartEntry;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.TicketDefinition;
+import pl.hellopoland.bo.User;
+import pl.hellopoland.bo.UserRole.Role;
+import pl.hellopoland.dto.EmailSendingReportDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
+import pl.hellopoland.exception.email.EmailSendingException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.rest.dto.OrderIRO;
 import pl.hellopoland.rest.dto.OrderIRO.OrderEntryIRO;
@@ -137,9 +142,7 @@ public class OrderService extends ServiceSuperclass {
     em.refresh(o);
     logger.log(Logger.Level.INFO,
         "Checking if any of order sight entries ought to be placed in external API");
-    var groupedByPortal =
-        o.getEntries().stream().filter(ose -> ose.getSightEvent().getPortal() != null)
-            .collect(groupingBy(ose -> ose.getSightEvent().getPortal()));
+    Map<Portal, List<OrderSightEntry>> groupedByPortal = groupByPortal(o);
     for (var entry : groupedByPortal.entrySet()) {
       Portal portal = entry.getKey();
       logger.log(Logger.Level.INFO, "Placing external order in " + portal.getName());
@@ -149,6 +152,11 @@ public class OrderService extends ServiceSuperclass {
           break;
       }
     }
+  }
+
+  private Map<Portal, List<OrderSightEntry>> groupByPortal(Order order) {
+    return order.getEntries().stream().filter(ose -> ose.getSightEvent().getPortal() != null)
+        .collect(groupingBy(ose -> ose.getSightEvent().getPortal()));
   }
 
   private PassageCart getP24PassageCart(Order o) {
@@ -230,9 +238,7 @@ public class OrderService extends ServiceSuperclass {
   public void confirmInExternalAPI(Order o) {
     logger.log(Logger.Level.INFO,
         "Checking if any of order sight entries ought to be confirmed in external API");
-    var groupedByPortal =
-        o.getEntries().stream().filter(ose -> ose.getSightEvent().getPortal() != null)
-            .collect(groupingBy(ose -> ose.getSightEvent().getPortal()));
+    Map<Portal, List<OrderSightEntry>> groupedByPortal = groupByPortal(o);
     for (var entry : groupedByPortal.entrySet()) {
       Portal portal = entry.getKey();
       logger.log(Logger.Level.INFO, "Confirming external order in " + portal.getName());
@@ -352,9 +358,7 @@ public class OrderService extends ServiceSuperclass {
   private void cancelInExternalAPI(Order order) {
     logger.log(Logger.Level.INFO,
         "Checking if any of order sight entries ought to be cancelled in external API");
-    Map<Portal, List<OrderSightEntry>> groupedByPortal =
-        order.getEntries().stream().filter(ose -> ose.getSightEvent().getPortal() != null)
-            .collect(groupingBy(ose -> ose.getSightEvent().getPortal()));
+    Map<Portal, List<OrderSightEntry>> groupedByPortal = groupByPortal(order);
     for (Map.Entry<Portal, List<OrderSightEntry>> entry : groupedByPortal.entrySet()) {
       Portal portal = entry.getKey();
       logger.log(Logger.Level.INFO, "Cancelling external order in " + portal.getName());
@@ -434,6 +438,52 @@ public class OrderService extends ServiceSuperclass {
       tQuery.setParameter("partner", partner);
     }
     return tQuery.getResultList();
+  }
+
+  public EmailSendingReportDTO sendTicketCopy(String p24Statement) {
+    var order = findByP24Statement(p24Statement);
+    EmailSendingReportDTO report = sendTicketsCopyByExternalAPI(order);
+    String clientEmail = order.getDetails().getEmail();
+    if (report.validUnsentAddresses != null && report.validUnsentAddresses.length > 0) {
+      Arrays.stream(report.validUnsentAddresses).filter(address -> clientEmail.equals(address))
+          .findAny().orElseThrow(() -> new EmailSendingException(
+              "Wystąpił błąd podczas wysyłania kopii biletów do " + clientEmail));
+    }
+    if (report.invalidAddresses != null && report.invalidAddresses.length > 0) {
+      Arrays.stream(report.invalidAddresses).filter(address -> clientEmail.equals(address))
+          .findAny().orElseThrow(() -> new EmailSendingException(
+              "Wystąpił błąd podczas wysyłania kopii biletów do " + clientEmail));
+    }
+    return report;
+  }
+
+  private Order findByP24Statement(String p24Statement) {
+    return em.createQuery("from Order where p24Statement = :p24Statement", Order.class)
+        .setParameter("p24Statement", p24Statement).getResultStream().findFirst()
+        .orElseThrow(() -> new ResourceNotFoundException());
+  }
+
+  private EmailSendingReportDTO sendTicketsCopyByExternalAPI(Order order) {
+    Map<Portal, List<OrderSightEntry>> groupedByPortal = groupByPortal(order);
+    for (var entry : groupedByPortal.entrySet()) {
+      Portal portal = entry.getKey();
+      switch (portal.getType()) {
+        case HELLOTICKET_CLOUD_1:
+          return sendTicketsCopyByHpt(portal, entry.getValue());
+      }
+    }
+    return null;
+  }
+
+  private EmailSendingReportDTO sendTicketsCopyByHpt(Portal portal, List<OrderSightEntry> ose) {
+    String serialNumber = ose.stream().map(OrderSightEntry::getSerialNumber).findFirst()
+        .orElseThrow(() -> new ResourceNotFoundException());
+    HelloTicket hpt = new HelloTicket(portal.getUrl());
+    User loggedUser = getLoggedUser();
+    if (loggedUser.hasRole(Role.ADMIN)) {
+      return hpt.sendTicketsCopyByAdmin(serialNumber, loggedUser.getHptToken());
+    }
+    return hpt.sendTicketsCopyByPartner(serialNumber, loggedUser.getPartner().getHptToken());
   }
 
 }

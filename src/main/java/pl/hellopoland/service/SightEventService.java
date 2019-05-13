@@ -440,6 +440,10 @@ public class SightEventService extends ServiceSuperclass {
   public SightEvent uploadPdf(Long id, byte[] pdf) {
     SightEvent bo = getForLoggedUser(id);
     bo.setPdfAttachment(fdService.storeFileDescriptor(new ByteArrayInputStream(pdf), "pdf"));
+    Portal hpt = getPortal("Hello Ticket Cloud");
+    HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
+    helloTicket.addPdfToSightEvent(bo.getHptId(), DtoMapper.getFullDTO(bo.getPdfAttachment()),
+        bo.getPartner().getHptToken());
     return bo;
   }
 
@@ -449,6 +453,9 @@ public class SightEventService extends ServiceSuperclass {
     if (pdf != null) {
       fdService.deleteFile(Paths.get(pdf.getPath()));
       bo.setPdfAttachment(null);
+      Portal hpt = getPortal("Hello Ticket Cloud");
+      HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
+      helloTicket.deletePdfFromSightEvent(bo, bo.getPartner().getHptToken());
       return;
     }
     logger.log(Level.INFO, "SightEvent [id=" + bo.getId() + "] doesn't have a pdf file ");
