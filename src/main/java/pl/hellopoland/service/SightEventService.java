@@ -187,8 +187,9 @@ public class SightEventService extends ServiceSuperclass {
   public SightEvent updateForLoggedUser(SightEventDTO dto, LanguageVersion language) {
     SightEvent bo = getForLoggedUser(dto.id);
     if (!translationService.isTranslated(bo, language)) {
-      throw new ConflictingException(
-          "Translation for language " + language.getLanuage() + "doesn't exists");
+      // throw new ConflictingException(
+      // "Translation for language " + language.getLanuage() + " doesn't exists");
+      createLanguageVesrion(dto, language);
     }
     if (bo.getDefaultLanguage().equals(language)) {
       if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
