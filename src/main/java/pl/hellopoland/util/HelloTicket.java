@@ -476,4 +476,15 @@ public class HelloTicket {
     }
   }
 
+  public UserDTO createUsherForLoggedPartner(UserDTO usherDTO, String partnerAuthToken) {
+    String jsonString = JsonbConfig.getInstance().toJson(usherDTO);
+    try {
+      return JsonbConfig.getInstance().fromJson(
+          post("/v1/partners/ushers", jsonString, partnerAuthToken).toString(), UserDTO.class);
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      throw new ConflictingException("Nie udało się utworzyć biletera w zewnętrznym systemie.");
+    }
+  }
+
 }
