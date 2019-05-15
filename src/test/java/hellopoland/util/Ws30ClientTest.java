@@ -16,15 +16,15 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.ws.Service;
-import org.junit.Test;
 import pl.hellopoland.soap.object.p24.MerchantRegisterRequest;
 import pl.hellopoland.soap.object.p24.MerchantRegisterResult;
 import pl.hellopoland.soap.service.p24.SoapConstants;
 import pl.hellopoland.soap.service.p24.Ws30Port;
 
+// TODO: not finished!
 public class Ws30ClientTest {
-  @Test
-  public void soapTest() {
+  // @Test
+  public void soapMerchantRegisterTest() {
     try {
       URL wsdlLocation = new URL(SoapConstants.WSDL_LOCATION);
       QName serviceName = new QName(SoapConstants.NAMESPACE_URI, SoapConstants.SERVICE_NAME);
@@ -43,7 +43,7 @@ public class Ws30ClientTest {
   }
 
   // @Test
-  public void soapXMLTest() {
+  public void soapMerchantRegisterXMLTest() {
     try {
       SOAPConnectionFactory soapConnectionFactory = SOAPConnectionFactory.newInstance();
       SOAPConnection soapConnection = soapConnectionFactory.createConnection();

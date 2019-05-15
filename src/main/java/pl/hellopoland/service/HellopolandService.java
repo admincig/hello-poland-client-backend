@@ -25,6 +25,7 @@ import pl.hellopoland.dto.RoleDTO;
 import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.email.EmailSendingRollbackException;
+import pl.hellopoland.soap.object.p24.MerchantRegisterRequest;
 import pl.hellopoland.util.HelloTicket;
 
 @LocalBean
@@ -52,6 +53,10 @@ public class HellopolandService extends ServiceSuperclass {
         || partner.commission.compareTo(new BigDecimal("100")) == 1) {
       throw new ConflictingException("The partner commission is out of range: 0 - 100.");
     }
+
+    // 0. creating a partner in p24:
+    var merchant = new MerchantRegisterRequest();
+
 
     // 1. creating a partner and the user in hpl:
     var partnerBO = new Partner();

@@ -64,5 +64,5 @@ public class MerchantRegisterRequest {
 
   @NotNull
   // Określa czy konto ma zostać aktywowane natychmiast
-  public Boolean acceptance;
+  public boolean acceptance = true;
 }

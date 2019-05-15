@@ -3,14 +3,15 @@ package pl.hellopoland.soap.service.p24;
 import pl.hellopoland.soap.object.p24.MerchantRegisterRequest;
 import pl.hellopoland.soap.object.p24.MerchantRegisterResult;
 
+// TODO: not finished!
 public class Ws30Client {
+  private final static Ws30Port PORT = new Ws30Service().getWs30Port();
+
 
 
   public static void main(String... strings) {
-    var service = new Ws30Service();
-    var port = service.getWs30Port();
     // boolean response = port.testAccess("71852", "2ee0c1a05174cdbbcfae5e271f3eae15");
-    MerchantRegisterResult response = port.merchantRegister(71852,
+    MerchantRegisterResult response = PORT.merchantRegister(71852,
         "2ee0c1a05174cdbbcfae5e271f3eae15", new MerchantRegisterRequest());
 
     System.out.println(response);
