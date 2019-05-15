@@ -2,6 +2,7 @@ package pl.hellopoland.util;
 
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.System.Logger.Level;
 import java.net.HttpURLConnection;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.json.JsonArray;
+import javax.json.JsonException;
 import javax.json.JsonStructure;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbException;
@@ -182,7 +184,19 @@ public class HelloTicket {
     PrintWriter printWriter = new PrintWriter(os);
     printWriter.append(json);
     printWriter.close();
-    var is = conn.getInputStream();
+    var respCode = conn.getResponseCode();
+    InputStream is = conn.getErrorStream();
+    if (is != null) {
+      var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
+      try {
+        throw new ConflictingException(resp.getValue("/message").toString());
+      } catch (JsonException e) {
+        // TODO: handle exception
+      }
+      System.out.println(resp.toString());;
+    } else {
+      is = conn.getInputStream();
+    }
     var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
     logger.log(System.Logger.Level.INFO, "Server responded with code: " + conn.getResponseCode());
     logger.log(System.Logger.Level.DEBUG, "Server responded with body: " + resp);
