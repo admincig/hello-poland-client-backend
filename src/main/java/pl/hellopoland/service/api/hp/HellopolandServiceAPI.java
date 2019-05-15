@@ -8,11 +8,13 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
+import pl.hellopoland.dto.EmailSendingReportDTO;
 import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.AnalyticsService;
 import pl.hellopoland.service.HellopolandService;
+import pl.hellopoland.service.OrderService;
 import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.PagedEntityCollection;
@@ -25,6 +27,8 @@ public class HellopolandServiceAPI {
   private AnalyticsService analyticsService;
   @Inject
   private SightEventService seService;
+  @Inject
+  private OrderService orderService;
 
   @RolesAllowed({"admin", "salesman"})
   public PartnerDTO addPartner(PartnerDTO partner) {
@@ -54,6 +58,11 @@ public class HellopolandServiceAPI {
   @RolesAllowed("admin")
   public void removeSightEventPromotion(Long id) {
     seService.removeSightEventPromotion(id);
+  }
+
+  @RolesAllowed("admin")
+  public EmailSendingReportDTO sendTicketCopy(String P24Statement) {
+    return orderService.sendTicketCopy(P24Statement);
   }
 
 }
