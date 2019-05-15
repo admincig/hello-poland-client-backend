@@ -1,0 +1,128 @@
+package hellopoland.util;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.Charset;
+import javax.xml.namespace.QName;
+import javax.xml.soap.MessageFactory;
+import javax.xml.soap.MimeHeaders;
+import javax.xml.soap.SOAPConnection;
+import javax.xml.soap.SOAPConnectionFactory;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.ws.Service;
+import org.junit.Test;
+import pl.hellopoland.soap.object.p24.MerchantRegisterRequest;
+import pl.hellopoland.soap.object.p24.MerchantRegisterResult;
+import pl.hellopoland.soap.service.p24.SoapConstants;
+import pl.hellopoland.soap.service.p24.Ws30Port;
+
+public class Ws30ClientTest {
+  @Test
+  public void soapTest() {
+    try {
+      URL wsdlLocation = new URL(SoapConstants.WSDL_LOCATION);
+      QName serviceName = new QName(SoapConstants.NAMESPACE_URI, SoapConstants.SERVICE_NAME);
+      Service service = Service.create(wsdlLocation, serviceName);
+      var port = service.getPort(Ws30Port.class);
+
+      // boolean response = port.testAccess("71852", "2ee0c1a05174cdbbcfae5e271f3eae15");
+      MerchantRegisterResult response = port.merchantRegister(71852,
+          "2ee0c1a05174cdbbcfae5e271f3eae15", new MerchantRegisterRequest());
+
+      System.out.println(response);
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+
+  // @Test
+  public void soapXMLTest() {
+    try {
+      SOAPConnectionFactory soapConnectionFactory = SOAPConnectionFactory.newInstance();
+      SOAPConnection soapConnection = soapConnectionFactory.createConnection();
+      String url = SoapConstants.NAMESPACE_URI;
+      String soapMessage =
+          "<soapenv:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:php=\"https://secure.przelewy24.pl/external/71852.php\" xmlns:soapenc=\"http://schemas.xmlsoap.org/soap/encoding/\">\n"
+              + "   <soapenv:Header/>\n" + "   <soapenv:Body>\n"
+              + "      <php:MerchantRegister soapenv:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">\n"
+              + "         <login xsi:type=\"xsd:int\">71852</login>\n"
+              + "         <pass xsi:type=\"xsd:string\">2ee0c1a05174cdbbcfae5e271f3eae15</pass>\n"
+              + "         <merchant xsi:type=\"php:MerchantRegisterRequest\">\n"
+              + "            <!--You may enter the following 19 items in any order-->\n"
+              + "            <business_type xsi:type=\"xsd:int\"></business_type>\n"
+              + "            <name xsi:type=\"xsd:string\"></name>\n"
+              + "            <email xsi:type=\"xsd:string\"></email>\n"
+              + "            <pesel xsi:type=\"xsd:string\"></pesel>\n"
+              + "            <phone_number xsi:type=\"xsd:string\"></phone_number>\n"
+              + "            <bank_account xsi:type=\"xsd:string\"></bank_account>\n"
+              + "            <representatives xsi:type=\"php:ArrayOfRepresentative\" soapenc:arrayType=\"php:Representative[]\"/>\n"
+              + "            <contact_person xsi:type=\"php:ContactPerson\">\n"
+              + "               <!--You may enter the following 3 items in any order-->\n"
+              + "               <name xsi:type=\"xsd:string\"></name>\n"
+              + "               <email xsi:type=\"xsd:string\"></email>\n"
+              + "               <phone_number xsi:type=\"xsd:string\"></phone_number>\n"
+              + "            </contact_person>\n"
+              + "            <technical_contact xsi:type=\"php:TechnicalContact\">\n"
+              + "               <!--You may enter the following 3 items in any order-->\n"
+              + "               <name xsi:type=\"xsd:string\"></name>\n"
+              + "               <email xsi:type=\"xsd:string\"></email>\n"
+              + "               <phone_number xsi:type=\"xsd:string\"></phone_number>\n"
+              + "            </technical_contact>\n"
+              + "            <address xsi:type=\"php:Address\">\n"
+              + "               <!--You may enter the following 4 items in any order-->\n"
+              + "               <country xsi:type=\"xsd:string\"></country>\n"
+              + "               <city xsi:type=\"xsd:string\"></city>\n"
+              + "               <post_code xsi:type=\"xsd:string\"></post_code>\n"
+              + "               <street xsi:type=\"xsd:string\"></street>\n"
+              + "            </address>\n"
+              + "            <correspondence_address xsi:type=\"php:CorrespondenceAddress\">\n"
+              + "               <!--You may enter the following 4 items in any order-->\n"
+              + "               <country xsi:type=\"xsd:string\"></country>\n"
+              + "               <city xsi:type=\"xsd:string\"></city>\n"
+              + "               <post_code xsi:type=\"xsd:string\"></post_code>\n"
+              + "               <street xsi:type=\"xsd:string\"></street>\n"
+              + "            </correspondence_address>\n"
+              + "            <invoice_email xsi:type=\"xsd:string\"></invoice_email>\n"
+              + "            <shop_url xsi:type=\"xsd:string\"></shop_url>\n"
+              + "            <services_description xsi:type=\"xsd:string\"></services_description>\n"
+              + "            <trade xsi:type=\"xsd:string\"></trade>\n"
+              + "            <krs xsi:type=\"xsd:string\"></krs>\n"
+              + "            <nip xsi:type=\"xsd:string\"></nip>\n"
+              + "            <regon xsi:type=\"xsd:string\"></regon>\n"
+              + "            <acceptance xsi:type=\"xsd:boolean\"></acceptance>\n"
+              + "         </merchant>\n" + "      </php:MerchantRegister>\n"
+              + "   </soapenv:Body>\n" + "</soapenv:Envelope>";
+
+      SOAPMessage soapResponse = soapConnection.call(getSoapMessageFromString(soapMessage), url);
+      printSOAPResponse(soapResponse);
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+
+  private static SOAPMessage getSoapMessageFromString(String xml)
+      throws SOAPException, IOException {
+    MessageFactory factory = MessageFactory.newInstance();
+    SOAPMessage message = factory.createMessage(new MimeHeaders(),
+        new ByteArrayInputStream(xml.getBytes(Charset.forName("UTF-8"))));
+    return message;
+  }
+
+  private static void printSOAPResponse(SOAPMessage soapResponse) throws Exception {
+    TransformerFactory transformerFactory = TransformerFactory.newInstance();
+    Transformer transformer = transformerFactory.newTransformer();
+    Source sourceContent = soapResponse.getSOAPPart().getContent();
+    System.out.print("\nResponse SOAP Message = ");
+    StreamResult result = new StreamResult(System.out);
+    transformer.transform(sourceContent, result);
+  }
+
+}
