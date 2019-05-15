@@ -26,6 +26,7 @@ import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.email.EmailSendingRollbackException;
 import pl.hellopoland.soap.object.p24.MerchantRegisterRequest;
+import pl.hellopoland.soap.object.p24.MerchantRegisterResult;
 import pl.hellopoland.util.HelloTicket;
 
 @LocalBean
@@ -56,6 +57,8 @@ public class HellopolandService extends ServiceSuperclass {
 
     // 0. creating a partner in p24:
     var merchant = new MerchantRegisterRequest();
+    MerchantRegisterResult response = PORT.merchantRegister(71852,
+        "2ee0c1a05174cdbbcfae5e271f3eae15", new MerchantRegisterRequest());
 
 
     // 1. creating a partner and the user in hpl:
