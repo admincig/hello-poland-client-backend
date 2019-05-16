@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Properties;
+import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonStructure;
 import pl.hellopoland.rest.JsonbConfig;
@@ -39,7 +40,17 @@ public class FacebookFanPagePostReader {
 
   public JsonObject readPosts() {
     downloadIfNeeded();
-    return posts;
+
+    // filtrowanie niechcianego posta o id=316534255768958_452515972170785
+    var dataBuilder = Json.createArrayBuilder();
+    posts.getJsonArray("data").forEach(p -> {
+      if (!"316534255768958_452515972170785".equals(p.asJsonObject().getString("id"))) {
+        dataBuilder.add(p);
+      }
+    });
+
+    return Json.createObjectBuilder().add("data", dataBuilder.build())
+        .add("paging", posts.get("paging")).build();
   }
 
   private void downloadIfNeeded() {
