@@ -1,18 +1,18 @@
 package pl.hellopoland.soap.p24.object;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 public class MerchantRegisterRequest {
 
   @NotNull
-  // Rodzaj działalności, wartości dopuszczalne w tabeli „Rodzaj działaności”
   public Integer business_type;
 
   @NotBlank
   public String name;
 
-  @NotBlank
+  @Email
   public String email;
 
   // Wymagany w przypadku rejestracji osoby fizycznej (business type = 1)
@@ -38,7 +38,7 @@ public class MerchantRegisterRequest {
 
   public CorrespondenceAddress correspondence_address;
 
-  @NotBlank
+  @Email
   // Adres email do faktur
   public String invoice_email;
 
@@ -50,7 +50,6 @@ public class MerchantRegisterRequest {
   public String services_description;
 
   @NotBlank
-  // Branża, lista dostępna w tabeli „Branża”
   public String trade;
 
   // Tylko w przypadku business_type = 2 Numer krs
