@@ -1,4 +1,4 @@
-package pl.hellopoland.soap.service.p24;
+package pl.hellopoland.soap.p24.service;
 
 public interface SoapConstants {
   final static String BASE_NAMESPACE_URI = "https://secure.przelewy24.pl/external/71852.";

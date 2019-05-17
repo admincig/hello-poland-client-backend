@@ -1,4 +1,4 @@
-package pl.hellopoland.soap.service.p24;
+package pl.hellopoland.soap.p24.service;
 
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;

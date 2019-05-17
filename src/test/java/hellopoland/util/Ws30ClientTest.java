@@ -16,10 +16,10 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.ws.Service;
-import pl.hellopoland.soap.object.p24.MerchantRegisterRequest;
-import pl.hellopoland.soap.object.p24.MerchantRegisterResult;
-import pl.hellopoland.soap.service.p24.SoapConstants;
-import pl.hellopoland.soap.service.p24.Ws30Port;
+import pl.hellopoland.soap.p24.object.MerchantRegisterRequest;
+import pl.hellopoland.soap.p24.object.MerchantRegisterResult;
+import pl.hellopoland.soap.p24.service.SoapConstants;
+import pl.hellopoland.soap.p24.service.Ws30Port;
 
 // TODO: not finished!
 public class Ws30ClientTest {

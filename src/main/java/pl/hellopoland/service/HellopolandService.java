@@ -25,8 +25,8 @@ import pl.hellopoland.dto.RoleDTO;
 import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.email.EmailSendingRollbackException;
-import pl.hellopoland.soap.object.p24.MerchantRegisterRequest;
-import pl.hellopoland.soap.object.p24.MerchantRegisterResult;
+import pl.hellopoland.soap.p24.object.MerchantRegisterRequest;
+import pl.hellopoland.soap.p24.object.MerchantRegisterResult;
 import pl.hellopoland.util.HelloTicket;
 
 @LocalBean

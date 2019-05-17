@@ -1,4 +1,4 @@
-package pl.hellopoland.soap.object.p24;
+package pl.hellopoland.soap.p24.object;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;

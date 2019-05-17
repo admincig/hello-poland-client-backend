@@ -1,7 +1,7 @@
-package pl.hellopoland.soap.service.p24;
+package pl.hellopoland.soap.p24.service;
 
-import pl.hellopoland.soap.object.p24.MerchantRegisterRequest;
-import pl.hellopoland.soap.object.p24.MerchantRegisterResult;
+import pl.hellopoland.soap.p24.object.MerchantRegisterRequest;
+import pl.hellopoland.soap.p24.object.MerchantRegisterResult;
 
 // TODO: not finished!
 public class Ws30Client {

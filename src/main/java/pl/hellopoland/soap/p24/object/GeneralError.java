@@ -1,4 +1,4 @@
-package pl.hellopoland.soap.object.p24;
+package pl.hellopoland.soap.p24.object;
 
 public class GeneralError {
   public int errorCode;
