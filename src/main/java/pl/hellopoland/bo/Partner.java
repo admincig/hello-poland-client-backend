@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 import pl.hellopoland.soap.p24.enums.BusinessType;
+import pl.hellopoland.soap.p24.enums.Trade;
 
 @Entity
 public class Partner extends ModelSuperclass {
@@ -50,7 +51,9 @@ public class Partner extends ModelSuperclass {
 
   private BusinessType businessType;
 
+  private Trade trade;
 
+  private
 
   public Integer getP24Id() {
     return p24Id;

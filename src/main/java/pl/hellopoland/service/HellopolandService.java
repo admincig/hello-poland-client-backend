@@ -28,6 +28,7 @@ import pl.hellopoland.exception.email.EmailSendingRollbackException;
 import pl.hellopoland.soap.p24.object.MerchantRegisterRequest;
 import pl.hellopoland.soap.p24.object.MerchantRegisterResult;
 import pl.hellopoland.util.HelloTicket;
+import pl.hellopoland.util.soap.p24.MerchantRegisterValidator;
 
 @LocalBean
 @Stateless
@@ -57,6 +58,12 @@ public class HellopolandService extends ServiceSuperclass {
 
     // 0. creating a partner in p24:
     var merchant = new MerchantRegisterRequest();
+
+
+
+    MerchantRegisterValidator.validate(merchant);
+
+
     MerchantRegisterResult response = PORT.merchantRegister(71852,
         "2ee0c1a05174cdbbcfae5e271f3eae15", new MerchantRegisterRequest());
 
