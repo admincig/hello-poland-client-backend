@@ -149,8 +149,9 @@ public class SightService extends ServiceSuperclass {
   public Sight updateForLoggedUser(SightDTO dto, LanguageVersion language) {
     Sight bo = getActiveForLoggedPartner(dto.id);
     if (!translationService.isTranslated(bo, language)) {
-      throw new ConflictingException(
-          "Translation for language " + language.getLanuage() + " doesn't exists");
+      // throw new ConflictingException(
+      // "Translation for language " + language.getLanuage() + " doesn't exists");
+      createLanguageVesrion(dto, language);
     }
     if (bo.getDefaultLanguage().equals(language)) {
       DtoMapper.copy(dto, bo);
