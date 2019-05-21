@@ -9,9 +9,10 @@ import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 import pl.hellopoland.soap.p24.enums.BusinessType;
 import pl.hellopoland.soap.p24.enums.Trade;
+import pl.hellopoland.util.Located;
 
 @Entity
-public class Partner extends ModelSuperclass {
+public class Partner extends ModelSuperclass implements Located {
 
   private static final long serialVersionUID = 6118414827783500940L;
 
@@ -53,7 +54,11 @@ public class Partner extends ModelSuperclass {
 
   private Trade trade;
 
+  private List<Representative> representatives;
+
   private
+
+  private Location location;
 
   public Integer getP24Id() {
     return p24Id;
@@ -132,6 +137,16 @@ public class Partner extends ModelSuperclass {
 
   public void setAffiliateCode(String affiliateCode) {
     this.affiliateCode = affiliateCode;
+  }
+
+  @Override
+  public Location getLocation() {
+    return location;
+  }
+
+  @Override
+  public void setLocation(Location location) {
+    this.location = location;
   }
 
 }

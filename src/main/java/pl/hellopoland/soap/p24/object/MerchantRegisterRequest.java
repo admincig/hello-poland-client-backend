@@ -3,8 +3,33 @@ package pl.hellopoland.soap.p24.object;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import pl.hellopoland.dto.PartnerDTO;
 
 public class MerchantRegisterRequest {
+
+  public MerchantRegisterRequest() {}
+
+  public MerchantRegisterRequest(PartnerDTO partner) {
+    acceptance = partner.acceptance;
+    address = new Address(partner.location);
+    bank_account = partner.bankAccount;
+    business_type = partner.businessType;
+    contact_person = partner.contactPerson != null ?;
+    correspondence_address = partner.correspondenceAddress != null ? new Address(partner.correspondenceAddress) : new Address(partner.location);
+    email = partner.email;
+    invoice_email = partner.invoiceEmail != null ? partner.invoiceEmail : partner.email;
+    krs = partner.krs;
+    name = partner.name;
+    nip = partner.nip;
+    pesel = partner.pesel;
+    phone_number = partner.phoneNumber;
+    regon = partner.regon;
+    representatives = partner.representatives != null ? ;
+    services_description = partner.servicesDescription;
+    shop_url = partner.shopUrl;
+    technical_contact = partner.technicalContact != null ? ;
+    trade = partner.trade;
+  }
 
   @NotNull
   public Integer business_type;

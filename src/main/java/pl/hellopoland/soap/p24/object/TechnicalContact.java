@@ -5,7 +5,7 @@ import javax.validation.constraints.NotBlank;
 public class TechnicalContact {
 
   @NotBlank
-  // Imię oraz nazwisko
+  // firstname and lastname
   public String name;
 
   @NotBlank

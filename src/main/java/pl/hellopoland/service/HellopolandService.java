@@ -57,7 +57,8 @@ public class HellopolandService extends ServiceSuperclass {
     }
 
     // 0. creating a partner in p24:
-    var merchant = new MerchantRegisterRequest();
+    var merchant = new MerchantRegisterRequest(partner);
+
 
     // moze nie?
     // Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
