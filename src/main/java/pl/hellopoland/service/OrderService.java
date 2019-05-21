@@ -58,6 +58,14 @@ public class OrderService extends ServiceSuperclass {
   AgreementService aService;
 
   public PassageCart create(OrderIRO iro) {
+    logger.log(Level.INFO, "-------Start creating order --------");
+    logger.log(Level.INFO, "Order details: " + iro.details.getEmail() + " "
+        + iro.details.getFirstName() + " " + iro.details.getLastName());
+    var orderEntriesLog = new StringBuilder();
+    iro.entries.forEach(entry -> orderEntriesLog.append("[").append("date:").append(entry.date)
+        .append("quantity:").append(entry.quantity).append(".partnerAffiliateCode:")
+        .append(entry.partnerAffiliateCode).append("id:").append(entry.id).append("];\n"));
+    logger.log(Level.INFO, "Order entries: " + orderEntriesLog.toString());
     Order o = new Order();
     o.generateHash();
     o.setUser(getLoggedUser());
@@ -65,25 +73,19 @@ public class OrderService extends ServiceSuperclass {
     details.setUserLogged(getLoggedUser() != null);
     o.setDetails(details);
     em.persist(o);
-
     Set<Long> ticketsIds =
         iro.entries.stream().filter(oe -> oe.quantity != null && oe.quantity.compareTo(0) > 0)
             .collect(groupingBy(oeIRO -> oeIRO.id)).keySet();
-
     List<TicketDefinition> tickets = em.createQuery(
         "from TicketDefinition t join fetch t.sightEvent s where t.id in (:ids) order by s.id asc",
         TicketDefinition.class).setParameter("ids", ticketsIds).getResultList();
-
     if (tickets.size() < ticketsIds.size()) {
       throw new ResourceNotFoundException();
     }
-
     Map<Long, TicketDefinition> ticketIdToObject =
         tickets.stream().collect(toMap(TicketDefinition::getId, t -> t));
-
     Map<SightEvent, List<TicketDefinition>> ticketsGroupedBySight =
         tickets.stream().collect(groupingBy(TicketDefinition::getSightEvent));
-
     for (Map.Entry<SightEvent, List<TicketDefinition>> entry : ticketsGroupedBySight.entrySet()) {
       OrderSightEntry ose = new OrderSightEntry();
       ose.setOrder(o);
@@ -92,14 +94,11 @@ public class OrderService extends ServiceSuperclass {
       em.persist(ose);
       ose.setAgreements(new ArrayList<>(sightEvent.getAgreements()));
       em.flush();
-
       List<Long> ticketsOfSight =
           entry.getValue().stream().map(TicketDefinition::getId).collect(toList());
-
       Map<Date, List<OrderEntryIRO>> inSightGroupedByDate =
           iro.entries.stream().filter(oeIRO -> ticketsOfSight.contains(oeIRO.id))
               .collect(groupingBy(oeIRO -> oeIRO.date));
-
       for (Map.Entry<Date, List<OrderEntryIRO>> inSightOnDate : inSightGroupedByDate.entrySet()) {
         if (!inSightOnDate.getValue().isEmpty()) {
           OrderDateEntry dateEntry = new OrderDateEntry();
@@ -134,7 +133,10 @@ public class OrderService extends ServiceSuperclass {
     } catch (Exception e) {
       throw new ConflictingException("Nie udało się złożyć zamówienia w zewnętrznym systemie", e);
     }
-    return getP24PassageCart(o);
+    var cart = getP24PassageCart(o);
+    logger.log(Level.INFO, "Returned p24 cart id=" + cart.getId());
+    logger.log(Level.INFO, "-------End creating order --------");
+    return cart;
   }
 
   // em.refreshes are because of strange NPEs
