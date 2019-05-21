@@ -63,8 +63,9 @@ public class OrderService extends ServiceSuperclass {
         + iro.details.getFirstName() + " " + iro.details.getLastName());
     var orderEntriesLog = new StringBuilder();
     iro.entries.forEach(entry -> orderEntriesLog.append("[").append("date:").append(entry.date)
-        .append("quantity:").append(entry.quantity).append(".partnerAffiliateCode:")
-        .append(entry.partnerAffiliateCode).append("id:").append(entry.id).append("];\n"));
+        .append("; quantity:").append(entry.quantity).append("; partnerAffiliateCode:")
+        .append(entry.partnerAffiliateCode).append("; TicketDefinition id:").append(entry.id)
+        .append("];\n"));
     logger.log(Level.INFO, "Order entries: " + orderEntriesLog.toString());
     Order o = new Order();
     o.generateHash();
@@ -134,7 +135,7 @@ public class OrderService extends ServiceSuperclass {
       throw new ConflictingException("Nie udało się złożyć zamówienia w zewnętrznym systemie", e);
     }
     var cart = getP24PassageCart(o);
-    logger.log(Level.INFO, "Returned p24 cart id=" + cart.getId());
+    logger.log(Level.INFO, "Returned order id=" + o.getId() + "; p24cart id=" + cart.getId());
     logger.log(Level.INFO, "-------End creating order --------");
     return cart;
   }
@@ -268,6 +269,9 @@ public class OrderService extends ServiceSuperclass {
 
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     JsonObject resp = (JsonObject) hpt.book(details, orderEntries);
+    if (resp == null) {
+      throw new ConflictingException("Placing order in HPT returned respons null.");
+    }
     Integer externalOrderId = resp.getInt("id");
     entry.getValue().forEach(ose -> ose.setExternalId(externalOrderId.longValue()));
     em.flush();
