@@ -54,7 +54,7 @@ public class Partner extends ModelSuperclass implements Located {
 
   private Trade trade;
 
-  private List<Representative> representatives;
+  private List<PartnerRepresentative> representatives;
 
   private
 

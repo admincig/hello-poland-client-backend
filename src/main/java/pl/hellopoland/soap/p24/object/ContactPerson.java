@@ -1,11 +1,19 @@
 package pl.hellopoland.soap.p24.object;
 
 import javax.validation.constraints.NotBlank;
+import pl.hellopoland.dto.ContactPersonDTO;
 
 public class ContactPerson {
+  public ContactPerson() {}
+
+  public ContactPerson(ContactPersonDTO dto) {
+    name = dto.name;
+    email = dto.email;
+    phone_number = String.valueOf(dto.phone_number);
+  }
 
   @NotBlank
-  // Imię oraz nazwisko
+  // firstname and lastname
   public String name;
 
   @NotBlank

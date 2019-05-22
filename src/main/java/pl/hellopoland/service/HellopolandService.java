@@ -27,6 +27,7 @@ import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.email.EmailSendingRollbackException;
 import pl.hellopoland.soap.p24.object.MerchantRegisterRequest;
 import pl.hellopoland.soap.p24.object.MerchantRegisterResult;
+import pl.hellopoland.soap.p24.service.Ws30Service;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.soap.p24.MerchantRegisterValidator;
 
@@ -67,7 +68,7 @@ public class HellopolandService extends ServiceSuperclass {
     MerchantRegisterValidator.validate(merchant);
 
 
-    MerchantRegisterResult response = PORT.merchantRegister(71852,
+    MerchantRegisterResult response = new Ws30Service().getWs30Port().merchantRegister(71852,
         "2ee0c1a05174cdbbcfae5e271f3eae15", new MerchantRegisterRequest());
 
 

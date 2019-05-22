@@ -4,14 +4,13 @@ import javax.validation.constraints.NotBlank;
 import pl.hellopoland.dto.LocationDTO;
 
 public class Address {
+  public Address() {}
 
   public Address(LocationDTO locationDTO) {
     city = locationDTO.city;
     post_code = locationDTO.zipCode;
     street = locationDTO.street;
   }
-
-  public Address() {}
 
   @NotBlank
   // dostępna tylko wartość ‘PL’

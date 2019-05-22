@@ -4,12 +4,14 @@ import javax.persistence.Entity;
 import javax.validation.constraints.NotBlank;
 
 @Entity
-public class Representative {
+public class PartnerRepresentative extends ModelSuperclass {
+  private static final long serialVersionUID = -6996932813336717031L;
+
   @NotBlank
   private String name;
 
   @NotBlank
-  private String pesel;
+  private Integer pesel;
 
   public String getName() {
     return name;
@@ -19,11 +21,11 @@ public class Representative {
     this.name = name;
   }
 
-  public String getPesel() {
+  public Integer getPesel() {
     return pesel;
   }
 
-  public void setPesel(String pesel) {
+  public void setPesel(Integer pesel) {
     this.pesel = pesel;
   }
 

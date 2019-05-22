@@ -1,34 +1,46 @@
 package pl.hellopoland.soap.p24.object;
 
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import pl.hellopoland.dto.PartnerDTO;
+import pl.hellopoland.soap.p24.enums.Trade;
 
 public class MerchantRegisterRequest {
 
   public MerchantRegisterRequest() {}
 
   public MerchantRegisterRequest(PartnerDTO partner) {
-    acceptance = partner.acceptance;
-    address = new Address(partner.location);
+    // acceptance = true;
+    address = partner.location != null ? new Address(partner.location) : null;
     bank_account = partner.bankAccount;
     business_type = partner.businessType;
-    contact_person = partner.contactPerson != null ?;
-    correspondence_address = partner.correspondenceAddress != null ? new Address(partner.correspondenceAddress) : new Address(partner.location);
+    contact_person =
+        partner.contactPerson != null ? new ContactPerson(partner.contactPerson) : null;
+    correspondence_address = partner.correspondenceAddress != null
+        ? new CorrespondenceAddress(partner.correspondenceAddress)
+        : (partner.location != null ? new CorrespondenceAddress(partner.location) : null);
     email = partner.email;
     invoice_email = partner.invoiceEmail != null ? partner.invoiceEmail : partner.email;
     krs = partner.krs;
     name = partner.name;
     nip = partner.nip;
-    pesel = partner.pesel;
+    pesel = String.valueOf(partner.pesel);
     phone_number = partner.phoneNumber;
     regon = partner.regon;
-    representatives = partner.representatives != null ? ;
+    if (partner.representatives != null) {
+      ArrayList<Representative> list = partner.representatives.stream()
+          .map(r -> new Representative(r)).collect(Collectors.toCollection(ArrayList::new));
+      representatives = list.toArray(new Representative[list.size()]);
+    }
     services_description = partner.servicesDescription;
     shop_url = partner.shopUrl;
-    technical_contact = partner.technicalContact != null ? ;
-    trade = partner.trade;
+    technical_contact =
+        partner.technicalContact != null ? new TechnicalContact(partner.technicalContact)
+            : (partner.contactPerson != null ? new TechnicalContact(partner.contactPerson) : null);
+    trade = Trade.SPORT_LEISURE.getValue();
   }
 
   @NotNull
