@@ -120,36 +120,37 @@ public class DbFiller extends ServiceSuperclass {
     logger.log(Logger.Level.INFO, "Envi: " + System.getenv("ProgramFiles(x86)"));
     createPortals();
     createUsers();
-    // createImageCollectors();
-    // createLocations();
-    // createSights();
-    // createSightEvents();
-    // createTicketPoolDefinitions();
+    createImageCollectors();
+    createLocations();
+    createSights();
+    createSightsEnglishVersion(hpWroc, hpKielce, geoparkKielce, zeromKielce, zooWro, stadGd, kol);
+    createSightEvents();
+    createSightEventsEnglishVersion(afrEvent, kolEvent, meczPCEvent, parkSzczEvent, zwStadEvent,
+        zwZooEvent, zwKielcEvent, zeromEvent, geoparkKielcEvent);
+    createTicketPoolDefinitions();
     logger.log(Logger.Level.INFO, "dbfiller finished");
   }
 
   private void createUsers() {
-    userHelloPoland = createUser("Hello Poland - admin", "admin@hello-poland.pl",
-        "RozwazneWakacjeNaSkrajuWszechswiata",
+    userHelloPoland = createUser("Hello Poland - admin", "hp-admin@fream.pl", "hp-admin",
         "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJocC1hZG1pbkBmcmVhbS5wbCIsImF1dGgiOiJST0xFX0FETUlOIn0.ffo2GsvkbE72S4BMWEoXs2ZV9PIBkTaiFKX7DQr_Xm0pxXMrWSzI8TICovtwvi4RdEzsX4Xty8DNKXvkP12ciw",
         null, Role.ADMIN);
-    userHelloPoland = createPartner("Hello Poland", "biuro@hello-poland.pl",
-        "RozwazneWakacjeNaSkrajuWszechswiata",
+    userHelloPoland = createPartner("Hello Poland", "hp-partner@fream.pl", "hp-partner",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.",
         Integer.valueOf(properties.getProperty("przelewy24.posId")), BigDecimal.TEN, "zaqwsx",
         Role.PARTNER);
-    // userZoo = createPartner("Zoo",
-    // "eyJhbGciOiJub25lIn0.eyJzdWIiOiJDOTU1NTI0MDk2REU0MjlEQjBGODM1NTA1RUI5MzAxNzkzQzE4NEJBQzM2NTFBNzI2MDFCRDNGMUFEQTkyQzAzIn0.",
-    // Integer.valueOf(properties.getProperty("przelewy24.merchantId")), new BigDecimal("3.5"),
-    // Role.PARTNER);
-    // userKolejkowo = createPartner("Kolejkowo",
-    // "eyJhbGciOiJub25lIn0.eyJzdWIiOiI0MDc5MTkyRkI2NTQyQTYyRjc3QTcwNDZDRDU1QkJGNUM5NDAzNkE0MjRFRDI4RTM0MEYwODNCRDE1MDRFODZBIn0.",
-    // Integer.valueOf(properties.getProperty("przelewy24.merchantId")), new BigDecimal("5"),
-    // Role.PARTNER);
-    // userStadionGd = createPartner("Stadion Gdański",
-    // "eyJhbGciOiJub25lIn0.eyJzdWIiOiIyODQyODcyRThEQ0EzMENFNkJBOTk5REMzQjBGODJFNUNFOTNFNzA5RTJEMjlGMEQ4NjFFOTU4QjMxQ0QwQzREIn0.",
-    // Integer.valueOf(properties.getProperty("przelewy24.merchantId")), new BigDecimal("4"),
-    // Role.PARTNER);
+    userZoo = createPartner("Zoo", "zoo@zoo.plQQ", "zoo",
+        "eyJhbGciOiJub25lIn0.eyJzdWIiOiJDOTU1NTI0MDk2REU0MjlEQjBGODM1NTA1RUI5MzAxNzkzQzE4NEJBQzM2NTFBNzI2MDFCRDNGMUFEQTkyQzAzIn0.",
+        Integer.valueOf(properties.getProperty("przelewy24.posId")), new BigDecimal("3.5"), null,
+        Role.PARTNER);
+    userKolejkowo = createPartner("Kolejkowo", "kolejkowo@kolejkowo.plQQ", "kolejkowo",
+        "eyJhbGciOiJub25lIn0.eyJzdWIiOiI0MDc5MTkyRkI2NTQyQTYyRjc3QTcwNDZDRDU1QkJGNUM5NDAzNkE0MjRFRDI4RTM0MEYwODNCRDE1MDRFODZBIn0.",
+        Integer.valueOf(properties.getProperty("przelewy24.posId")), new BigDecimal("5"), null,
+        Role.PARTNER);
+    userStadionGd = createPartner("Stadion Gdański", "stadiongdansk@stadiongdansk.plQQ", "stadion",
+        "eyJhbGciOiJub25lIn0.eyJzdWIiOiIyODQyODcyRThEQ0EzMENFNkJBOTk5REMzQjBGODJFNUNFOTNFNzA5RTJEMjlGMEQ4NjFFOTU4QjMxQ0QwQzREIn0.",
+        Integer.valueOf(properties.getProperty("przelewy24.posId")), new BigDecimal("4"), null,
+        Role.PARTNER);
   }
 
   private User createPartner(String partnerName, String email, String password, String token,
