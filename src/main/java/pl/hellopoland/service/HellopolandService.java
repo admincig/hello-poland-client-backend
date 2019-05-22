@@ -15,7 +15,10 @@ import javax.inject.Inject;
 import javax.mail.MessagingException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import pl.hellopoland.bo.Address;
+import pl.hellopoland.bo.ContactPerson;
 import pl.hellopoland.bo.Partner;
+import pl.hellopoland.bo.PartnerRepresentative;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole;
@@ -25,6 +28,8 @@ import pl.hellopoland.dto.RoleDTO;
 import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.email.EmailSendingRollbackException;
+import pl.hellopoland.soap.p24.enums.BusinessType;
+import pl.hellopoland.soap.p24.enums.Trade;
 import pl.hellopoland.soap.p24.object.MerchantRegisterRequest;
 import pl.hellopoland.soap.p24.object.MerchantRegisterResult;
 import pl.hellopoland.soap.p24.service.Ws30Service;
@@ -66,16 +71,40 @@ public class HellopolandService extends ServiceSuperclass {
     // validator.validate(merchant).
 
     MerchantRegisterValidator.validate(merchant);
-
-
     MerchantRegisterResult response = new Ws30Service().getWs30Port().merchantRegister(71852,
         "2ee0c1a05174cdbbcfae5e271f3eae15", new MerchantRegisterRequest());
 
-
     // 1. creating a partner and the user in hpl:
     var partnerBO = new Partner();
+
+
+    partnerBO.setP24Id(response.result.link – string – link do dokończenia rejestracji );
+    partnerBO.setP24Id(response.result.merchant_id);
+    // partnerBO.setP24Id(partner.p24MerchantId);
+
+
+
+    partnerBO.setBusinessType(BusinessType.getBusinessType(partner.businessType));
+    partnerBO.setTrade(Trade.SPORT_LEISURE);
+    partnerBO.setBankAccount(partner.bankAccount);
+    partnerBO.setInvoiceEmail(partner.invoiceEmail);
+    partnerBO.setKrs(partner.krs);
+    partnerBO.setNip(partner.nip);
+    partnerBO.setPesel(partner.pesel);
+    partnerBO.setPhoneNumber(partner.phoneNumber);
+    partnerBO.setRegon(partner.regon);
+    partnerBO.setServicesDescription(partner.servicesDescription);
+    partnerBO.setShopUrl(partner.shopUrl);
+
+    private List<PartnerRepresentative> representatives;
+    private Address address;
+    private Address correspondenceAddress;
+    private ContactPerson contactPerson;
+    private ContactPerson technicalContact;
+
+
+
     partnerBO.setName(partner.name);
-    partnerBO.setP24Id(partner.p24MerchantId);
     partnerBO.setCommission(partner.commission);
     partnerBO.setHptToken("temporaryToken");
     partnerBO.setEmail(partner.email);

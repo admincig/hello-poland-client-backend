@@ -1,5 +1,7 @@
 package pl.hellopoland.soap.p24.enums;
 
+import java.util.Arrays;
+
 public enum Trade {
 //@formatter:off
   AGD("agd"), AGD_RTV("agdrtv"), ALCOHOLS("alkoh"), PHARMACY("apteki"), LABORATORY_ARTICLES("artlab"), MEDICAL_ARTICLE("artmed"),
@@ -27,4 +29,10 @@ public enum Trade {
   public String getValue() {
     return value;
   }
+
+  public static Trade getTrade(String value) {
+    return Arrays.stream(Trade.values()).filter(t -> t.getValue().equals(value)).findFirst()
+        .orElse(null);
+  }
+
 }

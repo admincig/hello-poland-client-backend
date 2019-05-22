@@ -1,5 +1,7 @@
 package pl.hellopoland.soap.p24.enums;
 
+import java.util.Arrays;
+
 public enum BusinessType {
 //@formatter:off
   NATURAL_PERSON(1), SELF_EMPLOYED_ACTIVITY(2), PARTNERSHIP(3), GENERAL_PARTNERSHIP(4),
@@ -15,4 +17,10 @@ public enum BusinessType {
   public int getValue() {
     return value;
   }
+
+  public static BusinessType getBusinessType(int value) {
+    return Arrays.stream(BusinessType.values()).filter(bt -> bt.getValue() == value).findFirst()
+        .orElse(null);
+  }
+
 }

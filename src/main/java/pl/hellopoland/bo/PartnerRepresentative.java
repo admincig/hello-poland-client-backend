@@ -1,6 +1,8 @@
 package pl.hellopoland.bo;
 
+import java.util.List;
 import javax.persistence.Entity;
+import javax.persistence.ManyToMany;
 import javax.validation.constraints.NotBlank;
 
 @Entity
@@ -12,6 +14,9 @@ public class PartnerRepresentative extends ModelSuperclass {
 
   @NotBlank
   private Integer pesel;
+
+  @ManyToMany
+  private List<Partner> partners;
 
   public String getName() {
     return name;
@@ -27,6 +32,14 @@ public class PartnerRepresentative extends ModelSuperclass {
 
   public void setPesel(Integer pesel) {
     this.pesel = pesel;
+  }
+
+  public List<Partner> getPartners() {
+    return partners;
+  }
+
+  public void setPartners(List<Partner> partners) {
+    this.partners = partners;
   }
 
 }

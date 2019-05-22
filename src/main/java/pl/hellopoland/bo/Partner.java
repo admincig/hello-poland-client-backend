@@ -5,14 +5,18 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 import pl.hellopoland.soap.p24.enums.BusinessType;
 import pl.hellopoland.soap.p24.enums.Trade;
-import pl.hellopoland.util.Located;
 
 @Entity
-public class Partner extends ModelSuperclass implements Located {
+public class Partner extends ModelSuperclass {
 
   private static final long serialVersionUID = 6118414827783500940L;
 
@@ -50,15 +54,44 @@ public class Partner extends ModelSuperclass implements Located {
 
   private String affiliateCode;
 
+  @Enumerated(EnumType.STRING)
   private BusinessType businessType;
 
+  @Enumerated(EnumType.STRING)
   private Trade trade;
 
+  @ManyToMany(mappedBy = "partners")
   private List<PartnerRepresentative> representatives;
 
-  private
+  @OneToOne
+  private Address address;
 
-  private Location location;
+  @OneToOne
+  private Address correspondenceAddress;
+
+  private String bankAccount;
+
+  @ManyToOne
+  private ContactPerson contactPerson;
+
+  private String invoiceEmail;
+
+  private String krs;
+
+  private String nip;
+
+  private Integer pesel;
+
+  private String phoneNumber;
+
+  private String regon;
+
+  private String servicesDescription;
+
+  private String shopUrl;
+
+  @ManyToOne
+  private ContactPerson technicalContact;
 
   public Integer getP24Id() {
     return p24Id;
@@ -139,14 +172,141 @@ public class Partner extends ModelSuperclass implements Located {
     this.affiliateCode = affiliateCode;
   }
 
-  @Override
-  public Location getLocation() {
-    return location;
+
+  public List<SightEvent> getSightEvents() {
+    return sightEvents;
   }
 
-  @Override
-  public void setLocation(Location location) {
-    this.location = location;
+  public void setSightEvents(List<SightEvent> sightEvents) {
+    this.sightEvents = sightEvents;
+  }
+
+  public BusinessType getBusinessType() {
+    return businessType;
+  }
+
+  public void setBusinessType(BusinessType businessType) {
+    this.businessType = businessType;
+  }
+
+  public Trade getTrade() {
+    return trade;
+  }
+
+  public void setTrade(Trade trade) {
+    this.trade = trade;
+  }
+
+  public List<PartnerRepresentative> getRepresentatives() {
+    return representatives;
+  }
+
+  public void setRepresentatives(List<PartnerRepresentative> representatives) {
+    this.representatives = representatives;
+  }
+
+  public Address getAddress() {
+    return address;
+  }
+
+  public void setAddress(Address address) {
+    this.address = address;
+  }
+
+  public Address getCorrespondenceAddress() {
+    return correspondenceAddress;
+  }
+
+  public void setCorrespondenceAddress(Address correspondenceAddress) {
+    this.correspondenceAddress = correspondenceAddress;
+  }
+
+  public String getBankAccount() {
+    return bankAccount;
+  }
+
+  public void setBankAccount(String bankAccount) {
+    this.bankAccount = bankAccount;
+  }
+
+  public ContactPerson getContactPerson() {
+    return contactPerson;
+  }
+
+  public void setContactPerson(ContactPerson contactPerson) {
+    this.contactPerson = contactPerson;
+  }
+
+  public String getInvoiceEmail() {
+    return invoiceEmail;
+  }
+
+  public void setInvoiceEmail(String invoiceEmail) {
+    this.invoiceEmail = invoiceEmail;
+  }
+
+  public String getKrs() {
+    return krs;
+  }
+
+  public void setKrs(String krs) {
+    this.krs = krs;
+  }
+
+  public String getNip() {
+    return nip;
+  }
+
+  public void setNip(String nip) {
+    this.nip = nip;
+  }
+
+  public Integer getPesel() {
+    return pesel;
+  }
+
+  public void setPesel(Integer pesel) {
+    this.pesel = pesel;
+  }
+
+  public String getPhoneNumber() {
+    return phoneNumber;
+  }
+
+  public void setPhoneNumber(String phoneNumber) {
+    this.phoneNumber = phoneNumber;
+  }
+
+  public String getRegon() {
+    return regon;
+  }
+
+  public void setRegon(String regon) {
+    this.regon = regon;
+  }
+
+  public String getServicesDescription() {
+    return servicesDescription;
+  }
+
+  public void setServicesDescription(String servicesDescription) {
+    this.servicesDescription = servicesDescription;
+  }
+
+  public String getShopUrl() {
+    return shopUrl;
+  }
+
+  public void setShopUrl(String shopUrl) {
+    this.shopUrl = shopUrl;
+  }
+
+  public ContactPerson getTechnicalContact() {
+    return technicalContact;
+  }
+
+  public void setTechnicalContact(ContactPerson technicalContact) {
+    this.technicalContact = technicalContact;
   }
 
 }
