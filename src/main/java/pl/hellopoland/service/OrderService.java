@@ -266,7 +266,6 @@ public class OrderService extends ServiceSuperclass {
   private void placeInHpt(OrderDetails details, Entry<Portal, List<OrderSightEntry>> entry) {
     Portal portal = entry.getKey();
     List<OrderEntry> orderEntries = gatherOrderEntries(entry.getValue());
-
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     JsonObject resp = (JsonObject) hpt.book(details, orderEntries);
     if (resp == null) {

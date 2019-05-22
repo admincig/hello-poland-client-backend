@@ -70,7 +70,6 @@ public class HelloTicket {
     try {
       var resp = post("/v1/bookings", json, AUTH_TOKEN);
       booking = JsonbConfig.getInstance().fromJson(resp.toString(), BookingDTO.class);
-
       for (var oe : orderEntries) {
         var ose = oe.getDateEntry().getSightEntry();
         ose.setSerialNumber(booking.serialNumber);
