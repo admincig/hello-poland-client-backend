@@ -77,6 +77,7 @@ public class HelloTicket {
           TicketDTO ticket = iter.next();
           if (oe.matches(ticket)) {
             oe.setExternalId((long) ticket.id);
+            oe.getDateEntry().setDate(ticket.date);
             ose.setWholeDay(ticket.wholeDay);
             break;
           }
