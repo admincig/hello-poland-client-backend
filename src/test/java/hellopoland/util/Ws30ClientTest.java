@@ -93,7 +93,7 @@ public class Ws30ClientTest {
   }
 
   @Test
-  public void soapMerchantRegisterXMLTest() {
+  public void soapMerchantRegisterErrorResultXMLTest() {
     try {
       SOAPConnectionFactory soapConnectionFactory = SOAPConnectionFactory.newInstance();
       SOAPConnection soapConnection = soapConnectionFactory.createConnection();
@@ -147,6 +147,57 @@ public class Ws30ClientTest {
               + "            <nip xsi:type=\"xsd:string\"></nip>\n"
               + "            <regon xsi:type=\"xsd:string\"></regon>\n"
               + "            <acceptance xsi:type=\"xsd:boolean\"></acceptance>\n"
+              + "         </merchant>\n" + "      </php:MerchantRegister>\n"
+              + "   </soapenv:Body>\n" + "</soapenv:Envelope>";
+
+      SOAPMessage soapResponse = soapConnection.call(getSoapMessageFromString(soapMessage), url);
+      printSOAPResponse(soapResponse);
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+
+  @Test
+  public void soapMerchantRegisterSuccessResultXMLTest() {
+    try {
+      SOAPConnectionFactory soapConnectionFactory = SOAPConnectionFactory.newInstance();
+      SOAPConnection soapConnection = soapConnectionFactory.createConnection();
+      String url = SoapConstants.NAMESPACE_URI;
+      String soapMessage =
+          "<soapenv:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:php=\"https://secure.przelewy24.pl/external/71852.php\" xmlns:soapenc=\"http://schemas.xmlsoap.org/soap/encoding/\">\n"
+              + "   <soapenv:Header/>\n" + "   <soapenv:Body>\n"
+              + "      <php:MerchantRegister soapenv:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">\n"
+              + "         <login xsi:type=\"xsd:int\">71852</login>\n"
+              + "         <pass xsi:type=\"xsd:string\">2ee0c1a05174cdbbcfae5e271f3eae15</pass>\n"
+              + "         <merchant xsi:type=\"php:MerchantRegisterRequest\">\n"
+              + "            <!--You may enter the following 19 items in any order-->\n"
+              + "            <business_type xsi:type=\"xsd:int\">8</business_type>\n"
+              + "            <name xsi:type=\"xsd:string\">Everytarget sp. z o.o.</name>\n"
+              + "            <email xsi:type=\"xsd:string\">m@everytarget.com</email>\n"
+              + "            <phone_number xsi:type=\"xsd:string\">692425966</phone_number>\n"
+              + "            <bank_account xsi:type=\"xsd:string\">68114011400000506894001001</bank_account>\n"
+              + "            <representatives xsi:type=\"php:ArrayOfRepresentative\" soapenc:arrayType=\"php:Representative[]\"/>\n"
+              + "            <contact_person xsi:type=\"php:ContactPerson\">\n"
+              + "               <!--You may enter the following 3 items in any order-->\n"
+              + "               <name xsi:type=\"xsd:string\">Michał Dusiński</name>\n"
+              + "               <email xsi:type=\"xsd:string\">m@everytarget.com</email>\n"
+              + "               <phone_number xsi:type=\"xsd:string\">692425966</phone_number>\n"
+              + "            </contact_person>\n"
+              + "             <address xsi:type=\"php:Address\">\n"
+              + "               <!--You may enter the following 4 items in any order-->\n"
+              + "               <country xsi:type=\"xsd:string\">PL</country>\n"
+              + "               <city xsi:type=\"xsd:string\">Nizniy</city>\n"
+              + "               <post_code xsi:type=\"xsd:string\">55-120</post_code>\n"
+              + "               <street xsi:type=\"xsd:string\">Stumilowego Lasu 6</street>\n"
+              + "            </address>\n"
+              + "            <invoice_email xsi:type=\"xsd:string\">m@everytarget.com</invoice_email>\n"
+              + "            <services_description xsi:type=\"xsd:string\">tarcze</services_description>\n"
+              + "            <trade xsi:type=\"xsd:string\">siw</trade>\n"
+              + "            <krs xsi:type=\"xsd:string\">0000593323</krs>\n"
+              + "            <nip xsi:type=\"xsd:string\">9151796154</nip>\n"
+              + "            <regon xsi:type=\"xsd:string\">362596009</regon>\n"
+              + "            <acceptance xsi:type=\"xsd:boolean\">true</acceptance>\n"
               + "         </merchant>\n" + "      </php:MerchantRegister>\n"
               + "   </soapenv:Body>\n" + "</soapenv:Envelope>";
 
