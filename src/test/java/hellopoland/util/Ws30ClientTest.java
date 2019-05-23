@@ -16,6 +16,10 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.ws.Service;
+import org.junit.Test;
+import pl.hellopoland.soap.p24.enums.Trade;
+import pl.hellopoland.soap.p24.object.Address;
+import pl.hellopoland.soap.p24.object.ContactPerson;
 import pl.hellopoland.soap.p24.object.MerchantRegisterRequest;
 import pl.hellopoland.soap.p24.object.MerchantRegisterResult;
 import pl.hellopoland.soap.p24.service.SoapConstants;
@@ -23,8 +27,9 @@ import pl.hellopoland.soap.p24.service.Ws30Port;
 
 // TODO: not finished!
 public class Ws30ClientTest {
-  // @Test
-  public void soapMerchantRegisterTest() {
+
+  @Test
+  public void soapMerchantRegisterErrorResultTest() {
     try {
       URL wsdlLocation = new URL(SoapConstants.WSDL_LOCATION);
       QName serviceName = new QName(SoapConstants.NAMESPACE_URI, SoapConstants.SERVICE_NAME);
@@ -42,7 +47,52 @@ public class Ws30ClientTest {
     }
   }
 
-  // @Test
+  @Test
+  public void soapMerchantRegisterSuccessResultTest() {
+    try {
+      URL wsdlLocation = new URL(SoapConstants.WSDL_LOCATION);
+      QName serviceName = new QName(SoapConstants.NAMESPACE_URI, SoapConstants.SERVICE_NAME);
+      Service service = Service.create(wsdlLocation, serviceName);
+      var port = service.getPort(Ws30Port.class);
+
+      // boolean response = port.testAccess("71852", "2ee0c1a05174cdbbcfae5e271f3eae15");
+
+      var merchant = new MerchantRegisterRequest();
+      var address = new Address();
+      address.city = "Nizniy";
+      address.post_code = "55-120";
+      address.street = "Stumilowego Lasu 6";
+      var contactPerson = new ContactPerson();
+      contactPerson.email = "m@everytarget.com";
+      contactPerson.name = "Michał Dusiński";
+      contactPerson.phone_number = "692425966";
+      merchant.address = address;
+      merchant.bank_account = "68114011400000506894001001";
+      merchant.business_type = 8;
+      merchant.contact_person = contactPerson;
+      merchant.email = "m@everytarget.com";
+      merchant.invoice_email = "m@everytarget.com";
+      merchant.krs = "0000593323";
+      merchant.name = "Everytarget sp. z o.o.";
+      merchant.nip = "9151796154";
+      merchant.phone_number = "692425966";
+      merchant.regon = "362596009";
+      merchant.services_description = "tarcze";
+      merchant.trade = Trade.SPORT_LEISURE.getValue();
+
+      MerchantRegisterResult response =
+          port.merchantRegister(71852, "2ee0c1a05174cdbbcfae5e271f3eae15", merchant);
+
+      System.out.println(response.result);
+      System.out.println(response.error.errorCode);
+      System.out.println(response.error.errorMessage);
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+
+  @Test
   public void soapMerchantRegisterXMLTest() {
     try {
       SOAPConnectionFactory soapConnectionFactory = SOAPConnectionFactory.newInstance();

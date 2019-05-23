@@ -75,39 +75,16 @@ public class HellopolandService extends ServiceSuperclass {
         "2ee0c1a05174cdbbcfae5e271f3eae15", new MerchantRegisterRequest());
 
     // 1. creating a partner and the user in hpl:
-    var partnerBO = new Partner();
+    var partnerBO = getPartnerFromMerchantRegisterRequest(merchant);
 
 
-    partnerBO.setP24Id(response.result.link – string – link do dokończenia rejestracji );
-    partnerBO.setP24Id(response.result.merchant_id);
+     partnerBO.setP24Id(response.result.link – string – link do dokończenia rejestracji );
+     partnerBO.setP24Id(response.result.merchant_id);
     // partnerBO.setP24Id(partner.p24MerchantId);
 
 
-
-    partnerBO.setBusinessType(BusinessType.getBusinessType(partner.businessType));
-    partnerBO.setTrade(Trade.SPORT_LEISURE);
-    partnerBO.setBankAccount(partner.bankAccount);
-    partnerBO.setInvoiceEmail(partner.invoiceEmail);
-    partnerBO.setKrs(partner.krs);
-    partnerBO.setNip(partner.nip);
-    partnerBO.setPesel(partner.pesel);
-    partnerBO.setPhoneNumber(partner.phoneNumber);
-    partnerBO.setRegon(partner.regon);
-    partnerBO.setServicesDescription(partner.servicesDescription);
-    partnerBO.setShopUrl(partner.shopUrl);
-
-    private List<PartnerRepresentative> representatives;
-    private Address address;
-    private Address correspondenceAddress;
-    private ContactPerson contactPerson;
-    private ContactPerson technicalContact;
-
-
-
-    partnerBO.setName(partner.name);
     partnerBO.setCommission(partner.commission);
     partnerBO.setHptToken("temporaryToken");
-    partnerBO.setEmail(partner.email);
     partnerBO.setAffiliateCode(partner.affiliateCode);
     String password = RandomStringUtils.randomAlphanumeric(10);
     userService.create(partner.email, password, null, null, null, partnerBO, UserRole.Role.PARTNER,
@@ -158,6 +135,52 @@ public class HellopolandService extends ServiceSuperclass {
       }
     });
 
+    return partnerBO;
+  }
+
+  private Partner getPartnerFromMerchantRegisterRequest(MerchantRegisterRequest merchant) {
+    var partnerBO = new Partner();
+    partnerBO.setBusinessType(BusinessType.getBusinessType(merchant.business_type));
+    partnerBO.setTrade(Trade.SPORT_LEISURE);
+    partnerBO.setBankAccount(merchant.bank_account);
+    partnerBO.setName(merchant.name);
+    partnerBO.setEmail(merchant.email);
+    partnerBO.setInvoiceEmail(merchant.invoice_email);
+    partnerBO.setKrs(merchant.krs);
+    partnerBO.setNip(merchant.nip);
+    partnerBO.setPesel(Integer.valueOf(merchant.pesel));
+    partnerBO.setPhoneNumber(merchant.phone_number);
+    partnerBO.setRegon(merchant.regon);
+    partnerBO.setServicesDescription(merchant.services_description);
+    partnerBO.setShopUrl(merchant.shop_url);
+    var address = new Address();
+    address.setCity(merchant.address.city);
+    address.setPostCode(merchant.address.post_code);
+    address.setStreet(merchant.address.street);
+    partnerBO.setAddress(address);
+    var correspondenceAddress = new Address();
+    correspondenceAddress.setCity(merchant.correspondence_address.city);
+    correspondenceAddress.setPostCode(merchant.correspondence_address.post_code);
+    correspondenceAddress.setStreet(merchant.correspondence_address.street);
+    partnerBO.setCorrespondenceAddress(correspondenceAddress);
+    var contactPerson = new ContactPerson();
+    contactPerson.setEmail(merchant.contact_person.email);
+    contactPerson.setName(merchant.contact_person.name);
+    contactPerson.setPhone_number(Integer.valueOf(merchant.contact_person.phone_number));
+    partnerBO.setContactPerson(contactPerson);
+    var technicalContact = new ContactPerson();
+    technicalContact.setEmail(merchant.technical_contact.email);
+    technicalContact.setName(merchant.technical_contact.name);
+    technicalContact.setPhone_number(Integer.valueOf(merchant.technical_contact.phone_number));
+    partnerBO.setTechnicalContact(technicalContact);
+    List<PartnerRepresentative> representatives =
+        Arrays.asList(merchant.representatives).stream().map(r -> {
+          var rep = new PartnerRepresentative();
+          rep.setName(r.name);
+          rep.setPesel(Integer.valueOf(r.pesel));
+          return rep;
+        }).collect(Collectors.toList());
+    partnerBO.setRepresentatives(representatives);
     return partnerBO;
   }
 

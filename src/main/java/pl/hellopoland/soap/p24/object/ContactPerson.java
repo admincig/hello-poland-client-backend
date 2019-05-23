@@ -9,7 +9,7 @@ public class ContactPerson {
   public ContactPerson(ContactPersonDTO dto) {
     name = dto.name;
     email = dto.email;
-    phone_number = String.valueOf(dto.phone_number);
+    phone_number = String.valueOf(dto.phoneNumber);
   }
 
   @NotBlank
