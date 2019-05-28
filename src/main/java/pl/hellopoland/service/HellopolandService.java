@@ -31,8 +31,6 @@ import pl.hellopoland.exception.email.EmailSendingRollbackException;
 import pl.hellopoland.soap.p24.enums.BusinessType;
 import pl.hellopoland.soap.p24.enums.Trade;
 import pl.hellopoland.soap.p24.object.MerchantRegisterRequest;
-import pl.hellopoland.soap.p24.object.MerchantRegisterResult;
-import pl.hellopoland.soap.p24.service.Ws30Service;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.soap.p24.MerchantRegisterValidator;
 
@@ -62,7 +60,7 @@ public class HellopolandService extends ServiceSuperclass {
       throw new ConflictingException("The partner commission is out of range: 0 - 100.");
     }
 
-    // 0. creating a partner in p24:
+    // 1. creating a partner in p24:
     var merchant = new MerchantRegisterRequest(partner);
 
 
@@ -71,16 +69,17 @@ public class HellopolandService extends ServiceSuperclass {
     // validator.validate(merchant).
 
     MerchantRegisterValidator.validate(merchant);
-    MerchantRegisterResult response = new Ws30Service().getWs30Port().merchantRegister(71852,
-        "2ee0c1a05174cdbbcfae5e271f3eae15", new MerchantRegisterRequest());
+    // MerchantRegisterResult response = new Ws30Service().getWs30Port().merchantRegister(71852,
+    // "2ee0c1a05174cdbbcfae5e271f3eae15", new MerchantRegisterRequest());
 
-    // 1. creating a partner and the user in hpl:
+    // 2. creating a partner and the user in hpl:
     var partnerBO = getPartnerFromMerchantRegisterRequest(merchant);
 
 
-     partnerBO.setP24Id(response.result.link – string – link do dokończenia rejestracji );
-     partnerBO.setP24Id(response.result.merchant_id);
-    // partnerBO.setP24Id(partner.p24MerchantId);
+    // partnerBO.setP24Id(response.result.link – string – link do dokończenia rejestracji );
+    // partnerBO.setP24Id(response.result.merchant_id);
+    // temporary for tests
+    partnerBO.setP24Id(123);
 
 
     partnerBO.setCommission(partner.commission);
@@ -93,7 +92,7 @@ public class HellopolandService extends ServiceSuperclass {
     var emailPassword = new HashMap<String, String>();
     emailPassword.put(partner.email, password);
 
-    // 2. creating users (excluded ushers) of the partner in hpl:
+    // 3. creating users (excluded ushers) of the partner in hpl:
     var usersDTOs = partner.users;
     if (usersDTOs != null && !usersDTOs.isEmpty()) {
       for (UserDTO userDTO : usersDTOs) {
@@ -114,7 +113,7 @@ public class HellopolandService extends ServiceSuperclass {
       }
     }
 
-    // 3. creating a partner in hpt:
+    // 4. creating a partner in hpt:
     try {
       Portal hpt = getPortal("Hello Ticket Cloud");
       var ht = new HelloTicket(hpt.getUrl());
@@ -147,9 +146,9 @@ public class HellopolandService extends ServiceSuperclass {
     partnerBO.setEmail(merchant.email);
     partnerBO.setInvoiceEmail(merchant.invoice_email);
     partnerBO.setKrs(merchant.krs);
-    partnerBO.setNip(merchant.nip);
-    partnerBO.setPesel(Integer.valueOf(merchant.pesel));
-    partnerBO.setPhoneNumber(merchant.phone_number);
+    partnerBO.setTaxNumber(merchant.nip);
+    partnerBO.setSocialNumber(Integer.valueOf(merchant.pesel));
+    partnerBO.setPhone(merchant.phone_number);
     partnerBO.setRegon(merchant.regon);
     partnerBO.setServicesDescription(merchant.services_description);
     partnerBO.setShopUrl(merchant.shop_url);
@@ -166,18 +165,18 @@ public class HellopolandService extends ServiceSuperclass {
     var contactPerson = new ContactPerson();
     contactPerson.setEmail(merchant.contact_person.email);
     contactPerson.setName(merchant.contact_person.name);
-    contactPerson.setPhone_number(Integer.valueOf(merchant.contact_person.phone_number));
+    contactPerson.setPhone(Integer.valueOf(merchant.contact_person.phone_number));
     partnerBO.setContactPerson(contactPerson);
     var technicalContact = new ContactPerson();
     technicalContact.setEmail(merchant.technical_contact.email);
     technicalContact.setName(merchant.technical_contact.name);
-    technicalContact.setPhone_number(Integer.valueOf(merchant.technical_contact.phone_number));
+    technicalContact.setPhone(Integer.valueOf(merchant.technical_contact.phone_number));
     partnerBO.setTechnicalContact(technicalContact);
     List<PartnerRepresentative> representatives =
         Arrays.asList(merchant.representatives).stream().map(r -> {
           var rep = new PartnerRepresentative();
           rep.setName(r.name);
-          rep.setPesel(Integer.valueOf(r.pesel));
+          rep.setSocialNumber(Integer.valueOf(r.pesel));
           return rep;
         }).collect(Collectors.toList());
     partnerBO.setRepresentatives(representatives);

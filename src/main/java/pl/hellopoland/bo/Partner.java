@@ -78,11 +78,11 @@ public class Partner extends ModelSuperclass {
 
   private String krs;
 
-  private String nip;
+  private String taxNumber;
 
-  private Integer pesel;
+  private Integer socialNumber;
 
-  private String phoneNumber;
+  private String phone;
 
   private String regon;
 
@@ -253,28 +253,28 @@ public class Partner extends ModelSuperclass {
     this.krs = krs;
   }
 
-  public String getNip() {
-    return nip;
+  public String getTaxNumber() {
+    return taxNumber;
   }
 
-  public void setNip(String nip) {
-    this.nip = nip;
+  public void setTaxNumber(String taxNumber) {
+    this.taxNumber = taxNumber;
   }
 
-  public Integer getPesel() {
-    return pesel;
+  public Integer getSocialNumber() {
+    return socialNumber;
   }
 
-  public void setPesel(Integer pesel) {
-    this.pesel = pesel;
+  public void setSocialNumber(Integer socialNumber) {
+    this.socialNumber = socialNumber;
   }
 
-  public String getPhoneNumber() {
-    return phoneNumber;
+  public String getPhone() {
+    return phone;
   }
 
-  public void setPhoneNumber(String phoneNumber) {
-    this.phoneNumber = phoneNumber;
+  public void setPhone(String phone) {
+    this.phone = phone;
   }
 
   public String getRegon() {

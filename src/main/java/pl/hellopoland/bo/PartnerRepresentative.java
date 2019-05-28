@@ -13,7 +13,7 @@ public class PartnerRepresentative extends ModelSuperclass {
   private String name;
 
   @NotBlank
-  private Integer pesel;
+  private Integer socialNumber;
 
   @ManyToMany
   private List<Partner> partners;
@@ -26,12 +26,12 @@ public class PartnerRepresentative extends ModelSuperclass {
     this.name = name;
   }
 
-  public Integer getPesel() {
-    return pesel;
+  public Integer getSocialNumber() {
+    return socialNumber;
   }
 
-  public void setPesel(Integer pesel) {
-    this.pesel = pesel;
+  public void setSocialNumber(Integer socialNumber) {
+    this.socialNumber = socialNumber;
   }
 
   public List<Partner> getPartners() {

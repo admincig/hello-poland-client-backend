@@ -4,6 +4,11 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.util.JAXBResult;
+import javax.xml.bind.util.JAXBSource;
 import javax.xml.namespace.QName;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.MimeHeaders;
@@ -11,15 +16,14 @@ import javax.xml.soap.SOAPConnection;
 import javax.xml.soap.SOAPConnectionFactory;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
 import javax.xml.ws.Service;
 import org.junit.Test;
 import pl.hellopoland.soap.p24.enums.Trade;
 import pl.hellopoland.soap.p24.object.Address;
 import pl.hellopoland.soap.p24.object.ContactPerson;
+import pl.hellopoland.soap.p24.object.GeneralError;
 import pl.hellopoland.soap.p24.object.MerchantRegisterRequest;
 import pl.hellopoland.soap.p24.object.MerchantRegisterResult;
 import pl.hellopoland.soap.p24.service.SoapConstants;
@@ -28,7 +32,7 @@ import pl.hellopoland.soap.p24.service.Ws30Port;
 // TODO: not finished!
 public class Ws30ClientTest {
 
-  @Test
+  // @Test
   public void soapMerchantRegisterErrorResultTest() {
     try {
       URL wsdlLocation = new URL(SoapConstants.WSDL_LOCATION);
@@ -83,16 +87,38 @@ public class Ws30ClientTest {
       MerchantRegisterResult response =
           port.merchantRegister(71852, "2ee0c1a05174cdbbcfae5e271f3eae15", merchant);
 
-      System.out.println(response.result);
-      System.out.println(response.error.errorCode);
-      System.out.println(response.error.errorMessage);
+
+      var k = new JAXBElement<Object>(new QName("bar"), Object.class, response.result);
+
+
+
+      // var e = (org.w3c.dom.Element) response.result;
+      // e.getClass();
+      // var a = e.getElementsByTagName("value");
+      // var z = a.item(0).getFirstChild().getNodeValue();
+
+      JAXBContext jc = JAXBContext.newInstance(MerchantRegisterResult.class, GeneralError.class);
+      Unmarshaller unmarshaller = jc.createUnmarshaller();
+      var payload = (MerchantRegisterResult) unmarshaller.unmarshal(new JAXBSource(jc, response));
+
+      // Marshaller marshaller = jc.createMarshaller();
+      // marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+      // marshaller.marshal(merchant, System.out);
+
+      System.out.println(payload);
+      // for (Object o : payload.result) {
+      // System.out.println(o.getClass());
+      // }
+      // System.out.println(response.result);
+      // System.out.println(response.error.errorCode);
+      // System.out.println(response.error.errorMessage);
     } catch (Exception e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
 
-  @Test
+  // @Test
   public void soapMerchantRegisterErrorResultXMLTest() {
     try {
       SOAPConnectionFactory soapConnectionFactory = SOAPConnectionFactory.newInstance();
@@ -220,10 +246,30 @@ public class Ws30ClientTest {
   private static void printSOAPResponse(SOAPMessage soapResponse) throws Exception {
     TransformerFactory transformerFactory = TransformerFactory.newInstance();
     Transformer transformer = transformerFactory.newTransformer();
-    Source sourceContent = soapResponse.getSOAPPart().getContent();
+    var sourceContent = soapResponse.getSOAPBody();
+
+    // sourceContent.getChildNodes()
+
+
+
+    // Source sourceContent = soapResponse.getSOAPPart().getContent();
     System.out.print("\nResponse SOAP Message = ");
-    StreamResult result = new StreamResult(System.out);
-    transformer.transform(sourceContent, result);
+    // StreamResult result = new StreamResult(System.out);
+
+
+    JAXBContext jc = JAXBContext.newInstance(MerchantRegisterResult.class);
+    // Unmarshaller unmarshaller = jc.createUnmarshaller();
+    // MerchantRegisterResult payload = (MerchantRegisterResult)
+    // unmarshaller.unmarshal(sourceContent);
+
+
+    JAXBResult result = new JAXBResult(jc);
+
+
+    // transformer.transform(sourceContent, result);
+
+    var o = (MerchantRegisterResult) result.getResult();
+    System.out.println(o);
   }
 
 }

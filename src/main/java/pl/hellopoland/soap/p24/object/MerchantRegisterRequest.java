@@ -26,9 +26,9 @@ public class MerchantRegisterRequest {
     invoice_email = partner.invoiceEmail != null ? partner.invoiceEmail : partner.email;
     krs = partner.krs;
     name = partner.name;
-    nip = partner.nip;
-    pesel = String.valueOf(partner.pesel);
-    phone_number = partner.phoneNumber;
+    nip = partner.taxNumber;
+    pesel = String.valueOf(partner.socialNumber);
+    phone_number = partner.phone;
     regon = partner.regon;
     if (partner.representatives != null) {
       ArrayList<Representative> list = partner.representatives.stream()

@@ -8,7 +8,7 @@ public class Representative {
 
   public Representative(PartnerRepresentativeDTO dto) {
     this.name = dto.name;
-    this.pesel = String.valueOf(dto.pesel);
+    this.pesel = String.valueOf(dto.socialNumber);
   }
 
   @NotBlank
