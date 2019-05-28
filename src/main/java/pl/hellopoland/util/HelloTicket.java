@@ -2,6 +2,7 @@ package pl.hellopoland.util;
 
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.System.Logger.Level;
 import java.net.HttpURLConnection;
@@ -13,6 +14,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.json.JsonArray;
+import javax.json.JsonException;
+import javax.json.JsonString;
 import javax.json.JsonStructure;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbException;
@@ -37,6 +40,7 @@ import pl.hellopoland.dto.booking.TicketOrderDTO;
 import pl.hellopoland.exception.badrequest.BadRequestException;
 import pl.hellopoland.exception.conflict.CannotDeleteSightEventFromExternalSystemException;
 import pl.hellopoland.exception.conflict.ConflictingException;
+import pl.hellopoland.exception.conflict.ExternalSystemException;
 import pl.hellopoland.exception.email.EmailSendingException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.rest.JsonbConfig;
@@ -167,86 +171,6 @@ public class HelloTicket {
     }
 
     return null;
-  }
-
-  private JsonStructure post(String path, String json, String authToken) throws IOException {
-    URL url = new URL(this.url + path);
-    var conn = (HttpURLConnection) url.openConnection();
-    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-    logger.log(System.Logger.Level.INFO, "Sending POST request to url: " + url);
-    logger.log(System.Logger.Level.DEBUG,
-        "Sending POST request to url: " + url + " with body: " + json);
-    conn.setRequestProperty("Authorization", "Bearer " + authToken);
-    conn.setDoOutput(true);
-    var os = conn.getOutputStream();
-    PrintWriter printWriter = new PrintWriter(os);
-    printWriter.append(json);
-    printWriter.close();
-    var is = conn.getInputStream();
-    var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
-    logger.log(System.Logger.Level.INFO, "Server responded with code: " + conn.getResponseCode());
-    logger.log(System.Logger.Level.DEBUG, "Server responded with body: " + resp);
-    return resp;
-  }
-
-  private JsonStructure put(String path, String json, String authToken) throws IOException {
-    URL url = new URL(this.url + path);
-    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-    logger.log(System.Logger.Level.INFO, "Sending PUT request to url: " + url);
-    logger.log(System.Logger.Level.DEBUG,
-        "Sending PUT request to url: " + url + " with body: " + json);
-    conn.setRequestMethod("PUT");
-    conn.setRequestProperty("Authorization", "Bearer " + authToken);
-    if (json != null) {
-      conn.setDoOutput(true);
-      var os = conn.getOutputStream();
-      PrintWriter printWriter = new PrintWriter(os);
-      printWriter.append(json);
-      printWriter.close();
-    }
-    var is = conn.getInputStream();
-    var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
-    logger.log(System.Logger.Level.INFO, "Server responded with code: " + conn.getResponseCode());
-    logger.log(System.Logger.Level.DEBUG, "Server responded with body: " + resp);
-    return resp;
-  }
-
-  private int delete(String path, String authToken) throws IOException {
-    URL url = new URL(this.url + path);
-    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-    logger.log(System.Logger.Level.INFO, "Sending DELETE request to url: " + url);
-    conn.setRequestMethod("DELETE");
-    conn.setRequestProperty("Authorization", "Bearer " + authToken);
-    conn.setDoOutput(true);
-    conn.connect();
-    var is = conn.getInputStream();
-    int responseCode = conn.getResponseCode();
-    logger.log(System.Logger.Level.INFO, "Server responded with code: " + responseCode);
-    is.close();
-
-    if (responseCode != NO_CONTENT.getStatusCode()) {
-      throw new CannotDeleteSightEventFromExternalSystemException();
-    }
-    return responseCode;
-  }
-
-  private JsonStructure get(String path, String authToken) throws IOException {
-    URL url = new URL(this.url + path);
-    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-    logger.log(System.Logger.Level.INFO, "Sending GET request to url: " + url);
-    conn.setRequestMethod("GET");
-    conn.setRequestProperty("Authorization", "Bearer " + authToken);
-    conn.setDoOutput(true);
-    conn.connect();
-    var is = conn.getInputStream();
-    int responseCode = conn.getResponseCode();
-    logger.log(System.Logger.Level.INFO, "Server responded with code: " + responseCode);
-    var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
-    is.close();
-    return resp;
   }
 
   public List<TicketPoolDefinitionDTO> getTicketPoolDefinitions(String partnerAuthToken) {
@@ -474,6 +398,136 @@ public class HelloTicket {
       throw new ConflictingException(
           "Wystąpił problem podczas usówania pdf'a w zewnętrznym systemie.");
     }
+  }
+
+  public UserDTO createUsherForLoggedPartner(UserDTO usherDTO, String partnerAuthToken) {
+    String jsonString = JsonbConfig.getInstance().toJson(usherDTO);
+    try {
+      return JsonbConfig.getInstance().fromJson(
+          post("/v1/partners/ushers", jsonString, partnerAuthToken).toString(), UserDTO.class);
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      throw new ConflictingException(
+          "Nie udało się utworzyć biletera w zewnętrznym systemie." + e.getLocalizedMessage());
+    }
+  }
+
+  private JsonStructure post(String path, String json, String authToken) throws IOException {
+    URL url = new URL(this.url + path);
+    var conn = (HttpURLConnection) url.openConnection();
+    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+    logger.log(System.Logger.Level.INFO, "Sending POST request to url: " + url);
+    logger.log(System.Logger.Level.DEBUG,
+        "Sending POST request to url: " + url + " with body: " + json);
+    conn.setRequestProperty("Authorization", "Bearer " + authToken);
+    conn.setDoOutput(true);
+    var os = conn.getOutputStream();
+    PrintWriter printWriter = new PrintWriter(os);
+    printWriter.append(json);
+    printWriter.close();
+    var respCode = conn.getResponseCode();
+    InputStream is = conn.getErrorStream();
+    if (is != null) {
+      var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
+      try {
+        throw new ExternalSystemException(((JsonString) resp.getValue("/message")).getString());
+      } catch (JsonException e) {
+        throw new ExternalSystemException(resp.toString());
+      }
+    }
+    is = conn.getInputStream();
+    var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
+    logger.log(System.Logger.Level.INFO, "Server responded with code: " + respCode);
+    logger.log(System.Logger.Level.DEBUG, "Server responded with body: " + resp);
+    return resp;
+  }
+
+  private JsonStructure put(String path, String json, String authToken) throws IOException {
+    URL url = new URL(this.url + path);
+    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+    logger.log(System.Logger.Level.INFO, "Sending PUT request to url: " + url);
+    logger.log(System.Logger.Level.DEBUG,
+        "Sending PUT request to url: " + url + " with body: " + json);
+    conn.setRequestMethod("PUT");
+    conn.setRequestProperty("Authorization", "Bearer " + authToken);
+    if (json != null) {
+      conn.setDoOutput(true);
+      var os = conn.getOutputStream();
+      PrintWriter printWriter = new PrintWriter(os);
+      printWriter.append(json);
+      printWriter.close();
+    }
+    var respCode = conn.getResponseCode();
+    InputStream is = conn.getErrorStream();
+    if (is != null) {
+      var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
+      try {
+        throw new ExternalSystemException(((JsonString) resp.getValue("/message")).getString());
+      } catch (JsonException e) {
+        throw new ExternalSystemException(resp.toString());
+      }
+    }
+    is = conn.getInputStream();
+    var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
+    logger.log(System.Logger.Level.INFO, "Server responded with code: " + respCode);
+    logger.log(System.Logger.Level.DEBUG, "Server responded with body: " + resp);
+    return resp;
+  }
+
+  private int delete(String path, String authToken) throws IOException {
+    URL url = new URL(this.url + path);
+    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+    logger.log(System.Logger.Level.INFO, "Sending DELETE request to url: " + url);
+    conn.setRequestMethod("DELETE");
+    conn.setRequestProperty("Authorization", "Bearer " + authToken);
+    conn.setDoOutput(true);
+    conn.connect();
+    var respCode = conn.getResponseCode();
+    InputStream is = conn.getErrorStream();
+    if (is != null) {
+      var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
+      try {
+        throw new ExternalSystemException(((JsonString) resp.getValue("/message")).getString());
+      } catch (JsonException e) {
+        throw new ExternalSystemException(resp.toString());
+      }
+    }
+    is = conn.getInputStream();
+    logger.log(System.Logger.Level.INFO, "Server responded with code: " + respCode);
+    is.close();
+
+    if (respCode != NO_CONTENT.getStatusCode()) {
+      throw new CannotDeleteSightEventFromExternalSystemException();
+    }
+    return respCode;
+  }
+
+  private JsonStructure get(String path, String authToken) throws IOException {
+    URL url = new URL(this.url + path);
+    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+    logger.log(System.Logger.Level.INFO, "Sending GET request to url: " + url);
+    conn.setRequestMethod("GET");
+    conn.setRequestProperty("Authorization", "Bearer " + authToken);
+    conn.setDoOutput(true);
+    conn.connect();
+    var respCode = conn.getResponseCode();
+    InputStream is = conn.getErrorStream();
+    if (is != null) {
+      var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
+      try {
+        throw new ExternalSystemException(((JsonString) resp.getValue("/message")).getString());
+      } catch (JsonException e) {
+        throw new ExternalSystemException(resp.toString());
+      }
+    }
+    is = conn.getInputStream();
+    logger.log(System.Logger.Level.INFO, "Server responded with code: " + respCode);
+    var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
+    is.close();
+    return resp;
   }
 
 }

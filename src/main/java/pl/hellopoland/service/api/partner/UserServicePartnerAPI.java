@@ -34,6 +34,11 @@ public class UserServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
+  public UserDTO createUsher(UserDTO usherDTO) {
+    return service.createUsherForLoggedPartner(usherDTO);
+  }
+
+  @RolesAllowed("partner")
   public PagedCollection getUshers() {
     return new PagedCollection(service.getUshers(), null);
   }
