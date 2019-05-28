@@ -31,6 +31,8 @@ import pl.hellopoland.exception.email.EmailSendingRollbackException;
 import pl.hellopoland.soap.p24.enums.BusinessType;
 import pl.hellopoland.soap.p24.enums.Trade;
 import pl.hellopoland.soap.p24.object.MerchantRegisterRequest;
+import pl.hellopoland.soap.p24.object.MerchantRegisterResult;
+import pl.hellopoland.soap.p24.service.Ws30Service;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.soap.p24.MerchantRegisterValidator;
 
@@ -69,8 +71,8 @@ public class HellopolandService extends ServiceSuperclass {
     // validator.validate(merchant).
 
     MerchantRegisterValidator.validate(merchant);
-    // MerchantRegisterResult response = new Ws30Service().getWs30Port().merchantRegister(71852,
-    // "2ee0c1a05174cdbbcfae5e271f3eae15", new MerchantRegisterRequest());
+    MerchantRegisterResult response = new Ws30Service().getWs30Port().merchantRegister(71852,
+        "2ee0c1a05174cdbbcfae5e271f3eae15", new MerchantRegisterRequest());
 
     // 2. creating a partner and the user in hpl:
     var partnerBO = getPartnerFromMerchantRegisterRequest(merchant);
@@ -79,7 +81,7 @@ public class HellopolandService extends ServiceSuperclass {
     // partnerBO.setP24Id(response.result.link – string – link do dokończenia rejestracji );
     // partnerBO.setP24Id(response.result.merchant_id);
     // temporary for tests
-    partnerBO.setP24Id(123);
+    // partnerBO.setP24Id(123);
 
 
     partnerBO.setCommission(partner.commission);

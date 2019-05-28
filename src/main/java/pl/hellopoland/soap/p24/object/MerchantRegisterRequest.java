@@ -5,9 +5,11 @@ import java.util.stream.Collectors;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.xml.bind.annotation.XmlRootElement;
 import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.soap.p24.enums.Trade;
 
+@XmlRootElement(name = "merchant")
 public class MerchantRegisterRequest {
 
   public MerchantRegisterRequest() {}
