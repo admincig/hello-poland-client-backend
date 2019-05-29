@@ -4,6 +4,7 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Entity
 public class PartnerRepresentative extends ModelSuperclass {
@@ -12,7 +13,7 @@ public class PartnerRepresentative extends ModelSuperclass {
   @NotBlank
   private String name;
 
-  @NotBlank
+  @NotNull
   private Integer socialNumber;
 
   @ManyToMany

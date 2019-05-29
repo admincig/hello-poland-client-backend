@@ -2,6 +2,7 @@ package pl.hellopoland.service;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,8 +32,7 @@ import pl.hellopoland.exception.email.EmailSendingRollbackException;
 import pl.hellopoland.soap.p24.enums.BusinessType;
 import pl.hellopoland.soap.p24.enums.Trade;
 import pl.hellopoland.soap.p24.object.MerchantRegisterRequest;
-import pl.hellopoland.soap.p24.object.MerchantRegisterResult;
-import pl.hellopoland.soap.p24.service.Ws30Service;
+import pl.hellopoland.soap.p24.service.P24SOAPClient;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.soap.p24.MerchantRegisterValidator;
 
@@ -43,6 +43,8 @@ public class HellopolandService extends ServiceSuperclass {
   private UserService userService;
   @Inject
   private EmailService emailService;
+  @Inject
+  private P24SOAPClient p24SOAPClient;
 
   final Set<UserRole.Role> excluded_roles = Set.of(UserRole.Role.ROOT, UserRole.Role.ADMIN,
       UserRole.Role.PARTNER, UserRole.Role.SALESMAN);
@@ -64,32 +66,21 @@ public class HellopolandService extends ServiceSuperclass {
 
     // 1. creating a partner in p24:
     var merchant = new MerchantRegisterRequest(partner);
-
-
-    // moze nie?
-    // Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-    // validator.validate(merchant).
-
     MerchantRegisterValidator.validate(merchant);
-    MerchantRegisterResult response = new Ws30Service().getWs30Port().merchantRegister(71852,
-        "2ee0c1a05174cdbbcfae5e271f3eae15", new MerchantRegisterRequest());
+    // Integer merchantId = p24SOAPClient.merchantRegistration(merchant);
 
     // 2. creating a partner and the user in hpl:
     var partnerBO = getPartnerFromMerchantRegisterRequest(merchant);
-
-
-    // partnerBO.setP24Id(response.result.link – string – link do dokończenia rejestracji );
-    // partnerBO.setP24Id(response.result.merchant_id);
-    // temporary for tests
-    // partnerBO.setP24Id(123);
-
-
+    partnerBO.setCreated(LocalDateTime.now());
+    partnerBO.setP24Id(123);
+    // partnerBO.setP24Id(merchantId);
     partnerBO.setCommission(partner.commission);
     partnerBO.setHptToken("temporaryToken");
     partnerBO.setAffiliateCode(partner.affiliateCode);
     String password = RandomStringUtils.randomAlphanumeric(10);
     userService.create(partner.email, password, null, null, null, partnerBO, UserRole.Role.PARTNER,
         UserRole.Role.USHER);
+    em.flush();
     partner.password = password;
     var emailPassword = new HashMap<String, String>();
     emailPassword.put(partner.email, password);
@@ -132,6 +123,10 @@ public class HellopolandService extends ServiceSuperclass {
             "Twój login to " + key + ", hasło to " + value);
       } catch (MessagingException | UnsupportedEncodingException e) {
         logger.log(System.Logger.Level.ERROR, e.getLocalizedMessage());
+
+
+        // TODO: add removing new partner from hpt!!!!
+
         throw new EmailSendingRollbackException();
       }
     });
@@ -149,17 +144,19 @@ public class HellopolandService extends ServiceSuperclass {
     partnerBO.setInvoiceEmail(merchant.invoice_email);
     partnerBO.setKrs(merchant.krs);
     partnerBO.setTaxNumber(merchant.nip);
-    partnerBO.setSocialNumber(Integer.valueOf(merchant.pesel));
+    partnerBO.setSocialNumber(merchant.pesel != null ? Integer.valueOf(merchant.pesel) : null);
     partnerBO.setPhone(merchant.phone_number);
     partnerBO.setRegon(merchant.regon);
     partnerBO.setServicesDescription(merchant.services_description);
     partnerBO.setShopUrl(merchant.shop_url);
     var address = new Address();
+    address.setCountry(merchant.address.country);
     address.setCity(merchant.address.city);
     address.setPostCode(merchant.address.post_code);
     address.setStreet(merchant.address.street);
     partnerBO.setAddress(address);
     var correspondenceAddress = new Address();
+    correspondenceAddress.setCountry(merchant.correspondence_address.country);
     correspondenceAddress.setCity(merchant.correspondence_address.city);
     correspondenceAddress.setPostCode(merchant.correspondence_address.post_code);
     correspondenceAddress.setStreet(merchant.correspondence_address.street);
@@ -167,21 +164,27 @@ public class HellopolandService extends ServiceSuperclass {
     var contactPerson = new ContactPerson();
     contactPerson.setEmail(merchant.contact_person.email);
     contactPerson.setName(merchant.contact_person.name);
-    contactPerson.setPhone(Integer.valueOf(merchant.contact_person.phone_number));
+    contactPerson.setPhone(merchant.contact_person.phone_number != null
+        ? Integer.valueOf(merchant.contact_person.phone_number)
+        : null);
     partnerBO.setContactPerson(contactPerson);
     var technicalContact = new ContactPerson();
     technicalContact.setEmail(merchant.technical_contact.email);
     technicalContact.setName(merchant.technical_contact.name);
-    technicalContact.setPhone(Integer.valueOf(merchant.technical_contact.phone_number));
+    technicalContact.setPhone(merchant.technical_contact.phone_number != null
+        ? Integer.valueOf(merchant.technical_contact.phone_number)
+        : null);
     partnerBO.setTechnicalContact(technicalContact);
-    List<PartnerRepresentative> representatives =
-        Arrays.asList(merchant.representatives).stream().map(r -> {
-          var rep = new PartnerRepresentative();
-          rep.setName(r.name);
-          rep.setSocialNumber(Integer.valueOf(r.pesel));
-          return rep;
-        }).collect(Collectors.toList());
-    partnerBO.setRepresentatives(representatives);
+    if (merchant.representatives != null) {
+      List<PartnerRepresentative> representatives =
+          Arrays.asList(merchant.representatives).stream().map(r -> {
+            var rep = new PartnerRepresentative();
+            rep.setName(r.name);
+            rep.setSocialNumber(r.pesel != null ? Integer.valueOf(r.pesel) : null);
+            return rep;
+          }).collect(Collectors.toList());
+      partnerBO.setRepresentatives(representatives);
+    }
     return partnerBO;
   }
 

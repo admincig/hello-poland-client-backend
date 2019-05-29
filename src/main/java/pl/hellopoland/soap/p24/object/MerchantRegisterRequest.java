@@ -29,7 +29,7 @@ public class MerchantRegisterRequest {
     krs = partner.krs;
     name = partner.name;
     nip = partner.taxNumber;
-    pesel = String.valueOf(partner.socialNumber);
+    pesel = partner.socialNumber != null ? String.valueOf(partner.socialNumber) : null;
     phone_number = partner.phone;
     regon = partner.regon;
     if (partner.representatives != null) {

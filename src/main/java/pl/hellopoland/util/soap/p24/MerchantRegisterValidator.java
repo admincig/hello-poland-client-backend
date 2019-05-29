@@ -14,11 +14,13 @@ public class MerchantRegisterValidator {
       throw new ConflictingException(
           "Brak lub niepoprawny nr PESEL. W przypadku rejestracji osoby fizycznej nr PESEL jest obowiązkowy.");
     }
-    if (intBusinesType != 1
-        && (merchant.representatives == null || merchant.representatives.length == 0)) {
-      throw new ConflictingException(
-          "Brak reprezentantów firmy. Obowiązkowe w przypadku rejestracji działalności innej niż osoba fizyczna.");
-    }
+    // TODO: check is it true?!!
+    // if (intBusinesType != 1
+    // && (merchant.representatives == null || merchant.representatives.length == 0)) {
+    // throw new ConflictingException(
+    // "Brak reprezentantów firmy. Obowiązkowe w przypadku rejestracji działalności innej niż osoba
+    // fizyczna.");
+    // }
     if (intBusinesType != 1 && StringUtils.isBlank(merchant.nip)) {
       throw new ConflictingException(
           "Brak nr NIP. Obowiązkowe w przypadku rejestracji działalności innej niż osoba fizyczna.");
