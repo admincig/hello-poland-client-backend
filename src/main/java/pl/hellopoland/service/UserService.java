@@ -117,4 +117,10 @@ public class UserService extends ServiceSuperclass {
     return ht.updateUsherForPartner(usher, getLoggedPartner().getHptToken());
   }
 
+  public UserDTO createUsherForLoggedPartner(UserDTO usherDTO) {
+    Portal hpt = getPortal("Hello Ticket Cloud");
+    HelloTicket ht = new HelloTicket(hpt.getUrl());
+    return ht.createUsherForLoggedPartner(usherDTO, getLoggedPartner().getHptToken());
+  }
+
 }
