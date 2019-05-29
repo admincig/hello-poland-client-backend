@@ -1,0 +1,96 @@
+package pl.hellopoland.soap.p24.service;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.nio.charset.Charset;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.soap.MessageFactory;
+import javax.xml.soap.MimeHeaders;
+import javax.xml.soap.SOAPConnectionFactory;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
+import pl.hellopoland.exception.conflict.ConflictingException;
+import pl.hellopoland.service.ServiceSuperclass;
+import pl.hellopoland.soap.p24.object.MerchantRegisterRequest;
+
+// TODO: not finished!
+public class P24SOAPClient extends ServiceSuperclass {
+  private final static String POS_ID = properties.getProperty("przelewy24.merchantId");
+  private final static Ws30Port PORT = new Ws30Service().getWs30Port();
+
+  public static void main(String... strings) {
+    System.out.println("");
+  }
+
+  /**
+   * Registers the merchant on the Przelewy24 and return merchant id from response.
+   * 
+   * @return Integer merchant id from response
+   */
+  public void merchantRegistration(MerchantRegisterRequest merchant) {
+    final String beginXML =
+        "<soapenv:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:php=\"https://secure.przelewy24.pl/external/71852.php\" xmlns:soapenc=\"http://schemas.xmlsoap.org/soap/encoding/\">"
+            + "<soapenv:Header/><soapenv:Body><php:MerchantRegister soapenv:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">"
+            + "<login xsi:type=\"xsd:int\">71852</login><pass xsi:type=\"xsd:string\">2ee0c1a05174cdbbcfae5e271f3eae15</pass>";
+    final String endXML = "</php:MerchantRegister>\n</soapenv:Body>\n</soapenv:Envelope>";
+    try {
+      var jc = JAXBContext.newInstance(MerchantRegisterRequest.class);
+      var sw = new StringWriter();
+      Marshaller marshaller = jc.createMarshaller();
+      marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+      marshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
+      marshaller.marshal(merchant, sw);
+
+
+
+      var sb = new StringBuilder(sw.toString());
+      sb.insert(0, beginXML).append(endXML);
+
+      SOAPMessage soapResponse = sendSOAPRequest(sb.toString());
+
+      var soapBody = soapResponse.getSOAPBody();
+
+      String errorCode =
+          soapBody.getElementsByTagName("errorCode").item(0).getFirstChild().getNodeValue();
+
+      if (!String.valueOf(0).equals(errorCode)) {
+        String errorMessage =
+            soapBody.getElementsByTagName("errorMessage").item(0).getFirstChild().getNodeValue();
+        throw new ConflictingException(
+            "Błąd podczas tworzenia partnera w przelewy24: " + errorCode);
+      }
+
+      String merchantId = null;
+      var keyElems = soapBody.getElementsByTagName("key");
+
+      for (int i = 0; i < keyElems.getLength(); i++) {
+        if ("merchant_id".equals(keyElems.item(i).getFirstChild().getNodeValue())) {
+          merchantId = keyElems.item(i).getNextSibling().getFirstChild().getNodeValue();
+          break;
+        }
+      }
+
+    } catch (Exception e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+
+  private static SOAPMessage getSoapMessageFromString(String xml)
+      throws SOAPException, IOException {
+    MessageFactory factory = MessageFactory.newInstance();
+    SOAPMessage message = factory.createMessage(new MimeHeaders(),
+        new ByteArrayInputStream(xml.getBytes(Charset.forName("UTF-8"))));
+    return message;
+  }
+
+  private SOAPMessage sendSOAPRequest(String xml) throws SOAPException, IOException {
+    var soapConnection = SOAPConnectionFactory.newInstance().createConnection();
+    SOAPMessage soapResponse =
+        soapConnection.call(getSoapMessageFromString(xml.toString()), SoapConstants.NAMESPACE_URI);
+    return soapResponse;
+  }
+
+}

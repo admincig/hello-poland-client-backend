@@ -18,6 +18,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.ws.Service;
 import org.junit.Ignore;
+import org.junit.Test;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.soap.p24.enums.Trade;
 import pl.hellopoland.soap.p24.object.Address;
@@ -31,7 +32,7 @@ import pl.hellopoland.soap.p24.service.Ws30Port;
 @Ignore
 public class Ws30ClientTest {
 
-  // @Test
+  @Test
   public void soapMerchantRegisterErrorResultTest() {
     try {
       URL wsdlLocation = new URL(SoapConstants.WSDL_LOCATION);
@@ -53,10 +54,10 @@ public class Ws30ClientTest {
   // @Test
   public void soapMerchantRegisterSuccessResultTest() {
     try {
-      URL wsdlLocation = new URL(SoapConstants.WSDL_LOCATION);
-      QName serviceName = new QName(SoapConstants.NAMESPACE_URI, SoapConstants.SERVICE_NAME);
-      Service service = Service.create(wsdlLocation, serviceName);
-      var port = service.getPort(Ws30Port.class);
+      // URL wsdlLocation = new URL(SoapConstants.WSDL_LOCATION);
+      // QName serviceName = new QName(SoapConstants.NAMESPACE_URI, SoapConstants.SERVICE_NAME);
+      // Service service = Service.create(wsdlLocation, serviceName);
+      // var port = service.getPort(Ws30Port.class);
 
       // boolean response = port.testAccess("71852", "2ee0c1a05174cdbbcfae5e271f3eae15");
 
@@ -93,13 +94,13 @@ public class Ws30ClientTest {
       marshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
       marshaller.marshal(merchant, sw);
 
-      String beginXML =
+      final String beginXML =
           "<soapenv:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:php=\"https://secure.przelewy24.pl/external/71852.php\" xmlns:soapenc=\"http://schemas.xmlsoap.org/soap/encoding/\">\n"
               + "<soapenv:Header/>\n<soapenv:Body>\n"
               + "<php:MerchantRegister soapenv:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">\n"
               + "<login xsi:type=\"xsd:int\">71852</login>\n"
               + "<pass xsi:type=\"xsd:string\">2ee0c1a05174cdbbcfae5e271f3eae15</pass>\n";
-      String endXML = "</php:MerchantRegister>\n</soapenv:Body>\n</soapenv:Envelope>";
+      final String endXML = "</php:MerchantRegister>\n</soapenv:Body>\n</soapenv:Envelope>";
 
       var sb = new StringBuilder(sw.toString());
       sb.insert(0, beginXML).append(endXML);
