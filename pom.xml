@@ -32,6 +32,10 @@
 					<groupId>xml-apis</groupId>
 					<artifactId>xml-apis</artifactId>
 				</exclusion>
+				<exclusion>
+    				<groupId>org.apache.geronimo.javamail</groupId>
+					<artifactId>geronimo-javamail_1.4_mail</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>

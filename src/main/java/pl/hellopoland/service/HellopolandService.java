@@ -1,6 +1,5 @@
 package pl.hellopoland.service;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -13,7 +12,6 @@ import java.util.stream.Stream;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.mail.MessagingException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import pl.hellopoland.bo.Address;
@@ -67,13 +65,12 @@ public class HellopolandService extends ServiceSuperclass {
     // 1. creating a partner in p24:
     var merchant = new MerchantRegisterRequest(partner);
     MerchantRegisterValidator.validate(merchant);
-    // Integer merchantId = p24SOAPClient.merchantRegistration(merchant);
+    Integer merchantId = p24SOAPClient.merchantRegistration(merchant);
 
     // 2. creating a partner and the user in hpl:
     var partnerBO = getPartnerFromMerchantRegisterRequest(merchant);
     partnerBO.setCreated(LocalDateTime.now());
-    partnerBO.setP24Id(123);
-    // partnerBO.setP24Id(merchantId);
+    partnerBO.setP24Id(merchantId);
     partnerBO.setCommission(partner.commission);
     partnerBO.setHptToken("temporaryToken");
     partnerBO.setAffiliateCode(partner.affiliateCode);
@@ -107,10 +104,11 @@ public class HellopolandService extends ServiceSuperclass {
     }
 
     // 4. creating a partner in hpt:
+    Portal hpt = getPortal("Hello Ticket Cloud");
+    var ht = new HelloTicket(hpt.getUrl());
+    var hptToken = getLoggedUser().getHptToken();
     try {
-      Portal hpt = getPortal("Hello Ticket Cloud");
-      var ht = new HelloTicket(hpt.getUrl());
-      var hptPartner = ht.addPartner(partner, getLoggedUser().getHptToken());
+      var hptPartner = ht.addPartner(partner, hptToken);
       partnerBO.setHptToken(hptPartner.token);
     } catch (Exception e) {
       throw new ConflictingException("Nie udało się stworzyć partnera w zewnętrznym systemie", e);
@@ -121,13 +119,10 @@ public class HellopolandService extends ServiceSuperclass {
       try {
         emailService.sendEmail(key, "Nowe konto w Hello Poland.",
             "Twój login to " + key + ", hasło to " + value);
-      } catch (MessagingException | UnsupportedEncodingException e) {
+      } catch (Exception e) {
         logger.log(System.Logger.Level.ERROR, e.getLocalizedMessage());
-
-
-        // TODO: add removing new partner from hpt!!!!
-
-        throw new EmailSendingRollbackException();
+        ht.removePartner(partner.email, hptToken);
+        throw new EmailSendingRollbackException("Błąd podczas wysyłania maila do: " + key);
       }
     });
 
