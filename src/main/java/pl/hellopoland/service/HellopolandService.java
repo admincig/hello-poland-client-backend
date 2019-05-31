@@ -34,6 +34,7 @@ import pl.hellopoland.soap.p24.service.P24SOAPClient;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.soap.p24.MerchantRegisterValidator;
 
+
 @LocalBean
 @Stateless
 public class HellopolandService extends ServiceSuperclass {
@@ -75,9 +76,14 @@ public class HellopolandService extends ServiceSuperclass {
     partnerBO.setHptToken("temporaryToken");
     partnerBO.setAffiliateCode(RandomStringUtils.randomAlphanumeric(8));
     String password = RandomStringUtils.randomAlphanumeric(10);
-    userService.create(partner.email, password, null, null, null, partnerBO, UserRole.Role.PARTNER,
-        UserRole.Role.USHER);
-    em.flush();
+    try {
+      userService.create(partner.email, password, null, null, null, partnerBO,
+          UserRole.Role.PARTNER, UserRole.Role.USHER);
+      em.flush();
+    } catch (Exception e) {
+      System.out.println();
+    }
+
     partner.password = password;
     var emailPassword = new HashMap<String, String>();
     emailPassword.put(partner.email, password);

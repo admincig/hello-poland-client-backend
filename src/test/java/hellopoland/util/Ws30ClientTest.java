@@ -17,7 +17,7 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.ws.Service;
-import org.junit.Test;
+import org.junit.Ignore;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.soap.p24.enums.Trade;
 import pl.hellopoland.soap.p24.object.Address;
@@ -28,7 +28,7 @@ import pl.hellopoland.soap.p24.service.SoapConstants;
 import pl.hellopoland.soap.p24.service.Ws30Port;
 
 // TODO: not finished!
-// @Ignore
+@Ignore
 public class Ws30ClientTest {
 
   // @Test
@@ -50,7 +50,7 @@ public class Ws30ClientTest {
     }
   }
 
-  @Test
+  // @Test
   public void soapMerchantRegisterSuccessResultTest() {
     try {
       // URL wsdlLocation = new URL(SoapConstants.WSDL_LOCATION);
