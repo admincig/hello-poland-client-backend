@@ -1,11 +1,13 @@
 package pl.hellopoland.service;
 
+import java.lang.System.Logger.Level;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -14,6 +16,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.exception.ConstraintViolationException;
 import pl.hellopoland.bo.Address;
 import pl.hellopoland.bo.ContactPerson;
 import pl.hellopoland.bo.Partner;
@@ -81,7 +84,15 @@ public class HellopolandService extends ServiceSuperclass {
           UserRole.Role.PARTNER, UserRole.Role.USHER);
       em.flush();
     } catch (Exception e) {
-      System.out.println();
+      var exc = Optional.ofNullable(e.getCause()).map(ex -> ex.getCause()).orElseThrow(
+          () -> new ConflictingException("Błąd podczas zapisu do bazy nowego użytkownika."));
+      if (exc instanceof ConstraintViolationException) {
+        String errMsg = ((ConstraintViolationException) exc).getSQLException().getMessage();
+        logger.log(Level.ERROR, "Błąd podczas dodawania partnera; " + errMsg);
+        throw new ConflictingException(
+            "Błąd podczas dodawania partnera; " + errMsg.substring(errMsg.indexOf("Klucz (")));
+      }
+      throw (ConflictingException) exc;
     }
 
     partner.password = password;
