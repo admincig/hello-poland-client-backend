@@ -77,7 +77,9 @@ public class HellopolandService extends ServiceSuperclass {
     partnerBO.setP24Id(merchantId);
     partnerBO.setCommission(partner.commission);
     partnerBO.setHptToken("temporaryToken");
-    partnerBO.setAffiliateCode(RandomStringUtils.randomAlphanumeric(8));
+    if (partner.affiliation) {
+      partnerBO.setAffiliateCode(RandomStringUtils.randomAlphanumeric(8));
+    }
     String password = RandomStringUtils.randomAlphanumeric(10);
     try {
       userService.create(partner.email, password, null, null, null, partnerBO,
@@ -176,16 +178,12 @@ public class HellopolandService extends ServiceSuperclass {
     var contactPerson = new ContactPerson();
     contactPerson.setEmail(merchant.contact_person.email);
     contactPerson.setName(merchant.contact_person.name);
-    contactPerson.setPhone(merchant.contact_person.phone_number != null
-        ? Integer.valueOf(merchant.contact_person.phone_number)
-        : null);
+    contactPerson.setPhone(merchant.contact_person.phone_number);
     partnerBO.setContactPerson(contactPerson);
     var technicalContact = new ContactPerson();
     technicalContact.setEmail(merchant.technical_contact.email);
     technicalContact.setName(merchant.technical_contact.name);
-    technicalContact.setPhone(merchant.technical_contact.phone_number != null
-        ? Integer.valueOf(merchant.technical_contact.phone_number)
-        : null);
+    technicalContact.setPhone(merchant.technical_contact.phone_number);
     partnerBO.setTechnicalContact(technicalContact);
     if (merchant.representatives != null) {
       List<PartnerRepresentative> representatives =

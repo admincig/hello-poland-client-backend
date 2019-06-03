@@ -17,7 +17,7 @@ public class ContactPerson extends ModelSuperclass {
   private String email;
 
   @NotNull
-  private Integer phone;
+  private String phone;
 
   @OneToMany
   private List<Partner> partners;
@@ -38,11 +38,11 @@ public class ContactPerson extends ModelSuperclass {
     this.email = email;
   }
 
-  public Integer getPhone() {
+  public String getPhone() {
     return phone;
   }
 
-  public void setPhone(Integer phone) {
+  public void setPhone(String phone) {
     this.phone = phone;
   }
 
