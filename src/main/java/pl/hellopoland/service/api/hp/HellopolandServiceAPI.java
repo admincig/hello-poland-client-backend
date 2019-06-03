@@ -6,8 +6,9 @@ import java.util.stream.Collectors;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.ws.rs.core.Response.ResponseBuilder;
+import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.config.PartnerCollectionConfig;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.EmailSendingReportDTO;
 import pl.hellopoland.dto.PartnerDTO;
@@ -16,6 +17,7 @@ import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.AnalyticsService;
 import pl.hellopoland.service.HellopolandService;
 import pl.hellopoland.service.OrderService;
+import pl.hellopoland.service.PartnerService;
 import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.PagedEntityCollection;
@@ -30,6 +32,8 @@ public class HellopolandServiceAPI {
   private SightEventService seService;
   @Inject
   private OrderService orderService;
+  @Inject
+  private PartnerService partnerService;
 
   @RolesAllowed("admin")
   public PartnerDTO addPartner(PartnerDTO partner) {
@@ -37,8 +41,22 @@ public class HellopolandServiceAPI {
   }
 
   @RolesAllowed("admin")
-  public ResponseBuilder listPartners() {
-    // TODO Auto-generated method stub
+  public PagedCollection listPartners(PartnerCollectionConfig config) {
+    config.setOrderColumn("name");
+    config.setOrderDirection("asc");
+
+    PagedEntityCollection<Partner> bos = service.getList(config);
+    var dtos = bos.items.stream().map(bo -> {
+      var dto = DtoMapper.getDTO(bo);
+      dto.language = bo.getDefaultLanguage().getLanuage();
+      return dto;
+    }).collect(Collectors.toList());
+    if (language != null) {
+      dtos.forEach(dto -> dto.language = language.getLanuage());
+    }
+    return new PagedCollection(dtos, bos.config);
+
+
     return null;
   }
 
