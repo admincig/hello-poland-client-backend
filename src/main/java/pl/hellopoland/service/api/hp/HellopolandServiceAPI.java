@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.EmailSendingReportDTO;
@@ -33,6 +34,12 @@ public class HellopolandServiceAPI {
   @RolesAllowed("admin")
   public PartnerDTO addPartner(PartnerDTO partner) {
     return DtoMapper.getFullDTO(service.addPartner(partner));
+  }
+
+  @RolesAllowed("admin")
+  public ResponseBuilder listPartners() {
+    // TODO Auto-generated method stub
+    return null;
   }
 
   @RolesAllowed("admin")

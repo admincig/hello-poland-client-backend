@@ -39,6 +39,12 @@ public class HelloPolandRestService {
   }
 
   @GET
+  @Path("/partners")
+  public Response listPartners() {
+    return Response.ok(service.listPartners().build();
+  }
+
+  @GET
   @Path("/analytics/orders")
   @Produces(MediaType.APPLICATION_OCTET_STREAM)
   public Response downloadOrdersCsv(@QueryParam("fromDate") @DateFormat Date fromDate,
