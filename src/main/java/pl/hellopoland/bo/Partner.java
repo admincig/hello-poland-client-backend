@@ -62,7 +62,8 @@ public class Partner extends ModelSuperclass {
   @Enumerated(EnumType.STRING)
   private Trade trade;
 
-  @ManyToMany(mappedBy = "partners")
+  @ManyToMany(cascade = CascadeType.PERSIST)
+  // @ManyToMany(mappedBy = "partners")
   private List<PartnerRepresentative> representatives;
 
   @OneToOne(cascade = CascadeType.PERSIST)
@@ -82,7 +83,7 @@ public class Partner extends ModelSuperclass {
 
   private String taxNumber;
 
-  private Integer socialNumber;
+  private Long socialNumber;
 
   private String phone;
 
@@ -265,12 +266,12 @@ public class Partner extends ModelSuperclass {
     this.taxNumber = taxNumber;
   }
 
-  public Integer getSocialNumber() {
+  public Long getSocialNumber() {
     return socialNumber;
   }
 
-  public void setSocialNumber(Integer socialNumber) {
-    this.socialNumber = socialNumber;
+  public void setSocialNumber(Long long1) {
+    this.socialNumber = long1;
   }
 
   public String getPhone() {

@@ -7,13 +7,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.exception.ConstraintViolationException;
@@ -77,7 +77,7 @@ public class HellopolandService extends ServiceSuperclass {
     partnerBO.setP24Id(merchantId);
     partnerBO.setCommission(partner.commission);
     partnerBO.setHptToken("temporaryToken");
-    if (partner.affiliation) {
+    if (BooleanUtils.isTrue(partner.affiliation)) {
       partnerBO.setAffiliateCode(RandomStringUtils.randomAlphanumeric(8));
     }
     String password = RandomStringUtils.randomAlphanumeric(10);
@@ -86,15 +86,23 @@ public class HellopolandService extends ServiceSuperclass {
           UserRole.Role.PARTNER, UserRole.Role.USHER);
       em.flush();
     } catch (Exception e) {
-      var exc = Optional.ofNullable(e.getCause()).map(ex -> ex.getCause()).orElseThrow(
-          () -> new ConflictingException("Błąd podczas zapisu do bazy nowego użytkownika."));
-      if (exc instanceof ConstraintViolationException) {
-        String errMsg = ((ConstraintViolationException) exc).getSQLException().getMessage();
+      var exc = e.getCause();
+      if (exc instanceof javax.validation.ConstraintViolationException) {
+        var errMsg = new StringBuilder();
+        ((javax.validation.ConstraintViolationException) exc).getConstraintViolations().forEach(
+            cv -> errMsg.append(cv.getPropertyPath() + " ").append(cv.getMessage() + ", "));
+        logger.log(Level.ERROR, "Błąd podczas dodawania partnera; " + errMsg.toString());
+        throw new ConflictingException("Błąd podczas dodawania partnera; " + errMsg.toString());
+      }
+
+      var exc2 = e.getCause().getCause();
+      if (exc2 instanceof ConstraintViolationException) {
+        String errMsg = ((ConstraintViolationException) exc2).getSQLException().getMessage();
         logger.log(Level.ERROR, "Błąd podczas dodawania partnera; " + errMsg);
         throw new ConflictingException(
             "Błąd podczas dodawania partnera; " + errMsg.substring(errMsg.indexOf("Klucz (")));
       }
-      throw (ConflictingException) exc;
+      throw new ConflictingException("Błąd podczas dodawania partnera");
     }
 
     partner.password = password;
@@ -158,7 +166,8 @@ public class HellopolandService extends ServiceSuperclass {
     partnerBO.setInvoiceEmail(merchant.invoice_email);
     partnerBO.setKrs(merchant.krs);
     partnerBO.setTaxNumber(merchant.nip);
-    partnerBO.setSocialNumber(merchant.pesel != null ? Integer.valueOf(merchant.pesel) : null);
+    partnerBO.setSocialNumber(
+        StringUtils.isNotBlank(merchant.pesel) ? Long.valueOf(merchant.pesel) : null);
     partnerBO.setPhone(merchant.phone_number);
     partnerBO.setRegon(merchant.regon);
     partnerBO.setServicesDescription(merchant.services_description);
@@ -190,7 +199,7 @@ public class HellopolandService extends ServiceSuperclass {
           Arrays.asList(merchant.representatives).stream().map(r -> {
             var rep = new PartnerRepresentative();
             rep.setName(r.name);
-            rep.setSocialNumber(r.pesel != null ? Integer.valueOf(r.pesel) : null);
+            rep.setSocialNumber(StringUtils.isNotBlank(r.pesel) ? Long.valueOf(r.pesel) : null);
             return rep;
           }).collect(Collectors.toList());
       partnerBO.setRepresentatives(representatives);

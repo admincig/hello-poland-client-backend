@@ -4,7 +4,6 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 @Entity
 public class ContactPerson extends ModelSuperclass {
@@ -16,7 +15,7 @@ public class ContactPerson extends ModelSuperclass {
   @NotBlank
   private String email;
 
-  @NotNull
+  @NotBlank
   private String phone;
 
   @OneToMany

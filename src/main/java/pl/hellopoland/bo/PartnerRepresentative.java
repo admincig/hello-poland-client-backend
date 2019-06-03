@@ -14,9 +14,9 @@ public class PartnerRepresentative extends ModelSuperclass {
   private String name;
 
   @NotNull
-  private Integer socialNumber;
+  private Long socialNumber;
 
-  @ManyToMany
+  @ManyToMany(mappedBy = "representatives")
   private List<Partner> partners;
 
   public String getName() {
@@ -27,11 +27,11 @@ public class PartnerRepresentative extends ModelSuperclass {
     this.name = name;
   }
 
-  public Integer getSocialNumber() {
+  public Long getSocialNumber() {
     return socialNumber;
   }
 
-  public void setSocialNumber(Integer socialNumber) {
+  public void setSocialNumber(Long socialNumber) {
     this.socialNumber = socialNumber;
   }
 
