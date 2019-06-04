@@ -3,6 +3,7 @@ package pl.hellopoland.service.timer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.PostConstruct;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Schedule;
@@ -16,13 +17,18 @@ import pl.hellopoland.util.HelloTicket;
 public class SightEventFetcherCacheScheduler {
 
   @Inject
-  private PartnerService partnerService;
+  PartnerService partnerService;
 
   private Map<Long, List<TicketPoolDefinitionDTO>> cache = new HashMap<>();
-  private HelloTicket hptClient =
-      new HelloTicket(partnerService.getPortal("Hello Ticket Cloud").getUrl());
+  private HelloTicket hptClient;
 
-  @Schedule(minute = "*/1", hour = "*", persistent = false)
+  @PostConstruct
+  private void afterConstruct() {
+    hptClient = new HelloTicket(partnerService.getPortal("Hello Ticket Cloud").getUrl());
+    populateCache();
+  }
+
+  @Schedule(minute = "*/2", hour = "*", persistent = false)
   private void populateCache() {
     partnerService.getAll().forEach(partner -> {
       var tpds = hptClient.getTicketPoolDefinitions(partner.getHptToken());
