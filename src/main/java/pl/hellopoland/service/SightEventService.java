@@ -41,6 +41,7 @@ import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.AccessDeniedException;
+import pl.hellopoland.service.timer.SightEventFetcherCacheScheduler;
 import pl.hellopoland.util.BeanUtils;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
@@ -50,6 +51,10 @@ import pl.hellopoland.util.Triplet;
 @LocalBean
 @Stateless
 public class SightEventService extends ServiceSuperclass {
+
+  @Inject
+  private SightEventFetcherCacheScheduler cache;
+
   @Inject
   private ImageService iService;
 
@@ -302,13 +307,11 @@ public class SightEventService extends ServiceSuperclass {
     if (hasAnyHptCloudEvent(bos)) {
       var pairedByIds = pairBosWithDtos(bos, sightEventDtos);
       var groupedByPartner = groupByPartner(pairedByIds);
-      HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
       Map<Long, List<TicketDefinition>> externalIdToTicket = null;
       // Map<Long, TicketDefinition> externalIdToTicket = null;
       for (var entry : groupedByPartner.entrySet()) {
         Partner partner = entry.getKey();
-        List<TicketPoolDefinitionDTO> poolDefinitions =
-            hpt.getTicketPoolDefinitions(partner.getHptToken());
+        List<TicketPoolDefinitionDTO> poolDefinitions = cache.getHptTPDs(partner.getHptToken());
         if (!showDeletedTPD) {
           poolDefinitions =
               poolDefinitions.stream().filter(tpd -> !tpd.deleted).collect(Collectors.toList());
