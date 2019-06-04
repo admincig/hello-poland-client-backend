@@ -311,7 +311,7 @@ public class SightEventService extends ServiceSuperclass {
       // Map<Long, TicketDefinition> externalIdToTicket = null;
       for (var entry : groupedByPartner.entrySet()) {
         Partner partner = entry.getKey();
-        List<TicketPoolDefinitionDTO> poolDefinitions = cache.getHptTPDs(partner.getHptToken());
+        List<TicketPoolDefinitionDTO> poolDefinitions = cache.getHptTPDs(partner.getId());
         if (!showDeletedTPD) {
           poolDefinitions =
               poolDefinitions.stream().filter(tpd -> !tpd.deleted).collect(Collectors.toList());

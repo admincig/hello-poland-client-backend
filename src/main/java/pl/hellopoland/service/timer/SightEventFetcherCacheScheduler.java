@@ -18,7 +18,7 @@ public class SightEventFetcherCacheScheduler {
   @Inject
   private PartnerService partnerService;
 
-  private Map<String, List<TicketPoolDefinitionDTO>> cache = new HashMap<>();
+  private Map<Long, List<TicketPoolDefinitionDTO>> cache = new HashMap<>();
   private HelloTicket hptClient =
       new HelloTicket(partnerService.getPortal("Hello Ticket Cloud").getUrl());
 
@@ -26,12 +26,12 @@ public class SightEventFetcherCacheScheduler {
   private void populateCache() {
     partnerService.getAll().forEach(partner -> {
       var tpds = hptClient.getTicketPoolDefinitions(partner.getHptToken());
-      cache.put(partner.getHptToken(), tpds);
+      cache.put(partner.getId(), tpds);
     });
   }
 
   @Lock(LockType.READ)
-  public List<TicketPoolDefinitionDTO> getHptTPDs(String hptToken) {
-    return cache.get(hptToken);
+  public List<TicketPoolDefinitionDTO> getHptTPDs(Long partnerId) {
+    return cache.get(partnerId);
   }
 }
