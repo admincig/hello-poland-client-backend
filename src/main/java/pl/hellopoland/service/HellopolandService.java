@@ -17,15 +17,18 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
+import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole;
 import pl.hellopoland.bo.UserRole.Role;
+import pl.hellopoland.config.PartnerCollectionConfig;
 import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.dto.RoleDTO;
 import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.email.EmailSendingRollbackException;
 import pl.hellopoland.util.HelloTicket;
+import pl.hellopoland.util.PagedEntityCollection;
 
 @LocalBean
 @Stateless
@@ -132,6 +135,11 @@ public class HellopolandService extends ServiceSuperclass {
     Stream<UserRole.Role> stream = roles.stream().map(r -> UserRole.Role.valueOf(r.name()))
         .filter(r -> !excluded_roles.contains(r) && !r.equals(UserRole.Role.USHER));
     return stream.toArray(UserRole.Role[]::new);
+  }
+
+  public PagedEntityCollection<Partner> getList(PartnerCollectionConfig config) {
+    List<Partner> partners = getQuery(config).getResultList();
+    return null;gdhfgf
   }
 
 }

@@ -43,7 +43,7 @@ public class HelloPolandRestService {
   @Path("/partners")
   public Response listPartners() {
     var config = new PartnerCollectionConfig();
-    return Response.ok(service.listPartners(config).build();
+    return Response.ok(service.listPartners(config)).build();
   }
 
   @GET
