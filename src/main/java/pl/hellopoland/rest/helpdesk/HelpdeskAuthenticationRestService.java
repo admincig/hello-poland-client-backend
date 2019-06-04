@@ -16,7 +16,7 @@ import pl.hellopoland.security.CurrentUser;
 @Path("/helpdesk")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@DeclareRoles({"root", "admin"})
+@DeclareRoles({"root", "admin", "salesman"})
 public class HelpdeskAuthenticationRestService {
 
   @Inject

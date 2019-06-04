@@ -409,6 +409,7 @@ public class DtoMapper {
 
   public static PartnerDTO getFullDTO(Partner bo) {
     var dto = getDTO(bo);
+    dto.affiliateCode = bo.getAffiliateCode();
     dto.users = Optional.ofNullable(bo.getUsers()).orElse(Collections.emptyList()).stream()
         .map(DtoMapper::getDTO).collect(Collectors.toList());
     // dto.sightEvents = ;
