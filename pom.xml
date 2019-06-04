@@ -24,6 +24,27 @@
 <!-- 		    <version>0.0.5</version> -->
 <!-- 		</dependency> -->
 		<dependency>
+		    <groupId>org.hibernate</groupId>
+		    <artifactId>hibernate-core</artifactId>
+		    <version>5.3.6.Final</version>
+		    <scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.ws.cxf</groupId>
+			<artifactId>jbossws-cxf-client</artifactId>
+			<version>5.2.4.Final</version>
+			<exclusions>
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
+				</exclusion>
+				<exclusion>
+    				<groupId>org.apache.geronimo.javamail</groupId>
+					<artifactId>geronimo-javamail_1.4_mail</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
 			<groupId>javax</groupId>
 			<artifactId>javaee-api</artifactId>
 			<version>8.0</version>
@@ -32,7 +53,7 @@
 		<dependency>
 			<groupId>pl.hellopoland</groupId>
 			<artifactId>hellopoland-dto</artifactId>
-			<version>1.0.21</version>
+			<version>1.0.25</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.microprofile.health</groupId>
@@ -190,5 +211,9 @@
 			<id>fream-nexus-releases</id>
 			<url>https://packages.fream.pl/repository/maven-fream-releases</url>
 		</repository>
+		<repository>
+            <id>redhat ga</id>
+            <url>https://maven.repository.redhat.com/ga</url>
+        </repository>
 	</repositories>
 </project>

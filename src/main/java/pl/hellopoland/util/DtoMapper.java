@@ -7,13 +7,16 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
+import pl.hellopoland.bo.Address;
 import pl.hellopoland.bo.Agreement;
+import pl.hellopoland.bo.ContactPerson;
 import pl.hellopoland.bo.FileDescriptor;
 import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.Location;
 import pl.hellopoland.bo.OpeningHours;
 import pl.hellopoland.bo.OrderDetails;
 import pl.hellopoland.bo.Partner;
+import pl.hellopoland.bo.PartnerRepresentative;
 import pl.hellopoland.bo.PassageCart;
 import pl.hellopoland.bo.PassageCartEntry;
 import pl.hellopoland.bo.Sight;
@@ -22,6 +25,7 @@ import pl.hellopoland.bo.TicketDefinition;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole;
 import pl.hellopoland.dto.AgreementDTO;
+import pl.hellopoland.dto.ContactPersonDTO;
 import pl.hellopoland.dto.FileDescriptorDTO;
 import pl.hellopoland.dto.ImageDTO;
 import pl.hellopoland.dto.LocationDTO;
@@ -30,6 +34,7 @@ import pl.hellopoland.dto.P24PassageCartDTO;
 import pl.hellopoland.dto.P24PassageCartEntryDTO;
 import pl.hellopoland.dto.P24PassageTransactionParamsDTO;
 import pl.hellopoland.dto.PartnerDTO;
+import pl.hellopoland.dto.PartnerRepresentativeDTO;
 import pl.hellopoland.dto.RoleDTO;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.dto.SightEventDTO;
@@ -200,6 +205,15 @@ public class DtoMapper {
     dto.city = bo.getCity();
     dto.country = bo.getCountry();
     dto.directions = bo.getDirections();
+    return dto;
+  }
+
+  private static LocationDTO getDTO(Address address) {
+    LocationDTO dto = new LocationDTO();
+    dto.street = address.getStreet();
+    dto.zipCode = address.getPostCode();
+    dto.city = address.getCity();
+    dto.country = address.getCountry();
     return dto;
   }
 
@@ -404,6 +418,17 @@ public class DtoMapper {
     dto.p24MerchantId = bo.getP24Id();
     dto.commission = bo.getCommission();
     dto.email = bo.getEmail();
+    dto.affiliateCode = bo.getAffiliateCode();
+    dto.bankAccount = bo.getBankAccount();
+    dto.businessType = bo.getBusinessType().getValue();
+    dto.invoiceEmail = bo.getInvoiceEmail();
+    dto.krs = bo.getKrs();
+    dto.taxNumber = bo.getTaxNumber();
+    dto.socialNumber = String.valueOf(bo.getSocialNumber());
+    dto.phone = bo.getPhone();
+    dto.regon = bo.getRegon();
+    dto.servicesDescription = bo.getServicesDescription();
+    dto.shopUrl = bo.getShopUrl();
     return dto;
   }
 
@@ -411,8 +436,28 @@ public class DtoMapper {
     var dto = getDTO(bo);
     dto.users = Optional.ofNullable(bo.getUsers()).orElse(Collections.emptyList()).stream()
         .map(DtoMapper::getDTO).collect(Collectors.toList());
-    // dto.sightEvents = ;
-    // dto.agreements = ;
+    dto.location = getDTO(bo.getAddress());
+    dto.correspondenceAddress = getDTO(bo.getCorrespondenceAddress());
+    dto.technicalContact = getDTO(bo.getTechnicalContact());
+    dto.contactPerson = getDTO(bo.getContactPerson());
+    dto.representatives =
+        Optional.ofNullable(bo.getRepresentatives()).orElse(Collections.emptyList()).stream()
+            .map(DtoMapper::getDTO).collect(Collectors.toList());
+    return dto;
+  }
+
+  private static ContactPersonDTO getDTO(ContactPerson bo) {
+    var dto = new ContactPersonDTO();
+    dto.name = bo.getName();
+    dto.email = bo.getEmail();
+    dto.phone = bo.getPhone();
+    return dto;
+  }
+
+  private static PartnerRepresentativeDTO getDTO(PartnerRepresentative bo) {
+    var dto = new PartnerRepresentativeDTO();
+    dto.name = bo.getName();
+    dto.socialNumber = String.valueOf(bo.getSocialNumber());
     return dto;
   }
 

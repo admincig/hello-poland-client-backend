@@ -275,6 +275,14 @@ public class HelloTicket {
     }
   }
 
+  public void removePartner(String partnerEmail, String hptToken) {
+    try {
+      delete("/v1/helpdesk/partners/" + partnerEmail, hptToken);
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+    }
+  }
+
   public void stopSale(String hptToken, Long sightEventHptId, Long ticketPoolDefId, Date date) {
     try {
       var dateFormat = new SimpleDateFormat("yyyy-MM-dd");
