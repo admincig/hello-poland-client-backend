@@ -307,13 +307,11 @@ public class SightEventService extends ServiceSuperclass {
     if (hasAnyHptCloudEvent(bos)) {
       var pairedByIds = pairBosWithDtos(bos, sightEventDtos);
       var groupedByPartner = groupByPartner(pairedByIds);
-      HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
       Map<Long, List<TicketDefinition>> externalIdToTicket = null;
       // Map<Long, TicketDefinition> externalIdToTicket = null;
       for (var entry : groupedByPartner.entrySet()) {
         Partner partner = entry.getKey();
-        List<TicketPoolDefinitionDTO> poolDefinitions =
-            hpt.getTicketPoolDefinitions(partner.getHptToken());
+        List<TicketPoolDefinitionDTO> poolDefinitions = cache.getHptTPDs(partner.getId());
         if (!showDeletedTPD) {
           poolDefinitions =
               poolDefinitions.stream().filter(tpd -> !tpd.deleted).collect(Collectors.toList());
