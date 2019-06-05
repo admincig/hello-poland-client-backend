@@ -4,9 +4,11 @@ import java.lang.System.Logger.Level;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -231,6 +233,7 @@ public class HellopolandService extends ServiceSuperclass {
 
   public PagedEntityCollection<Partner> getList(PartnerCollectionConfig config) {
     List<Partner> partners = getQuery(config).getResultList();
+    Collections.sort(partners, getNamesComparator(Partner::getName, new Locale("pl_PL")));
     return new PagedEntityCollection<>(partners, config);
   }
 

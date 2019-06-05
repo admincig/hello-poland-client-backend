@@ -39,8 +39,6 @@ public class HellopolandServiceAPI {
 
   @RolesAllowed("admin")
   public PagedCollection listPartners(PartnerCollectionConfig config) {
-    config.setOrderColumn("name");
-    config.setOrderDirection("asc");
     PagedEntityCollection<Partner> bos = service.getList(config);
     var dtos = bos.items.stream().map(bo -> DtoMapper.getFullDTO(bo)).collect(Collectors.toList());
     return new PagedCollection(dtos, bos.config);

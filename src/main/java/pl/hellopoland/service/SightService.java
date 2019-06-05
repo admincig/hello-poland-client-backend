@@ -1,10 +1,8 @@
 package pl.hellopoland.service;
 
 import java.io.ByteArrayInputStream;
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -63,15 +61,9 @@ public class SightService extends ServiceSuperclass {
     if (language != null) {
       sights = translationService.translateEntities(sights, language, false);
     }
-    Collections.sort(sights, sightNamesComparator(new Locale("pl_PL")));
+    Collections.sort(sights, getNamesComparator(Sight::getName, new Locale("pl_PL")));
 
     return new PagedEntityCollection<>(sights, config);
-  }
-
-  private Comparator<Sight> sightNamesComparator(Locale locale) {
-    var collator = Collator.getInstance(locale);
-    collator.setStrength(Collator.CANONICAL_DECOMPOSITION);
-    return Comparator.comparing(Sight::getName, collator);
   }
 
   public Sight create(SightDTO dto, Partner partner) {
