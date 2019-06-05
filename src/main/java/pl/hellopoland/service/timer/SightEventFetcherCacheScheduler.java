@@ -3,17 +3,18 @@ package pl.hellopoland.service.timer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
-import javax.ejb.Lock;
-import javax.ejb.LockType;
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
+import javax.ejb.Startup;
 import javax.inject.Inject;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.service.PartnerService;
 import pl.hellopoland.util.HelloTicket;
 
 @Singleton
+@Startup
 public class SightEventFetcherCacheScheduler {
 
   @Inject
@@ -36,8 +37,14 @@ public class SightEventFetcherCacheScheduler {
     });
   }
 
-  @Lock(LockType.READ)
   public List<TicketPoolDefinitionDTO> getHptTPDs(Long partnerId) {
-    return cache.get(partnerId);
+    return cache.get(partnerId).stream().map(t -> {
+      try {
+        return (TicketPoolDefinitionDTO) t.clone();
+      } catch (CloneNotSupportedException e) {
+        System.out.println("failed to clone");
+        return t;
+      }
+    }).collect(Collectors.toList());
   }
 }
