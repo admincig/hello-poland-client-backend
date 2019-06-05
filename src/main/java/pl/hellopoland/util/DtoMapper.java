@@ -209,12 +209,15 @@ public class DtoMapper {
   }
 
   private static LocationDTO getDTO(Address address) {
-    LocationDTO dto = new LocationDTO();
-    dto.street = address.getStreet();
-    dto.zipCode = address.getPostCode();
-    dto.city = address.getCity();
-    dto.country = address.getCountry();
-    return dto;
+    if (address != null) {
+      LocationDTO dto = new LocationDTO();
+      dto.street = address.getStreet();
+      dto.zipCode = address.getPostCode();
+      dto.city = address.getCity();
+      dto.country = address.getCountry();
+      return dto;
+    }
+    return null;
   }
 
   public static TicketDefinitionDTO getDTO(TicketDefinition bo) {
@@ -420,7 +423,7 @@ public class DtoMapper {
     dto.email = bo.getEmail();
     dto.affiliateCode = bo.getAffiliateCode();
     dto.bankAccount = bo.getBankAccount();
-    dto.businessType = bo.getBusinessType().getValue();
+    dto.businessType = bo.getBusinessType() != null ? bo.getBusinessType().getValue() : null;
     dto.invoiceEmail = bo.getInvoiceEmail();
     dto.krs = bo.getKrs();
     dto.taxNumber = bo.getTaxNumber();
@@ -438,8 +441,9 @@ public class DtoMapper {
         .map(DtoMapper::getDTO).collect(Collectors.toList());
     dto.location = getDTO(bo.getAddress());
     dto.correspondenceAddress = getDTO(bo.getCorrespondenceAddress());
-    dto.technicalContact = getDTO(bo.getTechnicalContact());
-    dto.contactPerson = getDTO(bo.getContactPerson());
+    dto.technicalContact =
+        bo.getTechnicalContact() != null ? getDTO(bo.getTechnicalContact()) : null;
+    dto.contactPerson = bo.getContactPerson() != null ? getDTO(bo.getContactPerson()) : null;
     dto.representatives =
         Optional.ofNullable(bo.getRepresentatives()).orElse(Collections.emptyList()).stream()
             .map(DtoMapper::getDTO).collect(Collectors.toList());

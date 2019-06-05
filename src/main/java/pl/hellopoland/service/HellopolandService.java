@@ -231,7 +231,7 @@ public class HellopolandService extends ServiceSuperclass {
 
   public PagedEntityCollection<Partner> getList(PartnerCollectionConfig config) {
     List<Partner> partners = getQuery(config).getResultList();
-    return null;
+    return new PagedEntityCollection<>(partners, config);
   }
 
 }
