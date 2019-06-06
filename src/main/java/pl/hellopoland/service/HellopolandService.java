@@ -100,7 +100,7 @@ public class HellopolandService extends ServiceSuperclass {
         String errMsg = ((ConstraintViolationException) exc2).getSQLException().getMessage();
         logger.log(Level.ERROR, "Błąd podczas dodawania partnera; " + errMsg);
         throw new ConflictingException(
-            "Błąd podczas dodawania partnera; " + errMsg.substring(errMsg.indexOf("Klucz (")));
+            "Błąd podczas dodawania partnera; " + errMsg.substring(errMsg.lastIndexOf(": ") + 1));
       }
       throw new ConflictingException("Błąd podczas dodawania partnera");
     }
