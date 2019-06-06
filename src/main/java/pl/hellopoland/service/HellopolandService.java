@@ -13,7 +13,6 @@ import java.util.stream.Stream;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.exception.ConstraintViolationException;
@@ -77,9 +76,9 @@ public class HellopolandService extends ServiceSuperclass {
     partnerBO.setP24Id(merchantId);
     partnerBO.setCommission(partner.commission);
     partnerBO.setHptToken("temporaryToken");
-    if (BooleanUtils.isTrue(partner.affiliation)) {
-      partnerBO.setAffiliateCode(RandomStringUtils.randomAlphanumeric(8));
-    }
+    // if (BooleanUtils.isTrue(partner.affiliation)) {
+    partnerBO.setAffiliateCode(RandomStringUtils.randomAlphanumeric(8));
+    // }
     String password = RandomStringUtils.randomAlphanumeric(10);
     try {
       userService.create(partner.email, password, null, null, null, partnerBO,
