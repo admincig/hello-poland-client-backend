@@ -1,7 +1,8 @@
 package pl.hellopoland.service;
 
-import java.io.UnsupportedEncodingException;
+import java.lang.System.Logger.Level;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,10 +13,14 @@ import java.util.stream.Stream;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.mail.MessagingException;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.exception.ConstraintViolationException;
+import pl.hellopoland.bo.Address;
+import pl.hellopoland.bo.ContactPerson;
 import pl.hellopoland.bo.Partner;
+import pl.hellopoland.bo.PartnerRepresentative;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole;
@@ -25,7 +30,13 @@ import pl.hellopoland.dto.RoleDTO;
 import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.email.EmailSendingRollbackException;
+import pl.hellopoland.soap.p24.enums.BusinessType;
+import pl.hellopoland.soap.p24.enums.Trade;
+import pl.hellopoland.soap.p24.object.MerchantRegisterRequest;
+import pl.hellopoland.soap.p24.service.P24SOAPClient;
 import pl.hellopoland.util.HelloTicket;
+import pl.hellopoland.util.soap.p24.MerchantRegisterValidator;
+
 
 @LocalBean
 @Stateless
@@ -34,9 +45,11 @@ public class HellopolandService extends ServiceSuperclass {
   private UserService userService;
   @Inject
   private EmailService emailService;
+  @Inject
+  private P24SOAPClient p24SOAPClient;
 
-  final Set<UserRole.Role> excluded_roles =
-      Set.of(UserRole.Role.ROOT, UserRole.Role.ADMIN, UserRole.Role.PARTNER);
+  final Set<UserRole.Role> excluded_roles = Set.of(UserRole.Role.ROOT, UserRole.Role.ADMIN,
+      UserRole.Role.PARTNER, UserRole.Role.SALESMAN);
 
   public Partner addPartner(PartnerDTO partner) {
     if (StringUtils.isBlank(partner.email)) {
@@ -53,22 +66,50 @@ public class HellopolandService extends ServiceSuperclass {
       throw new ConflictingException("The partner commission is out of range: 0 - 100.");
     }
 
-    // 1. creating a partner and the user in hpl:
-    var partnerBO = new Partner();
-    partnerBO.setName(partner.name);
-    partnerBO.setP24Id(partner.p24MerchantId);
+    // 1. creating a partner in p24:
+    var merchant = new MerchantRegisterRequest(partner);
+    MerchantRegisterValidator.validate(merchant);
+    Integer merchantId = p24SOAPClient.merchantRegistration(merchant);
+
+    // 2. creating a partner and the user in hpl:
+    var partnerBO = getPartnerFromMerchantRegisterRequest(merchant);
+    partnerBO.setCreated(LocalDateTime.now());
+    partnerBO.setP24Id(merchantId);
     partnerBO.setCommission(partner.commission);
     partnerBO.setHptToken("temporaryToken");
-    partnerBO.setEmail(partner.email);
-    partnerBO.setAffiliateCode(partner.affiliateCode);
+    if (BooleanUtils.isTrue(partner.affiliation)) {
+      partnerBO.setAffiliateCode(RandomStringUtils.randomAlphanumeric(8));
+    }
     String password = RandomStringUtils.randomAlphanumeric(10);
-    userService.create(partner.email, password, null, null, null, partnerBO, UserRole.Role.PARTNER,
-        UserRole.Role.USHER);
+    try {
+      userService.create(partner.email, password, null, null, null, partnerBO,
+          UserRole.Role.PARTNER, UserRole.Role.USHER);
+      em.flush();
+    } catch (Exception e) {
+      var exc = e.getCause();
+      if (exc instanceof javax.validation.ConstraintViolationException) {
+        var errMsg = new StringBuilder();
+        ((javax.validation.ConstraintViolationException) exc).getConstraintViolations().forEach(
+            cv -> errMsg.append(cv.getPropertyPath() + " ").append(cv.getMessage() + ", "));
+        logger.log(Level.ERROR, "Błąd podczas dodawania partnera; " + errMsg.toString());
+        throw new ConflictingException("Błąd podczas dodawania partnera; " + errMsg.toString());
+      }
+
+      var exc2 = e.getCause().getCause();
+      if (exc2 instanceof ConstraintViolationException) {
+        String errMsg = ((ConstraintViolationException) exc2).getSQLException().getMessage();
+        logger.log(Level.ERROR, "Błąd podczas dodawania partnera; " + errMsg);
+        throw new ConflictingException(
+            "Błąd podczas dodawania partnera; " + errMsg.substring(errMsg.lastIndexOf(": ") + 1));
+      }
+      throw new ConflictingException("Błąd podczas dodawania partnera");
+    }
+
     partner.password = password;
     var emailPassword = new HashMap<String, String>();
     emailPassword.put(partner.email, password);
 
-    // 2. creating users (excluded ushers) of the partner in hpl:
+    // 3. creating users (excluded ushers) of the partner in hpl:
     var usersDTOs = partner.users;
     if (usersDTOs != null && !usersDTOs.isEmpty()) {
       for (UserDTO userDTO : usersDTOs) {
@@ -89,11 +130,12 @@ public class HellopolandService extends ServiceSuperclass {
       }
     }
 
-    // 3. creating a partner in hpt:
+    // 4. creating a partner in hpt:
+    Portal hpt = getPortal("Hello Ticket Cloud");
+    var ht = new HelloTicket(hpt.getUrl());
+    var hptToken = getLoggedUser().getHptToken();
     try {
-      Portal hpt = getPortal("Hello Ticket Cloud");
-      var ht = new HelloTicket(hpt.getUrl());
-      var hptPartner = ht.addPartner(partner, getLoggedUser().getHptToken());
+      var hptPartner = ht.addPartner(partner, hptToken);
       partnerBO.setHptToken(hptPartner.token);
     } catch (Exception e) {
       throw new ConflictingException("Nie udało się stworzyć partnera w zewnętrznym systemie", e);
@@ -104,12 +146,64 @@ public class HellopolandService extends ServiceSuperclass {
       try {
         emailService.sendEmail(key, "Nowe konto w Hello Poland.",
             "Twój login to " + key + ", hasło to " + value);
-      } catch (MessagingException | UnsupportedEncodingException e) {
+      } catch (Exception e) {
         logger.log(System.Logger.Level.ERROR, e.getLocalizedMessage());
-        throw new EmailSendingRollbackException();
+        ht.removePartner(partner.email, hptToken);
+        throw new EmailSendingRollbackException("Błąd podczas wysyłania maila do: " + key);
       }
     });
 
+    return partnerBO;
+  }
+
+  private Partner getPartnerFromMerchantRegisterRequest(MerchantRegisterRequest merchant) {
+    var partnerBO = new Partner();
+    partnerBO.setBusinessType(BusinessType.getBusinessType(merchant.business_type));
+    partnerBO.setTrade(Trade.SPORT_LEISURE);
+    partnerBO.setBankAccount(merchant.bank_account);
+    partnerBO.setName(merchant.name);
+    partnerBO.setEmail(merchant.email);
+    partnerBO.setInvoiceEmail(merchant.invoice_email);
+    partnerBO.setKrs(merchant.krs);
+    partnerBO.setTaxNumber(merchant.nip);
+    partnerBO.setSocialNumber(
+        StringUtils.isNotBlank(merchant.pesel) ? Long.valueOf(merchant.pesel) : null);
+    partnerBO.setPhone(merchant.phone_number);
+    partnerBO.setRegon(merchant.regon);
+    partnerBO.setServicesDescription(merchant.services_description);
+    partnerBO.setShopUrl(merchant.shop_url);
+    var address = new Address();
+    address.setCountry(merchant.address.country);
+    address.setCity(merchant.address.city);
+    address.setPostCode(merchant.address.post_code);
+    address.setStreet(merchant.address.street);
+    partnerBO.setAddress(address);
+    var correspondenceAddress = new Address();
+    correspondenceAddress.setCountry(merchant.correspondence_address.country);
+    correspondenceAddress.setCity(merchant.correspondence_address.city);
+    correspondenceAddress.setPostCode(merchant.correspondence_address.post_code);
+    correspondenceAddress.setStreet(merchant.correspondence_address.street);
+    partnerBO.setCorrespondenceAddress(correspondenceAddress);
+    var contactPerson = new ContactPerson();
+    contactPerson.setEmail(merchant.contact_person.email);
+    contactPerson.setName(merchant.contact_person.name);
+    contactPerson.setPhone(merchant.contact_person.phone_number);
+    partnerBO.setContactPerson(contactPerson);
+    var technicalContact = new ContactPerson();
+    technicalContact.setEmail(merchant.technical_contact.email);
+    technicalContact.setName(merchant.technical_contact.name);
+    technicalContact.setPhone(merchant.technical_contact.phone_number);
+    partnerBO.setTechnicalContact(technicalContact);
+    if (merchant.representatives != null) {
+      List<PartnerRepresentative> representatives =
+          Arrays.asList(merchant.representatives).stream().map(r -> {
+            var rep = new PartnerRepresentative();
+            rep.setName(r.name);
+            rep.setSocialNumber(StringUtils.isNotBlank(r.pesel) ? Long.valueOf(r.pesel) : null);
+            return rep;
+          }).collect(Collectors.toList());
+      partnerBO.setRepresentatives(representatives);
+    }
     return partnerBO;
   }
 

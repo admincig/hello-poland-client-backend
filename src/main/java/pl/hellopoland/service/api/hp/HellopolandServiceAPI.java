@@ -30,7 +30,7 @@ public class HellopolandServiceAPI {
   @Inject
   private OrderService orderService;
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"admin", "salesman"})
   public PartnerDTO addPartner(PartnerDTO partner) {
     return DtoMapper.getFullDTO(service.addPartner(partner));
   }

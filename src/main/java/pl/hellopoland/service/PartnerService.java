@@ -1,5 +1,6 @@
 package pl.hellopoland.service;
 
+import java.util.List;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import pl.hellopoland.bo.Partner;
@@ -17,5 +18,9 @@ public class PartnerService extends ServiceSuperclass {
   public Partner findByToken(String token) {
     return em.createQuery("select partner from Partner partner where partner.hptToken=:token",
         Partner.class).setParameter("token", token).getSingleResult();
+  }
+
+  public List<Partner> getAll() {
+    return em.createQuery("from Partner order by id asc", Partner.class).getResultList();
   }
 }

@@ -41,6 +41,7 @@ import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.AccessDeniedException;
+import pl.hellopoland.service.timer.SightEventFetcherCacheScheduler;
 import pl.hellopoland.util.BeanUtils;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
@@ -50,6 +51,10 @@ import pl.hellopoland.util.Triplet;
 @LocalBean
 @Stateless
 public class SightEventService extends ServiceSuperclass {
+
+  @Inject
+  private SightEventFetcherCacheScheduler cache;
+
   @Inject
   private ImageService iService;
 
