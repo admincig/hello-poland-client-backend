@@ -40,8 +40,6 @@ public class MarketSightEventRestService {
       @HeaderParam("Accept-Language") String acceptLanguage,
       @HeaderParam("Content-Language") String contentLanguage) {
     var config = new SightEventPagedCollectionConfig();
-    config.onlyActive();
-    config.onlyPublished();
     config.setCity(city);
     return service.getList(config, fromDate, toDate,
         contentLanguage != null ? contentLanguage : acceptLanguage);
@@ -55,8 +53,6 @@ public class MarketSightEventRestService {
       @HeaderParam("Accept-Language") String acceptLanguage,
       @HeaderParam("Content-Language") String contentLanguage) {
     var config = new SightEventPagedCollectionConfig();
-    config.onlyActive();
-    config.onlyPublished();
     config.setSearchQuery(searchQuery);
     config.setCity(city);
     return service.getList(config, fromDate, toDate,
@@ -70,9 +66,6 @@ public class MarketSightEventRestService {
       @QueryParam("toDate") @DateFormat Date toDate, @QueryParam("city") String city,
       @HeaderParam("Accept-Language") String acceptLanguage,
       @HeaderParam("Content-Language") String contentLanguage) {
-    config.onlyActive();
-    config.onlyActive();
-    config.onlyPublished();
     config.setCity(city);
     return service.getList(config, fromDate, toDate,
         contentLanguage != null ? contentLanguage : acceptLanguage);
