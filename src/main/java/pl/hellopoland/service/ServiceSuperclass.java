@@ -4,9 +4,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.System.Logger;
+import java.text.Collator;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Properties;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
@@ -136,6 +140,13 @@ public abstract class ServiceSuperclass {
 
   public Partner getLoggedPartner() {
     return getLoggedUser().getPartner();
+  }
+
+  protected <T extends ModelSuperclass> Comparator<T> getNamesComparator(
+      Function<T, String> function, Locale locale) {
+    var collator = Collator.getInstance(locale);
+    collator.setStrength(Collator.CANONICAL_DECOMPOSITION);
+    return Comparator.comparing(function, collator);
   }
 
   @AroundInvoke

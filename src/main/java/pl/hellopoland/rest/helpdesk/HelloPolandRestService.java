@@ -18,6 +18,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import pl.hellopoland.annotation.DateFormat;
+import pl.hellopoland.config.PartnerCollectionConfig;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
@@ -36,6 +37,13 @@ public class HelloPolandRestService {
   @Path("/partners")
   public PartnerDTO add(PartnerDTO partner) {
     return service.addPartner(partner);
+  }
+
+  @GET
+  @Path("/partners")
+  public Response listPartners() {
+    var config = new PartnerCollectionConfig();
+    return Response.ok(service.listPartners(config)).build();
   }
 
   @GET

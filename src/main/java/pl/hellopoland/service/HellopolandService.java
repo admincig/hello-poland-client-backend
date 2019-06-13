@@ -4,9 +4,11 @@ import java.lang.System.Logger.Level;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -25,6 +27,7 @@ import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole;
 import pl.hellopoland.bo.UserRole.Role;
+import pl.hellopoland.config.PartnerCollectionConfig;
 import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.dto.RoleDTO;
 import pl.hellopoland.dto.UserDTO;
@@ -35,8 +38,8 @@ import pl.hellopoland.soap.p24.enums.Trade;
 import pl.hellopoland.soap.p24.object.MerchantRegisterRequest;
 import pl.hellopoland.soap.p24.service.P24SOAPClient;
 import pl.hellopoland.util.HelloTicket;
+import pl.hellopoland.util.PagedEntityCollection;
 import pl.hellopoland.util.soap.p24.MerchantRegisterValidator;
-
 
 @LocalBean
 @Stateless
@@ -226,6 +229,12 @@ public class HellopolandService extends ServiceSuperclass {
     Stream<UserRole.Role> stream = roles.stream().map(r -> UserRole.Role.valueOf(r.name()))
         .filter(r -> !excluded_roles.contains(r) && !r.equals(UserRole.Role.USHER));
     return stream.toArray(UserRole.Role[]::new);
+  }
+
+  public PagedEntityCollection<Partner> getList(PartnerCollectionConfig config) {
+    List<Partner> partners = getQuery(config).getResultList();
+    Collections.sort(partners, getNamesComparator(Partner::getName, new Locale("pl_PL")));
+    return new PagedEntityCollection<>(partners, config);
   }
 
 }

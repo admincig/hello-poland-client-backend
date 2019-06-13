@@ -12,7 +12,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 import pl.hellopoland.soap.p24.enums.BusinessType;
 import pl.hellopoland.soap.p24.enums.Trade;
@@ -63,13 +62,12 @@ public class Partner extends ModelSuperclass {
   private Trade trade;
 
   @ManyToMany(cascade = CascadeType.PERSIST)
-  // @ManyToMany(mappedBy = "partners")
   private List<PartnerRepresentative> representatives;
 
-  @OneToOne(cascade = CascadeType.PERSIST)
+  @ManyToOne(cascade = CascadeType.PERSIST)
   private Address address;
 
-  @OneToOne(cascade = CascadeType.PERSIST)
+  @ManyToOne(cascade = CascadeType.PERSIST)
   private Address correspondenceAddress;
 
   private String bankAccount;
