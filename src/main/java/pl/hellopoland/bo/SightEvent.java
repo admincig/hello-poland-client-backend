@@ -287,6 +287,10 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
     }
   }
 
+  public boolean canBeDysplayed() {
+    return published && active && !blocked && sight.canBeDysplayed();
+  }
+
   public boolean isPublished() {
     return published;
   }

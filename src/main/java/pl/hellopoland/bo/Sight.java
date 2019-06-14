@@ -205,6 +205,10 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
     this.agreements = agreements;
   }
 
+  public boolean canBeDysplayed() {
+    return published && active && !blocked;
+  }
+
   public boolean isPublished() {
     return published;
   }
