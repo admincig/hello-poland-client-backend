@@ -458,10 +458,10 @@ public class SightEventService extends ServiceSuperclass {
     var pdf = bo.getPdfAttachment();
     if (pdf != null) {
       fdService.deleteFile(Paths.get(pdf.getPath()));
-      bo.setPdfAttachment(null);
       Portal hpt = getPortal("Hello Ticket Cloud");
       HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
       helloTicket.deletePdfFromSightEvent(bo, bo.getPartner().getHptToken());
+      bo.setPdfAttachment(null);
       return;
     }
     logger.log(Level.INFO, "SightEvent [id=" + bo.getId() + "] doesn't have a pdf file ");
