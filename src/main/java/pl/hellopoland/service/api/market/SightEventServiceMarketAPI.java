@@ -46,7 +46,7 @@ public class SightEventServiceMarketAPI {
     config.setOrderDirection("asc");
     PagedEntityCollection<SightEvent> bos = service.getList(config, language);
 
-    var sEvents = bos.items.stream().filter(se -> se.canBeDysplayed()).collect(Collectors.toList());
+    var sEvents = bos.items.stream().filter(se -> se.isAccessible()).collect(Collectors.toList());
     bos.items = sEvents;
 
     List<SightEventDTO> dtos = bos.items.stream().map(bo -> {
@@ -71,7 +71,7 @@ public class SightEventServiceMarketAPI {
   public SightEventDTO get(Long id, String contentLanguageSymbol) {
     LanguageVersion language = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
     SightEvent bo = service.get(id);
-    if (bo.canBeDysplayed()) {
+    if (bo.isAccessible()) {
       if (language != null) {
         bo = translationService.translateEntity(bo, language, true);
         // var agreements = bo.getAgreements();
