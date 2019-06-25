@@ -10,8 +10,10 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.json.JsonArray;
 import javax.json.JsonException;
@@ -417,6 +419,34 @@ public class HelloTicket {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
       throw new ConflictingException(
           "Nie udało się utworzyć biletera w zewnętrznym systemie." + e.getLocalizedMessage());
+    }
+  }
+
+  public List<SightEvent> getAvailableSightEvents(List<SightEvent> sightEvents) {
+    String json = JsonbConfig.getInstance()
+        .toJson(sightEvents.stream().map(SightEvent::getHptId).collect(Collectors.toSet()));
+    try {
+      final Jsonb jsonb = JsonbConfig.getInstance();
+      JsonStructure respJson = post("/v1/sight-events/available", json, AUTH_TOKEN);
+      JsonArray jsonArray = (JsonArray) respJson;
+      Set<Long> resp = new HashSet<>();
+      jsonArray.forEach(p -> {
+        var id = jsonb.fromJson(p.toString(), Long.class);
+        resp.add(id);
+      });
+      var result = new ArrayList<SightEvent>();
+      resp.forEach(hptId -> {
+        for (SightEvent se : sightEvents) {
+          if (hptId.equals(se.getHptId())) {
+            result.add(se);
+            break;
+          }
+        }
+      });
+      return result;
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      return null;
     }
   }
 

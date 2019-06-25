@@ -51,14 +51,15 @@ public class SightEventServiceMarketAPI {
     if (language != null) {
       dtos.forEach(dto -> dto.language = language.getLanuage());
     }
-    service.fetchTicketPoolDefinitions(bos.items, dtos, false);
-
-    List<SightEventDTO> list = dtos.stream().filter(dto -> service.isAvailable(dto,
-        getFromDateWithCurrentTime(fromDate), getToDateForEndDay(toDate))).map(dto -> {
-          dto.ticketPoolDefinitions = null;
-          return dto;
-        }).collect(Collectors.toList());
-    return new PagedCollection(list, bos.config);
+    // service.fetchTicketPoolDefinitions(bos.items, dtos, false);
+    //
+    // List<SightEventDTO> list = dtos.stream().filter(dto -> service.isAvailable(dto,
+    // getFromDateWithCurrentTime(fromDate), getToDateForEndDay(toDate))).map(dto -> {
+    // dto.ticketPoolDefinitions = null;
+    // return dto;
+    // }).collect(Collectors.toList());
+    // return new PagedCollection(list, bos.config);
+    return new PagedCollection(dtos, bos.config);
   }
 
   @PermitAll
