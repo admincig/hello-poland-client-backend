@@ -109,7 +109,7 @@ public abstract class ServiceSuperclass {
       tq.setMaxResults(config.getPageSize());
       tq.setFirstResult(config.getPageSize() * config.getPageNum());
     }
-    logger.log(Logger.Level.INFO, humanReadable(query, config.getConditions()));
+    // logger.log(Logger.Level.INFO, humanReadable(query, config.getConditions()));
     return tq;
   }
 

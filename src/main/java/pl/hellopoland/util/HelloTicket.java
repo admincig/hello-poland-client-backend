@@ -1,6 +1,8 @@
 package pl.hellopoland.util;
 
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+import static javax.ws.rs.core.Response.Status.OK;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -400,9 +402,10 @@ public class HelloTicket {
   }
 
   public void deletePdfFromSightEvent(SightEvent sightEvent, String partnerAuthToken) {
+    String pdfPath = sightEvent.getPdfAttachment().getPath();
+    var pdfName = pdfPath.substring(pdfPath.lastIndexOf(File.separator) + 1);
     try {
-      delete("/v1/sight-events/" + sightEvent.getHptId() + "/pdf/"
-          + sightEvent.getPdfAttachment().getPath(), partnerAuthToken);
+      delete("/v1/sight-events/" + sightEvent.getHptId() + "/pdf/" + pdfName, partnerAuthToken);
     } catch (IOException e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
       throw new ConflictingException(
@@ -536,7 +539,7 @@ public class HelloTicket {
     logger.log(System.Logger.Level.INFO, "Server responded with code: " + respCode);
     is.close();
 
-    if (respCode != NO_CONTENT.getStatusCode()) {
+    if (respCode != NO_CONTENT.getStatusCode() && respCode != OK.getStatusCode()) {
       throw new CannotDeleteSightEventFromExternalSystemException();
     }
     return respCode;

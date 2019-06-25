@@ -288,6 +288,15 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
     }
   }
 
+  /**
+   * Check whether this SightEvent is active, published, not blocked and its Sight is accessible.
+   * 
+   * @return boolean
+   */
+  public boolean isAccessible() {
+    return published && active && !blocked && sight.isAccessible();
+  }
+
   public boolean isPublished() {
     return published;
   }
