@@ -289,7 +289,7 @@ public class HelloTicket {
 
   public void stopSale(String hptToken, Long sightEventHptId, Long ticketPoolDefId, Date date) {
     try {
-      var dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+      final var dateFormat = new SimpleDateFormat("yyyy-MM-dd");
       String dateString = dateFormat.format(date);
       delete("/v1/sight-events/" + sightEventHptId + "/sale?tpdId=" + ticketPoolDefId + "&date="
           + dateString, hptToken);
@@ -431,6 +431,41 @@ public class HelloTicket {
     try {
       final Jsonb jsonb = JsonbConfig.getInstance();
       JsonStructure respJson = post("/v1/sight-events/available", json, AUTH_TOKEN);
+      JsonArray jsonArray = (JsonArray) respJson;
+      Set<Long> resp = new HashSet<>();
+      jsonArray.forEach(p -> {
+        var id = jsonb.fromJson(p.toString(), Long.class);
+        resp.add(id);
+      });
+      var result = new ArrayList<SightEvent>();
+      resp.forEach(hptId -> {
+        for (SightEvent se : sightEvents) {
+          if (hptId.equals(se.getHptId())) {
+            result.add(se);
+            break;
+          }
+        }
+      });
+      return result;
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      return null;
+    }
+  }
+
+  public List<SightEvent> getSightEventsInDateRange(List<SightEvent> sightEvents, Date fromDate,
+      Date toDate) {
+    String json = JsonbConfig.getInstance()
+        .toJson(sightEvents.stream().map(SightEvent::getHptId).collect(Collectors.toSet()));
+    final var dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    var urlStr = "/v1/sight-events/in-date-range?fromDate="
+        + dateFormat.format(fromDate != null ? fromDate : new Date());
+    if (toDate != null) {
+      urlStr += "&toDate=" + dateFormat.format(toDate);
+    }
+    try {
+      final Jsonb jsonb = JsonbConfig.getInstance();
+      JsonStructure respJson = post(urlStr, json, AUTH_TOKEN);
       JsonArray jsonArray = (JsonArray) respJson;
       Set<Long> resp = new HashSet<>();
       jsonArray.forEach(p -> {

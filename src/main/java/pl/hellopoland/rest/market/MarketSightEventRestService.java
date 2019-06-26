@@ -40,9 +40,6 @@ public class MarketSightEventRestService {
       @HeaderParam("Accept-Language") String acceptLanguage,
       @HeaderParam("Content-Language") String contentLanguage) {
     var config = new SightEventPagedCollectionConfig();
-    config.onlyAvailable();
-    config.onlyActive();
-    config.onlyPublished();
     config.setCity(city);
     return service.getList(config, fromDate, toDate,
         contentLanguage != null ? contentLanguage : acceptLanguage);
