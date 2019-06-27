@@ -49,13 +49,11 @@ public class SightEventServiceMarketAPI {
     config.setOrderDirection("asc");
     PagedEntityCollection<SightEvent> bos = service.getList(config, language);
     bos.items = bos.items.stream().filter(se -> se.isAccessible()).collect(Collectors.toList());
-
     if (fromDate != null || toDate != null) {
       HelloTicket hptClient = new HelloTicket(service.getPortal("Hello Ticket Cloud").getUrl());
       bos.items = hptClient.getSightEventsInDateRange(new ArrayList<SightEvent>(bos.items),
           fromDate, toDate);
     }
-
     List<SightEventDTO> dtos = bos.items.stream().map(bo -> {
       var dto = DtoMapper.getDTO(bo);
       dto.language = bo.getDefaultLanguage().getLanuage();
@@ -64,14 +62,6 @@ public class SightEventServiceMarketAPI {
     if (language != null) {
       dtos.forEach(dto -> dto.language = language.getLanuage());
     }
-    // service.fetchTicketPoolDefinitions(bos.items, dtos, false);
-    //
-    // List<SightEventDTO> list = dtos.stream().filter(dto -> service.isAvailable(dto,
-    // getFromDateWithCurrentTime(fromDate), getToDateForEndDay(toDate))).map(dto -> {
-    // dto.ticketPoolDefinitions = null;
-    // return dto;
-    // }).collect(Collectors.toList());
-    // return new PagedCollection(list, bos.config);
     return new PagedCollection(dtos, bos.config);
   }
 

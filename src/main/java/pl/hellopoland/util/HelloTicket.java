@@ -432,7 +432,7 @@ public class HelloTicket {
       final Jsonb jsonb = JsonbConfig.getInstance();
       JsonStructure respJson = post("/v1/sight-events/available", json, AUTH_TOKEN);
       JsonArray jsonArray = (JsonArray) respJson;
-      Set<Long> resp = new HashSet<>();
+      List<Long> resp = new ArrayList<>();
       jsonArray.forEach(p -> {
         var id = jsonb.fromJson(p.toString(), Long.class);
         resp.add(id);

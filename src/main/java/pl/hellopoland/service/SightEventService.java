@@ -76,7 +76,7 @@ public class SightEventService extends ServiceSuperclass {
   @Inject
   private TranslationService translationService;
 
-  public List<SightEvent> getAllActiveAndPublishedandNotBlocked() {
+  public List<SightEvent> getAllActiveAndPublishedAndNotBlocked() {
     return em.createQuery(
         "from SightEvent where active is true and published is true and blocked is false",
         SightEvent.class).getResultList();

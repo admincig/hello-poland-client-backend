@@ -27,7 +27,7 @@ public class SightEventAvailableScheduler {
   @Schedule(minute = "*/2", hour = "*", persistent = false)
   @Lock(LockType.WRITE)
   private void perform() {
-    List<SightEvent> all = service.getAllActiveAndPublishedandNotBlocked();
+    List<SightEvent> all = service.getAllActiveAndPublishedAndNotBlocked();
     List<SightEvent> available = hptClient.getAvailableSightEvents(all);
     available.forEach(se -> se.setAvailable(true));
     all.removeAll(available);
