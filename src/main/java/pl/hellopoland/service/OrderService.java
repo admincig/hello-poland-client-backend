@@ -76,9 +76,9 @@ public class OrderService extends ServiceSuperclass {
           "W swoim koszyku masz bilety na oferty, które już minęły. Przeterminowane bilety:");
 
       tickets.forEach(t -> errMsg
-          .append(" " + t.getName() + ", data: " + format.format(expired.get(t.getId()).date)
+          .append("\n" + t.getName() + ", data: " + format.format(expired.get(t.getId()).date)
               + ", oferta: " + t.getSightEvent().getName() + ";"));
-
+      System.out.println(errMsg.toString());
       throw new ConflictingException(errMsg.toString());
     }
     Order o = new Order();
