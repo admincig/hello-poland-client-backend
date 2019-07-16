@@ -423,6 +423,11 @@ public class HelloTicket {
     }
   }
 
+  public List<TicketPoolDefinitionDTO> getWholeDay(List<Long> tpdIds) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
   private JsonStructure post(String path, String json, String authToken) throws IOException {
     URL url = new URL(this.url + path);
     var conn = (HttpURLConnection) url.openConnection();

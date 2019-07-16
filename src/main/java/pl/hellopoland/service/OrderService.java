@@ -41,6 +41,7 @@ import pl.hellopoland.bo.TicketDefinition;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole.Role;
 import pl.hellopoland.dto.EmailSendingReportDTO;
+import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.email.EmailSendingException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
@@ -70,6 +71,25 @@ public class OrderService extends ServiceSuperclass {
       List<TicketDefinition> tickets = em.createQuery(
           "from TicketDefinition t join fetch t.sightEvent s where t.id in (:ids) order by s.id asc",
           TicketDefinition.class).setParameter("ids", expired.keySet()).getResultList();
+
+
+
+      Map<Portal, List<TicketDefinition>> groupedByPortal =
+          tickets.stream().filter(t -> t.getSightEvent().getPortal() != null)
+              .collect(groupingBy(ose -> ose.getSightEvent().getPortal()));
+
+      for (var entry : groupedByPortal.entrySet()) {
+        Portal portal = entry.getKey();
+        switch (portal.getType()) {
+          case HELLOTICKET_CLOUD_1:
+            HelloTicket hpt = new HelloTicket(portal.getUrl());
+            List<TicketPoolDefinitionDTO> resp = hpt.getWholeDay(entry.getValue().stream()
+                .map(TicketDefinition::getPoolId).collect(Collectors.toList()));
+            break;
+        }
+      }
+
+
 
       var format = new SimpleDateFormat("YYYY-MM-dd HH:mm");
       var errMsg = new StringBuilder(
