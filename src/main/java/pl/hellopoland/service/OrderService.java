@@ -167,15 +167,20 @@ public class OrderService extends ServiceSuperclass {
             break;
         }
       }
+
+      // TODO: poolId sparowac z odpowiednim ticketem!!!!!!!!!
       expired.forEach((key, value) -> {
         for (Long id : wholeDay) {
           if (key.equals(id)) {
             expired.remove(key);
-            tickets.removeIf(t -> t.getId().equals(key));
+            tickets.removeIf(t -> t.getPoolId().equals(id));
             break;
           }
         }
       });
+
+
+
       var format = new SimpleDateFormat("YYYY-MM-dd HH:mm");
       var errMsg = new StringBuilder(
           "W swoim koszyku masz bilety na oferty, które już minęły. Przeterminowane bilety:");
