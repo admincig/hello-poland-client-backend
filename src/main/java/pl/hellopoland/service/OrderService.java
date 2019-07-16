@@ -61,46 +61,7 @@ public class OrderService extends ServiceSuperclass {
   AgreementService aService;
 
   public PassageCart create(OrderIRO iro) {
-    var expired = new HashMap<Long, OrderEntryIRO>();
-    iro.entries.forEach(entry -> {
-      if (entry.date.before(new Date())) {
-        expired.put(entry.id, entry);
-      }
-    });
-    if (expired.size() > 0) {
-      List<TicketDefinition> tickets = em.createQuery(
-          "from TicketDefinition t join fetch t.sightEvent s where t.id in (:ids) order by s.id asc",
-          TicketDefinition.class).setParameter("ids", expired.keySet()).getResultList();
-
-
-
-      Map<Portal, List<TicketDefinition>> groupedByPortal =
-          tickets.stream().filter(t -> t.getSightEvent().getPortal() != null)
-              .collect(groupingBy(ose -> ose.getSightEvent().getPortal()));
-
-      for (var entry : groupedByPortal.entrySet()) {
-        Portal portal = entry.getKey();
-        switch (portal.getType()) {
-          case HELLOTICKET_CLOUD_1:
-            HelloTicket hpt = new HelloTicket(portal.getUrl());
-            List<TicketPoolDefinitionDTO> resp = hpt.getWholeDay(entry.getValue().stream()
-                .map(TicketDefinition::getPoolId).collect(Collectors.toList()));
-            break;
-        }
-      }
-
-
-
-      var format = new SimpleDateFormat("YYYY-MM-dd HH:mm");
-      var errMsg = new StringBuilder(
-          "W swoim koszyku masz bilety na oferty, które już minęły. Przeterminowane bilety:");
-
-      tickets.forEach(t -> errMsg
-          .append("\n" + t.getName() + ", data: " + format.format(expired.get(t.getId()).date)
-              + ", oferta: " + t.getSightEvent().getName() + ";"));
-      System.out.println(errMsg.toString());
-      throw new ConflictingException(errMsg.toString());
-    }
+    throwIfExpiredTickets(iro);
     Order o = new Order();
     o.generateHash();
     o.setUser(getLoggedUser());
@@ -178,6 +139,52 @@ public class OrderService extends ServiceSuperclass {
       throw new ConflictingException("Nie udało się złożyć zamówienia w zewnętrznym systemie", e);
     }
     return getP24PassageCart(o);
+  }
+
+  private void throwIfExpiredTickets(OrderIRO iro) {
+    var expired = new HashMap<Long, OrderEntryIRO>();
+    iro.entries.forEach(entry -> {
+      if (entry.date.before(new Date())) {
+        expired.put(entry.id, entry);
+      }
+    });
+    if (expired.size() > 0) {
+      List<TicketDefinition> tickets = em.createQuery(
+          "from TicketDefinition t join fetch t.sightEvent s where t.id in (:ids) order by s.id asc",
+          TicketDefinition.class).setParameter("ids", expired.keySet()).getResultList();
+      var wholeDay = new ArrayList<Long>();
+      Map<Portal, List<TicketDefinition>> groupedByPortal =
+          tickets.stream().filter(t -> t.getSightEvent().getPortal() != null)
+              .collect(groupingBy(ose -> ose.getSightEvent().getPortal()));
+      for (var entry : groupedByPortal.entrySet()) {
+        Portal portal = entry.getKey();
+        switch (portal.getType()) {
+          case HELLOTICKET_CLOUD_1:
+            HelloTicket hpt = new HelloTicket(portal.getUrl());
+            List<TicketPoolDefinitionDTO> resp = hpt.getWholeDay(entry.getValue().stream()
+                .map(TicketDefinition::getPoolId).collect(Collectors.toList()));
+            resp.forEach(tpd -> wholeDay.add(tpd.id));
+            break;
+        }
+      }
+      expired.forEach((key, value) -> {
+        for (Long id : wholeDay) {
+          if (key.equals(id)) {
+            expired.remove(key);
+            tickets.removeIf(t -> t.getId().equals(key));
+            break;
+          }
+        }
+      });
+      var format = new SimpleDateFormat("YYYY-MM-dd HH:mm");
+      var errMsg = new StringBuilder(
+          "W swoim koszyku masz bilety na oferty, które już minęły. Przeterminowane bilety:");
+      tickets.forEach(t -> errMsg
+          .append("\n" + t.getName() + ", data: " + format.format(expired.get(t.getId()).date)
+              + ", oferta: " + t.getSightEvent().getName() + ";"));
+      System.out.println(errMsg.toString());
+      throw new ConflictingException(errMsg.toString());
+    }
   }
 
   // em.refreshes are because of strange NPEs

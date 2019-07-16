@@ -424,8 +424,21 @@ public class HelloTicket {
   }
 
   public List<TicketPoolDefinitionDTO> getWholeDay(List<Long> tpdIds) {
-    // TODO Auto-generated method stub
-    return null;
+    try {
+      JsonStructure respJson = post("/v1/ticket-pool-definitions/get-whole-day",
+          JsonbConfig.getInstance().toJson(tpdIds), AUTH_TOKEN);
+      JsonArray jsonArray = (JsonArray) respJson;
+      var resp = new ArrayList<TicketPoolDefinitionDTO>();
+      final Jsonb jsonb = JsonbConfig.getInstance();
+      jsonArray.forEach(p -> {
+        var tpdDTO = jsonb.fromJson(p.toString(), TicketPoolDefinitionDTO.class);
+        resp.add(tpdDTO);
+      });
+      return resp;
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      return null;
+    }
   }
 
   private JsonStructure post(String path, String json, String authToken) throws IOException {
