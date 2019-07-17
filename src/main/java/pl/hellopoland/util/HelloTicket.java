@@ -72,15 +72,10 @@ public class HelloTicket {
       return t;
     }).collect(Collectors.toList());
     booking.ticketBookings = ticketBookings;
-    // booking.sightEventPdfAttachments = orderEntries.stream()
-    // .map(oe -> oe.getDateEntry().getSightEntry().getSightEvent().getPdfAttachment())
-    // .filter(pdf -> pdf != null).distinct().map(DtoMapper::getFullDTO)
-    // .collect(Collectors.toSet());
     var json = JsonbConfig.getInstance().toJson(booking);
     try {
       var resp = post("/v1/bookings", json, AUTH_TOKEN);
       booking = JsonbConfig.getInstance().fromJson(resp.toString(), BookingDTO.class);
-
       for (var oe : orderEntries) {
         var ose = oe.getDateEntry().getSightEntry();
         ose.setSerialNumber(booking.serialNumber);
@@ -88,6 +83,7 @@ public class HelloTicket {
           TicketDTO ticket = iter.next();
           if (oe.matches(ticket)) {
             oe.setExternalId((long) ticket.id);
+            oe.getDateEntry().setDate(ticket.date);
             ose.setWholeDay(ticket.wholeDay);
             break;
           }

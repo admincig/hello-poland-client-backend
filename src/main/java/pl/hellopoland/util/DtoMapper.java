@@ -351,6 +351,7 @@ public class DtoMapper {
     OrderDetails od = o.getDetails();
 
     var dto = new P24PassageTransactionParamsDTO();
+    dto.encoding = "UTF-8";
     dto.amount = p24PassageCart.getAmount();
     dto.country = p24PassageCart.getCountry();
     dto.currency = p24PassageCart.getCurrency();
