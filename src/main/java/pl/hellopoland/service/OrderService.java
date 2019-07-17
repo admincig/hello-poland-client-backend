@@ -159,6 +159,7 @@ public class OrderService extends ServiceSuperclass {
       if (tickets.size() < expired.size()) {
         throw new ResourceNotFoundException();
       }
+      expiredTickets.addAll(tickets);
       var wholeDayPoolIds = new ArrayList<Long>();
       Map<Portal, List<TicketDefinition>> groupedByPortal =
           tickets.stream().filter(t -> t.getSightEvent().getPortal() != null)
@@ -177,13 +178,11 @@ public class OrderService extends ServiceSuperclass {
       wholeDayPoolIds.forEach(id -> {
         for (var ticket : tickets) {
           if (id.equals(ticket.getPoolId())) {
-            tickets.remove(ticket);
+            expiredTickets.remove(ticket);
             expired.remove(ticket.getId());
-            break;
           }
         }
       });
-      expiredTickets = tickets;
     }
     if (expired.size() > 0) {
       var format = new SimpleDateFormat("YYYY-MM-dd HH:mm");
