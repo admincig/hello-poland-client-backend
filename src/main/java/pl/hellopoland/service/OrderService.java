@@ -148,11 +148,12 @@ public class OrderService extends ServiceSuperclass {
         expired.put(entry.id, entry);
       }
     });
+    List<TicketDefinition> expiredTickets = new ArrayList<>();
     if (expired.size() > 0) {
       List<TicketDefinition> tickets = em.createQuery(
           "from TicketDefinition t join fetch t.sightEvent s where t.id in (:ids) order by s.id asc",
           TicketDefinition.class).setParameter("ids", expired.keySet()).getResultList();
-      var wholeDay = new ArrayList<Long>();
+      var wholeDayPoolIds = new ArrayList<Long>();
       Map<Portal, List<TicketDefinition>> groupedByPortal =
           tickets.stream().filter(t -> t.getSightEvent().getPortal() != null)
               .collect(groupingBy(ose -> ose.getSightEvent().getPortal()));
@@ -163,28 +164,26 @@ public class OrderService extends ServiceSuperclass {
             HelloTicket hpt = new HelloTicket(portal.getUrl());
             List<TicketPoolDefinitionDTO> resp = hpt.getWholeDay(entry.getValue().stream()
                 .map(TicketDefinition::getPoolId).collect(Collectors.toList()));
-            resp.forEach(tpd -> wholeDay.add(tpd.id));
+            resp.forEach(tpd -> wholeDayPoolIds.add(tpd.id));
             break;
         }
       }
-
-      // TODO: poolId sparowac z odpowiednim ticketem!!!!!!!!!
-      expired.forEach((key, value) -> {
-        for (Long id : wholeDay) {
-          if (key.equals(id)) {
-            expired.remove(key);
-            tickets.removeIf(t -> t.getPoolId().equals(id));
+      wholeDayPoolIds.forEach(id -> {
+        for (var ticket : tickets) {
+          if (id.equals(ticket.getPoolId())) {
+            tickets.remove(ticket);
+            expired.remove(ticket.getId());
             break;
           }
         }
       });
-
-
-
+      expiredTickets = tickets;
+    }
+    if (expired.size() > 0) {
       var format = new SimpleDateFormat("YYYY-MM-dd HH:mm");
       var errMsg = new StringBuilder(
           "W swoim koszyku masz bilety na oferty, które już minęły. Przeterminowane bilety:");
-      tickets.forEach(t -> errMsg
+      expiredTickets.forEach(t -> errMsg
           .append("\n" + t.getName() + ", data: " + format.format(expired.get(t.getId()).date)
               + ", oferta: " + t.getSightEvent().getName() + ";"));
       System.out.println(errMsg.toString());
