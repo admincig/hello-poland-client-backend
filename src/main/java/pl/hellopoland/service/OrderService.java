@@ -153,6 +153,9 @@ public class OrderService extends ServiceSuperclass {
       List<TicketDefinition> tickets = em.createQuery(
           "from TicketDefinition t join fetch t.sightEvent s where t.id in (:ids) order by s.id asc",
           TicketDefinition.class).setParameter("ids", expired.keySet()).getResultList();
+      if (tickets.size() < expired.size()) {
+        throw new ResourceNotFoundException();
+      }
       var wholeDayPoolIds = new ArrayList<Long>();
       Map<Portal, List<TicketDefinition>> groupedByPortal =
           tickets.stream().filter(t -> t.getSightEvent().getPortal() != null)
