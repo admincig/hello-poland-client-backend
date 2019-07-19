@@ -1,6 +1,8 @@
 package pl.hellopoland.util;
 
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+import static javax.ws.rs.core.Response.Status.OK;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -70,15 +72,10 @@ public class HelloTicket {
       return t;
     }).collect(Collectors.toList());
     booking.ticketBookings = ticketBookings;
-    // booking.sightEventPdfAttachments = orderEntries.stream()
-    // .map(oe -> oe.getDateEntry().getSightEntry().getSightEvent().getPdfAttachment())
-    // .filter(pdf -> pdf != null).distinct().map(DtoMapper::getFullDTO)
-    // .collect(Collectors.toSet());
     var json = JsonbConfig.getInstance().toJson(booking);
     try {
       var resp = post("/v1/bookings", json, AUTH_TOKEN);
       booking = JsonbConfig.getInstance().fromJson(resp.toString(), BookingDTO.class);
-
       for (var oe : orderEntries) {
         var ose = oe.getDateEntry().getSightEntry();
         ose.setSerialNumber(booking.serialNumber);
@@ -86,6 +83,7 @@ public class HelloTicket {
           TicketDTO ticket = iter.next();
           if (oe.matches(ticket)) {
             oe.setExternalId((long) ticket.id);
+            oe.getDateEntry().setDate(ticket.date);
             ose.setWholeDay(ticket.wholeDay);
             break;
           }
@@ -398,9 +396,10 @@ public class HelloTicket {
   }
 
   public void deletePdfFromSightEvent(SightEvent sightEvent, String partnerAuthToken) {
+    String pdfPath = sightEvent.getPdfAttachment().getPath();
+    var pdfName = pdfPath.substring(pdfPath.lastIndexOf(File.separator) + 1);
     try {
-      delete("/v1/sight-events/" + sightEvent.getHptId() + "/pdf/"
-          + sightEvent.getPdfAttachment().getPath(), partnerAuthToken);
+      delete("/v1/sight-events/" + sightEvent.getHptId() + "/pdf/" + pdfName, partnerAuthToken);
     } catch (IOException e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
       throw new ConflictingException(
@@ -417,6 +416,24 @@ public class HelloTicket {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
       throw new ConflictingException(
           "Nie udało się utworzyć biletera w zewnętrznym systemie." + e.getLocalizedMessage());
+    }
+  }
+
+  public List<TicketPoolDefinitionDTO> getWholeDay(List<Long> tpdIds) {
+    try {
+      JsonStructure respJson = post("/v1/ticket-pool-definitions/get-whole-day",
+          JsonbConfig.getInstance().toJson(tpdIds), AUTH_TOKEN);
+      JsonArray jsonArray = (JsonArray) respJson;
+      var resp = new ArrayList<TicketPoolDefinitionDTO>();
+      final Jsonb jsonb = JsonbConfig.getInstance();
+      jsonArray.forEach(p -> {
+        var tpdDTO = jsonb.fromJson(p.toString(), TicketPoolDefinitionDTO.class);
+        resp.add(tpdDTO);
+      });
+      return resp;
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      return null;
     }
   }
 
@@ -506,7 +523,7 @@ public class HelloTicket {
     logger.log(System.Logger.Level.INFO, "Server responded with code: " + respCode);
     is.close();
 
-    if (respCode != NO_CONTENT.getStatusCode()) {
+    if (respCode != NO_CONTENT.getStatusCode() && respCode != OK.getStatusCode()) {
       throw new CannotDeleteSightEventFromExternalSystemException();
     }
     return respCode;

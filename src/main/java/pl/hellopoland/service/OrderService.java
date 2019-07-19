@@ -8,10 +8,12 @@ import java.lang.System.Logger.Level;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +41,7 @@ import pl.hellopoland.bo.TicketDefinition;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole.Role;
 import pl.hellopoland.dto.EmailSendingReportDTO;
+import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.email.EmailSendingException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
@@ -58,6 +61,16 @@ public class OrderService extends ServiceSuperclass {
   AgreementService aService;
 
   public PassageCart create(OrderIRO iro) {
+    throwIfExpiredTickets(iro);
+    logger.log(Level.INFO, "-------Start creating order --------");
+    logger.log(Level.INFO, "Order details: " + iro.details.getEmail() + " "
+        + iro.details.getFirstName() + " " + iro.details.getLastName());
+    var orderEntriesLog = new StringBuilder();
+    iro.entries.forEach(entry -> orderEntriesLog.append("[").append("date:").append(entry.date)
+        .append("; quantity:").append(entry.quantity).append("; partnerAffiliateCode:")
+        .append(entry.partnerAffiliateCode).append("; TicketDefinition id:").append(entry.id)
+        .append("];\n"));
+    logger.log(Level.INFO, "Order entries: " + orderEntriesLog.toString());
     Order o = new Order();
     o.generateHash();
     o.setUser(getLoggedUser());
@@ -65,25 +78,19 @@ public class OrderService extends ServiceSuperclass {
     details.setUserLogged(getLoggedUser() != null);
     o.setDetails(details);
     em.persist(o);
-
     Set<Long> ticketsIds =
         iro.entries.stream().filter(oe -> oe.quantity != null && oe.quantity.compareTo(0) > 0)
             .collect(groupingBy(oeIRO -> oeIRO.id)).keySet();
-
     List<TicketDefinition> tickets = em.createQuery(
         "from TicketDefinition t join fetch t.sightEvent s where t.id in (:ids) order by s.id asc",
         TicketDefinition.class).setParameter("ids", ticketsIds).getResultList();
-
     if (tickets.size() < ticketsIds.size()) {
       throw new ResourceNotFoundException();
     }
-
     Map<Long, TicketDefinition> ticketIdToObject =
         tickets.stream().collect(toMap(TicketDefinition::getId, t -> t));
-
     Map<SightEvent, List<TicketDefinition>> ticketsGroupedBySight =
         tickets.stream().collect(groupingBy(TicketDefinition::getSightEvent));
-
     for (Map.Entry<SightEvent, List<TicketDefinition>> entry : ticketsGroupedBySight.entrySet()) {
       OrderSightEntry ose = new OrderSightEntry();
       ose.setOrder(o);
@@ -92,14 +99,11 @@ public class OrderService extends ServiceSuperclass {
       em.persist(ose);
       ose.setAgreements(new ArrayList<>(sightEvent.getAgreements()));
       em.flush();
-
       List<Long> ticketsOfSight =
           entry.getValue().stream().map(TicketDefinition::getId).collect(toList());
-
       Map<Date, List<OrderEntryIRO>> inSightGroupedByDate =
           iro.entries.stream().filter(oeIRO -> ticketsOfSight.contains(oeIRO.id))
               .collect(groupingBy(oeIRO -> oeIRO.date));
-
       for (Map.Entry<Date, List<OrderEntryIRO>> inSightOnDate : inSightGroupedByDate.entrySet()) {
         if (!inSightOnDate.getValue().isEmpty()) {
           OrderDateEntry dateEntry = new OrderDateEntry();
@@ -134,7 +138,62 @@ public class OrderService extends ServiceSuperclass {
     } catch (Exception e) {
       throw new ConflictingException("Nie udało się złożyć zamówienia w zewnętrznym systemie", e);
     }
-    return getP24PassageCart(o);
+    var cart = getP24PassageCart(o);
+    logger.log(Level.INFO, "Returned order id=" + o.getId() + "; p24cart id=" + cart.getId());
+    logger.log(Level.INFO, "-------End creating order --------");
+    return cart;
+  }
+
+  private void throwIfExpiredTickets(OrderIRO iro) {
+    var expired = new HashMap<Long, OrderEntryIRO>();
+    iro.entries.forEach(entry -> {
+      if (entry.date.before(new Date())) {
+        expired.put(entry.id, entry);
+      }
+    });
+    List<TicketDefinition> expiredTickets = new ArrayList<>();
+    if (expired.size() > 0) {
+      List<TicketDefinition> tickets = em.createQuery(
+          "from TicketDefinition t join fetch t.sightEvent s where t.id in (:ids) order by s.id asc",
+          TicketDefinition.class).setParameter("ids", expired.keySet()).getResultList();
+      if (tickets.size() < expired.size()) {
+        throw new ResourceNotFoundException();
+      }
+      expiredTickets.addAll(tickets);
+      var wholeDayPoolIds = new ArrayList<Long>();
+      Map<Portal, List<TicketDefinition>> groupedByPortal =
+          tickets.stream().filter(t -> t.getSightEvent().getPortal() != null)
+              .collect(groupingBy(ose -> ose.getSightEvent().getPortal()));
+      for (var entry : groupedByPortal.entrySet()) {
+        Portal portal = entry.getKey();
+        switch (portal.getType()) {
+          case HELLOTICKET_CLOUD_1:
+            HelloTicket hpt = new HelloTicket(portal.getUrl());
+            List<TicketPoolDefinitionDTO> resp = hpt.getWholeDay(entry.getValue().stream()
+                .map(TicketDefinition::getPoolId).collect(Collectors.toList()));
+            resp.forEach(tpd -> wholeDayPoolIds.add(tpd.id));
+            break;
+        }
+      }
+      wholeDayPoolIds.forEach(id -> {
+        for (var ticket : tickets) {
+          if (id.equals(ticket.getPoolId())) {
+            expiredTickets.remove(ticket);
+            expired.remove(ticket.getId());
+          }
+        }
+      });
+    }
+    if (expired.size() > 0) {
+      var format = new SimpleDateFormat("YYYY-MM-dd HH:mm");
+      var errMsg = new StringBuilder(
+          "W swoim koszyku masz bilety na oferty, które już minęły. Przeterminowane bilety:");
+      expiredTickets.forEach(t -> errMsg
+          .append("\n" + t.getName() + ", data: " + format.format(expired.get(t.getId()).date)
+              + ", oferta: " + t.getSightEvent().getName() + ";"));
+      System.out.println(errMsg.toString());
+      throw new ConflictingException(errMsg.toString());
+    }
   }
 
   // em.refreshes are because of strange NPEs
@@ -263,9 +322,11 @@ public class OrderService extends ServiceSuperclass {
   private void placeInHpt(OrderDetails details, Entry<Portal, List<OrderSightEntry>> entry) {
     Portal portal = entry.getKey();
     List<OrderEntry> orderEntries = gatherOrderEntries(entry.getValue());
-
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     JsonObject resp = (JsonObject) hpt.book(details, orderEntries);
+    if (resp == null) {
+      throw new ConflictingException("Placing order in HPT returned respons null.");
+    }
     Integer externalOrderId = resp.getInt("id");
     entry.getValue().forEach(ose -> ose.setExternalId(externalOrderId.longValue()));
     em.flush();

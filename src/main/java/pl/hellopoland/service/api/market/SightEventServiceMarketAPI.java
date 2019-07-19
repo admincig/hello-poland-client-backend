@@ -40,9 +40,15 @@ public class SightEventServiceMarketAPI {
     if (fromDate != null && toDate != null && toDate.before(fromDate)) {
       throw new ConflictingException("toDate[" + toDate + "] is before fromDate[" + fromDate + "]");
     }
+    config.onlyActive();
+    config.onlyPublished();
     config.setOrderColumn("name");
     config.setOrderDirection("asc");
     PagedEntityCollection<SightEvent> bos = service.getList(config, language);
+
+    var sEvents = bos.items.stream().filter(se -> se.isAccessible()).collect(Collectors.toList());
+    bos.items = sEvents;
+
     List<SightEventDTO> dtos = bos.items.stream().map(bo -> {
       var dto = DtoMapper.getDTO(bo);
       dto.language = bo.getDefaultLanguage().getLanuage();
@@ -65,7 +71,7 @@ public class SightEventServiceMarketAPI {
   public SightEventDTO get(Long id, String contentLanguageSymbol) {
     LanguageVersion language = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
     SightEvent bo = service.get(id);
-    if (bo.isPublished()) {
+    if (bo.isAccessible()) {
       if (language != null) {
         bo = translationService.translateEntity(bo, language, true);
         // var agreements = bo.getAgreements();
