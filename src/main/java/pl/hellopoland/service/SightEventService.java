@@ -76,6 +76,12 @@ public class SightEventService extends ServiceSuperclass {
   @Inject
   private TranslationService translationService;
 
+  public List<SightEvent> getAllActiveAndPublishedAndNotBlocked() {
+    return em.createQuery(
+        "from SightEvent where active is true and published is true and blocked is false",
+        SightEvent.class).getResultList();
+  }
+
   public PagedEntityCollection<SightEvent> getList(SightEventPagedCollectionConfig config,
       LanguageVersion language) {
     if (config.isCurrentPartner()) {
