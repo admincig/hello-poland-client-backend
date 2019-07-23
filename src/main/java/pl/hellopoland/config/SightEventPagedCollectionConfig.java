@@ -26,6 +26,10 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
     }
   }
 
+  public void onlyAvailable() {
+    addCondition("available", true, "e.available=:available");
+  }
+
   public void onlyActive() {
     addCondition("active", true, "e.active=:active");
   }

@@ -76,6 +76,7 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
   private boolean active = true;
   private boolean published;
   private boolean blocked;
+  private boolean available;
   @NotNull
   @Column(length = 5, nullable = false)
   @Enumerated(EnumType.STRING)
@@ -310,6 +311,14 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
 
   public void setBlocked(boolean blocked) {
     this.blocked = blocked;
+  }
+
+  public boolean isAvailable() {
+    return available;
+  }
+
+  public void setAvailable(boolean available) {
+    this.available = available;
   }
 
   @Override
