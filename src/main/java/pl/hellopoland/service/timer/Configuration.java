@@ -1,5 +1,6 @@
 package pl.hellopoland.service.timer;
 
+import javax.annotation.sql.DataSourceDefinition;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.enterprise.inject.Produces;
@@ -9,6 +10,14 @@ import pl.hellopoland.util.GoogleAPIConnector;
 
 @Startup
 @Singleton
+@DataSourceDefinition(
+    name = "java:global/jdbc/hellopolandDS",
+    className = "org.postgresql.xa.PGXADataSource",
+    serverName = "database",
+    portNumber = 5432,
+    databaseName = "hellopoland",
+    user = "hellopoland",
+    password = "hellopoland")
 public class Configuration {
 
   @Produces

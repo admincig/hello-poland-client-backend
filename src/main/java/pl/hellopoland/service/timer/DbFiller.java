@@ -58,9 +58,7 @@ public class DbFiller extends ServiceSuperclass {
   @Inject
   private TranslationService translationService;
 
-  private User adminHelloPoland;
   private User userHelloPoland;
-  private User salesmanHelloPoland;
   private User userZoo;
   private User userKolejkowo;
   private User userStadionGd;
@@ -109,10 +107,9 @@ public class DbFiller extends ServiceSuperclass {
 
   @PostConstruct
   public void fillDb() {
-    String hibernateStrategy = properties.get("hibernate.hbm2ddl.auto").toString();
-    if (!hibernateStrategy.startsWith("create")) {
-      logger.log(Logger.Level.INFO,
-          "omitting dbfiller because hibernate.hbm2ddl.auto isnt set to create");
+    Boolean run = Boolean.valueOf(properties.getProperty("db.filler.run"));
+    if (!run) {
+      logger.log(Logger.Level.INFO, "db filler disabled");
       return;
     }
     logger.log(Logger.Level.INFO, "DbFiller started");
@@ -134,16 +131,13 @@ public class DbFiller extends ServiceSuperclass {
   }
 
   private void createUsers() {
-    adminHelloPoland = createUser("Hello Poland - admin", "hp-admin@fream.pl", "hp-admin",
+    userHelloPoland = createUser("Hello Poland - admin", "hp-admin@fream.pl", "hp-admin",
         "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJocC1hZG1pbkBmcmVhbS5wbCIsImF1dGgiOiJST0xFX0FETUlOIn0.ffo2GsvkbE72S4BMWEoXs2ZV9PIBkTaiFKX7DQr_Xm0pxXMrWSzI8TICovtwvi4RdEzsX4Xty8DNKXvkP12ciw",
         null, Role.ADMIN);
     userHelloPoland = createPartner("Hello Poland", "hp-partner@fream.pl", "hp-partner",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.",
         Integer.valueOf(properties.getProperty("przelewy24.posId")), BigDecimal.TEN, "zaqwsx",
         Role.PARTNER);
-    salesmanHelloPoland = createUser("Hello Poland - salesman", "hp-sales@fream.pl", "hp-sales",
-        "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJocC1zYWxlc0BmcmVhbS5wbCIsImF1dGgiOiJST0xFX1NBTEVTTUFOIn0.2bT8JgK4MZS-lxq1lGvgwZ5VXIYWWsNOQ6wRSEZnknK8JBFTTtR_yKBNr2W2NRkOEoIJtluoXDaoL6qEFBaskA",
-        userHelloPoland.getPartner(), Role.SALESMAN);
     userZoo = createPartner("Zoo", "zoo@zoo.plQQ", "zoo",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiJDOTU1NTI0MDk2REU0MjlEQjBGODM1NTA1RUI5MzAxNzkzQzE4NEJBQzM2NTFBNzI2MDFCRDNGMUFEQTkyQzAzIn0.",
         Integer.valueOf(properties.getProperty("przelewy24.posId")), new BigDecimal("3.5"), null,

@@ -15,9 +15,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -27,36 +24,29 @@ import pl.hellopoland.bo.ModelSuperclass;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.User;
+import pl.hellopoland.config.Entry;
 import pl.hellopoland.config.PagedCollectionConfig;
-import pl.hellopoland.config.PagedCollectionConfig.Entry;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 
 
 public abstract class ServiceSuperclass {
 
-  private static Context namingContext;
   protected static Properties properties;
   private static Logger staticLogger = System.getLogger(ServiceSuperclass.class.getName());
-  protected Logger logger = System.getLogger(this.getClass().getName());
 
   static {
-    try {
-      namingContext = new InitialContext();
-    } catch (NamingException e) {
-      staticLogger.log(Logger.Level.WARNING, "Failed to get lookup context", e);
-    }
-
     try {
       properties = System.getProperties();
       var copy = new HashMap<>(properties);
       properties.clear();
-      properties.load(ServiceSuperclass.class.getResourceAsStream("/etc/config.properties"));
-      properties.load(ServiceSuperclass.class
-          .getResourceAsStream("/etc/" + copy.get("user.name") + ".config.properties"));
-      if (copy.containsKey("local.properties")) {
-        properties.load(new FileInputStream(new File((String) copy.get("local.properties"))));
+      properties.load(ServiceSuperclass.class.getResourceAsStream("/runtime.properties"));
+      if (copy.containsKey("local.runtime.properties")) {
+        properties
+            .load(new FileInputStream(new File((String) copy.get("local.runtime.properties"))));
       }
       properties.putAll(copy);
+      staticLogger.log(Logger.Level.DEBUG,
+          properties.entrySet().stream().map(Object::toString).collect(Collectors.joining("\n")));
     } catch (IOException e) {
       staticLogger.log(Logger.Level.WARNING, "Failed to load properties", e);
     }
@@ -68,28 +58,7 @@ public abstract class ServiceSuperclass {
   @PersistenceContext
   protected EntityManager em;
 
-  // @Inject
-  // private JMSContext jms;
-  // protected boolean sendMessage(String queue, Serializable message) {
-  // Queue q = (Queue) lookup(queue);
-  // if (q == null) {
-  // return false;
-  // } else {
-  // JMSProducer producer = jms.createProducer();
-  // producer.setDeliveryMode(DeliveryMode.PERSISTENT);
-  // producer.send(q, message);
-  // return false;
-  // }
-  // }
-
-  protected Object lookup(String jndiName) {
-    try {
-      return namingContext.lookup(jndiName);
-    } catch (NamingException e) {
-      logger.log(Logger.Level.WARNING, "Failed to lookup " + jndiName, e);
-      return null;
-    }
-  }
+  protected Logger logger = System.getLogger(this.getClass().getName());
 
   protected <E extends ModelSuperclass> TypedQuery<E> getQuery(PagedCollectionConfig<E> config) {
     String query = "from " + config.entityClass().getSimpleName() + " e " + config.joins();
@@ -109,14 +78,14 @@ public abstract class ServiceSuperclass {
       tq.setMaxResults(config.getPageSize());
       tq.setFirstResult(config.getPageSize() * config.getPageNum());
     }
-    // logger.log(Logger.Level.INFO, humanReadable(query, config.getConditions()));
+    logger.log(Logger.Level.INFO, humanReadable(query, config.getConditions()));
     return tq;
   }
 
   private <E extends ModelSuperclass> String humanReadable(String query,
-      Collection<PagedCollectionConfig<E>.Entry> conditions) {
-    if (conditions != null) {
-      for (PagedCollectionConfig<E>.Entry e : conditions) {
+      Collection<Entry> collection) {
+    if (collection != null) {
+      for (var e : collection) {
         query = query.replaceAll(":" + e.parameterName, e.value.toString());
       }
     }
@@ -142,13 +111,6 @@ public abstract class ServiceSuperclass {
     return getLoggedUser().getPartner();
   }
 
-  protected <T extends ModelSuperclass> Comparator<T> getNamesComparator(
-      Function<T, String> function, Locale locale) {
-    var collator = Collator.getInstance(locale);
-    collator.setStrength(Collator.CANONICAL_DECOMPOSITION);
-    return Comparator.comparing(function, collator);
-  }
-
   @AroundInvoke
   public Object catchNoResultException(InvocationContext ctx) throws Exception {
     try {
@@ -156,6 +118,13 @@ public abstract class ServiceSuperclass {
     } catch (NoResultException e) {
       throw new ResourceNotFoundException();
     }
+  }
+
+  protected <T extends ModelSuperclass> Comparator<T> getNamesComparator(
+      Function<T, String> function, Locale locale) {
+    var collator = Collator.getInstance(locale);
+    collator.setStrength(Collator.CANONICAL_DECOMPOSITION);
+    return Comparator.comparing(function, collator);
   }
 
 }
