@@ -22,7 +22,7 @@ import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.PagedEntityCollection;
 
 @Stateless
-public class HellopolandServiceAPI {
+public class ServiceHelpdeskAPI {
   @Inject
   private HellopolandService service;
   @Inject
@@ -40,7 +40,7 @@ public class HellopolandServiceAPI {
   @RolesAllowed("admin")
   public PagedCollection listPartners(PartnerCollectionConfig config) {
     PagedEntityCollection<Partner> bos = service.getList(config);
-    var dtos = bos.items.stream().map(bo -> DtoMapper.getFullDTO(bo)).collect(Collectors.toList());
+    var dtos = bos.items.stream().map(DtoMapper::getFullDTO).collect(Collectors.toList());
     return new PagedCollection(dtos, bos.config);
   }
 

@@ -23,15 +23,16 @@ import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.dto.PagedCollection;
-import pl.hellopoland.service.api.hp.HellopolandServiceAPI;
+import pl.hellopoland.service.api.hp.ServiceHelpdeskAPI;
 
 @RequestScoped
 @Path("/helpdesk")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class HelloPolandRestService {
+public class HelpdeskRestService {
+
   @Inject
-  private HellopolandServiceAPI service;
+  private ServiceHelpdeskAPI service;
 
   @POST
   @Path("/partners")
