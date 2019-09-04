@@ -175,7 +175,7 @@ public class SightEventService extends ServiceSuperclass {
       bo.setOpeningHours(oHoursList);
     }
     logger.log(Logger.Level.INFO, "Saved new sight event: " + bo.getName());
-    return createLanguageVesrion(DtoMapper.getDTO(bo), partner, bo.getDefaultLanguage());
+    return createLanguageVersion(DtoMapper.getDTO(bo), partner, bo.getDefaultLanguage());
   }
 
   private ArrayList<OpeningHours> getOpeningHoursCollectionFromDTO(SightEventDTO dto) {
@@ -185,7 +185,7 @@ public class SightEventService extends ServiceSuperclass {
         .orElse(null);
   }
 
-  private SightEvent createLanguageVesrion(SightEventDTO dto, Partner partner,
+  private SightEvent createLanguageVersion(SightEventDTO dto, Partner partner,
       LanguageVersion language) {
     return translationService.createEntityLanguageVersion(getForPartner(dto.id, partner), dto,
         language);
