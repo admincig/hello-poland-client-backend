@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.ejb.DependsOn;
@@ -22,6 +23,7 @@ import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole.Role;
+import pl.hellopoland.dto.CategoryDTO;
 import pl.hellopoland.dto.FrequencyDataDTO;
 import pl.hellopoland.dto.FrequencyTypeDTO;
 import pl.hellopoland.dto.SightEventDTO;
@@ -29,6 +31,7 @@ import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.security.password.PasswordEncoder;
+import pl.hellopoland.service.CategoryService;
 import pl.hellopoland.service.ImageService;
 import pl.hellopoland.service.ServiceSuperclass;
 import pl.hellopoland.service.SightEventService;
@@ -53,6 +56,8 @@ public class DbFiller extends ServiceSuperclass {
   TicketPoolDefinitionService tpdService;
   @Inject
   TicketDefinitionService tdService;
+  @Inject
+  CategoryService categoryService;
   @Inject
   private PasswordEncoder passwordEncoder;
   @Inject
@@ -119,15 +124,31 @@ public class DbFiller extends ServiceSuperclass {
     logger.log(Logger.Level.INFO, "Envi: " + System.getenv("ProgramFiles(x86)"));
     createPortals();
     createUsers();
-    createImageCollectors();
+    // createImageCollectors();
     createLocations();
-    createSights();
-    createSightsEnglishVersion(hpWroc, hpKielce, geoparkKielce, zeromKielce, zooWro, stadGd, kol);
-    createSightEvents();
-    createSightEventsEnglishVersion(afrEvent, kolEvent, meczPCEvent, parkSzczEvent, zwStadEvent,
-        zwZooEvent, zwKielcEvent, zeromEvent, geoparkKielcEvent);
-    createTicketPoolDefinitions();
+    // createSights();
+    // createSightsEnglishVersion(hpWroc, hpKielce, geoparkKielce, zeromKielce, zooWro, stadGd,
+    // kol);
+    // createSightEvents();
+    // createSightEventsEnglishVersion(afrEvent, kolEvent, meczPCEvent, parkSzczEvent, zwStadEvent,
+    // zwZooEvent, zwKielcEvent, zeromEvent, geoparkKielcEvent);
+    // createTicketPoolDefinitions();
+    createCategories();
     logger.log(Logger.Level.INFO, "dbfiller finished");
+  }
+
+  private void createCategories() {
+    for (int i = 0; i < 10; i++) {
+      createCategory("kategoria " + i);
+    }
+  }
+
+  private void createCategory(String label) {
+    CategoryDTO dto = new CategoryDTO();
+    dto.label = label;
+    dto.defaultLanguage = LanguageVersion.PL_PL.toString();
+    dto.availableLanguageVersions = Set.of(LanguageVersion.PL_PL.toString());
+    categoryService.create(dto);
   }
 
   private void createUsers() {

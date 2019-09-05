@@ -27,7 +27,7 @@ import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole;
 import pl.hellopoland.bo.UserRole.Role;
-import pl.hellopoland.config.PartnerCollectionConfig;
+import pl.hellopoland.config.PartnerPagedCollectionConfig;
 import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.dto.RoleDTO;
 import pl.hellopoland.dto.UserDTO;
@@ -231,7 +231,7 @@ public class HellopolandService extends ServiceSuperclass {
     return stream.toArray(UserRole.Role[]::new);
   }
 
-  public PagedEntityCollection<Partner> getList(PartnerCollectionConfig config) {
+  public PagedEntityCollection<Partner> getList(PartnerPagedCollectionConfig config) {
     List<Partner> partners = getQuery(config).getResultList();
     Collections.sort(partners, getNamesComparator(Partner::getName, new Locale("pl_PL")));
     return new PagedEntityCollection<>(partners, config);

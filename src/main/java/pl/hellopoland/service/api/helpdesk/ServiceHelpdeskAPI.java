@@ -1,4 +1,4 @@
-package pl.hellopoland.service.api.hp;
+package pl.hellopoland.service.api.helpdesk;
 
 import java.io.File;
 import java.util.Date;
@@ -8,7 +8,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.SightEvent;
-import pl.hellopoland.config.PartnerCollectionConfig;
+import pl.hellopoland.config.PartnerPagedCollectionConfig;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.EmailSendingReportDTO;
 import pl.hellopoland.dto.PartnerDTO;
@@ -38,7 +38,7 @@ public class ServiceHelpdeskAPI {
   }
 
   @RolesAllowed("admin")
-  public PagedCollection listPartners(PartnerCollectionConfig config) {
+  public PagedCollection listPartners(PartnerPagedCollectionConfig config) {
     PagedEntityCollection<Partner> bos = service.getList(config);
     var dtos = bos.items.stream().map(DtoMapper::getFullDTO).collect(Collectors.toList());
     return new PagedCollection(dtos, bos.config);

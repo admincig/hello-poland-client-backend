@@ -5,10 +5,10 @@ import static java.util.stream.Collectors.toList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.stream.Collectors;
 import pl.hellopoland.bo.Address;
 import pl.hellopoland.bo.Agreement;
+import pl.hellopoland.bo.Category;
 import pl.hellopoland.bo.ContactPerson;
 import pl.hellopoland.bo.FileDescriptor;
 import pl.hellopoland.bo.ImageCollector;
@@ -25,6 +25,7 @@ import pl.hellopoland.bo.TicketDefinition;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole;
 import pl.hellopoland.dto.AgreementDTO;
+import pl.hellopoland.dto.CategoryDTO;
 import pl.hellopoland.dto.ContactPersonDTO;
 import pl.hellopoland.dto.FileDescriptorDTO;
 import pl.hellopoland.dto.ImageDTO;
@@ -43,8 +44,6 @@ import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.enums.LanguageVersion;
 
 public class DtoMapper {
-
-  private static final Properties PROPERTIES = System.getProperties();
 
   public static void copy(SightDTO source, Sight target) {
     target.setName(source.name);
@@ -463,6 +462,18 @@ public class DtoMapper {
     var dto = new PartnerRepresentativeDTO();
     dto.name = bo.getName();
     dto.socialNumber = String.valueOf(bo.getSocialNumber());
+    return dto;
+  }
+
+  public static CategoryDTO getDTO(Category bo) {
+    var dto = new CategoryDTO();
+    dto.label = bo.getLabel();
+    dto.iconUrl = bo.getIconUrl();
+    dto.published = bo.isPublished();
+    dto.recommended = bo.isRecommended();
+    dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
+    dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
+        .map(lang -> lang.getLanuage()).collect(Collectors.toSet());
     return dto;
   }
 

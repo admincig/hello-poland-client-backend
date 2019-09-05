@@ -1,4 +1,4 @@
-package pl.hellopoland.service.api.hp;
+package pl.hellopoland.service.api.helpdesk;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
