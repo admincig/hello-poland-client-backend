@@ -25,8 +25,8 @@ public class CategoryService extends ServiceSuperclass {
     Category cat = new Category();
     cat.setLabel(dto.label);
     cat.setIconUrl(dto.iconUrl);
-    cat.setPublished(dto.published);
-    cat.setRecommended(dto.recommended);
+    cat.setPublished(Boolean.TRUE.equals(dto.published));
+    cat.setRecommended(Boolean.TRUE.equals(dto.recommended));
     cat.setDefaultLanguage(LanguageVersion.valueOf(dto.defaultLanguage));
     cat.setAvailableLanguageVersions(dto.availableLanguageVersions.stream()
         .map(LanguageVersion::valueOf).collect(Collectors.toSet()));
