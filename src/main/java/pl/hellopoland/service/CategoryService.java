@@ -2,6 +2,7 @@ package pl.hellopoland.service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -9,6 +10,7 @@ import pl.hellopoland.bo.Category;
 import pl.hellopoland.config.CategoryPagedCollectionConfig;
 import pl.hellopoland.dto.CategoryDTO;
 import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.util.PagedEntityCollection;
 
 @Stateless
@@ -18,7 +20,8 @@ public class CategoryService extends ServiceSuperclass {
   private TranslationService tService;
 
   public Category get(long id) {
-    return em.find(Category.class, id);
+    return Optional.ofNullable(em.find(Category.class, id))
+        .orElseThrow(() -> new ResourceNotFoundException());
   }
 
   public PagedEntityCollection<Category> pagedList(CategoryPagedCollectionConfig config) {
@@ -44,6 +47,6 @@ public class CategoryService extends ServiceSuperclass {
   }
 
   public void delete(Long id) {
-    em.remove(em.find(Category.class, id));
+    em.remove(get(id));
   }
 }
