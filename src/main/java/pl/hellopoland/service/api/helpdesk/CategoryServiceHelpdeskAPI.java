@@ -20,7 +20,7 @@ public class CategoryServiceHelpdeskAPI {
 
   @RolesAllowed("admin")
   public CategoryDTO create(CategoryDTO dto) {
-    return DtoMapper.getDTO(service.create(dto));
+    return DtoMapper.getFullDTO(service.create(dto));
   }
 
   @RolesAllowed("admin")
@@ -42,6 +42,11 @@ public class CategoryServiceHelpdeskAPI {
   @RolesAllowed("admin")
   public void delete(long id) {
     service.delete(id);
+  }
+
+  @RolesAllowed("admin")
+  public CategoryDTO get(Long id) {
+    return DtoMapper.getFullDTO(service.get(id));
   }
 
 }

@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
@@ -62,6 +63,8 @@ public class DbFiller extends ServiceSuperclass {
   private PasswordEncoder passwordEncoder;
   @Inject
   private TranslationService translationService;
+
+  private Random random = new Random();
 
   private User userHelloPoland;
   private User userZoo;
@@ -146,8 +149,12 @@ public class DbFiller extends ServiceSuperclass {
   private void createCategory(String label) {
     CategoryDTO dto = new CategoryDTO();
     dto.label = label;
+    dto.recommended = random.nextBoolean();
+    dto.restricted = random.nextBoolean();
     dto.defaultLanguage = LanguageVersion.PL_PL.toString();
-    dto.availableLanguageVersions = Set.of(LanguageVersion.PL_PL.toString());
+    dto.availableLanguageVersions = Set.of(LanguageVersion.PL_PL.toString(),
+        LanguageVersion.DE_DE.toString(), LanguageVersion.EN_GB.toString());
+    dto.iconUrl = "https://static.thenounproject.com/png/22802-200.png";
     categoryService.create(dto);
   }
 

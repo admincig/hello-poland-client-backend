@@ -16,6 +16,10 @@ public class CategoryService extends ServiceSuperclass {
   @Inject
   private TranslationService tService;
 
+  public Category get(long id) {
+    return em.find(Category.class, id);
+  }
+
   public PagedEntityCollection<Category> pagedList(CategoryPagedCollectionConfig config) {
     List<Category> list = getQuery(config).getResultList();
     return new PagedEntityCollection<>(list, config);
@@ -25,7 +29,7 @@ public class CategoryService extends ServiceSuperclass {
     Category cat = new Category();
     cat.setLabel(dto.label);
     cat.setIconUrl(dto.iconUrl);
-    cat.setPublished(Boolean.TRUE.equals(dto.published));
+    cat.setRestricted(Boolean.TRUE.equals(dto.restricted));
     cat.setRecommended(Boolean.TRUE.equals(dto.recommended));
     cat.setDefaultLanguage(LanguageVersion.valueOf(dto.defaultLanguage));
     cat.setAvailableLanguageVersions(dto.availableLanguageVersions.stream()

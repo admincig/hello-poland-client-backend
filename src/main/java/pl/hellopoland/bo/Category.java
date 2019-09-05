@@ -7,6 +7,7 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.util.Translated;
@@ -20,14 +21,15 @@ public class Category extends ModelSuperclass implements Translated {
   @Column(length = 5, nullable = false)
   @Enumerated(EnumType.STRING)
   private LanguageVersion defaultLanguage;
-  @NotNull
   @Column(nullable = false)
   @ElementCollection
   @Enumerated(EnumType.STRING)
   private Set<LanguageVersion> availableLanguageVersions;
-  private boolean published;
+  private boolean restricted;
   private boolean recommended;
   private String iconUrl;
+  @Transient
+  private int assignedItemsCount;
 
   public String getLabel() {
     return label;
@@ -57,12 +59,12 @@ public class Category extends ModelSuperclass implements Translated {
     this.availableLanguageVersions = availableLanguageVersions;
   }
 
-  public boolean isPublished() {
-    return published;
+  public boolean isRestricted() {
+    return restricted;
   }
 
-  public void setPublished(boolean published) {
-    this.published = published;
+  public void setRestricted(boolean restricted) {
+    this.restricted = restricted;
   }
 
   public boolean isRecommended() {
@@ -79,6 +81,14 @@ public class Category extends ModelSuperclass implements Translated {
 
   public void setIconUrl(String iconUrl) {
     this.iconUrl = iconUrl;
+  }
+
+  public int getAssignedItemsCount() {
+    return assignedItemsCount;
+  }
+
+  public void setAssignedItemsCount(int assignedItemsCount) {
+    this.assignedItemsCount = assignedItemsCount;
   }
 
   @Override

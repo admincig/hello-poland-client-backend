@@ -37,6 +37,13 @@ public class HelpdeskCategoryRestService {
     return service.pagedList(contentLanguage != null ? contentLanguage : acceptLanguage);
   }
 
+  @GET
+  @Path("/{id}")
+  public CategoryDTO get(
+      @PathParam("id") Long id) {
+    return service.get(id);
+  }
+
   @DELETE
   @Path("/{id}")
   public Response deleteCategory(

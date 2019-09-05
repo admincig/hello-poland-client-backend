@@ -467,13 +467,20 @@ public class DtoMapper {
 
   public static CategoryDTO getDTO(Category bo) {
     var dto = new CategoryDTO();
+    dto.id = bo.getId();
     dto.label = bo.getLabel();
     dto.iconUrl = bo.getIconUrl();
-    dto.published = bo.isPublished();
+    dto.restricted = bo.isRestricted();
+    dto.assignedItemsCount = bo.getAssignedItemsCount();
     dto.recommended = bo.isRecommended();
     dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
+    return dto;
+  }
+
+  public static CategoryDTO getFullDTO(Category bo) {
+    var dto = getDTO(bo);
     dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
-        .map(lang -> lang.getLanuage()).collect(Collectors.toSet());
+        .map(lv -> lv.getLanuage()).collect(Collectors.toSet());
     return dto;
   }
 
