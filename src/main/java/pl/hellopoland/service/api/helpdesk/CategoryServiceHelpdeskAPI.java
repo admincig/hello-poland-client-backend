@@ -49,4 +49,9 @@ public class CategoryServiceHelpdeskAPI {
     return DtoMapper.getFullDTO(service.get(id));
   }
 
+  @RolesAllowed("admin")
+  public CategoryDTO createLanguageVesrion(CategoryDTO dto, LanguageVersion lang) {
+    return DtoMapper.getFullDTO(service.createLanguageVesrion(dto, lang));
+  }
+
 }

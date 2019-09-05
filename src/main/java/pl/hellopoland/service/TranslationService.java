@@ -1,5 +1,6 @@
 package pl.hellopoland.service;
 
+import java.lang.System.Logger.Level;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -221,7 +222,7 @@ public class TranslationService extends ServiceSuperclass {
       em.flush();
     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
         | NoSuchMethodException | SecurityException e) {
-      e.printStackTrace();
+      logger.log(Level.ERROR, "failed to invoke reflection method", e);
     }
   }
 

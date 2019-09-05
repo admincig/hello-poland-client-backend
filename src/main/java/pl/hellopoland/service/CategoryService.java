@@ -1,7 +1,8 @@
 package pl.hellopoland.service;
 
+import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.Category;
@@ -31,12 +32,15 @@ public class CategoryService extends ServiceSuperclass {
     cat.setIconUrl(dto.iconUrl);
     cat.setRestricted(Boolean.TRUE.equals(dto.restricted));
     cat.setRecommended(Boolean.TRUE.equals(dto.recommended));
-    cat.setDefaultLanguage(LanguageVersion.valueOf(dto.defaultLanguage));
-    cat.setAvailableLanguageVersions(dto.availableLanguageVersions.stream()
-        .map(LanguageVersion::valueOf).collect(Collectors.toSet()));
+    cat.setDefaultLanguage(LanguageVersion.getForCreateAndUpdateEntity(dto.language));
+    cat.setAvailableLanguageVersions(new HashSet<>(Set.of(cat.getDefaultLanguage())));
     em.persist(cat);
     tService.createEntityLanguageVersion(cat, dto, cat.getDefaultLanguage());
     return cat;
+  }
+
+  public Category createLanguageVesrion(CategoryDTO dto, LanguageVersion language) {
+    return tService.createEntityLanguageVersion(get(dto.id), dto, language);
   }
 
   public void delete(Long id) {

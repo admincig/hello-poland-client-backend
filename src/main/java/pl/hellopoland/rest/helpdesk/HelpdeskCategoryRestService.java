@@ -1,5 +1,6 @@
 package pl.hellopoland.rest.helpdesk;
 
+import java.util.Optional;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -13,6 +14,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import pl.hellopoland.dto.CategoryDTO;
+import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.api.helpdesk.CategoryServiceHelpdeskAPI;
 
@@ -26,8 +29,15 @@ public class HelpdeskCategoryRestService {
   private CategoryServiceHelpdeskAPI service;
 
   @POST
-  public CategoryDTO create(CategoryDTO dto) {
-    return service.create(dto);
+  public CategoryDTO create(CategoryDTO dto, @HeaderParam("Content-Language") String language) {
+    LanguageVersion lang =
+        Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
+            .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+    if (dto.id == null) {
+      dto.language = lang.getLanuage();
+      return service.create(dto);
+    }
+    return service.createLanguageVesrion(dto, lang);
   }
 
   @GET
