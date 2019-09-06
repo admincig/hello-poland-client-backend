@@ -30,6 +30,8 @@ public class Category extends ModelSuperclass implements Translated {
   private String iconUrl;
   @Transient
   private int assignedItemsCount;
+  @Transient
+  private LanguageVersion currentLanguage;
 
   public String getLabel() {
     return label;
@@ -106,4 +108,14 @@ public class Category extends ModelSuperclass implements Translated {
     }
     return availableLanguageVersions.remove(languageVersion);
   }
+
+  @Override
+  public LanguageVersion getCurrentLanguage() {
+    return currentLanguage;
+  }
+
+  public void setCurrentLanguage(LanguageVersion currentLanguage) {
+    this.currentLanguage = currentLanguage;
+  }
+
 }

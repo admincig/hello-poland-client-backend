@@ -474,6 +474,8 @@ public class DtoMapper {
     dto.assignedItemsCount = bo.getAssignedItemsCount();
     dto.recommended = bo.isRecommended();
     dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
+    dto.language = bo.getCurrentLanguage() == null ? dto.defaultLanguage
+        : bo.getCurrentLanguage().getLanuage();
     return dto;
   }
 

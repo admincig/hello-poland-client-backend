@@ -19,6 +19,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.util.Imaged;
@@ -63,11 +64,12 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
   @Column(length = 5, nullable = false)
   @Enumerated(EnumType.STRING)
   private LanguageVersion defaultLanguage;
-  @NotNull
   @Column(nullable = false)
   @ElementCollection
   @Enumerated(EnumType.STRING)
   private Set<LanguageVersion> availableLanguageVersions;
+  @Transient
+  private LanguageVersion currentLanguage;
 
   public Sight() {}
 
@@ -264,6 +266,16 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
       availableLanguageVersions = new HashSet<>();
     }
     return availableLanguageVersions.remove(languageVersion);
+  }
+
+  @Override
+  public LanguageVersion getCurrentLanguage() {
+    return currentLanguage;
+  }
+
+  @Override
+  public void setCurrentLanguage(LanguageVersion currentLanguage) {
+    this.currentLanguage = currentLanguage;
   }
 
 }

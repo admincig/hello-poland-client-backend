@@ -9,6 +9,7 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.util.Translated;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(name = "translation_key_language_unique",
@@ -58,7 +59,7 @@ public class Translation extends ModelSuperclass {
     this.deleted = deleted;
   }
 
-  public void generateKey(ModelSuperclass bo, String fieldName) {
+  public void generateKey(Translated bo, String fieldName) {
     setKey(bo.getClass().getSimpleName() + KEY_DELIMITER + bo.getId() + KEY_DELIMITER + fieldName);
   }
 

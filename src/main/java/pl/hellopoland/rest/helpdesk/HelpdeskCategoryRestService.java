@@ -50,8 +50,10 @@ public class HelpdeskCategoryRestService {
   @GET
   @Path("/{id}")
   public CategoryDTO get(
+      @HeaderParam("Accept-Language") String acceptLanguage,
+      @HeaderParam("Content-Language") String contentLanguage,
       @PathParam("id") Long id) {
-    return service.get(id);
+    return service.get(id, contentLanguage != null ? contentLanguage : acceptLanguage);
   }
 
   @DELETE

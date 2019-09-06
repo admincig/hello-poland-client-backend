@@ -72,15 +72,6 @@ public class SightEventServiceMarketAPI {
     if (bo.isAccessible()) {
       if (language != null) {
         bo = translationService.translateEntity(bo, language, true);
-        // var agreements = bo.getAgreements();
-        // if (agreements != null && !agreements.isEmpty()) {
-        // bo.setAgreements(
-        // Set.copyOf(translationService.translateEntities(agreements, language, true)));
-        // }
-        var tickets = bo.getTickets();
-        if (tickets != null && !tickets.isEmpty()) {
-          bo.setTickets(translationService.translateEntities(tickets, language, true));
-        }
       } else {
         language = bo.getDefaultLanguage();
       }
