@@ -51,8 +51,7 @@ public class ServiceHelpdeskAPI {
 
   @RolesAllowed("admin")
   public PagedCollection getSightEvents(SightEventPagedCollectionConfig config,
-      String contentLanguageSymbol) {
-    LanguageVersion language = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
+      LanguageVersion language) {
     config.onlyActive();
     PagedEntityCollection<SightEvent> bos = seService.getList(config, language);
     var dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());

@@ -2,6 +2,7 @@ package pl.hellopoland.rest.helpdesk;
 
 import java.io.File;
 import java.util.Date;
+import java.util.Optional;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -13,7 +14,10 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import org.apache.commons.lang3.StringUtils;
 import pl.hellopoland.annotation.DateFormat;
+import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.service.api.helpdesk.ServiceHelpdeskAPI;
 
 @RequestScoped
@@ -43,4 +47,11 @@ public class HelpdeskRestService {
     return Response.ok().build();
   }
 
+  public static LanguageVersion parseLang(String contentLanguage) {
+    if (StringUtils.isBlank(contentLanguage)) {
+      throw new ConflictingException("Language is required");
+    }
+    return Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(contentLanguage))
+        .orElseThrow(() -> new ConflictingException("Unsupported language: " + contentLanguage));
+  }
 }

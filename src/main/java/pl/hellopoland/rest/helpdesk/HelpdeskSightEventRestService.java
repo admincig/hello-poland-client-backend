@@ -28,10 +28,18 @@ public class HelpdeskSightEventRestService {
 
   @GET
   public PagedCollection getSightEvents(
-      @HeaderParam("Accept-Language") String acceptLanguage,
       @HeaderParam("Content-Language") String contentLanguage) {
     return service.getSightEvents(new SightEventPagedCollectionConfig(),
-        contentLanguage != null ? contentLanguage : acceptLanguage);
+        HelpdeskRestService.parseLang(contentLanguage));
+  }
+
+  @GET
+  @Path("/promoted")
+  public PagedCollection getPromotedSightEvents(
+      @HeaderParam("Content-Language") String contentLanguage) {
+    SightEventPagedCollectionConfig config = new SightEventPagedCollectionConfig();
+    config.setPromotion(1, 2, 3);
+    return service.getSightEvents(config, HelpdeskRestService.parseLang(contentLanguage));
   }
 
   @DELETE

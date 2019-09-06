@@ -1,6 +1,5 @@
 package pl.hellopoland.rest.helpdesk;
 
-import java.util.Optional;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -15,10 +14,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.commons.lang3.StringUtils;
 import pl.hellopoland.dto.CategoryDTO;
 import pl.hellopoland.enums.LanguageVersion;
-import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.api.helpdesk.CategoryServiceHelpdeskAPI;
 
@@ -35,7 +32,7 @@ public class HelpdeskCategoryRestService {
   public CategoryDTO create(
       @HeaderParam("Content-Language") String contentLanguage,
       CategoryDTO dto) {
-    LanguageVersion lang = parseLang(contentLanguage);
+    LanguageVersion lang = HelpdeskRestService.parseLang(contentLanguage);
     if (dto.id == null) {
       dto.language = lang.getLanuage();
       return service.create(dto);
@@ -46,7 +43,7 @@ public class HelpdeskCategoryRestService {
   @GET
   public PagedCollection getCategories(
       @HeaderParam("Content-Language") String contentLanguage) {
-    LanguageVersion lang = parseLang(contentLanguage);
+    LanguageVersion lang = HelpdeskRestService.parseLang(contentLanguage);
     return service.pagedList(lang);
   }
 
@@ -55,7 +52,7 @@ public class HelpdeskCategoryRestService {
   public CategoryDTO get(
       @HeaderParam("Content-Language") String contentLanguage,
       @PathParam("id") Long id) {
-    LanguageVersion lang = parseLang(contentLanguage);
+    LanguageVersion lang = HelpdeskRestService.parseLang(contentLanguage);
     return service.get(id, lang);
   }
 
@@ -73,7 +70,7 @@ public class HelpdeskCategoryRestService {
       @PathParam("id") Long id,
       @PathParam("language") String language,
       CategoryDTO dto) {
-    LanguageVersion lang = parseLang(language);
+    LanguageVersion lang = HelpdeskRestService.parseLang(language);
     dto.id = id;
     return service.update(dto, lang);
   }
@@ -83,7 +80,7 @@ public class HelpdeskCategoryRestService {
   public Response delete(
       @PathParam("id") Long id,
       @PathParam("language") String language) {
-    LanguageVersion lang = parseLang(language);
+    LanguageVersion lang = HelpdeskRestService.parseLang(language);
     service.deleteLanguageVersion(id, lang);
     return Response.ok().build();
   }
@@ -93,16 +90,8 @@ public class HelpdeskCategoryRestService {
   public CategoryDTO changeDefaultLanguage(
       @HeaderParam("Content-Language") String contentLanguage,
       @PathParam("id") Long id) {
-    LanguageVersion lang = parseLang(contentLanguage);
+    LanguageVersion lang = HelpdeskRestService.parseLang(contentLanguage);
     return service.changeDefaultLanguage(id, lang);
-  }
-
-  private LanguageVersion parseLang(String contentLanguage) {
-    if (StringUtils.isBlank(contentLanguage)) {
-      throw new ConflictingException("Language is required");
-    }
-    return Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(contentLanguage))
-        .orElseThrow(() -> new ConflictingException("Unsupported language: " + contentLanguage));
   }
 
 }
