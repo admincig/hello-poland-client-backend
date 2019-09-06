@@ -20,16 +20,6 @@ public class CategoryService extends ServiceSuperclass {
   @Inject
   private TranslationService tService;
 
-  public Category get(long id) {
-    return Optional.ofNullable(em.find(Category.class, id))
-        .orElseThrow(() -> new ResourceNotFoundException());
-  }
-
-  public PagedEntityCollection<Category> pagedList(CategoryPagedCollectionConfig config) {
-    List<Category> list = getQuery(config).getResultList();
-    return new PagedEntityCollection<>(list, config);
-  }
-
   public Category create(CategoryDTO dto) {
     Category cat = new Category();
     cat.setLabel(dto.label);
@@ -47,6 +37,26 @@ public class CategoryService extends ServiceSuperclass {
     return tService.createEntityLanguageVersion(get(dto.id), dto, language);
   }
 
+  public Category get(long id) {
+    return Optional.ofNullable(em.find(Category.class, id))
+        .orElseThrow(() -> new ResourceNotFoundException());
+  }
+
+  public PagedEntityCollection<Category> pagedList(CategoryPagedCollectionConfig config) {
+    List<Category> list = getQuery(config).getResultList();
+    return new PagedEntityCollection<>(list, config);
+  }
+
+  public Category update(Category bo, CategoryDTO dto, LanguageVersion lang) {
+    if (bo.getDefaultLanguage().equals(lang)) {
+      bo.setLabel(dto.label);
+      bo.setRecommended(dto.recommended);
+      bo.setRestricted(dto.restricted);
+      bo.setIconUrl(dto.iconUrl);
+    }
+    return tService.updateEntityLanguageVersion(bo, dto, lang);
+  }
+
   public Category changeDefaultLanguage(Category bo, LanguageVersion language) {
     Category translation = tService.translateEntity(bo, language, true);
     bo.setDefaultLanguage(language);
@@ -62,10 +72,4 @@ public class CategoryService extends ServiceSuperclass {
     tService.deleteEntityTranslations(get(id), lang);
   }
 
-  public Category update(Category bo, CategoryDTO dto, LanguageVersion lang) {
-    if (bo.getDefaultLanguage().equals(lang)) {
-      BeanUtils.copyNotNullProperties(dto, bo);
-    }
-    return tService.updateEntityLanguageVersion(bo, dto, lang);
-  }
 }
