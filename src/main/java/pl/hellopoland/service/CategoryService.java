@@ -47,17 +47,20 @@ public class CategoryService extends ServiceSuperclass {
     return new PagedEntityCollection<>(list, config);
   }
 
-  public Category update(Category bo, CategoryDTO dto, LanguageVersion lang) {
+  public Category update(CategoryDTO dto, LanguageVersion lang) {
+    Category bo = get(dto.id);
     if (bo.getDefaultLanguage().equals(lang)) {
       bo.setLabel(dto.label);
       bo.setRecommended(dto.recommended);
       bo.setRestricted(dto.restricted);
       bo.setIconUrl(dto.iconUrl);
+      em.flush();
     }
     return tService.updateEntityLanguageVersion(bo, dto, lang);
   }
 
-  public Category changeDefaultLanguage(Category bo, LanguageVersion language) {
+  public Category changeDefaultLanguage(Long id, LanguageVersion language) {
+    Category bo = get(id);
     Category translation = tService.translateEntity(bo, language, true);
     bo.setDefaultLanguage(language);
     bo = BeanUtils.copyNotNullProperties(translation, bo);

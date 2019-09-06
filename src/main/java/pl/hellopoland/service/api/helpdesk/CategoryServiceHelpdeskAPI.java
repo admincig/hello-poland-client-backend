@@ -57,14 +57,13 @@ public class CategoryServiceHelpdeskAPI {
           "Can not change the default language. Translation for language " + language.getLanuage()
               + "doesn't exists");
     }
-    bo = service.changeDefaultLanguage(bo, language);
+    bo = service.changeDefaultLanguage(id, language);
     return DtoMapper.getFullDTO(bo);
   }
 
   @RolesAllowed("admin")
   public CategoryDTO update(CategoryDTO dto, LanguageVersion lang) {
-    Category bo = service.get(dto.id);
-    bo = service.update(bo, dto, lang);
+    Category bo = service.update(dto, lang);
     return DtoMapper.getFullDTO(bo);
   }
 
