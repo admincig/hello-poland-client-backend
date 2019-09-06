@@ -22,6 +22,29 @@ public class SightEventServicePartnerAPI {
   SightEventService service;
 
   @RolesAllowed("partner")
+  public SightEventDTO create(SightEventDTO dto) {
+    SightEvent bo = service.create(dto, null);
+    return DtoMapper.getFullDTO(bo);
+  }
+
+  @RolesAllowed("partner")
+  public SightEventDTO createLanguageVesrion(SightEventDTO dto, LanguageVersion language) {
+    return DtoMapper.getFullDTO(service.createLanguageVesrion(dto, language));
+  }
+
+  @RolesAllowed("partner")
+  public SightEventDTO get(Long id, String contentLanguageSymbol) {
+    LanguageVersion lang = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
+    SightEvent bo = service.getForLoggedUser(id, lang);
+    var dto = DtoMapper.getFullDTO(bo);
+    if (lang == null) {
+      lang = bo.getDefaultLanguage();
+    }
+    dto.language = lang.getLanuage();
+    return dto;
+  }
+
+  @RolesAllowed("partner")
   public PagedCollection getList(SightEventPagedCollectionConfig config,
       String contentLanguageSymbol) {
     LanguageVersion language = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
@@ -41,43 +64,11 @@ public class SightEventServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
-  public SightEventDTO create(SightEventDTO dto) {
-    SightEvent bo = service.create(dto, null);
-    return DtoMapper.getFullDTO(bo);
-  }
-
-  @RolesAllowed("partner")
-  public SightEventDTO createLanguageVesrion(SightEventDTO dto, LanguageVersion language) {
-    return DtoMapper.getFullDTO(service.createLanguageVesrion(dto, language));
-  }
-
-  @RolesAllowed("partner")
   public SightEventDTO update(SightEventDTO dto, LanguageVersion language) {
     SightEvent bo = service.updateForLoggedUser(dto, language);
     return DtoMapper.getFullDTO(bo);
   }
 
-  @RolesAllowed("partner")
-  public SightEventDTO get(Long id, String contentLanguageSymbol) {
-    LanguageVersion lang = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
-    SightEvent bo = service.getForLoggedUser(id, lang);
-    var dto = DtoMapper.getFullDTO(bo);
-    if (lang == null) {
-      lang = bo.getDefaultLanguage();
-    }
-    dto.language = lang.getLanuage();
-    return dto;
-  }
-
-  @RolesAllowed("partner")
-  public void delete(Long id) {
-    service.deleteForLoggedUser(id);
-  }
-
-  @RolesAllowed("partner")
-  public void delete(Long id, LanguageVersion language) {
-    service.deleteForLoggedUser(id, language);
-  }
 
   @RolesAllowed("partner")
   public SightEventDTO uploadMainImage(Long id, byte[] icon) {
@@ -123,6 +114,16 @@ public class SightEventServicePartnerAPI {
   public SightEventDTO changeDefaultLanguage(Long id, LanguageVersion language) {
     SightEvent bo = service.changeDefaultLanguage(id, language);
     return DtoMapper.getFullDTO(bo);
+  }
+
+  @RolesAllowed("partner")
+  public void delete(Long id) {
+    service.deleteForLoggedUser(id);
+  }
+
+  @RolesAllowed("partner")
+  public void delete(Long id, LanguageVersion language) {
+    service.deleteForLoggedUser(id, language);
   }
 
 }

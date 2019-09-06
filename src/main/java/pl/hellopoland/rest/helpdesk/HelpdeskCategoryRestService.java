@@ -7,12 +7,15 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.apache.commons.lang3.StringUtils;
 import pl.hellopoland.dto.CategoryDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
@@ -29,10 +32,10 @@ public class HelpdeskCategoryRestService {
   private CategoryServiceHelpdeskAPI service;
 
   @POST
-  public CategoryDTO create(CategoryDTO dto, @HeaderParam("Content-Language") String language) {
-    LanguageVersion lang =
-        Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
-            .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+  public CategoryDTO create(
+      @HeaderParam("Content-Language") String contentLanguage,
+      CategoryDTO dto) {
+    LanguageVersion lang = parseLang(contentLanguage);
     if (dto.id == null) {
       dto.language = lang.getLanuage();
       return service.create(dto);
@@ -42,18 +45,18 @@ public class HelpdeskCategoryRestService {
 
   @GET
   public PagedCollection getCategories(
-      @HeaderParam("Accept-Language") String acceptLanguage,
       @HeaderParam("Content-Language") String contentLanguage) {
-    return service.pagedList(contentLanguage != null ? contentLanguage : acceptLanguage);
+    LanguageVersion lang = parseLang(contentLanguage);
+    return service.pagedList(lang);
   }
 
   @GET
   @Path("/{id}")
   public CategoryDTO get(
-      @HeaderParam("Accept-Language") String acceptLanguage,
       @HeaderParam("Content-Language") String contentLanguage,
       @PathParam("id") Long id) {
-    return service.get(id, contentLanguage != null ? contentLanguage : acceptLanguage);
+    LanguageVersion lang = parseLang(contentLanguage);
+    return service.get(id, lang);
   }
 
   @DELETE
@@ -62,6 +65,44 @@ public class HelpdeskCategoryRestService {
       @PathParam("id") Long id) {
     service.delete(id);
     return Response.ok().build();
+  }
+
+  @PUT
+  @Path("/{id}/languageVersion/{language}")
+  public CategoryDTO update(
+      @PathParam("id") Long id,
+      @PathParam("language") String language,
+      CategoryDTO dto) {
+    LanguageVersion lang = parseLang(language);
+    dto.id = id;
+    return service.update(dto, lang);
+  }
+
+  @DELETE
+  @Path("/{id}/languageVersion/{language}")
+  public Response delete(
+      @PathParam("id") Long id,
+      @PathParam("language") String language) {
+    LanguageVersion lang = parseLang(language);
+    service.deleteLanguageVersion(id, lang);
+    return Response.ok().build();
+  }
+
+  @PATCH
+  @Path("/{id}/defaultLanguage")
+  public CategoryDTO changeDefaultLanguage(
+      @HeaderParam("Content-Language") String contentLanguage,
+      @PathParam("id") Long id) {
+    LanguageVersion lang = parseLang(contentLanguage);
+    return service.changeDefaultLanguage(id, lang);
+  }
+
+  private LanguageVersion parseLang(String contentLanguage) {
+    if (StringUtils.isBlank(contentLanguage)) {
+      throw new ConflictingException("Language is required");
+    }
+    return Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(contentLanguage))
+        .orElseThrow(() -> new ConflictingException("Unsupported language: " + contentLanguage));
   }
 
 }
