@@ -66,6 +66,27 @@ public class SightEventServiceMarketAPI {
   }
 
   @PermitAll
+  public PagedCollection getPromoted(SightEventPagedCollectionConfig config,
+      LanguageVersion language) {
+    config.onlyAvailable();
+    config.onlyActive();
+    config.onlyPublished();
+    config.setOrderColumn("name");
+    config.setOrderDirection("asc");
+    PagedEntityCollection<SightEvent> bos = service.getList(config, language);
+    bos.items = bos.items.stream().filter(se -> se.isAccessible()).collect(Collectors.toList());
+    List<SightEventDTO> dtos = bos.items.stream().map(bo -> {
+      var dto = DtoMapper.getDTO(bo);
+      dto.language = bo.getDefaultLanguage().getLanuage();
+      return dto;
+    }).collect(Collectors.toList());
+    if (language != null) {
+      dtos.forEach(dto -> dto.language = language.getLanuage());
+    }
+    return new PagedCollection(dtos, bos.config);
+  }
+
+  @PermitAll
   public SightEventDTO get(Long id, String contentLanguageSymbol) {
     LanguageVersion language = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
     SightEvent bo = service.get(id);

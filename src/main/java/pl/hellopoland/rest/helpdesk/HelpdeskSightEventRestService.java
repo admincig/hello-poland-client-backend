@@ -33,15 +33,6 @@ public class HelpdeskSightEventRestService {
         HelpdeskRestService.parseLang(contentLanguage));
   }
 
-  @GET
-  @Path("/promoted")
-  public PagedCollection getPromotedSightEvents(
-      @HeaderParam("Content-Language") String contentLanguage) {
-    SightEventPagedCollectionConfig config = new SightEventPagedCollectionConfig();
-    config.setPromotion(1, 2, 3);
-    return service.getSightEvents(config, HelpdeskRestService.parseLang(contentLanguage));
-  }
-
   @DELETE
   @Path("/{id}/promotion")
   public Response setSightEventPromotion(
