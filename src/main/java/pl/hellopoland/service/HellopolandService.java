@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -85,8 +86,11 @@ public class HellopolandService extends ServiceSuperclass {
     }
     String password = RandomStringUtils.randomAlphanumeric(10);
     try {
-      userService.create(partner.email, password, null, null, null, partnerBO,
-          UserRole.Role.PARTNER, UserRole.Role.USHER);
+      Optional<User> user = userService.findByEmailWithNotNullPartner(partner.email);
+      user.ifPresentOrElse(us -> {
+        userService.attachToPartner(us, partnerBO);
+      }, () -> userService.create(partner.email, password, null, null, null, partnerBO,
+          UserRole.Role.PARTNER, UserRole.Role.USHER));
       em.flush();
     } catch (Exception e) {
       var exc = e.getCause();

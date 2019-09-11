@@ -81,6 +81,11 @@ public class UserService extends ServiceSuperclass {
         .setParameter("email", email.toLowerCase()).getResultStream().findFirst();
   }
 
+  public Optional<User> findByEmailWithNotNullPartner(String email) {
+    return em.createQuery("from User where lower(email) = :email and partner != null", User.class)
+        .setParameter("email", email.toLowerCase()).getResultStream().findFirst();
+  }
+
   public void changePasswordForLoggedPartner(UserAuthDTO userAuthDTO) {
     if (passwordEncoder.matches(userAuthDTO.oldPassword, getLoggedUser().getPassword())) {
       getLoggedUser().setPassword(passwordEncoder.encode(userAuthDTO.password));
@@ -121,6 +126,19 @@ public class UserService extends ServiceSuperclass {
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket ht = new HelloTicket(hpt.getUrl());
     return ht.createUsherForLoggedPartner(usherDTO, getLoggedPartner().getHptToken());
+  }
+
+  public void attachToPartner(User user, Partner partner) {
+    user.setPartner(partner);
+    createUserRole(user, Role.USHER);
+    createUserRole(user, Role.PARTNER);
+  }
+
+  private void createUserRole(User user, Role role) {
+    UserRole ur = new UserRole();
+    ur.setUser(user);
+    ur.setRole(role);
+    em.persist(ur);
   }
 
 }
