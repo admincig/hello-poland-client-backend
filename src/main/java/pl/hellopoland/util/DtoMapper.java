@@ -137,7 +137,6 @@ public class DtoMapper {
     dto.phone = bo.getPhone();
     dto.duration = bo.getDuration();
     dto.location = ofNullable(bo.getLocation()).map(DtoMapper::getDTO).orElse(null);
-    // dto.date = bo.getDate();
     dto.generalAdmission = bo.getGeneralAdmission();
     dto.score = bo.getScore();
     dto.sightId = bo.getSight() != null ? bo.getSight().getId() : null;
@@ -146,6 +145,10 @@ public class DtoMapper {
     dto.partnerAffiliateCode = bo.getPartner().getAffiliateCode();
     dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
     dto.promotion = bo.getPromotion();
+    dto.sightId = bo.getSight().getId();
+    dto.sightName = bo.getSight().getName();
+    dto.partnerId = bo.getPartner().getId();
+    dto.partnerName = bo.getPartner().getName();
     return dto;
   }
 

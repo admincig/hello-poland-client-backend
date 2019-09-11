@@ -197,6 +197,10 @@ public class SightEventService extends ServiceSuperclass {
 
   public SightEvent updateForLoggedUser(SightEventDTO dto, LanguageVersion language) {
     SightEvent bo = getForLoggedUser(dto.id);
+    return update(bo, dto, language);
+  }
+
+  public SightEvent update(SightEvent bo, SightEventDTO dto, LanguageVersion language) {
     if (!translationService.isTranslated(bo, language)) {
       // throw new ConflictingException(
       // "Translation for language " + language.getLanuage() + " doesn't exists");
