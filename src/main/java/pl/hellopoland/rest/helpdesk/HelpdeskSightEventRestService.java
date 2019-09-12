@@ -18,7 +18,7 @@ import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.dto.PagedCollection;
-import pl.hellopoland.service.api.helpdesk.ServiceHelpdeskAPI;
+import pl.hellopoland.service.api.helpdesk.SightEventServiceHelpdeskAPI;
 
 @RequestScoped
 @Path("/helpdesk/sight-events")
@@ -27,19 +27,19 @@ import pl.hellopoland.service.api.helpdesk.ServiceHelpdeskAPI;
 public class HelpdeskSightEventRestService {
 
   @Inject
-  private ServiceHelpdeskAPI service;
+  private SightEventServiceHelpdeskAPI service;
 
   @GET
-  public PagedCollection getSightEvents(
+  public PagedCollection list(
       @HeaderParam("Content-Language") String contentLanguage) {
-    return service.getSightEvents(new SightEventPagedCollectionConfig(),
+    return service.list(new SightEventPagedCollectionConfig(),
         HelpdeskRestService.parseLang(contentLanguage));
   }
 
   @DELETE
   @Path("/{id}")
   public Response delete(@PathParam("id") Long id) {
-    service.deleteSightEvent(id);
+    service.delete(id);
     return Response.ok().build();
   }
 
@@ -48,7 +48,26 @@ public class HelpdeskSightEventRestService {
   public SightEventDTO get(
       @HeaderParam("Content-Language") String contentLanguage,
       @PathParam("id") Long id) {
-    return service.getSightEvent(id, HelpdeskRestService.parseLang(contentLanguage));
+    return service.get(id, HelpdeskRestService.parseLang(contentLanguage));
+  }
+
+  @DELETE
+  @Path("/{id}/languageVersion/{language}")
+  public Response deleteLanguageVersion(
+      @PathParam("id") Long id,
+      @PathParam("language") String language) {
+    LanguageVersion lang = HelpdeskRestService.parseLang(language);
+    service.deleteLanguageVersion(id, lang);
+    return Response.ok().build();
+  }
+
+  @PATCH
+  @Path("/{id}/defaultLanguage")
+  public SightEventDTO changeDefaultLanguage(
+      @HeaderParam("Content-Language") String contentLanguage,
+      @PathParam("id") Long id) {
+    LanguageVersion lang = HelpdeskRestService.parseLang(contentLanguage);
+    return service.changeDefaultLanguage(id, lang);
   }
 
   @PUT
@@ -58,26 +77,26 @@ public class HelpdeskSightEventRestService {
       SightEventDTO dto) {
     LanguageVersion lang = HelpdeskRestService.parseLang(language);
     dto.id = id;
-    return service.updateSightEvent(dto, lang);
+    return service.update(dto, lang);
   }
 
   @DELETE
   @Path("/{id}/promotion")
-  public Response setSightEventPromotion(
+  public Response setPromotion(
       @PathParam("id") Long id) {
-    service.removeSightEventPromotion(id);
+    service.removePromotion(id);
     return Response.ok().build();
   }
 
   @PATCH
   @Path("/{id}/promotion/{value}")
-  public Response setSightEventPromotion(
+  public Response setPromotion(
       @PathParam("id") Long id,
       @PathParam("value") Integer promotion) {
     if (promotion.compareTo(1) < 0 || promotion.compareTo(3) > 0) {
       throw new ConflictingException("The 'value' parameter can be only 1 or 2 or 3.");
     }
-    service.setSightEventPromotion(id, promotion);
+    service.setPromotion(id, promotion);
     return Response.ok().build();
   }
 

@@ -1,0 +1,85 @@
+package pl.hellopoland.service.api.helpdesk;
+
+import java.util.stream.Collectors;
+import javax.annotation.security.RolesAllowed;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.config.SightEventPagedCollectionConfig;
+import pl.hellopoland.dto.SightEventDTO;
+import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.exception.conflict.ConflictingException;
+import pl.hellopoland.rest.dto.PagedCollection;
+import pl.hellopoland.service.SightEventService;
+import pl.hellopoland.service.TranslationService;
+import pl.hellopoland.util.DtoMapper;
+import pl.hellopoland.util.PagedEntityCollection;
+
+@Stateless
+public class SightEventServiceHelpdeskAPI {
+
+  @Inject
+  private SightEventService service;
+  @Inject
+  private TranslationService tService;
+
+
+
+  @RolesAllowed("admin")
+  public PagedCollection list(SightEventPagedCollectionConfig config,
+      LanguageVersion language) {
+    config.onlyActive();
+    PagedEntityCollection<SightEvent> bos = service.getList(config, language);
+    var dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
+    return new PagedCollection(dtos, bos.config);
+  }
+
+  @RolesAllowed("admin")
+  public void setPromotion(Long id, Integer promotion) {
+    service.setSightEventPromotion(id, promotion);
+  }
+
+  @RolesAllowed("admin")
+  public void removePromotion(Long id) {
+    service.removeSightEventPromotion(id);
+  }
+
+
+  @RolesAllowed("admin")
+  public void delete(Long id) {
+    service.delete(id);
+  }
+
+  @RolesAllowed("admin")
+  public SightEventDTO update(SightEventDTO dto, LanguageVersion language) {
+    SightEvent bo = service.get(dto.id);
+    bo = service.update(bo, dto, language);
+    return DtoMapper.getFullDTO(bo);
+  }
+
+  @RolesAllowed("admin")
+  public void deleteLanguageVersion(Long id, LanguageVersion language) {
+    SightEvent bo = service.get(id);
+    tService.deleteEntityTranslations(bo, language);
+  }
+
+  @RolesAllowed("admin")
+  public SightEventDTO get(Long id, LanguageVersion language) {
+    SightEvent bo = service.get(id);
+    bo = tService.translateEntity(bo, language, true);
+    return DtoMapper.getFullDTO(bo);
+  }
+
+  @RolesAllowed("admin")
+  public SightEventDTO changeDefaultLanguage(Long id, LanguageVersion language) {
+    SightEvent bo = service.get(id);
+    if (!tService.isTranslated(bo, language)) {
+      throw new ConflictingException(
+          "Can not change the default language. Translation for language " + language.getLanuage()
+              + "doesn't exists");
+    }
+    bo = service.changeDefaultLanguage(id, language);
+    return DtoMapper.getFullDTO(bo);
+  }
+
+}
