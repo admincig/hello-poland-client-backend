@@ -191,7 +191,13 @@ public class SightEventService extends ServiceSuperclass {
         language);
   }
 
-  public SightEvent createLanguageVesrion(SightEventDTO dto, LanguageVersion language) {
+  public SightEvent createLanguageVersion(SightEventDTO dto, LanguageVersion language) {
+    SightEvent bo = get(dto.id);
+    return translationService.createEntityLanguageVersion(bo, dto, language);
+  }
+
+  public SightEvent createLanguageVersionForLoggedUser(SightEventDTO dto,
+      LanguageVersion language) {
     return translationService.createEntityLanguageVersion(getForLoggedUser(dto.id), dto, language);
   }
 
@@ -204,7 +210,7 @@ public class SightEventService extends ServiceSuperclass {
     if (!translationService.isTranslated(bo, language)) {
       // throw new ConflictingException(
       // "Translation for language " + language.getLanuage() + " doesn't exists");
-      createLanguageVesrion(dto, language);
+      createLanguageVersionForLoggedUser(dto, language);
     }
     if (bo.getDefaultLanguage().equals(language)) {
       if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {

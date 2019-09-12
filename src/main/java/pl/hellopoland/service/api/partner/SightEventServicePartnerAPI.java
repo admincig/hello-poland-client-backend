@@ -29,7 +29,7 @@ public class SightEventServicePartnerAPI {
 
   @RolesAllowed("partner")
   public SightEventDTO createLanguageVesrion(SightEventDTO dto, LanguageVersion language) {
-    return DtoMapper.getFullDTO(service.createLanguageVesrion(dto, language));
+    return DtoMapper.getFullDTO(service.createLanguageVersionForLoggedUser(dto, language));
   }
 
   @RolesAllowed("partner")

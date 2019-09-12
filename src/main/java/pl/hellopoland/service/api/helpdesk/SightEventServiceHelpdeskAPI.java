@@ -73,7 +73,7 @@ public class SightEventServiceHelpdeskAPI {
 
   @RolesAllowed("admin")
   public SightEventDTO createLanguageVesrion(SightEventDTO dto, LanguageVersion language) {
-    SightEvent bo = service.createLanguageVesrion(dto, language);
+    SightEvent bo = service.createLanguageVersion(dto, language);
     return DtoMapper.getFullDTO(bo);
   }
 
