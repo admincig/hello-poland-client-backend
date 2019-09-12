@@ -4,12 +4,15 @@ import java.util.stream.Collectors;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import pl.hellopoland.bo.Category;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.dto.PagedCollection;
+import pl.hellopoland.service.CategoryService;
+import pl.hellopoland.service.SightEventCategoryService;
 import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.service.TranslationService;
 import pl.hellopoland.util.DtoMapper;
@@ -22,6 +25,10 @@ public class SightEventServiceHelpdeskAPI {
   private SightEventService service;
   @Inject
   private TranslationService tService;
+  @Inject
+  private SightEventCategoryService secService;
+  @Inject
+  private CategoryService catService;
 
 
 
@@ -58,17 +65,18 @@ public class SightEventServiceHelpdeskAPI {
   }
 
   @RolesAllowed("admin")
-  public void deleteLanguageVersion(Long id, LanguageVersion language) {
-    SightEvent bo = service.get(id);
-    tService.deleteEntityTranslations(bo, language);
-  }
-
-  @RolesAllowed("admin")
   public SightEventDTO get(Long id, LanguageVersion language) {
     SightEvent bo = service.get(id);
     bo = tService.translateEntity(bo, language, true);
     return DtoMapper.getFullDTO(bo);
   }
+
+  @RolesAllowed("admin")
+  public SightEventDTO createLanguageVesrion(SightEventDTO dto, LanguageVersion language) {
+    SightEvent bo = service.createLanguageVesrion(dto, language);
+    return DtoMapper.getFullDTO(bo);
+  }
+
 
   @RolesAllowed("admin")
   public SightEventDTO changeDefaultLanguage(Long id, LanguageVersion language) {
@@ -80,6 +88,28 @@ public class SightEventServiceHelpdeskAPI {
     }
     bo = service.changeDefaultLanguage(id, language);
     return DtoMapper.getFullDTO(bo);
+  }
+
+  @RolesAllowed("admin")
+  public void deleteLanguageVersion(Long id, LanguageVersion language) {
+    SightEvent bo = service.get(id);
+    tService.deleteEntityTranslations(bo, language);
+  }
+
+  @RolesAllowed("admin")
+  public SightEventDTO addCategory(Long id, Long categoryId) {
+    SightEvent se = service.get(id);
+    Category cat = catService.get(id);
+    se = secService.addCategory(se, cat);
+    return DtoMapper.getFullDTO(se);
+  }
+
+  @RolesAllowed("admin")
+  public SightEventDTO removeCategory(Long id, Long categoryId) {
+    SightEvent se = service.get(id);
+    Category cat = catService.get(id);
+    se = secService.removeCategory(se, cat);
+    return DtoMapper.getFullDTO(se);
   }
 
 }

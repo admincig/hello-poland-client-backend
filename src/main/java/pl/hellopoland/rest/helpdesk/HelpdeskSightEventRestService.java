@@ -7,6 +7,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PATCH;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -28,6 +29,14 @@ public class HelpdeskSightEventRestService {
 
   @Inject
   private SightEventServiceHelpdeskAPI service;
+
+  @POST
+  public SightEventDTO createLanguageVersion(
+      @HeaderParam("Content-Language") String contentLanguage,
+      SightEventDTO dto) {
+    LanguageVersion lang = HelpdeskRestService.parseLang(contentLanguage);
+    return service.createLanguageVesrion(dto, lang);
+  }
 
   @GET
   public PagedCollection list(
@@ -98,6 +107,22 @@ public class HelpdeskSightEventRestService {
     }
     service.setPromotion(id, promotion);
     return Response.ok().build();
+  }
+
+  @PATCH
+  @Path("/{id}/categories/{cId}")
+  public SightEventDTO addCategory(
+      @PathParam("id") Long id,
+      @PathParam("cId") Long categoryId) {
+    return service.addCategory(id, categoryId);
+  }
+
+  @DELETE
+  @Path("/{id}/categories/{cId}")
+  public SightEventDTO removeCategory(
+      @PathParam("id") Long id,
+      @PathParam("cId") Long categoryId) {
+    return service.removeCategory(id, categoryId);
   }
 
 }

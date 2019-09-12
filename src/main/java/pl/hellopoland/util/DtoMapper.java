@@ -2,6 +2,7 @@ package pl.hellopoland.util;
 
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
@@ -167,6 +168,9 @@ public class DtoMapper {
     }
     if (bo.getAgreements() != null && !bo.getAgreements().isEmpty()) {
       dto.agreements = bo.getAgreements().stream().map(DtoMapper::getDTO).collect(toList());
+    }
+    if (bo.getCategories() != null && !bo.getCategories().isEmpty()) {
+      dto.categories = bo.getCategories().stream().map(DtoMapper::getDTO).collect(toSet());
     }
     dto.pdfAttachment = bo.getPdfAttachment() != null ? getFullDTO(bo.getPdfAttachment()) : null;
     return dto;

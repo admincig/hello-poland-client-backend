@@ -89,6 +89,8 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
   @Transient
   private LanguageVersion currentLanguage;
   private Integer promotion;
+  @ManyToMany
+  private Set<Category> categories;
 
   public String getName() {
     return name;
@@ -364,6 +366,14 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
 
   public void setPromotion(Integer promotion) {
     this.promotion = promotion;
+  }
+
+  public Set<Category> getCategories() {
+    return categories;
+  }
+
+  public void setCategories(Set<Category> categories) {
+    this.categories = categories;
   }
 
   @Override
