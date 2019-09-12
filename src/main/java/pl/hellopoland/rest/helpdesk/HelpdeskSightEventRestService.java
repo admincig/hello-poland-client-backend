@@ -43,6 +43,14 @@ public class HelpdeskSightEventRestService {
     return Response.ok().build();
   }
 
+  @GET
+  @Path("/{id}")
+  public SightEventDTO get(
+      @HeaderParam("Content-Language") String contentLanguage,
+      @PathParam("id") Long id) {
+    return service.getSightEvent(id, HelpdeskRestService.parseLang(contentLanguage));
+  }
+
   @PUT
   @Path("/{id}/languageVersion/{language}")
   public SightEventDTO update(@PathParam("id") Long id,

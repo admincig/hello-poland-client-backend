@@ -95,4 +95,11 @@ public class ServiceHelpdeskAPI {
     tService.deleteEntityTranslations(bo, language);
   }
 
+  @RolesAllowed("admin")
+  public SightEventDTO getSightEvent(Long id, LanguageVersion language) {
+    SightEvent bo = seService.get(id);
+    bo = tService.translateEntity(bo, language, true);
+    return DtoMapper.getFullDTO(bo);
+  }
+
 }
