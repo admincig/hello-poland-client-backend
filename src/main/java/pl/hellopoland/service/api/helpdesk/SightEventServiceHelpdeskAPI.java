@@ -99,7 +99,7 @@ public class SightEventServiceHelpdeskAPI {
   @RolesAllowed("admin")
   public SightEventDTO addCategory(Long id, Long categoryId) {
     SightEvent se = service.get(id);
-    Category cat = catService.get(id);
+    Category cat = catService.get(categoryId);
     se = secService.addCategory(se, cat);
     return DtoMapper.getFullDTO(se);
   }
@@ -107,7 +107,7 @@ public class SightEventServiceHelpdeskAPI {
   @RolesAllowed("admin")
   public SightEventDTO removeCategory(Long id, Long categoryId) {
     SightEvent se = service.get(id);
-    Category cat = catService.get(id);
+    Category cat = catService.get(categoryId);
     se = secService.removeCategory(se, cat);
     return DtoMapper.getFullDTO(se);
   }
