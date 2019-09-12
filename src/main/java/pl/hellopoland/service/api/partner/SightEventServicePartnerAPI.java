@@ -112,7 +112,7 @@ public class SightEventServicePartnerAPI {
 
   @RolesAllowed("partner")
   public SightEventDTO changeDefaultLanguage(Long id, LanguageVersion language) {
-    SightEvent bo = service.changeDefaultLanguage(id, language);
+    SightEvent bo = service.changeDefaultLanguageForLoggedUser(id, language);
     return DtoMapper.getFullDTO(bo);
   }
 

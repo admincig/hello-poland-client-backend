@@ -86,7 +86,7 @@ public class SightEventServiceHelpdeskAPI {
           "Can not change the default language. Translation for language " + language.getLanuage()
               + "doesn't exists");
     }
-    bo = service.changeDefaultLanguage(id, language);
+    bo = service.changeDefaultLanguage(bo, language);
     return DtoMapper.getFullDTO(bo);
   }
 

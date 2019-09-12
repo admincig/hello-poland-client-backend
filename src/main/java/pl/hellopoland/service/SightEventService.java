@@ -548,8 +548,12 @@ public class SightEventService extends ServiceSuperclass {
     ht.stopSale(getLoggedPartner().getHptToken(), bo.getHptId(), ticketPoolDefId, date);
   }
 
-  public SightEvent changeDefaultLanguage(Long id, LanguageVersion language) {
+  public SightEvent changeDefaultLanguageForLoggedUser(Long id, LanguageVersion language) {
     SightEvent bo = getForLoggedUser(id);
+    return changeDefaultLanguage(bo, language);
+  }
+
+  public SightEvent changeDefaultLanguage(SightEvent bo, LanguageVersion language) {
     if (!translationService.isTranslated(bo, language)) {
       throw new ConflictingException(
           "Can not change the default language. Translation for language " + language.getLanuage()

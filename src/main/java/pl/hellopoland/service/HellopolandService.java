@@ -214,10 +214,6 @@ public class HellopolandService extends ServiceSuperclass {
     return partnerBO;
   }
 
-  private boolean isAtLeastOneUsher(List<UserDTO> usersDTOs) {
-    return usersDTOs.stream().anyMatch(user -> user.roles.contains(RoleDTO.USHER));
-  }
-
   private boolean areRolesSupported(Set<RoleDTO> roles) {
     var supported = new HashSet<Role>(Arrays.asList(UserRole.Role.values()));
     supported.removeAll(excluded_roles);
