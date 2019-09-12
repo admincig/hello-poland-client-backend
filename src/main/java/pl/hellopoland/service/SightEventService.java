@@ -564,7 +564,7 @@ public class SightEventService extends ServiceSuperclass {
     bo = BeanUtils.copyNotNullProperties(translation, bo);
     em.merge(bo);
     if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
-      Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
+      Partner partner = bo.getPartner();
       Portal hpt = getPortal("Hello Ticket Cloud");
       HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
       helloTicket.updateSightEvent(DtoMapper.getDTO(bo), partner.getHptToken());
