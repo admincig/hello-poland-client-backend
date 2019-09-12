@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.text.Collator;
 import java.util.Collection;
 import java.util.Comparator;
@@ -116,6 +117,7 @@ public abstract class ServiceSuperclass {
     try {
       return ctx.proceed();
     } catch (NoResultException e) {
+      logger.log(Level.ERROR, "NoResultException occured ", e);
       throw new ResourceNotFoundException();
     }
   }

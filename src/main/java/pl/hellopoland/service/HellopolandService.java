@@ -52,7 +52,7 @@ public class HellopolandService extends ServiceSuperclass {
   @Inject
   private P24SOAPClient p24SOAPClient;
 
-  final Set<UserRole.Role> excluded_roles = Set.of(UserRole.Role.ROOT, UserRole.Role.ADMIN,
+  final Set<UserRole.Role> excludedRoles = Set.of(UserRole.Role.ROOT, UserRole.Role.ADMIN,
       UserRole.Role.PARTNER, UserRole.Role.SALESMAN);
 
   public Partner addPartner(PartnerDTO partner) {
@@ -216,7 +216,7 @@ public class HellopolandService extends ServiceSuperclass {
 
   private boolean areRolesSupported(Set<RoleDTO> roles) {
     var supported = new HashSet<Role>(Arrays.asList(UserRole.Role.values()));
-    supported.removeAll(excluded_roles);
+    supported.removeAll(excludedRoles);
     try {
       return supported.containsAll(
           roles.stream().map(r -> UserRole.Role.valueOf(r.name())).collect(Collectors.toSet()));
@@ -227,7 +227,7 @@ public class HellopolandService extends ServiceSuperclass {
 
   private Role[] getFilteredRolesFromDTO(Set<RoleDTO> roles) {
     Stream<UserRole.Role> stream = roles.stream().map(r -> UserRole.Role.valueOf(r.name()))
-        .filter(r -> !excluded_roles.contains(r) && !r.equals(UserRole.Role.USHER));
+        .filter(r -> !excludedRoles.contains(r) && !r.equals(UserRole.Role.USHER));
     return stream.toArray(UserRole.Role[]::new);
   }
 
