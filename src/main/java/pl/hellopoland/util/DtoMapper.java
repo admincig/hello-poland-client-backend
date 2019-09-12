@@ -150,7 +150,8 @@ public class DtoMapper {
     dto.sightName = bo.getSight().getName();
     dto.partnerId = bo.getPartner().getId();
     dto.partnerName = bo.getPartner().getName();
-    dto.language = bo.getCurrentLanguage().getLanuage();
+    dto.language = bo.getCurrentLanguage() == null ? dto.defaultLanguage
+        : bo.getCurrentLanguage().getLanuage();
     return dto;
   }
 
