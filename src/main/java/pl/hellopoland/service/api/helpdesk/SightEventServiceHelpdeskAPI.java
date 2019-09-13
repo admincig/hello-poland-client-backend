@@ -1,5 +1,6 @@
 package pl.hellopoland.service.api.helpdesk;
 
+import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
@@ -51,7 +52,6 @@ public class SightEventServiceHelpdeskAPI {
     service.removeSightEventPromotion(id);
   }
 
-
   @RolesAllowed("admin")
   public void delete(Long id) {
     service.delete(id);
@@ -68,7 +68,9 @@ public class SightEventServiceHelpdeskAPI {
   public SightEventDTO get(Long id, LanguageVersion language) {
     SightEvent bo = service.get(id);
     bo = tService.translateEntity(bo, language, true);
-    return DtoMapper.getFullDTO(bo);
+    SightEventDTO dto = DtoMapper.getFullDTO(bo);
+    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), false);
+    return dto;
   }
 
   @RolesAllowed("admin")
