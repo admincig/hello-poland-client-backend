@@ -214,7 +214,7 @@ public class SightEventService extends ServiceSuperclass {
     }
     if (bo.getDefaultLanguage().equals(language)) {
       if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
-        Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
+        Partner partner = bo.getPartner();
         Portal hpt = getPortal("Hello Ticket Cloud");
         HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
         dto.id = bo.getHptId();
