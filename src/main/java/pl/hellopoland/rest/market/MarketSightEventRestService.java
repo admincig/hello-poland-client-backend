@@ -52,6 +52,7 @@ public class MarketSightEventRestService {
       @HeaderParam("Content-Language") String contentLanguage) {
     SightEventPagedCollectionConfig config = new SightEventPagedCollectionConfig();
     config.setPromotion(1, 2, 3);
+    config.setOrderColumn("promotion, id");
     return service.getPromoted(config, HelpdeskRestService.parseLang(contentLanguage));
   }
 
