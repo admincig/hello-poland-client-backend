@@ -272,6 +272,10 @@ public class SightEventService extends ServiceSuperclass {
 
   public SightEvent uploadMainImageForLoggedUser(Long id, byte[] icon) {
     SightEvent bo = getForLoggedUser(id);
+    return uploadMainImage(bo, icon);
+  }
+
+  public SightEvent uploadMainImage(SightEvent bo, byte[] icon) {
     bo.setMainImage(
         iService.validateAndStoreImageCollector(new ByteArrayInputStream(icon), "jpeg", null));
     return bo;

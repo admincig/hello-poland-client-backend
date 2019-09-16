@@ -113,13 +113,6 @@ public class PartnerSightEventRestService {
     service.delete(id);
   }
 
-  @PUT
-  @Path("/{id}/mainImage")
-  @Consumes({"image/jpeg", "image/jpg"})
-  public SightEventDTO uploadIcon(@PathParam("id") Long id, byte[] icon) {
-    return service.uploadMainImage(id, icon);
-  }
-
   @POST
   @Path("/{id}/images")
   @Consumes({"image/jpeg", "image/jpg"})
@@ -145,6 +138,13 @@ public class PartnerSightEventRestService {
   @Consumes("application/pdf")
   public void deletePdf(@PathParam("id") Long id) {
     service.deletePdf(id);
+  }
+
+  @PUT
+  @Path("/{id}/mainImage")
+  @Consumes({"image/jpeg", "image/jpg"})
+  public SightEventDTO uploadIcon(@PathParam("id") Long id, byte[] icon) {
+    return service.uploadMainImage(id, icon);
   }
 
   @DELETE
