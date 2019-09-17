@@ -51,6 +51,11 @@
 			<version>1.0.35</version>
 		</dependency>
 		<dependency>
+			<groupId>pl.fream.commons</groupId>
+			<artifactId>fulltext-search-dialect</artifactId>
+			<version>0.1.0</version>
+		</dependency>
+		<dependency>
 			<groupId>org.eclipse.microprofile.health</groupId>
 			<artifactId>microprofile-health-api</artifactId>
 			<version>1.0</version>

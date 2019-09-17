@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
@@ -70,6 +72,7 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
   private Set<LanguageVersion> availableLanguageVersions;
   @Transient
   private LanguageVersion currentLanguage;
+  private String searchIndex;
 
   public Sight() {}
 
@@ -278,4 +281,16 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
     this.currentLanguage = currentLanguage;
   }
 
+  public String getSearchIndex() {
+    return searchIndex;
+  }
+
+  public void setSearchIndex(String searchIndex) {
+    this.searchIndex = searchIndex;
+  }
+
+  public void recreateSearchIndexAlsoForSightEvents() {
+    this.searchIndex = Stream.of(name, phone).collect(Collectors.joining(", "));
+    this.sightEvents.forEach(SightEvent::recreateSearchIndex);
+  }
 }

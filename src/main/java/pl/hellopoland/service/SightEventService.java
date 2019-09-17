@@ -174,6 +174,7 @@ public class SightEventService extends ServiceSuperclass {
       });
       bo.setOpeningHours(oHoursList);
     }
+    bo.recreateSearchIndex();
     logger.log(Logger.Level.INFO, "Saved new sight event: " + bo.getName());
     return createLanguageVersion(DtoMapper.getDTO(bo), partner, bo.getDefaultLanguage());
   }
@@ -231,6 +232,7 @@ public class SightEventService extends ServiceSuperclass {
       }
       bo.setOpeningHours(null);
       bo.setOpeningHours(oHoursList);
+      bo.recreateSearchIndex();
       em.flush();
     }
     return translationService.updateEntityLanguageVersion(bo, dto, language);

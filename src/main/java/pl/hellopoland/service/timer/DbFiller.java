@@ -126,15 +126,15 @@ public class DbFiller extends ServiceSuperclass {
     logger.log(Logger.Level.INFO, "Envi: " + System.getenv("ProgramFiles(x86)"));
     createPortals();
     createUsers();
-    createImageCollectors();
-    createLocations();
-    createSights();
-    createSightsEnglishVersion(hpWroc, hpKielce, geoparkKielce, zeromKielce, zooWro, stadGd,
-        kol);
-    createSightEvents();
-    createSightEventsEnglishVersion(afrEvent, kolEvent, meczPCEvent, parkSzczEvent, zwStadEvent,
-        zwZooEvent, zwKielcEvent, zeromEvent, geoparkKielcEvent);
-    createTicketPoolDefinitions();
+    // createImageCollectors();
+    // createLocations();
+    // createSights();
+    // createSightsEnglishVersion(hpWroc, hpKielce, geoparkKielce, zeromKielce, zooWro, stadGd,
+    // kol);
+    // createSightEvents();
+    // createSightEventsEnglishVersion(afrEvent, kolEvent, meczPCEvent, parkSzczEvent, zwStadEvent,
+    // zwZooEvent, zwKielcEvent, zeromEvent, geoparkKielcEvent);
+    // createTicketPoolDefinitions();
     createCategories();
     logger.log(Logger.Level.INFO, "dbfiller finished");
   }

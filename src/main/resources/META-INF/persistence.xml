@@ -18,6 +18,7 @@
 		<properties>
 			<property name="hibernate.hbm2ddl.auto" value="${hibernate.hbm2ddl.auto}" />
 			<property name="hibernate.show_sql" value="${hibernate.show.sql}" />
+			<property name="hibernate.dialect" value="pl.fream.commons.fulltextsearch.PostgresqlFulltextSearchDialect"/>
 		</properties>
 	</persistence-unit>
 </persistence>

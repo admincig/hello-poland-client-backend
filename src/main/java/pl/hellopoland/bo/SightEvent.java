@@ -8,6 +8,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
@@ -91,6 +93,7 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
   private Integer promotion;
   @ManyToMany
   private Set<Category> categories;
+  private String searchIndex;
 
   public String getName() {
     return name;
@@ -386,4 +389,16 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
     this.currentLanguage = currentLanguage;
   }
 
+  public String getSearchIndex() {
+    return searchIndex;
+  }
+
+  public void setSearchIndex(String searchIndex) {
+    this.searchIndex = searchIndex;
+  }
+
+  public void recreateSearchIndex() {
+    this.searchIndex = sight.getSearchIndex() + ", " +
+        Stream.of(email, name, phone).collect(Collectors.joining(", "));
+  }
 }
