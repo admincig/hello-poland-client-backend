@@ -22,6 +22,7 @@ import pl.hellopoland.bo.PassageCart;
 import pl.hellopoland.bo.PassageCartEntry;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.bo.SightEventCategory;
 import pl.hellopoland.bo.TicketDefinition;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole;
@@ -172,7 +173,8 @@ public class DtoMapper {
       dto.agreements = bo.getAgreements().stream().map(DtoMapper::getDTO).collect(toList());
     }
     if (bo.getCategories() != null && !bo.getCategories().isEmpty()) {
-      dto.categories = bo.getCategories().stream().map(DtoMapper::getDTO).collect(toSet());
+      dto.categories = bo.getCategories().stream().map(SightEventCategory::getCategory)
+          .map(DtoMapper::getDTO).collect(toSet());
     }
     dto.pdfAttachment = bo.getPdfAttachment() != null ? getFullDTO(bo.getPdfAttachment()) : null;
     return dto;
