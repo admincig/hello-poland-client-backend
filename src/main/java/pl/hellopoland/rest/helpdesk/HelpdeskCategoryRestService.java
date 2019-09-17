@@ -16,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import pl.hellopoland.dto.CategoryDTO;
 import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.rest.RestService;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.api.helpdesk.CategoryServiceHelpdeskAPI;
 
@@ -32,7 +33,7 @@ public class HelpdeskCategoryRestService {
   public CategoryDTO create(
       @HeaderParam("Content-Language") String contentLanguage,
       CategoryDTO dto) {
-    LanguageVersion lang = HelpdeskRestService.parseLang(contentLanguage);
+    LanguageVersion lang = RestService.parseLang(contentLanguage);
     if (dto.id == null) {
       dto.language = lang.getLanuage();
       return service.create(dto);
@@ -43,7 +44,7 @@ public class HelpdeskCategoryRestService {
   @GET
   public PagedCollection getCategories(
       @HeaderParam("Content-Language") String contentLanguage) {
-    LanguageVersion lang = HelpdeskRestService.parseLang(contentLanguage);
+    LanguageVersion lang = RestService.parseLang(contentLanguage);
     return service.pagedList(lang);
   }
 
@@ -52,7 +53,7 @@ public class HelpdeskCategoryRestService {
   public CategoryDTO get(
       @HeaderParam("Content-Language") String contentLanguage,
       @PathParam("id") Long id) {
-    LanguageVersion lang = HelpdeskRestService.parseLang(contentLanguage);
+    LanguageVersion lang = RestService.parseLang(contentLanguage);
     return service.get(id, lang);
   }
 
@@ -70,7 +71,7 @@ public class HelpdeskCategoryRestService {
       @PathParam("id") Long id,
       @PathParam("language") String language,
       CategoryDTO dto) {
-    LanguageVersion lang = HelpdeskRestService.parseLang(language);
+    LanguageVersion lang = RestService.parseLang(language);
     dto.id = id;
     return service.update(dto, lang);
   }
@@ -80,7 +81,7 @@ public class HelpdeskCategoryRestService {
   public Response delete(
       @PathParam("id") Long id,
       @PathParam("language") String language) {
-    LanguageVersion lang = HelpdeskRestService.parseLang(language);
+    LanguageVersion lang = RestService.parseLang(language);
     service.deleteLanguageVersion(id, lang);
     return Response.ok().build();
   }
@@ -90,7 +91,7 @@ public class HelpdeskCategoryRestService {
   public CategoryDTO changeDefaultLanguage(
       @HeaderParam("Content-Language") String contentLanguage,
       @PathParam("id") Long id) {
-    LanguageVersion lang = HelpdeskRestService.parseLang(contentLanguage);
+    LanguageVersion lang = RestService.parseLang(contentLanguage);
     return service.changeDefaultLanguage(id, lang);
   }
 

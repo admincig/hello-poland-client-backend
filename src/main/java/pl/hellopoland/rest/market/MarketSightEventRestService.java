@@ -16,9 +16,9 @@ import pl.hellopoland.annotation.DateFormat;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.FiltersContainerDTO;
 import pl.hellopoland.dto.SightEventDTO;
+import pl.hellopoland.rest.RestService;
 import pl.hellopoland.rest.dto.AvailableTicketNumberAssociationORO;
 import pl.hellopoland.rest.dto.PagedCollection;
-import pl.hellopoland.rest.helpdesk.HelpdeskRestService;
 import pl.hellopoland.service.api.market.FilterMarketAPI;
 import pl.hellopoland.service.api.market.SightEventServiceMarketAPI;
 
@@ -53,7 +53,7 @@ public class MarketSightEventRestService {
     SightEventPagedCollectionConfig config = new SightEventPagedCollectionConfig();
     config.setPromotion(1, 2, 3);
     config.setOrderColumn("promotion, id");
-    return service.getPromoted(config, HelpdeskRestService.parseLang(contentLanguage));
+    return service.getPromoted(config, RestService.parseLang(contentLanguage));
   }
 
   @GET
