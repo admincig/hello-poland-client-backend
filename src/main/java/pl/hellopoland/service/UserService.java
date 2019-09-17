@@ -81,8 +81,8 @@ public class UserService extends ServiceSuperclass {
         .setParameter("email", email.toLowerCase()).getResultStream().findFirst();
   }
 
-  public Optional<User> findByEmailWithNotNullPartner(String email) {
-    return em.createQuery("from User where lower(email) = :email and partner != null", User.class)
+  public Optional<User> findByEmailWithNullPartner(String email) {
+    return em.createQuery("from User where lower(email) = :email and partner = null", User.class)
         .setParameter("email", email.toLowerCase()).getResultStream().findFirst();
   }
 

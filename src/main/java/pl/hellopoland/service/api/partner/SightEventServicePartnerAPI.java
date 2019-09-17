@@ -4,14 +4,20 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.security.RolesAllowed;
+import javax.ejb.EJBAccessException;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import pl.hellopoland.bo.Category;
 import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.bo.SightEventCategory;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.rest.dto.PagedCollection;
+import pl.hellopoland.service.CategoryService;
+import pl.hellopoland.service.SightEventCategoryService;
 import pl.hellopoland.service.SightEventService;
+import pl.hellopoland.service.TranslationService;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.PagedEntityCollection;
 
@@ -20,6 +26,12 @@ public class SightEventServicePartnerAPI {
 
   @Inject
   SightEventService service;
+  @Inject
+  CategoryService catService;
+  @Inject
+  SightEventCategoryService secService;
+  @Inject
+  TranslationService tService;
 
   @RolesAllowed("partner")
   public SightEventDTO create(SightEventDTO dto) {
@@ -35,12 +47,11 @@ public class SightEventServicePartnerAPI {
   @RolesAllowed("partner")
   public SightEventDTO get(Long id, String contentLanguageSymbol) {
     LanguageVersion lang = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
-    SightEvent bo = service.getForLoggedUser(id, lang);
+    SightEvent bo = service.getForLoggedUser(id);
+    bo = tService.translateEntity(bo, lang, true);
+    tService.translateEntities(bo.getCategories().stream().map(SightEventCategory::getCategory)
+        .collect(Collectors.toSet()), lang, false);
     var dto = DtoMapper.getFullDTO(bo);
-    if (lang == null) {
-      lang = bo.getDefaultLanguage();
-    }
-    dto.language = lang.getLanuage();
     return dto;
   }
 
@@ -124,6 +135,30 @@ public class SightEventServicePartnerAPI {
   @RolesAllowed("partner")
   public void delete(Long id, LanguageVersion language) {
     service.deleteForLoggedUser(id, language);
+  }
+
+  @RolesAllowed("partner")
+  public SightEventDTO addCategory(Long id, Long categoryId) {
+    categoryRestrictionCheck(categoryId);
+    SightEvent se = service.get(id);
+    Category cat = catService.get(categoryId);
+    se = secService.addCategory(se, cat);
+    return DtoMapper.getFullDTO(se);
+  }
+
+  @RolesAllowed("partner")
+  public SightEventDTO removeCategory(Long id, Long categoryId) {
+    categoryRestrictionCheck(categoryId);
+    SightEvent se = service.get(id);
+    Category cat = catService.get(categoryId);
+    se = secService.removeCategory(se, cat);
+    return DtoMapper.getFullDTO(se);
+  }
+
+  private void categoryRestrictionCheck(Long id) {
+    if (catService.get(id).isRestricted()) {
+      throw new EJBAccessException();
+    }
   }
 
 }

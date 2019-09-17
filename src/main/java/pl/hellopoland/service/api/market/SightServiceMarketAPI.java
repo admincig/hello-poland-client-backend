@@ -6,6 +6,7 @@ import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.Sight;
+import pl.hellopoland.bo.SightEventCategory;
 import pl.hellopoland.config.SightPagedCollectionConfig;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.enums.LanguageVersion;
@@ -53,13 +54,11 @@ public class SightServiceMarketAPI {
       bo.setSightEvents(bo.getSightEvents().stream()
           .filter(se -> se.isActive() && se.isPublished() && !se.isBlocked())
           .collect(Collectors.toList()));
+      bo.setCategories(bo.getSightEvents().stream().flatMap(se -> se.getCategories().stream())
+          .map(SightEventCategory::getCategory).collect(Collectors.toSet()));
       if (language != null) {
         bo = translationService.translateEntity(bo, language, true);
-        // var agreements = bo.getAgreements();
-        // if (agreements != null && !agreements.isEmpty()) {
-        // bo.setAgreements(
-        // Set.copyOf(translationService.translateEntities(agreements, language, true)));
-        // }
+        translationService.translateEntities(bo.getCategories(), language, false);
         var sightEvents = bo.getSightEvents();
         if (sightEvents != null && !sightEvents.isEmpty()) {
           bo.setSightEvents(translationService.translateEntities(sightEvents, language, true));

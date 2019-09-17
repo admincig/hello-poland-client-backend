@@ -91,7 +91,7 @@ public class HellopolandService extends ServiceSuperclass {
     }
     String password = RandomStringUtils.randomAlphanumeric(10);
     try {
-      Optional<User> user = userService.findByEmailWithNotNullPartner(partner.email);
+      Optional<User> user = userService.findByEmailWithNullPartner(partner.email);
       user.ifPresentOrElse(us -> {
         userService.attachToPartner(us, partnerBO);
       }, () -> userService.create(partner.email, password, null, null, null, partnerBO,

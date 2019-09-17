@@ -73,6 +73,8 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
   @Transient
   private LanguageVersion currentLanguage;
   private String searchIndex;
+  @Transient
+  private Set<Category> categories;
 
   public Sight() {}
 
@@ -293,4 +295,13 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
     this.searchIndex = Stream.of(name, phone).collect(Collectors.joining(", "));
     this.sightEvents.forEach(SightEvent::recreateSearchIndex);
   }
+
+  public Set<Category> getCategories() {
+    return categories;
+  }
+
+  public void setCategories(Set<Category> categories) {
+    this.categories = categories;
+  }
+
 }
