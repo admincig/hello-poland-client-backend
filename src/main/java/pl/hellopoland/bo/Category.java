@@ -28,7 +28,6 @@ public class Category extends ModelSuperclass implements Translated {
   private boolean restricted;
   private boolean recommended;
   private String iconUrl;
-  @Transient
   private int assignedItemsCount;
   @Transient
   private LanguageVersion currentLanguage;
@@ -114,6 +113,7 @@ public class Category extends ModelSuperclass implements Translated {
     return currentLanguage;
   }
 
+  @Override
   public void setCurrentLanguage(LanguageVersion currentLanguage) {
     this.currentLanguage = currentLanguage;
   }

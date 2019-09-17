@@ -8,13 +8,17 @@ import pl.hellopoland.bo.SightEvent;
 public class SightEventCategoryService extends ServiceSuperclass {
 
   public SightEvent addCategory(SightEvent se, Category cat) {
-    se.getCategories().add(cat);
+    if (se.getCategories().add(cat)) {
+      cat.setAssignedItemsCount(cat.getAssignedItemsCount() + 1);
+    }
     em.flush();
     return se;
   }
 
   public SightEvent removeCategory(SightEvent se, Category cat) {
-    se.getCategories().remove(cat);
+    if (se.getCategories().remove(cat)) {
+      cat.setAssignedItemsCount(cat.getAssignedItemsCount() - 1);
+    }
     em.flush();
     return se;
   }
