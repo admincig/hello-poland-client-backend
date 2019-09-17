@@ -1,0 +1,41 @@
+package pl.hellopoland.service.api.partner;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.annotation.security.RolesAllowed;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import pl.hellopoland.bo.Category;
+import pl.hellopoland.config.CategoryPagedCollectionConfig;
+import pl.hellopoland.dto.CategoryDTO;
+import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.rest.dto.PagedCollection;
+import pl.hellopoland.service.CategoryService;
+import pl.hellopoland.service.TranslationService;
+import pl.hellopoland.util.DtoMapper;
+
+@Stateless
+public class CategoryServicePartnerAPI {
+
+  @Inject
+  CategoryService service;
+  @Inject
+  TranslationService tService;
+
+  @RolesAllowed("partner")
+  public PagedCollection pagedList(LanguageVersion language) {
+    var config = new CategoryPagedCollectionConfig();
+    var bos = service.pagedList(config);
+    bos.items = tService.translateEntities(bos.items, language, false);
+    List<CategoryDTO> dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
+    return new PagedCollection(dtos, bos.config);
+  }
+
+  @RolesAllowed("partner")
+  public CategoryDTO get(Long id, LanguageVersion language) {
+    Category cat = service.get(id);
+    cat = tService.translateEntity(cat, language, true);
+    return DtoMapper.getFullDTO(cat);
+  }
+
+}

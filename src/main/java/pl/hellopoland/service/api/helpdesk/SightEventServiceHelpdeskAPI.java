@@ -7,6 +7,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.Category;
 import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.bo.SightEventCategory;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.enums.LanguageVersion;
@@ -68,6 +69,8 @@ public class SightEventServiceHelpdeskAPI {
   public SightEventDTO get(Long id, LanguageVersion language) {
     SightEvent bo = service.get(id);
     bo = tService.translateEntity(bo, language, true);
+    tService.translateEntities(bo.getCategories().stream().map(SightEventCategory::getCategory)
+        .collect(Collectors.toSet()), language, false);
     SightEventDTO dto = DtoMapper.getFullDTO(bo);
     service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), false);
     return dto;

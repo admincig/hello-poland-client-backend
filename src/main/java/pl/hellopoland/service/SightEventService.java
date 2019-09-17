@@ -300,14 +300,6 @@ public class SightEventService extends ServiceSuperclass {
     return getForPartner(id, partner);
   }
 
-  public SightEvent getForLoggedUser(Long id, LanguageVersion language) {
-    var bo = getForLoggedUser(id);
-    if (language == null) {
-      return bo;
-    }
-    return translationService.translateEntity(bo, language, true);
-  }
-
   public SightEvent getForPartner(Long sightEventId, Partner partner) {
     return em.createQuery("from SightEvent where id=:id and partner=:partner", SightEvent.class)
         .setParameter("id", sightEventId).setParameter("partner", partner).getSingleResult();

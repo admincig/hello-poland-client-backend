@@ -147,6 +147,7 @@ public class DtoMapper {
     dto.partnerAffiliateCode = bo.getPartner().getAffiliateCode();
     dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
     dto.promotion = bo.getPromotion();
+    dto.promoted = dto.promotion != null;
     dto.sightId = bo.getSight().getId();
     dto.sightName = bo.getSight().getName();
     dto.partnerId = bo.getPartner().getId();

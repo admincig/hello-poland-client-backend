@@ -70,6 +70,8 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
   private Set<LanguageVersion> availableLanguageVersions;
   @Transient
   private LanguageVersion currentLanguage;
+  @Transient
+  private Set<Category> categories;
 
   public Sight() {}
 
@@ -276,6 +278,14 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
   @Override
   public void setCurrentLanguage(LanguageVersion currentLanguage) {
     this.currentLanguage = currentLanguage;
+  }
+
+  public Set<Category> getCategories() {
+    return categories;
+  }
+
+  public void setCategories(Set<Category> categories) {
+    this.categories = categories;
   }
 
 }

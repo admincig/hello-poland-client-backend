@@ -154,4 +154,20 @@ public class PartnerSightEventRestService {
     service.stopSale(id, tpdId, date);
   }
 
+  @PATCH
+  @Path("/{id}/categories/{cId}")
+  public SightEventDTO addCategory(
+      @PathParam("id") Long id,
+      @PathParam("cId") Long categoryId) {
+    return service.addCategory(id, categoryId);
+  }
+
+  @DELETE
+  @Path("/{id}/categories/{cId}")
+  public SightEventDTO removeCategory(
+      @PathParam("id") Long id,
+      @PathParam("cId") Long categoryId) {
+    return service.removeCategory(id, categoryId);
+  }
+
 }
