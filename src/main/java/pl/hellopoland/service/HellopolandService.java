@@ -70,15 +70,20 @@ public class HellopolandService extends ServiceSuperclass {
       throw new ConflictingException("The partner commission is out of range: 0 - 100.");
     }
 
-    // 1. creating a partner in p24:
     var merchant = new MerchantRegisterRequest(partner);
     MerchantRegisterValidator.validate(merchant);
-    Integer merchantId = p24SOAPClient.merchantRegistration(merchant);
+    Partner partnerBO = getPartnerFromMerchantRegisterRequest(merchant);
+
+    // 1. creating a partner in p24:
+    if (partner.skipP24) {
+      partnerBO.setP24Id(-1);
+    } else {
+      Integer merchantId = p24SOAPClient.merchantRegistration(merchant);
+      partnerBO.setP24Id(merchantId);
+    }
 
     // 2. creating a partner and the user in hpl:
-    var partnerBO = getPartnerFromMerchantRegisterRequest(merchant);
     partnerBO.setCreated(LocalDateTime.now());
-    partnerBO.setP24Id(merchantId);
     partnerBO.setCommission(partner.commission);
     partnerBO.setHptToken("temporaryToken");
     if (BooleanUtils.isTrue(partner.affiliation)) {
