@@ -4,9 +4,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.security.RolesAllowed;
+import javax.ejb.EJBAccessException;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.ws.rs.ForbiddenException;
 import pl.hellopoland.bo.Category;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.SightEventCategory;
@@ -137,12 +137,6 @@ public class SightEventServicePartnerAPI {
     service.deleteForLoggedUser(id, language);
   }
 
-  private void categoryRestrictionCheck(Long id) {
-    if (catService.get(id).isRestricted()) {
-      throw new ForbiddenException();
-    }
-  }
-
   @RolesAllowed("partner")
   public SightEventDTO addCategory(Long id, Long categoryId) {
     categoryRestrictionCheck(categoryId);
@@ -160,4 +154,11 @@ public class SightEventServicePartnerAPI {
     se = secService.removeCategory(se, cat);
     return DtoMapper.getFullDTO(se);
   }
+
+  private void categoryRestrictionCheck(Long id) {
+    if (catService.get(id).isRestricted()) {
+      throw new EJBAccessException();
+    }
+  }
+
 }
