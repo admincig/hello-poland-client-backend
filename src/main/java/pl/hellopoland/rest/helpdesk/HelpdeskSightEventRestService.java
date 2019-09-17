@@ -125,4 +125,25 @@ public class HelpdeskSightEventRestService {
     return service.removeCategory(id, categoryId);
   }
 
+  @POST
+  @Path("/{id}/pdf")
+  @Consumes("application/pdf")
+  public SightEventDTO uploadPdf(@PathParam("id") Long id, byte[] pdf) {
+    return service.uploadPdf(id, pdf);
+  }
+
+  @DELETE
+  @Path("/{id}/pdf")
+  @Consumes("application/pdf")
+  public void deletePdf(@PathParam("id") Long id) {
+    service.deletePdf(id);
+  }
+
+  @PUT
+  @Path("/{id}/mainImage")
+  @Consumes({"image/jpeg", "image/jpg"})
+  public SightEventDTO uploadIcon(@PathParam("id") Long id, byte[] icon) {
+    return service.uploadMainImage(id, icon);
+  }
+
 }
