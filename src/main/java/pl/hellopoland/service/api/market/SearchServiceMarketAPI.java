@@ -1,5 +1,6 @@
 package pl.hellopoland.service.api.market;
 
+import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
@@ -26,10 +27,10 @@ public class SearchServiceMarketAPI {
 
   @PermitAll
   public SearchResultORO search(
-      // List<Long> categoriesIds,
+      List<Long> categoriesIds,
       LanguageVersion languageVersion) {
     SightEventPagedCollectionConfig seConfig = new SightEventPagedCollectionConfig();
-    // seConfig.setCate
+    seConfig.setCategoriesIds(categoriesIds);
     PagedEntityCollection<SightEvent> ses = seService.getList(seConfig, languageVersion);
 
     SightPagedCollectionConfig sConfig = new SightPagedCollectionConfig();

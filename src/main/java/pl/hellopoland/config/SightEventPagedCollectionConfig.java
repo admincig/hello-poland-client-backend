@@ -1,6 +1,7 @@
 package pl.hellopoland.config;
 
 import java.util.Arrays;
+import java.util.List;
 import pl.hellopoland.bo.SightEvent;
 
 public class SightEventPagedCollectionConfig extends PagedCollectionConfig<SightEvent> {
@@ -62,6 +63,10 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
     if (promotions.length > 0) {
       addCondition("promotions", Arrays.asList(promotions), "e.promotion in (:promotions)");
     }
+  }
+
+  public void setCategoriesIds(List<Long> categoriesIds) {
+    addCondition("ids", categoriesIds, "e.categories.id in (:ids)");
   }
 
 }
