@@ -1,6 +1,5 @@
 package pl.hellopoland.service;
 
-import java.util.Objects;
 import javax.ejb.Stateless;
 import pl.hellopoland.bo.Category;
 import pl.hellopoland.bo.SightEvent;
@@ -10,7 +9,7 @@ import pl.hellopoland.bo.SightEventCategory;
 public class SightEventCategoryService extends ServiceSuperclass {
 
   public SightEvent addCategory(SightEvent se, Category cat) {
-    if (se.getCategories().stream().filter(sec -> Objects.equals(sec.getCategory(), cat))
+    if (se.getCategories().stream().filter(cat::equals)
         .findFirst().isEmpty()) {
       SightEventCategory sec = new SightEventCategory();
       sec.setCategory(cat);
@@ -24,7 +23,7 @@ public class SightEventCategoryService extends ServiceSuperclass {
   }
 
   public SightEvent removeCategory(SightEvent se, Category cat) {
-    se.getCategories().stream().filter(sec -> Objects.equals(sec.getCategory(), cat))
+    se.getCategories().stream().filter(cat::equals)
         .findFirst().ifPresent(sec -> {
           se.getCategories().remove(sec);
           em.remove(sec);
