@@ -94,7 +94,7 @@ public class SightEventServicePartnerAPI {
 
   @RolesAllowed("partner")
   public SightEventDTO uploadPdf(Long id, byte[] pdf) {
-    SightEvent bo = service.uploadPdf(id, pdf);
+    SightEvent bo = service.uploadPdfForLoggedUser(id, pdf);
     var dto = DtoMapper.getFullDTO(bo);
     service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), true);
     return dto;
@@ -102,7 +102,7 @@ public class SightEventServicePartnerAPI {
 
   @RolesAllowed("partner")
   public void deletePdf(Long id) {
-    service.deletePdf(id);
+    service.deletePdfForLoggedUser(id);
   }
 
   @RolesAllowed("partner")

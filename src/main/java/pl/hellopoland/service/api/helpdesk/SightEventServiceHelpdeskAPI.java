@@ -116,7 +116,8 @@ public class SightEventServiceHelpdeskAPI {
 
   @RolesAllowed("admin")
   public SightEventDTO uploadPdf(Long id, byte[] pdf) {
-    SightEvent bo = service.uploadPdf(id, pdf);
+    var bo = service.get(id);
+    bo = service.uploadPdf(bo, pdf);
     var dto = DtoMapper.getFullDTO(bo);
     service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), true);
     return dto;
@@ -124,7 +125,8 @@ public class SightEventServiceHelpdeskAPI {
 
   @RolesAllowed("admin")
   public void deletePdf(Long id) {
-    service.deletePdf(id);
+    var bo = service.get(id);
+    service.deletePdf(bo);
   }
 
   @RolesAllowed("admin")

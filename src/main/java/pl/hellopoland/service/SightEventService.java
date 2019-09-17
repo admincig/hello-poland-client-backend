@@ -463,8 +463,12 @@ public class SightEventService extends ServiceSuperclass {
     return associationDTO;
   }
 
-  public SightEvent uploadPdf(Long id, byte[] pdf) {
+  public SightEvent uploadPdfForLoggedUser(Long id, byte[] pdf) {
     SightEvent bo = getForLoggedUser(id);
+    return uploadPdf(bo, pdf);
+  }
+
+  public SightEvent uploadPdf(SightEvent bo, byte[] pdf) {
     bo.setPdfAttachment(fdService.storeFileDescriptor(new ByteArrayInputStream(pdf), "pdf"));
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
@@ -473,8 +477,12 @@ public class SightEventService extends ServiceSuperclass {
     return bo;
   }
 
-  public void deletePdf(Long id) {
+  public void deletePdfForLoggedUser(Long id) {
     SightEvent bo = getForLoggedUser(id);
+    deletePdf(bo);
+  }
+
+  public void deletePdf(SightEvent bo) {
     var pdf = bo.getPdfAttachment();
     if (pdf != null) {
       fdService.deleteFile(Paths.get(pdf.getPath()));
