@@ -125,6 +125,9 @@ public class DtoMapper {
     if (bo.getAgreements() != null && !bo.getAgreements().isEmpty()) {
       dto.agreements = bo.getAgreements().stream().map(DtoMapper::getDTO).collect(toList());
     }
+    if (bo.getCategories() != null && !bo.getCategories().isEmpty()) {
+      dto.categories = bo.getCategories().stream().map(DtoMapper::getDTO).collect(toSet());
+    }
     return dto;
   }
 
