@@ -38,6 +38,7 @@ public class SearchServiceMarketAPI {
     PagedEntityCollection<SightEvent> ses = seService.getList(seConfig, languageVersion);
 
     SightPagedCollectionConfig sConfig = new SightPagedCollectionConfig();
+    sConfig.setOrderColumn("random()");
     PagedEntityCollection<Sight> ss = sService.getList(sConfig, languageVersion);
 
     SearchResultORO oro = new SearchResultORO();
