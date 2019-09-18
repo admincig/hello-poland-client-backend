@@ -2,6 +2,8 @@ package pl.hellopoland.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -140,6 +142,11 @@ public class UserService extends ServiceSuperclass {
     ur.setUser(user);
     ur.setRole(role);
     em.persist(ur);
+  }
+
+  public Set<String> getFlatRoles(String email) {
+    return findByEmail(email).get().getRoles().stream().map(UserRole::getRole).map(Role::toString)
+        .collect(Collectors.toSet());
   }
 
 }
