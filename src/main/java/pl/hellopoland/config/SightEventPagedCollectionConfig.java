@@ -15,10 +15,14 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
 
   public void setSearchQuery(String searchQuery) {
     if (searchQuery != null) {
-      addCondition("searchQuery", "%" + searchQuery.toLowerCase() + "%",
-          "((unaccent(lower(e.name)) like unaccent(:searchQuery))"
-              + " or (unaccent(lower(e.lead)) like unaccent(:searchQuery))"
-              + " or (unaccent(lower(e.location.city)) like unaccent(:searchQuery)))");
+      addCondition("query",
+          searchQuery, "tsearch(e.searchIndex, :query) = true");
+      /*
+        "%" + searchQuery.toLowerCase() + "%",
+        "((unaccent(lower(e.name)) like unaccent(:searchQuery))" +
+        " or (unaccent(lower(e.lead)) like unaccent(:searchQuery))" +
+        " or (unaccent(lower(e.location.city)) like unaccent(:searchQuery)))");
+       */
     }
   }
 
@@ -66,7 +70,8 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
   }
 
   public void setCategoriesIds(List<Long> categoriesIds) {
-    addCondition("ids", categoriesIds, "e.categories.id in (:ids)");
+    addCondition("ids", categoriesIds,
+        "e.id in (select sightEvent.id from SightEventCategory where category.id in (:ids))");
   }
 
 }
