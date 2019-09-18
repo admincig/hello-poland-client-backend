@@ -15,7 +15,7 @@ import pl.hellopoland.security.token.JwtCredential;
 import pl.hellopoland.service.UserService;
 
 @RequestScoped
-public class JpaIdentityStore implements IdentityStore {
+public class Authentication implements IdentityStore {
 
   @Inject
   private UserService userDao;
@@ -44,8 +44,7 @@ public class JpaIdentityStore implements IdentityStore {
   }
 
   @Override
-  public Set<String> getCallerGroups(CredentialValidationResult validationResult) {
-    return userDao.getFlatRoles(validationResult.getCallerPrincipal().getName());
+  public Set<ValidationType> validationTypes() {
+    return Set.of(ValidationType.VALIDATE);
   }
-
 }
