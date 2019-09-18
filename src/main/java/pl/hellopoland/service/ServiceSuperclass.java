@@ -68,7 +68,7 @@ public abstract class ServiceSuperclass {
       query +=
           config.getConditions().stream().map(Entry::toString).collect(Collectors.joining(" and "));
     }
-    query += " order by e." + config.getOrder();
+    query += " order by " + config.getOrder();
     TypedQuery<E> tq = em.createQuery(query, config.entityClass());
     if (config.getConditions() != null) {
       config.getConditions().forEach(condition -> {

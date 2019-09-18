@@ -10,7 +10,7 @@ public abstract class PagedCollectionConfig<E extends ModelSuperclass> {
   private Collection<Entry> conditions;
   private Integer pageSize;
   private Integer pageNum = 0;
-  private String orderColumn = "id";
+  private String orderColumn = "e.id";
   private String orderDirection = "desc";
 
   protected void addCondition(String parameterName, Object value, String query) {

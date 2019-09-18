@@ -32,6 +32,7 @@ public class SearchServiceMarketAPI {
       Optional<String> searchQuery,
       Optional<List<Long>> categoriesIds) {
     SightEventPagedCollectionConfig seConfig = new SightEventPagedCollectionConfig();
+    seConfig.setOrderColumn("random()");
     categoriesIds.ifPresent(seConfig::setCategoriesIds);
     searchQuery.ifPresent(seConfig::setSearchQuery);
     PagedEntityCollection<SightEvent> ses = seService.getList(seConfig, languageVersion);

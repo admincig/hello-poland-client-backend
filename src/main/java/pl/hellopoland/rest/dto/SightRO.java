@@ -15,7 +15,9 @@ public class SightRO {
   public SightRO(Sight sight) {
     this.id = sight.getId();
     this.name = sight.getName();
-    this.mainImage = sight.getMainImage().getImageURL();
+    if (sight.getMainImage() != null) {
+      this.mainImage = sight.getMainImage().getImageURL();
+    }
     this.sightEventIds =
         sight.getSightEvents().stream().map(SightEvent::getId).collect(Collectors.toList());
   }
