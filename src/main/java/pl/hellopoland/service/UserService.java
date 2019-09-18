@@ -41,6 +41,9 @@ public class UserService extends ServiceSuperclass {
     try {
       User bo = findOneByEmail(email);
       bo.setPicture(picture);
+      if (!bo.hasRole(Role.USER)) {
+        createUserRole(bo, Role.USER);
+      }
       return bo;
     } catch (NoResultException e) {
       return create(email, null, name, picture, location);
