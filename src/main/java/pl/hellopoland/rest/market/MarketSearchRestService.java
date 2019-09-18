@@ -1,7 +1,6 @@
 package pl.hellopoland.rest.market;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.Date;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -11,6 +10,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import pl.hellopoland.annotation.DateFormat;
 import pl.hellopoland.rest.RestService;
 import pl.hellopoland.rest.dto.SearchResultORO;
 import pl.hellopoland.service.api.market.SearchServiceMarketAPI;
@@ -26,13 +26,18 @@ public class MarketSearchRestService {
 
   @GET
   public SearchResultORO search(
-      @HeaderParam("Content-Language") String contentLanguage,
       @QueryParam("query") String query,
-      @QueryParam("categoryId") List<Long> categoryIds) {
-    Optional<List<Long>> optCategories =
-        categoryIds == null ? Optional.empty() : Optional.of(categoryIds);
-    Optional<String> optQuery =
-        query == null || query.isBlank() ? Optional.empty() : Optional.of(query);
-    return service.search(RestService.parseLang(contentLanguage), optQuery, optCategories);
+      @QueryParam("categoryId") Long[] categoryIds,
+      @QueryParam("city") String city,
+      @QueryParam("fromDate") @DateFormat Date fromDate,
+      @QueryParam("toDate") @DateFormat Date toDate,
+      @HeaderParam("Content-Language") String contentLanguage) {
+    return service.search(
+        RestService.parseLang(contentLanguage),
+        query,
+        categoryIds,
+        city,
+        fromDate,
+        toDate);
   }
 }

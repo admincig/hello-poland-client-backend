@@ -1,7 +1,6 @@
 package pl.hellopoland.service.api.market;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.Date;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
@@ -27,18 +26,19 @@ public class SearchServiceMarketAPI {
   SightService sService;
 
   @PermitAll
-  public SearchResultORO search(
-      LanguageVersion languageVersion,
-      Optional<String> searchQuery,
-      Optional<List<Long>> categoriesIds) {
+  public SearchResultORO search(LanguageVersion languageVersion, String query, Long[] categoryIds,
+      String city, Date fromDate, Date toDate) {
     SightEventPagedCollectionConfig seConfig = new SightEventPagedCollectionConfig();
     seConfig.setOrderColumn("random()");
-    categoriesIds.ifPresent(seConfig::setCategoriesIds);
-    searchQuery.ifPresent(seConfig::setSearchQuery);
+    seConfig.setCategoriesIds(categoryIds);
+    seConfig.setSearchQuery(query);
+    seConfig.setCity(city);
     PagedEntityCollection<SightEvent> ses = seService.getList(seConfig, languageVersion);
 
     SightPagedCollectionConfig sConfig = new SightPagedCollectionConfig();
     sConfig.setOrderColumn("random()");
+    sConfig.setCity(city);
+    sConfig.setSearchQuery(query);
     PagedEntityCollection<Sight> ss = sService.getList(sConfig, languageVersion);
 
     SearchResultORO oro = new SearchResultORO();
