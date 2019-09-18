@@ -129,6 +129,7 @@ public class UserService extends ServiceSuperclass {
   }
 
   public void attachToPartner(User user, Partner partner) {
+    user.setPassword(passwordEncoder.encode(user.getPassword()));
     user.setPartner(partner);
     createUserRole(user, Role.USHER);
     createUserRole(user, Role.PARTNER);
