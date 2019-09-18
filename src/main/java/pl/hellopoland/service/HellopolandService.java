@@ -93,6 +93,7 @@ public class HellopolandService extends ServiceSuperclass {
     try {
       Optional<User> user = userService.findByEmailWithNullPartner(partner.email);
       user.ifPresentOrElse(us -> {
+        us.setPassword(password);
         userService.attachToPartner(us, partnerBO);
       }, () -> userService.create(partner.email, password, null, null, null, partnerBO,
           UserRole.Role.PARTNER, UserRole.Role.USHER));
