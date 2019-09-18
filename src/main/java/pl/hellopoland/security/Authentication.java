@@ -3,7 +3,6 @@ package pl.hellopoland.security;
 import static javax.security.enterprise.identitystore.CredentialValidationResult.NOT_VALIDATED_RESULT;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.security.enterprise.credential.Credential;
@@ -16,7 +15,7 @@ import pl.hellopoland.security.token.JwtCredential;
 import pl.hellopoland.service.UserService;
 
 @RequestScoped
-public class JpaIdentityStore implements IdentityStore {
+public class Authentication implements IdentityStore {
 
   @Inject
   private UserService userDao;
@@ -33,22 +32,19 @@ public class JpaIdentityStore implements IdentityStore {
 
       if (user.isPresent() && passwordEncoder.matches(
           new String(usernamePassword.getPassword().getValue()), user.get().getPassword())) {
-        return new CredentialValidationResult(usernamePassword.getCaller(), user.get().getRoles()
-            .stream().map(ur -> ur.getRole().toString()).collect(Collectors.toSet()));
+        return new CredentialValidationResult(usernamePassword.getCaller());
       }
     }
     if (credential instanceof JwtCredential
         && userDao.findByEmail(((JwtCredential) credential).getPrincipal()).isPresent()) {
-      return new CredentialValidationResult(((JwtCredential) credential).getPrincipal(),
-          ((JwtCredential) credential).getAuthorities());
+      return new CredentialValidationResult(((JwtCredential) credential).getPrincipal());
     }
 
     return NOT_VALIDATED_RESULT;
   }
 
   @Override
-  public Set<String> getCallerGroups(CredentialValidationResult validationResult) {
-    return validationResult.getCallerGroups();
+  public Set<ValidationType> validationTypes() {
+    return Set.of(ValidationType.VALIDATE);
   }
-
 }
