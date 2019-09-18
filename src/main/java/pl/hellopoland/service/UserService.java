@@ -1,5 +1,6 @@
 package pl.hellopoland.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -145,6 +146,10 @@ public class UserService extends ServiceSuperclass {
     ur.setUser(user);
     ur.setRole(role);
     em.persist(ur);
+    if (user.getRoles() == null) {
+      user.setRoles(new ArrayList<>());
+    }
+    user.getRoles().add(ur);
   }
 
   public Set<String> getFlatRoles(String email) {
