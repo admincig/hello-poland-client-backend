@@ -1,5 +1,6 @@
 package pl.hellopoland.config;
 
+import java.util.Arrays;
 import pl.hellopoland.bo.SightEvent;
 
 public class SightEventPagedCollectionConfig extends PagedCollectionConfig<SightEvent> {
@@ -8,7 +9,7 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
 
   @Override
   public String joins() {
-    return "left join fetch e.mainImage mi";
+    return "left join fetch e.mainImage mi join fetch e.partner p join fetch e.sight s";
   }
 
   public void setSearchQuery(String searchQuery) {
@@ -54,6 +55,12 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
   public void setCity(String city) {
     if (city != null) {
       addCondition("city", city.toLowerCase(), "lower(e.location.city)=:city");
+    }
+  }
+
+  public void setPromotion(Integer... promotions) {
+    if (promotions.length > 0) {
+      addCondition("promotions", Arrays.asList(promotions), "e.promotion in (:promotions)");
     }
   }
 

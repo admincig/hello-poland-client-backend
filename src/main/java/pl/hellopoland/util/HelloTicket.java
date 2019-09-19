@@ -23,6 +23,7 @@ import javax.json.JsonString;
 import javax.json.JsonStructure;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbException;
+import org.apache.cxf.helpers.IOUtils;
 import pl.hellopoland.bo.Order;
 import pl.hellopoland.bo.OrderDateEntry;
 import pl.hellopoland.bo.OrderDetails;
@@ -518,11 +519,13 @@ public class HelloTicket {
     var respCode = conn.getResponseCode();
     InputStream is = conn.getErrorStream();
     if (is != null) {
-      var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
+      String respString = IOUtils.toString(is);
       try {
+        var resp = JsonbConfig.getInstance().fromJson(respString, JsonStructure.class);
         throw new ExternalSystemException(((JsonString) resp.getValue("/message")).getString());
-      } catch (JsonException e) {
-        throw new ExternalSystemException(resp.toString());
+      } catch (Exception e) {
+        logger.log(Level.WARNING, respString);
+        throw new ExternalSystemException(respString);
       }
     }
     is = conn.getInputStream();

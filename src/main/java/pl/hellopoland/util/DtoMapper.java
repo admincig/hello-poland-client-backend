@@ -2,13 +2,14 @@ package pl.hellopoland.util;
 
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.stream.Collectors;
 import pl.hellopoland.bo.Address;
 import pl.hellopoland.bo.Agreement;
+import pl.hellopoland.bo.Category;
 import pl.hellopoland.bo.ContactPerson;
 import pl.hellopoland.bo.FileDescriptor;
 import pl.hellopoland.bo.ImageCollector;
@@ -21,10 +22,12 @@ import pl.hellopoland.bo.PassageCart;
 import pl.hellopoland.bo.PassageCartEntry;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.bo.SightEventCategory;
 import pl.hellopoland.bo.TicketDefinition;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole;
 import pl.hellopoland.dto.AgreementDTO;
+import pl.hellopoland.dto.CategoryDTO;
 import pl.hellopoland.dto.ContactPersonDTO;
 import pl.hellopoland.dto.FileDescriptorDTO;
 import pl.hellopoland.dto.ImageDTO;
@@ -43,8 +46,6 @@ import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.enums.LanguageVersion;
 
 public class DtoMapper {
-
-  private static final Properties PROPERTIES = System.getProperties();
 
   public static void copy(SightDTO source, Sight target) {
     target.setName(source.name);
@@ -124,6 +125,9 @@ public class DtoMapper {
     if (bo.getAgreements() != null && !bo.getAgreements().isEmpty()) {
       dto.agreements = bo.getAgreements().stream().map(DtoMapper::getDTO).collect(toList());
     }
+    if (bo.getCategories() != null && !bo.getCategories().isEmpty()) {
+      dto.categories = bo.getCategories().stream().map(DtoMapper::getDTO).collect(toSet());
+    }
     return dto;
   }
 
@@ -138,7 +142,6 @@ public class DtoMapper {
     dto.phone = bo.getPhone();
     dto.duration = bo.getDuration();
     dto.location = ofNullable(bo.getLocation()).map(DtoMapper::getDTO).orElse(null);
-    // dto.date = bo.getDate();
     dto.generalAdmission = bo.getGeneralAdmission();
     dto.score = bo.getScore();
     dto.sightId = bo.getSight() != null ? bo.getSight().getId() : null;
@@ -147,6 +150,13 @@ public class DtoMapper {
     dto.partnerAffiliateCode = bo.getPartner().getAffiliateCode();
     dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
     dto.promotion = bo.getPromotion();
+    dto.promoted = dto.promotion != null;
+    dto.sightId = bo.getSight().getId();
+    dto.sightName = bo.getSight().getName();
+    dto.partnerId = bo.getPartner().getId();
+    dto.partnerName = bo.getPartner().getName();
+    dto.language = bo.getCurrentLanguage() == null ? dto.defaultLanguage
+        : bo.getCurrentLanguage().getLanuage();
     return dto;
   }
 
@@ -165,6 +175,10 @@ public class DtoMapper {
     }
     if (bo.getAgreements() != null && !bo.getAgreements().isEmpty()) {
       dto.agreements = bo.getAgreements().stream().map(DtoMapper::getDTO).collect(toList());
+    }
+    if (bo.getCategories() != null && !bo.getCategories().isEmpty()) {
+      dto.categories = bo.getCategories().stream().map(SightEventCategory::getCategory)
+          .map(DtoMapper::getDTO).collect(toSet());
     }
     dto.pdfAttachment = bo.getPdfAttachment() != null ? getFullDTO(bo.getPdfAttachment()) : null;
     return dto;
@@ -463,6 +477,27 @@ public class DtoMapper {
     var dto = new PartnerRepresentativeDTO();
     dto.name = bo.getName();
     dto.socialNumber = String.valueOf(bo.getSocialNumber());
+    return dto;
+  }
+
+  public static CategoryDTO getDTO(Category bo) {
+    var dto = new CategoryDTO();
+    dto.id = bo.getId();
+    dto.label = bo.getLabel();
+    dto.iconUrl = bo.getIconUrl();
+    dto.restricted = bo.isRestricted();
+    dto.assignedItemsCount = bo.getAssignedItemsCount();
+    dto.recommended = bo.isRecommended();
+    dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
+    dto.language = bo.getCurrentLanguage() == null ? dto.defaultLanguage
+        : bo.getCurrentLanguage().getLanuage();
+    return dto;
+  }
+
+  public static CategoryDTO getFullDTO(Category bo) {
+    var dto = getDTO(bo);
+    dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
+        .map(lv -> lv.getLanuage()).collect(Collectors.toSet());
     return dto;
   }
 

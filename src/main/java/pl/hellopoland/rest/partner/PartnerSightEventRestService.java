@@ -70,8 +70,29 @@ public class PartnerSightEventRestService {
     return service.update(dto, lang);
   }
 
+  @DELETE
+  @Path("/{id}/languageVersion/{language}")
+  public Response delete(@PathParam("id") Long id, @PathParam("language") String language) {
+    LanguageVersion lang =
+        Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
+            .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+    service.delete(id, lang);
+    return Response.ok().build();
+  }
+
+  @PATCH
+  @Path("/{id}/defaultLanguage")
+  public SightEventDTO changeDefaultLanguage(@PathParam("id") Long id,
+      @HeaderParam("Content-Language") String language) {
+    LanguageVersion lang =
+        Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
+            .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
+    return service.changeDefaultLanguage(id, lang);
+  }
+
   @POST
   @Path("/search")
+  @Deprecated
   public PagedCollection search(SightEventPagedCollectionConfig config,
       @HeaderParam("Accept-Language") String acceptLanguage,
       @HeaderParam("Content-Language") String contentLanguage) {
@@ -90,23 +111,6 @@ public class PartnerSightEventRestService {
   @Path("/{id}")
   public void delete(@PathParam("id") Long id) {
     service.delete(id);
-  }
-
-  @DELETE
-  @Path("/{id}/languageVersion/{language}")
-  public Response delete(@PathParam("id") Long id, @PathParam("language") String language) {
-    LanguageVersion lang =
-        Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
-            .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
-    service.delete(id, lang);
-    return Response.ok().build();
-  }
-
-  @PUT
-  @Path("/{id}/mainImage")
-  @Consumes({"image/jpeg", "image/jpg"})
-  public SightEventDTO uploadIcon(@PathParam("id") Long id, byte[] icon) {
-    return service.uploadMainImage(id, icon);
   }
 
   @POST
@@ -136,6 +140,13 @@ public class PartnerSightEventRestService {
     service.deletePdf(id);
   }
 
+  @PUT
+  @Path("/{id}/mainImage")
+  @Consumes({"image/jpeg", "image/jpg"})
+  public SightEventDTO uploadIcon(@PathParam("id") Long id, byte[] icon) {
+    return service.uploadMainImage(id, icon);
+  }
+
   @DELETE
   @Path("/{id}/sale")
   public void stopSale(@PathParam("id") Long id, @QueryParam("tpdId") Long tpdId,
@@ -144,13 +155,19 @@ public class PartnerSightEventRestService {
   }
 
   @PATCH
-  @Path("/{id}/defaultLanguage")
-  public SightEventDTO changeDefaultLanguage(@PathParam("id") Long id,
-      @HeaderParam("Content-Language") String language) {
-    LanguageVersion lang =
-        Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(language))
-            .orElseThrow(() -> new ConflictingException("Unsupported language: " + language));
-    return service.changeDefaultLanguage(id, lang);
+  @Path("/{id}/categories/{cId}")
+  public SightEventDTO addCategory(
+      @PathParam("id") Long id,
+      @PathParam("cId") Long categoryId) {
+    return service.addCategory(id, categoryId);
+  }
+
+  @DELETE
+  @Path("/{id}/categories/{cId}")
+  public SightEventDTO removeCategory(
+      @PathParam("id") Long id,
+      @PathParam("cId") Long categoryId) {
+    return service.removeCategory(id, categoryId);
   }
 
 }

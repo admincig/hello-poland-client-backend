@@ -175,7 +175,7 @@ public class SightEventService extends ServiceSuperclass {
       bo.setOpeningHours(oHoursList);
     }
     logger.log(Logger.Level.INFO, "Saved new sight event: " + bo.getName());
-    return createLanguageVesrion(DtoMapper.getDTO(bo), partner, bo.getDefaultLanguage());
+    return createLanguageVersion(DtoMapper.getDTO(bo), partner, bo.getDefaultLanguage());
   }
 
   private ArrayList<OpeningHours> getOpeningHoursCollectionFromDTO(SightEventDTO dto) {
@@ -185,26 +185,36 @@ public class SightEventService extends ServiceSuperclass {
         .orElse(null);
   }
 
-  private SightEvent createLanguageVesrion(SightEventDTO dto, Partner partner,
+  private SightEvent createLanguageVersion(SightEventDTO dto, Partner partner,
       LanguageVersion language) {
     return translationService.createEntityLanguageVersion(getForPartner(dto.id, partner), dto,
         language);
   }
 
-  public SightEvent createLanguageVesrion(SightEventDTO dto, LanguageVersion language) {
+  public SightEvent createLanguageVersion(SightEventDTO dto, LanguageVersion language) {
+    SightEvent bo = get(dto.id);
+    return translationService.createEntityLanguageVersion(bo, dto, language);
+  }
+
+  public SightEvent createLanguageVersionForLoggedUser(SightEventDTO dto,
+      LanguageVersion language) {
     return translationService.createEntityLanguageVersion(getForLoggedUser(dto.id), dto, language);
   }
 
   public SightEvent updateForLoggedUser(SightEventDTO dto, LanguageVersion language) {
     SightEvent bo = getForLoggedUser(dto.id);
+    return update(bo, dto, language);
+  }
+
+  public SightEvent update(SightEvent bo, SightEventDTO dto, LanguageVersion language) {
     if (!translationService.isTranslated(bo, language)) {
       // throw new ConflictingException(
       // "Translation for language " + language.getLanuage() + " doesn't exists");
-      createLanguageVesrion(dto, language);
+      createLanguageVersionForLoggedUser(dto, language);
     }
     if (bo.getDefaultLanguage().equals(language)) {
       if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
-        Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
+        Partner partner = bo.getPartner();
         Portal hpt = getPortal("Hello Ticket Cloud");
         HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
         dto.id = bo.getHptId();
@@ -262,6 +272,10 @@ public class SightEventService extends ServiceSuperclass {
 
   public SightEvent uploadMainImageForLoggedUser(Long id, byte[] icon) {
     SightEvent bo = getForLoggedUser(id);
+    return uploadMainImage(bo, icon);
+  }
+
+  public SightEvent uploadMainImage(SightEvent bo, byte[] icon) {
     bo.setMainImage(
         iService.validateAndStoreImageCollector(new ByteArrayInputStream(icon), "jpeg", null));
     return bo;
@@ -284,14 +298,6 @@ public class SightEventService extends ServiceSuperclass {
   public SightEvent getForLoggedUser(Long id) {
     Partner partner = partnerService.getLoggedPartner();
     return getForPartner(id, partner);
-  }
-
-  public SightEvent getForLoggedUser(Long id, LanguageVersion language) {
-    var bo = getForLoggedUser(id);
-    if (language == null) {
-      return bo;
-    }
-    return translationService.translateEntity(bo, language, true);
   }
 
   public SightEvent getForPartner(Long sightEventId, Partner partner) {
@@ -449,8 +455,12 @@ public class SightEventService extends ServiceSuperclass {
     return associationDTO;
   }
 
-  public SightEvent uploadPdf(Long id, byte[] pdf) {
+  public SightEvent uploadPdfForLoggedUser(Long id, byte[] pdf) {
     SightEvent bo = getForLoggedUser(id);
+    return uploadPdf(bo, pdf);
+  }
+
+  public SightEvent uploadPdf(SightEvent bo, byte[] pdf) {
     bo.setPdfAttachment(fdService.storeFileDescriptor(new ByteArrayInputStream(pdf), "pdf"));
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
@@ -459,8 +469,12 @@ public class SightEventService extends ServiceSuperclass {
     return bo;
   }
 
-  public void deletePdf(Long id) {
+  public void deletePdfForLoggedUser(Long id) {
     SightEvent bo = getForLoggedUser(id);
+    deletePdf(bo);
+  }
+
+  public void deletePdf(SightEvent bo) {
     var pdf = bo.getPdfAttachment();
     if (pdf != null) {
       fdService.deleteFile(Paths.get(pdf.getPath()));
@@ -538,8 +552,12 @@ public class SightEventService extends ServiceSuperclass {
     ht.stopSale(getLoggedPartner().getHptToken(), bo.getHptId(), ticketPoolDefId, date);
   }
 
-  public SightEvent changeDefaultLanguage(Long id, LanguageVersion language) {
+  public SightEvent changeDefaultLanguageForLoggedUser(Long id, LanguageVersion language) {
     SightEvent bo = getForLoggedUser(id);
+    return changeDefaultLanguage(bo, language);
+  }
+
+  public SightEvent changeDefaultLanguage(SightEvent bo, LanguageVersion language) {
     if (!translationService.isTranslated(bo, language)) {
       throw new ConflictingException(
           "Can not change the default language. Translation for language " + language.getLanuage()
@@ -550,7 +568,7 @@ public class SightEventService extends ServiceSuperclass {
     bo = BeanUtils.copyNotNullProperties(translation, bo);
     em.merge(bo);
     if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
-      Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
+      Partner partner = bo.getPartner();
       Portal hpt = getPortal("Hello Ticket Cloud");
       HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
       helloTicket.updateSightEvent(DtoMapper.getDTO(bo), partner.getHptToken());

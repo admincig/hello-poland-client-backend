@@ -18,6 +18,7 @@ import pl.hellopoland.dto.FiltersContainerDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.rest.dto.AvailableTicketNumberAssociationORO;
 import pl.hellopoland.rest.dto.PagedCollection;
+import pl.hellopoland.rest.helpdesk.HelpdeskRestService;
 import pl.hellopoland.service.api.market.FilterMarketAPI;
 import pl.hellopoland.service.api.market.SightEventServiceMarketAPI;
 
@@ -43,6 +44,16 @@ public class MarketSightEventRestService {
     config.setCity(city);
     return service.getList(config, fromDate, toDate,
         contentLanguage != null ? contentLanguage : acceptLanguage);
+  }
+
+  @GET
+  @Path("/promoted")
+  public PagedCollection getPromotedSightEvents(
+      @HeaderParam("Content-Language") String contentLanguage) {
+    SightEventPagedCollectionConfig config = new SightEventPagedCollectionConfig();
+    config.setPromotion(1, 2, 3);
+    config.setOrderColumn("promotion, id");
+    return service.getPromoted(config, HelpdeskRestService.parseLang(contentLanguage));
   }
 
   @GET

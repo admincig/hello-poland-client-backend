@@ -34,24 +34,6 @@ public abstract class PagedCollectionConfig<E extends ModelSuperclass> {
     return orderColumn + " " + orderDirection;
   }
 
-  public class Entry {
-
-    public Entry(String parameterName, Object value, String query) {
-      this.parameterName = parameterName;
-      this.value = value;
-      this.query = query;
-    }
-
-    public String parameterName;
-    public Object value;
-    private String query;
-
-    @Override
-    public String toString() {
-      return query;
-    }
-  }
-
   public Collection<Entry> getConditions() {
     return conditions;
   }

@@ -21,6 +21,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import pl.hellopoland.enums.LanguageVersion;
@@ -81,13 +82,15 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
   @Column(length = 5, nullable = false)
   @Enumerated(EnumType.STRING)
   private LanguageVersion defaultLanguage;
-  @NotNull
   @Column(nullable = false)
   @ElementCollection
   @Enumerated(EnumType.STRING)
   private Set<LanguageVersion> availableLanguageVersions;
-
+  @Transient
+  private LanguageVersion currentLanguage;
   private Integer promotion;
+  @OneToMany(mappedBy = "sightEvent")
+  private Set<SightEventCategory> categories;
 
   public String getName() {
     return name;
@@ -363,6 +366,24 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
 
   public void setPromotion(Integer promotion) {
     this.promotion = promotion;
+  }
+
+  public Set<SightEventCategory> getCategories() {
+    return categories;
+  }
+
+  public void setCategories(Set<SightEventCategory> categories) {
+    this.categories = categories;
+  }
+
+  @Override
+  public LanguageVersion getCurrentLanguage() {
+    return currentLanguage;
+  }
+
+  @Override
+  public void setCurrentLanguage(LanguageVersion currentLanguage) {
+    this.currentLanguage = currentLanguage;
   }
 
 }

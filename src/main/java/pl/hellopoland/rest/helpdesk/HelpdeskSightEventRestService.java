@@ -1,0 +1,149 @@
+package pl.hellopoland.rest.helpdesk;
+
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.PATCH;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import pl.hellopoland.config.SightEventPagedCollectionConfig;
+import pl.hellopoland.dto.SightEventDTO;
+import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.exception.conflict.ConflictingException;
+import pl.hellopoland.rest.dto.PagedCollection;
+import pl.hellopoland.service.api.helpdesk.SightEventServiceHelpdeskAPI;
+
+@RequestScoped
+@Path("/helpdesk/sight-events")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+public class HelpdeskSightEventRestService {
+
+  @Inject
+  private SightEventServiceHelpdeskAPI service;
+
+  @POST
+  public SightEventDTO createLanguageVersion(
+      @HeaderParam("Content-Language") String contentLanguage,
+      SightEventDTO dto) {
+    LanguageVersion lang = HelpdeskRestService.parseLang(contentLanguage);
+    return service.createLanguageVesrion(dto, lang);
+  }
+
+  @GET
+  public PagedCollection list(
+      @HeaderParam("Content-Language") String contentLanguage) {
+    return service.list(new SightEventPagedCollectionConfig(),
+        HelpdeskRestService.parseLang(contentLanguage));
+  }
+
+  @DELETE
+  @Path("/{id}")
+  public Response delete(@PathParam("id") Long id) {
+    service.delete(id);
+    return Response.ok().build();
+  }
+
+  @GET
+  @Path("/{id}")
+  public SightEventDTO get(
+      @HeaderParam("Content-Language") String contentLanguage,
+      @PathParam("id") Long id) {
+    return service.get(id, HelpdeskRestService.parseLang(contentLanguage));
+  }
+
+  @DELETE
+  @Path("/{id}/languageVersion/{language}")
+  public Response deleteLanguageVersion(
+      @PathParam("id") Long id,
+      @PathParam("language") String language) {
+    LanguageVersion lang = HelpdeskRestService.parseLang(language);
+    service.deleteLanguageVersion(id, lang);
+    return Response.ok().build();
+  }
+
+  @PATCH
+  @Path("/{id}/defaultLanguage")
+  public SightEventDTO changeDefaultLanguage(
+      @HeaderParam("Content-Language") String contentLanguage,
+      @PathParam("id") Long id) {
+    LanguageVersion lang = HelpdeskRestService.parseLang(contentLanguage);
+    return service.changeDefaultLanguage(id, lang);
+  }
+
+  @PUT
+  @Path("/{id}/languageVersion/{language}")
+  public SightEventDTO update(@PathParam("id") Long id,
+      @PathParam("language") String language,
+      SightEventDTO dto) {
+    LanguageVersion lang = HelpdeskRestService.parseLang(language);
+    dto.id = id;
+    return service.update(dto, lang);
+  }
+
+  @DELETE
+  @Path("/{id}/promotion")
+  public Response setPromotion(
+      @PathParam("id") Long id) {
+    service.removePromotion(id);
+    return Response.ok().build();
+  }
+
+  @PATCH
+  @Path("/{id}/promotion/{value}")
+  public Response setPromotion(
+      @PathParam("id") Long id,
+      @PathParam("value") Integer promotion) {
+    if (promotion.compareTo(1) < 0 || promotion.compareTo(3) > 0) {
+      throw new ConflictingException("The 'value' parameter can be only 1 or 2 or 3.");
+    }
+    service.setPromotion(id, promotion);
+    return Response.ok().build();
+  }
+
+  @PATCH
+  @Path("/{id}/categories/{cId}")
+  public SightEventDTO addCategory(
+      @PathParam("id") Long id,
+      @PathParam("cId") Long categoryId) {
+    return service.addCategory(id, categoryId);
+  }
+
+  @DELETE
+  @Path("/{id}/categories/{cId}")
+  public SightEventDTO removeCategory(
+      @PathParam("id") Long id,
+      @PathParam("cId") Long categoryId) {
+    return service.removeCategory(id, categoryId);
+  }
+
+  @POST
+  @Path("/{id}/pdf")
+  @Consumes("application/pdf")
+  public SightEventDTO uploadPdf(@PathParam("id") Long id, byte[] pdf) {
+    return service.uploadPdf(id, pdf);
+  }
+
+  @DELETE
+  @Path("/{id}/pdf")
+  @Consumes("application/pdf")
+  public void deletePdf(@PathParam("id") Long id) {
+    service.deletePdf(id);
+  }
+
+  @PUT
+  @Path("/{id}/mainImage")
+  @Consumes({"image/jpeg", "image/jpg"})
+  public SightEventDTO uploadIcon(@PathParam("id") Long id, byte[] icon) {
+    return service.uploadMainImage(id, icon);
+  }
+
+}

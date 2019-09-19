@@ -16,7 +16,7 @@ import org.eclipse.microprofile.health.HealthCheckResponseBuilder;
 @ApplicationScoped
 public class DatabaseHealthCheck implements HealthCheck {
 
-  @Resource(lookup = "java:jboss/datasources/hellopoland")
+  @Resource(lookup = "java:global/jdbc/hellopolandDS")
   private DataSource ds;
 
   @Override

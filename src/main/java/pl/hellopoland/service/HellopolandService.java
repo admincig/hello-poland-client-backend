@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -27,7 +28,7 @@ import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole;
 import pl.hellopoland.bo.UserRole.Role;
-import pl.hellopoland.config.PartnerCollectionConfig;
+import pl.hellopoland.config.PartnerPagedCollectionConfig;
 import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.dto.RoleDTO;
 import pl.hellopoland.dto.UserDTO;
@@ -51,7 +52,7 @@ public class HellopolandService extends ServiceSuperclass {
   @Inject
   private P24SOAPClient p24SOAPClient;
 
-  final Set<UserRole.Role> excluded_roles = Set.of(UserRole.Role.ROOT, UserRole.Role.ADMIN,
+  final Set<UserRole.Role> excludedRoles = Set.of(UserRole.Role.ROOT, UserRole.Role.ADMIN,
       UserRole.Role.PARTNER, UserRole.Role.SALESMAN);
 
   public Partner addPartner(PartnerDTO partner) {
@@ -69,15 +70,20 @@ public class HellopolandService extends ServiceSuperclass {
       throw new ConflictingException("The partner commission is out of range: 0 - 100.");
     }
 
-    // 1. creating a partner in p24:
     var merchant = new MerchantRegisterRequest(partner);
     MerchantRegisterValidator.validate(merchant);
-    Integer merchantId = p24SOAPClient.merchantRegistration(merchant);
+    Partner partnerBO = getPartnerFromMerchantRegisterRequest(merchant);
+
+    // 1. creating a partner in p24:
+    if (partner.skipP24) {
+      partnerBO.setP24Id(-1);
+    } else {
+      Integer merchantId = p24SOAPClient.merchantRegistration(merchant);
+      partnerBO.setP24Id(merchantId);
+    }
 
     // 2. creating a partner and the user in hpl:
-    var partnerBO = getPartnerFromMerchantRegisterRequest(merchant);
     partnerBO.setCreated(LocalDateTime.now());
-    partnerBO.setP24Id(merchantId);
     partnerBO.setCommission(partner.commission);
     partnerBO.setHptToken("temporaryToken");
     if (BooleanUtils.isTrue(partner.affiliation)) {
@@ -85,8 +91,12 @@ public class HellopolandService extends ServiceSuperclass {
     }
     String password = RandomStringUtils.randomAlphanumeric(10);
     try {
-      userService.create(partner.email, password, null, null, null, partnerBO,
-          UserRole.Role.PARTNER, UserRole.Role.USHER);
+      Optional<User> user = userService.findByEmailWithNullPartner(partner.email);
+      user.ifPresentOrElse(us -> {
+        us.setPassword(password);
+        userService.attachToPartner(us, partnerBO);
+      }, () -> userService.create(partner.email, password, null, null, null, partnerBO,
+          UserRole.Role.PARTNER, UserRole.Role.USHER));
       em.flush();
     } catch (Exception e) {
       var exc = e.getCause();
@@ -210,13 +220,9 @@ public class HellopolandService extends ServiceSuperclass {
     return partnerBO;
   }
 
-  private boolean isAtLeastOneUsher(List<UserDTO> usersDTOs) {
-    return usersDTOs.stream().anyMatch(user -> user.roles.contains(RoleDTO.USHER));
-  }
-
   private boolean areRolesSupported(Set<RoleDTO> roles) {
     var supported = new HashSet<Role>(Arrays.asList(UserRole.Role.values()));
-    supported.removeAll(excluded_roles);
+    supported.removeAll(excludedRoles);
     try {
       return supported.containsAll(
           roles.stream().map(r -> UserRole.Role.valueOf(r.name())).collect(Collectors.toSet()));
@@ -227,11 +233,11 @@ public class HellopolandService extends ServiceSuperclass {
 
   private Role[] getFilteredRolesFromDTO(Set<RoleDTO> roles) {
     Stream<UserRole.Role> stream = roles.stream().map(r -> UserRole.Role.valueOf(r.name()))
-        .filter(r -> !excluded_roles.contains(r) && !r.equals(UserRole.Role.USHER));
+        .filter(r -> !excludedRoles.contains(r) && !r.equals(UserRole.Role.USHER));
     return stream.toArray(UserRole.Role[]::new);
   }
 
-  public PagedEntityCollection<Partner> getList(PartnerCollectionConfig config) {
+  public PagedEntityCollection<Partner> getList(PartnerPagedCollectionConfig config) {
     List<Partner> partners = getQuery(config).getResultList();
     Collections.sort(partners, getNamesComparator(Partner::getName, new Locale("pl_PL")));
     return new PagedEntityCollection<>(partners, config);

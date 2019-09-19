@@ -8,6 +8,9 @@ import pl.hellopoland.enums.LanguageVersion;
  * languages.
  */
 public interface Translated {
+
+  Long getId();
+
   LanguageVersion getDefaultLanguage();
 
   void setDefaultLanguage(LanguageVersion defaultLanguage);
@@ -19,4 +22,9 @@ public interface Translated {
   boolean addAvailableLanguageVersion(LanguageVersion languageVersion);
 
   boolean deleteAvailableLanguageVersion(LanguageVersion languageVersion);
+
+  LanguageVersion getCurrentLanguage();
+
+  void setCurrentLanguage(LanguageVersion languageVersion);
+
 }
