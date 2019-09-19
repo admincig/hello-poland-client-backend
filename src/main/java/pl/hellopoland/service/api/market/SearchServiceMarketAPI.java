@@ -10,14 +10,18 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.config.CategoryPagedCollectionConfig;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
+import pl.hellopoland.dto.FilterDTO;
+import pl.hellopoland.dto.FilterPriceEntryDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.dto.SearchResultORO;
 import pl.hellopoland.rest.dto.SightRO;
+import pl.hellopoland.service.CategoryService;
 import pl.hellopoland.service.SightEventService;
-import pl.hellopoland.service.SightService;
 import pl.hellopoland.service.TranslationService;
+import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PagedEntityCollection;
 
@@ -27,9 +31,20 @@ public class SearchServiceMarketAPI {
   @Inject
   SightEventService seService;
   @Inject
-  SightService sService;
-  @Inject
   TranslationService tService;
+  @Inject
+  CategoryService catService;
+
+  private List<FilterPriceEntryDTO> predefinedPriceFilters;
+
+  public SearchServiceMarketAPI() {
+    predefinedPriceFilters = new ArrayList<>();
+    predefinedPriceFilters.add(new FilterPriceEntryDTO(0, 2000));
+    predefinedPriceFilters.add(new FilterPriceEntryDTO(2000, 4000));
+    predefinedPriceFilters.add(new FilterPriceEntryDTO(4000, 6000));
+    predefinedPriceFilters.add(new FilterPriceEntryDTO(6000, 8000));
+    predefinedPriceFilters.add(new FilterPriceEntryDTO(8000, null));
+  }
 
   @PermitAll
   public SearchResultORO search(LanguageVersion languageVersion, String query, Long[] categoryIds,
@@ -63,6 +78,16 @@ public class SearchServiceMarketAPI {
       return new SightRO(s);
     }).collect(Collectors.toList());
     return oro;
+  }
+
+  @PermitAll
+  public FilterDTO filters() {
+    FilterDTO filter = new FilterDTO();
+    filter.prices = predefinedPriceFilters;
+    filter.city = seService.getCitiesForPublicEvents();
+    filter.categories = catService.pagedList(new CategoryPagedCollectionConfig()).items.stream()
+        .map(DtoMapper::getDTO).collect(Collectors.toList());
+    return filter;
   }
 
 }

@@ -11,6 +11,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import pl.hellopoland.annotation.DateFormat;
+import pl.hellopoland.dto.FilterDTO;
 import pl.hellopoland.rest.RestService;
 import pl.hellopoland.rest.dto.SearchResultORO;
 import pl.hellopoland.service.api.market.SearchServiceMarketAPI;
@@ -39,5 +40,11 @@ public class MarketSearchRestService {
         city,
         fromDate,
         toDate);
+  }
+
+  @GET
+  @Path("/filters")
+  public FilterDTO filters() {
+    return service.filters();
   }
 }

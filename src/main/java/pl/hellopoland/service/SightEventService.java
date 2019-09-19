@@ -599,4 +599,11 @@ public class SightEventService extends ServiceSuperclass {
     return bo;
   }
 
+  public List<String> getCitiesForPublicEvents() {
+    return em.createQuery(
+        "select distinct location.city from SightEvent where active = true "
+            + "and published = true and blocked = false and available = true",
+        String.class).getResultList();
+  }
+
 }
