@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -292,8 +293,14 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
   }
 
   public void recreateSearchIndexAlsoForSightEvents() {
-    this.searchIndex = Stream.of(name, phone).collect(Collectors.joining(", "));
-    this.sightEvents.forEach(SightEvent::recreateSearchIndex);
+    this.searchIndex =
+        Stream.of(email, name, phone)
+            .filter(Objects::nonNull)
+            .flatMap(s -> Stream.of(s.split(" ")))
+            .collect(Collectors.joining(", "));
+    if (this.sightEvents != null) {
+      this.sightEvents.forEach(SightEvent::recreateSearchIndex);
+    }
   }
 
   public Set<Category> getCategories() {

@@ -55,14 +55,8 @@ public class SightEventServiceMarketAPI {
       bos.items = hptClient.getSightEventsInDateRange(new ArrayList<SightEvent>(bos.items),
           fromDate, toDate);
     }
-    List<SightEventDTO> dtos = bos.items.stream().map(bo -> {
-      var dto = DtoMapper.getDTO(bo);
-      dto.language = bo.getDefaultLanguage().getLanuage();
-      return dto;
-    }).collect(Collectors.toList());
-    if (language != null) {
-      dtos.forEach(dto -> dto.language = language.getLanuage());
-    }
+    List<SightEventDTO> dtos =
+        bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
     return new PagedCollection(dtos, bos.config);
   }
 

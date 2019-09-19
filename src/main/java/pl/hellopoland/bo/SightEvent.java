@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -399,6 +400,9 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
 
   public void recreateSearchIndex() {
     this.searchIndex = sight.getSearchIndex() + ", " +
-        Stream.of(email, name, phone).collect(Collectors.joining(", "));
+        Stream.of(email, name, phone)
+            .filter(Objects::nonNull)
+            .flatMap(s -> Stream.of(s.split(" ")))
+            .collect(Collectors.joining(", "));
   }
 }
