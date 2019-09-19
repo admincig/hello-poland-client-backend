@@ -3,12 +3,14 @@ package pl.hellopoland.rest.dto;
 import java.util.List;
 import java.util.stream.Collectors;
 import pl.hellopoland.bo.Sight;
+import pl.hellopoland.dto.CategoryDTO;
 
 public class SightRO {
 
   public Long id;
   public String name;
   public String mainImage;
+  public List<CategoryDTO> categories;
   public List<SightEventSimpleRO> sightEvents;
 
   public SightRO(Sight sight) {

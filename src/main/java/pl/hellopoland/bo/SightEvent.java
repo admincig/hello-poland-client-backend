@@ -59,6 +59,7 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
   @Column(columnDefinition = "varchar(2500)")
   private String description;
   private Integer duration;
+  @Transient
   private Integer minPrice;
   private Float score;
   @Embedded

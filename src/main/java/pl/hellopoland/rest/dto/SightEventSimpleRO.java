@@ -8,6 +8,7 @@ public class SightEventSimpleRO {
   public String name;
   public SightLocationRO location;
   public Long sightId;
+  public Integer minPrice;
 
   public SightEventSimpleRO(SightEvent s) {
     this.id = s.getId();
@@ -18,5 +19,6 @@ public class SightEventSimpleRO {
     if (s.getSight() != null) {
       this.sightId = s.getSight().getId();
     }
+    this.minPrice = s.getMinPrice();
   }
 }
