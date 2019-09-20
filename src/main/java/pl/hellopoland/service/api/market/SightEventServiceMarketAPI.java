@@ -103,6 +103,20 @@ public class SightEventServiceMarketAPI {
   }
 
   @PermitAll
+  public PagedCollection getRecommended(Integer count, LanguageVersion languageVersion) {
+    SightEventPagedCollectionConfig config = new SightEventPagedCollectionConfig();
+    config.setPageSize(count);
+    config.setOrderColumn("random()");
+    config.onlyActive();
+    config.onlyPublished();
+    PagedEntityCollection<SightEvent> pagedCollection = service.getList(config, languageVersion);
+    return new PagedCollection(
+        pagedCollection.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList()),
+        pagedCollection.config);
+  }
+
+
+  @PermitAll
   public AvailableTicketNumberAssociationORO checkAvailability(Long sightEventId, Date fromDate,
       Date toDate) {
     return new AvailableTicketNumberAssociationORO(service.checkAvailability(sightEventId,
