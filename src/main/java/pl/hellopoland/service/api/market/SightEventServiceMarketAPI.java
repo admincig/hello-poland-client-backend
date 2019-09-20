@@ -85,6 +85,7 @@ public class SightEventServiceMarketAPI {
   public SightEventDTO get(Long id, String contentLanguageSymbol) {
     LanguageVersion language = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
     SightEvent bo = service.get(id);
+    SightEventDTO dto = null;
     if (bo.isAccessible()) {
       if (language != null) {
         bo = translationService.translateEntity(bo, language, true);
@@ -93,28 +94,41 @@ public class SightEventServiceMarketAPI {
       } else {
         language = bo.getDefaultLanguage();
       }
-      var dto = DtoMapper.getFullDTO(bo);
+      dto = DtoMapper.getFullDTO(bo);
       dto.partnerAffiliateCode = null;
       dto.language = language.getLanuage();
       service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), false);
-      return service.isAvailable(dto, null, null) ? dto : null;
+      if (service.isAvailable(dto, null, null)) {
+        dto.similar = getSimilar(bo, language);
+      }
     }
-    return null;
+    return dto;
   }
 
   @PermitAll
   public PagedCollection getRecommended(Integer count, LanguageVersion languageVersion) {
-    SightEventPagedCollectionConfig config = new SightEventPagedCollectionConfig();
-    config.setPageSize(count);
-    config.setOrderColumn("random()");
-    config.onlyActive();
-    config.onlyPublished();
+    SightEventPagedCollectionConfig config = prepareConfigForRandom(6);
     PagedEntityCollection<SightEvent> pagedCollection = service.getList(config, languageVersion);
     return new PagedCollection(
         pagedCollection.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList()),
         pagedCollection.config);
   }
 
+  private List<SightEventDTO> getSimilar(SightEvent bo, LanguageVersion language) {
+    SightEventPagedCollectionConfig config = prepareConfigForRandom(6);
+    config.setSight(bo.getSight());
+    return service.getList(config, language).items.stream().map(DtoMapper::getDTO)
+        .collect(Collectors.toList());
+  }
+
+  private SightEventPagedCollectionConfig prepareConfigForRandom(Integer count) {
+    SightEventPagedCollectionConfig config = new SightEventPagedCollectionConfig();
+    config.setPageSize(count);
+    config.setOrderColumn("random()");
+    config.onlyActive();
+    config.onlyPublished();
+    return config;
+  }
 
   @PermitAll
   public AvailableTicketNumberAssociationORO checkAvailability(Long sightEventId, Date fromDate,

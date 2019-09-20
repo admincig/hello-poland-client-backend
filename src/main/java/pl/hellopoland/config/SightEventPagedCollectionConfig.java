@@ -2,6 +2,7 @@ package pl.hellopoland.config;
 
 import java.util.Arrays;
 import java.util.List;
+import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 
 public class SightEventPagedCollectionConfig extends PagedCollectionConfig<SightEvent> {
@@ -89,6 +90,10 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
 
   public boolean isFetchCategories() {
     return this.fetchCategories;
+  }
+
+  public void setSight(Sight sight) {
+    addCondition("sight", sight, "e.sight=:sight");
   }
 
 }

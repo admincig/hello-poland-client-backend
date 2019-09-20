@@ -1,11 +1,13 @@
 package pl.hellopoland.service.api.market;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.Sight;
+import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.SightEventCategory;
 import pl.hellopoland.config.SightPagedCollectionConfig;
 import pl.hellopoland.dto.SightDTO;
@@ -52,7 +54,7 @@ public class SightServiceMarketAPI {
     Sight bo = service.get(id);
     if (bo.isPublished()) {
       bo.setSightEvents(bo.getSightEvents().stream()
-          .filter(se -> se.isActive() && se.isPublished() && !se.isBlocked())
+          .filter(SightEvent::isAccessible)
           .collect(Collectors.toList()));
       bo.setCategories(bo.getSightEvents().stream().flatMap(se -> se.getCategories().stream())
           .map(SightEventCategory::getCategory).collect(Collectors.toSet()));
@@ -77,22 +79,35 @@ public class SightServiceMarketAPI {
           }).collect(Collectors.toList());
       dto.minPrice = dto.sightEvents.stream().min(Comparator.comparing(seDto -> seDto.minPrice))
           .map(seDto -> seDto.minPrice).orElse(null);
+      dto.similar = getSimilar(bo, language);
       return dto;
     }
     return null;
   }
 
+  private List<SightDTO> getSimilar(Sight bo, LanguageVersion language) {
+    SightPagedCollectionConfig config = prepareConfigForRandom(6);
+    config.setPartner(bo.getPartner().getId());
+    return service.getList(config, language).items.stream().map(DtoMapper::getDTO)
+        .collect(Collectors.toList());
+  }
+
   @PermitAll
   public PagedCollection getRecommended(Integer count, LanguageVersion languageVersion) {
+    SightPagedCollectionConfig config = prepareConfigForRandom(count);
+    PagedEntityCollection<Sight> pagedCollection = service.getList(config, languageVersion);
+    return new PagedCollection(
+        pagedCollection.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList()),
+        pagedCollection.config);
+  }
+
+  private SightPagedCollectionConfig prepareConfigForRandom(Integer count) {
     SightPagedCollectionConfig config = new SightPagedCollectionConfig();
     config.setPageSize(count);
     config.setOrderColumn("random()");
     config.onlyActive();
     config.onlyPublished();
-    PagedEntityCollection<Sight> pagedCollection = service.getList(config, languageVersion);
-    return new PagedCollection(
-        pagedCollection.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList()),
-        pagedCollection.config);
+    return config;
   }
 
 }
