@@ -77,7 +77,7 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
     }
   }
 
-  public void setCategoriesIds(Long[] categoryIds) {
+  public void setCategoriesIdsArray(Long[] categoryIds) {
     if (categoryIds != null && categoryIds.length > 0) {
       setCategoriesIds(Arrays.asList(categoryIds));
     }

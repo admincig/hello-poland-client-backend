@@ -82,4 +82,17 @@ public class SightServiceMarketAPI {
     return null;
   }
 
+  @PermitAll
+  public PagedCollection getRecommended(Integer count, LanguageVersion languageVersion) {
+    SightPagedCollectionConfig config = new SightPagedCollectionConfig();
+    config.setPageSize(count);
+    config.setOrderColumn("random()");
+    config.onlyActive();
+    config.onlyPublished();
+    PagedEntityCollection<Sight> pagedCollection = service.getList(config, languageVersion);
+    return new PagedCollection(
+        pagedCollection.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList()),
+        pagedCollection.config);
+  }
+
 }

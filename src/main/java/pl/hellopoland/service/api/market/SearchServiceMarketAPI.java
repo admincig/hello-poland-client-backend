@@ -100,7 +100,7 @@ public class SearchServiceMarketAPI {
     seConfig.onlyActive();
     seConfig.onlyPublished();
     seConfig.setOrderColumn("random()");
-    seConfig.setCategoriesIds(categoryIds);
+    seConfig.setCategoriesIdsArray(categoryIds);
     seConfig.setSearchQuery(query);
     seConfig.setCity(city);
     seConfig.setFetchCategories(true);
