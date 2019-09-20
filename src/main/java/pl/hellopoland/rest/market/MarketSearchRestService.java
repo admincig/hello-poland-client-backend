@@ -12,8 +12,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import pl.hellopoland.annotation.DateFormat;
 import pl.hellopoland.dto.FilterDTO;
+import pl.hellopoland.dto.SearchResultDTO;
 import pl.hellopoland.rest.RestService;
-import pl.hellopoland.rest.dto.SearchResultORO;
 import pl.hellopoland.service.api.market.SearchServiceMarketAPI;
 
 @Path("/market/search")
@@ -26,7 +26,7 @@ public class MarketSearchRestService {
   SearchServiceMarketAPI service;
 
   @GET
-  public SearchResultORO search(
+  public SearchResultDTO search(
       @QueryParam("query") String query,
       @QueryParam("categories") Long[] categoryIds,
       @QueryParam("city") String city,

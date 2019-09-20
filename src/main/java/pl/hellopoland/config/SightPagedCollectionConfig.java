@@ -8,7 +8,7 @@ public class SightPagedCollectionConfig extends PagedCollectionConfig<Sight> {
 
   @Override
   public String joins() {
-    return "left join fetch e.mainImage mi join fetch e.sightEvents ses";
+    return "left join fetch e.mainImage mi";// join fetch e.sightEvents ses";
   }
 
   public void setSearchQuery(String searchQuery) {

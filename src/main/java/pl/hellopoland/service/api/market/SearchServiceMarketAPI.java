@@ -2,9 +2,9 @@ package pl.hellopoland.service.api.market;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.security.PermitAll;
@@ -18,10 +18,10 @@ import pl.hellopoland.config.CategoryPagedCollectionConfig;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.FilterDTO;
 import pl.hellopoland.dto.FilterPriceEntryDTO;
+import pl.hellopoland.dto.SearchResultDTO;
+import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
-import pl.hellopoland.rest.dto.SearchResultORO;
-import pl.hellopoland.rest.dto.SightRO;
 import pl.hellopoland.service.CategoryService;
 import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.service.TranslationService;
@@ -51,7 +51,7 @@ public class SearchServiceMarketAPI {
   }
 
   @PermitAll
-  public SearchResultORO search(LanguageVersion languageVersion, String query, Long[] categoryIds,
+  public SearchResultDTO search(LanguageVersion languageVersion, String query, Long[] categoryIds,
       String city, Date fromDate, Date toDate, Integer minPrice, Integer maxPrice) {
 
     List<SightEvent> ses = getSightEvents(languageVersion, query, categoryIds, city,
@@ -60,18 +60,21 @@ public class SearchServiceMarketAPI {
     Map<Sight, List<SightEvent>> ss =
         ses.stream().collect(groupingBy(SightEvent::getSight));
 
-    SearchResultORO oro = new SearchResultORO();
+    SearchResultDTO oro = new SearchResultDTO();
     oro.sights = ss.entrySet().stream().map(entry -> {
       Sight s = tService.translateEntity(entry.getKey(), languageVersion, false);
       List<SightEvent> se = entry.getValue();
-      s.setSightEvents(se);
-      List<Category> categories =
-          se.stream().filter(event -> event.getCategories() != null)
-              .flatMap(event -> event.getCategories().stream())
-              .map(SightEventCategory::getCategory).collect(toList());
-      s.setCategories(
-          new HashSet<>(tService.translateEntities(categories, languageVersion, false)));
-      return new SightRO(s);
+      List<Category> categories = se.stream()
+          .filter(event -> event.getCategories() != null)
+          .flatMap(event -> event.getCategories().stream())
+          .map(SightEventCategory::getCategory)
+          .collect(toList());
+
+      SightDTO dto = DtoMapper.getDTO(s);
+      dto.sightEvents = se.stream().map(DtoMapper::getDTO).collect(toList());
+      dto.categories = tService.translateEntities(categories, languageVersion, false).stream()
+          .map(DtoMapper::getDTO).collect(toSet());
+      return dto;
     }).collect(toList());
     return oro;
   }
