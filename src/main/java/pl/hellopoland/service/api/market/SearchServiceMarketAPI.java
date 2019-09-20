@@ -48,7 +48,8 @@ public class SearchServiceMarketAPI {
 
   @PermitAll
   public SearchResultORO search(LanguageVersion languageVersion, String query, Long[] categoryIds,
-      String city, Date fromDate, Date toDate) {
+      String city, Date fromDate, Date toDate, Integer minPrice, Integer maxPrice) {
+
     SightEventPagedCollectionConfig seConfig = new SightEventPagedCollectionConfig();
     if (fromDate != null && toDate != null && toDate.before(fromDate)) {
       throw new ConflictingException("toDate[" + toDate + "] is before fromDate[" + fromDate + "]");
@@ -66,6 +67,14 @@ public class SearchServiceMarketAPI {
       HelloTicket hptClient = new HelloTicket(seService.getPortal("Hello Ticket Cloud").getUrl());
       ses.items = hptClient.getSightEventsInDateRange(new ArrayList<SightEvent>(ses.items),
           fromDate, toDate);
+      if (minPrice != null) {
+        ses.items = ses.items.stream().filter(se -> se.getMinPrice() >= minPrice)
+            .collect(Collectors.toList());
+      }
+      if (maxPrice != null) {
+        ses.items = ses.items.stream().filter(se -> se.getMinPrice() <= maxPrice)
+            .collect(Collectors.toList());
+      }
     }
     Map<Sight, List<SightEvent>> ss =
         ses.items.stream().collect(Collectors.groupingBy(SightEvent::getSight));

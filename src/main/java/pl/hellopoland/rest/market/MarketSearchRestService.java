@@ -28,10 +28,12 @@ public class MarketSearchRestService {
   @GET
   public SearchResultORO search(
       @QueryParam("query") String query,
-      @QueryParam("categoryId") Long[] categoryIds,
+      @QueryParam("categories") Long[] categoryIds,
       @QueryParam("city") String city,
       @QueryParam("fromDate") @DateFormat Date fromDate,
       @QueryParam("toDate") @DateFormat Date toDate,
+      @QueryParam("minPrice") Integer minPrice,
+      @QueryParam("maxPrice") Integer maxPrice,
       @HeaderParam("Content-Language") String contentLanguage) {
     return service.search(
         RestService.parseLang(contentLanguage),
@@ -39,7 +41,9 @@ public class MarketSearchRestService {
         categoryIds,
         city,
         fromDate,
-        toDate);
+        toDate,
+        minPrice,
+        maxPrice);
   }
 
   @GET
