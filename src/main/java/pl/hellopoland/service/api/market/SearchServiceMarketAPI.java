@@ -4,9 +4,11 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -71,9 +73,17 @@ public class SearchServiceMarketAPI {
           .collect(toList());
 
       SightDTO dto = DtoMapper.getDTO(s);
-      dto.sightEvents = se.stream().map(DtoMapper::getDTO).collect(toList());
+      dto.sightEvents = se.stream()
+          .map(DtoMapper::getDTO)
+          .collect(toList());
+      dto.minPrice = dto.sightEvents.stream()
+          .map(sedto -> sedto.minPrice)
+          .filter(Objects::nonNull)
+          .min(Comparator.naturalOrder())
+          .orElse(null);
       dto.categories = tService.translateEntities(categories, languageVersion, false).stream()
-          .map(DtoMapper::getDTO).collect(toSet());
+          .map(DtoMapper::getDTO)
+          .collect(toSet());
       return dto;
     }).collect(toList());
     return oro;
