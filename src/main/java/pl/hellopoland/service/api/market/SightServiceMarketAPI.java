@@ -32,7 +32,7 @@ public class SightServiceMarketAPI {
   @PermitAll
   public PagedCollection getList(SightPagedCollectionConfig config, String contentLanguageSymbol) {
     LanguageVersion language = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
-    config.setOrderColumn("name");
+    config.setOrderColumn("e.name");
     config.setOrderDirection("asc");
     PagedEntityCollection<Sight> bos = service.getList(config, language);
     var dtos = bos.items.stream().map(bo -> {

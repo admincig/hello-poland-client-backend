@@ -46,7 +46,7 @@ public class SightEventServiceMarketAPI {
     config.onlyAvailable();
     config.onlyActive();
     config.onlyPublished();
-    config.setOrderColumn("name");
+    config.setOrderColumn("e.name");
     config.setOrderDirection("asc");
     PagedEntityCollection<SightEvent> bos = service.getList(config, language);
     bos.items = bos.items.stream().filter(se -> se.isAccessible()).collect(Collectors.toList());
@@ -66,7 +66,7 @@ public class SightEventServiceMarketAPI {
     config.onlyAvailable();
     config.onlyActive();
     config.onlyPublished();
-    config.setOrderColumn("name");
+    config.setOrderColumn("e.name");
     config.setOrderDirection("asc");
     PagedEntityCollection<SightEvent> bos = service.getList(config, language);
     bos.items = bos.items.stream().filter(se -> se.isAccessible()).collect(Collectors.toList());
