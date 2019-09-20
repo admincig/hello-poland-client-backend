@@ -441,6 +441,7 @@ public class HelloTicket {
   }
 
   public List<SightEvent> getAvailableSightEvents(List<SightEvent> sightEvents) {
+    var result = new ArrayList<SightEvent>();
     String json = JsonbConfig.getInstance()
         .toJson(sightEvents.stream().map(SightEvent::getHptId).collect(Collectors.toSet()));
     try {
@@ -452,7 +453,6 @@ public class HelloTicket {
         var id = jsonb.fromJson(p.toString(), Long.class);
         resp.add(id);
       });
-      var result = new ArrayList<SightEvent>();
       resp.forEach(hptId -> {
         for (SightEvent se : sightEvents) {
           if (hptId.equals(se.getHptId())) {
@@ -461,11 +461,10 @@ public class HelloTicket {
           }
         }
       });
-      return result;
     } catch (Exception e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
-      return null;
     }
+    return result;
   }
 
   public List<SightEvent> getSightEventsInDateRange(List<SightEvent> sightEvents, Date fromDate,
