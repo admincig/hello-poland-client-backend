@@ -1,15 +1,19 @@
 package pl.hellopoland.service.api.market;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import pl.hellopoland.bo.Category;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.bo.SightEventCategory;
 import pl.hellopoland.config.CategoryPagedCollectionConfig;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.FilterDTO;
@@ -61,31 +65,39 @@ public class SearchServiceMarketAPI {
     seConfig.setCategoriesIds(categoryIds);
     seConfig.setSearchQuery(query);
     seConfig.setCity(city);
-    PagedEntityCollection<SightEvent> ses = seService.getList(seConfig, languageVersion);
-    ses.items = ses.items.stream().filter(SightEvent::isAccessible).collect(Collectors.toList());
+    seConfig.setFetchCategories(true);
+    PagedEntityCollection<SightEvent> sesPagedList = seService.getList(seConfig, languageVersion);
+    List<SightEvent> ses =
+        sesPagedList.items.stream().filter(SightEvent::isAccessible).collect(toList());
     if (fromDate != null || toDate != null) {
       HelloTicket hptClient = new HelloTicket(seService.getPortal("Hello Ticket Cloud").getUrl());
-      ses.items = hptClient.getSightEventsInDateRange(new ArrayList<SightEvent>(ses.items),
+      ses = hptClient.getSightEventsInDateRange(new ArrayList<SightEvent>(ses),
           fromDate, toDate);
       if (minPrice != null) {
-        ses.items = ses.items.stream().filter(se -> se.getMinPrice() >= minPrice)
-            .collect(Collectors.toList());
+        ses = ses.stream().filter(se -> se.getMinPrice() >= minPrice)
+            .collect(toList());
       }
       if (maxPrice != null) {
-        ses.items = ses.items.stream().filter(se -> se.getMinPrice() <= maxPrice)
-            .collect(Collectors.toList());
+        ses = ses.stream().filter(se -> se.getMinPrice() <= maxPrice)
+            .collect(toList());
       }
     }
     Map<Sight, List<SightEvent>> ss =
-        ses.items.stream().collect(Collectors.groupingBy(SightEvent::getSight));
+        ses.stream().collect(groupingBy(SightEvent::getSight));
 
     SearchResultORO oro = new SearchResultORO();
     oro.sights = ss.entrySet().stream().map(entry -> {
-      Sight s = tService.translateEntity(entry.getKey(), languageVersion, true);
+      Sight s = tService.translateEntity(entry.getKey(), languageVersion, false);
       List<SightEvent> se = entry.getValue();
-      s.setSightEvents(tService.translateEntities(se, languageVersion, false));
+      s.setSightEvents(se);
+      List<Category> categories =
+          se.stream().filter(event -> event.getCategories() != null)
+              .flatMap(event -> event.getCategories().stream())
+              .map(SightEventCategory::getCategory).collect(toList());
+      s.setCategories(
+          new HashSet<>(tService.translateEntities(categories, languageVersion, false)));
       return new SightRO(s);
-    }).collect(Collectors.toList());
+    }).collect(toList());
     return oro;
   }
 
@@ -95,7 +107,7 @@ public class SearchServiceMarketAPI {
     filter.prices = predefinedPriceFilters;
     filter.city = seService.getCitiesForPublicEvents();
     filter.categories = catService.pagedList(new CategoryPagedCollectionConfig()).items.stream()
-        .map(DtoMapper::getDTO).collect(Collectors.toList());
+        .map(DtoMapper::getDTO).collect(toList());
     return filter;
   }
 

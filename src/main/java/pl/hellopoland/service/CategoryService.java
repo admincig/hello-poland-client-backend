@@ -7,6 +7,8 @@ import java.util.Set;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.Category;
+import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.bo.SightEventCategory;
 import pl.hellopoland.config.CategoryPagedCollectionConfig;
 import pl.hellopoland.dto.CategoryDTO;
 import pl.hellopoland.enums.LanguageVersion;
@@ -75,4 +77,10 @@ public class CategoryService extends ServiceSuperclass {
     tService.deleteEntityTranslations(get(id), lang);
   }
 
+  public List<SightEventCategory> getFor(List<SightEvent> sightEvents) {
+    return em
+        .createQuery("from SightEventCategory where sightEvent in (:sightEvents)",
+            SightEventCategory.class)
+        .setParameter("sightEvents", sightEvents).getResultList();
+  }
 }

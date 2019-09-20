@@ -30,6 +30,7 @@ import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.bo.SightEventCategory;
 import pl.hellopoland.bo.TicketDefinition;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.AvailableTicketNumberAssociationDTO;
@@ -76,6 +77,9 @@ public class SightEventService extends ServiceSuperclass {
   @Inject
   private TranslationService translationService;
 
+  @Inject
+  private CategoryService catService;
+
   public List<SightEvent> getAllActiveAndPublishedAndNotBlocked() {
     return em.createQuery(
         "from SightEvent where active is true and published is true and blocked is false",
@@ -88,6 +92,12 @@ public class SightEventService extends ServiceSuperclass {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
     }
     List<SightEvent> sightEvents = getQuery(config).getResultList();
+    if (config.isFetchCategories()) {
+      List<SightEventCategory> categories = catService.getFor(sightEvents);
+      Map<SightEvent, Set<SightEventCategory>> grouped = categories.stream()
+          .collect(Collectors.groupingBy(SightEventCategory::getSightEvent, Collectors.toSet()));
+      sightEvents.forEach(se -> se.setCategories(grouped.get(se)));
+    }
     if (language != null) {
       sightEvents = translationService.translateEntities(sightEvents, language, false);
     }

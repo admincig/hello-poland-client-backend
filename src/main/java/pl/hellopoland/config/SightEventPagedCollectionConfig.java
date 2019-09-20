@@ -7,6 +7,7 @@ import pl.hellopoland.bo.SightEvent;
 public class SightEventPagedCollectionConfig extends PagedCollectionConfig<SightEvent> {
 
   private boolean currentPartner;
+  private boolean fetchCategories;
 
   @Override
   public String joins() {
@@ -80,6 +81,14 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
     if (categoryIds != null && categoryIds.length > 0) {
       setCategoriesIds(Arrays.asList(categoryIds));
     }
+  }
+
+  public void setFetchCategories(boolean fetchCategories) {
+    this.fetchCategories = fetchCategories;
+  }
+
+  public boolean isFetchCategories() {
+    return this.fetchCategories;
   }
 
 }
