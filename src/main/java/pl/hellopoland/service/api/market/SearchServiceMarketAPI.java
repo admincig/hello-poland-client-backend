@@ -54,6 +54,31 @@ public class SearchServiceMarketAPI {
   public SearchResultORO search(LanguageVersion languageVersion, String query, Long[] categoryIds,
       String city, Date fromDate, Date toDate, Integer minPrice, Integer maxPrice) {
 
+    List<SightEvent> ses = getSightEvents(languageVersion, query, categoryIds, city,
+        fromDate, toDate, minPrice, maxPrice);
+
+    Map<Sight, List<SightEvent>> ss =
+        ses.stream().collect(groupingBy(SightEvent::getSight));
+
+    SearchResultORO oro = new SearchResultORO();
+    oro.sights = ss.entrySet().stream().map(entry -> {
+      Sight s = tService.translateEntity(entry.getKey(), languageVersion, false);
+      List<SightEvent> se = entry.getValue();
+      s.setSightEvents(se);
+      List<Category> categories =
+          se.stream().filter(event -> event.getCategories() != null)
+              .flatMap(event -> event.getCategories().stream())
+              .map(SightEventCategory::getCategory).collect(toList());
+      s.setCategories(
+          new HashSet<>(tService.translateEntities(categories, languageVersion, false)));
+      return new SightRO(s);
+    }).collect(toList());
+    return oro;
+  }
+
+  private List<SightEvent> getSightEvents(LanguageVersion languageVersion,
+      String query, Long[] categoryIds, String city, Date fromDate, Date toDate, Integer minPrice,
+      Integer maxPrice) {
     SightEventPagedCollectionConfig seConfig = new SightEventPagedCollectionConfig();
     if (fromDate != null && toDate != null && toDate.before(fromDate)) {
       throw new ConflictingException("toDate[" + toDate + "] is before fromDate[" + fromDate + "]");
@@ -82,23 +107,7 @@ public class SearchServiceMarketAPI {
             .collect(toList());
       }
     }
-    Map<Sight, List<SightEvent>> ss =
-        ses.stream().collect(groupingBy(SightEvent::getSight));
-
-    SearchResultORO oro = new SearchResultORO();
-    oro.sights = ss.entrySet().stream().map(entry -> {
-      Sight s = tService.translateEntity(entry.getKey(), languageVersion, false);
-      List<SightEvent> se = entry.getValue();
-      s.setSightEvents(se);
-      List<Category> categories =
-          se.stream().filter(event -> event.getCategories() != null)
-              .flatMap(event -> event.getCategories().stream())
-              .map(SightEventCategory::getCategory).collect(toList());
-      s.setCategories(
-          new HashSet<>(tService.translateEntities(categories, languageVersion, false)));
-      return new SightRO(s);
-    }).collect(toList());
-    return oro;
+    return ses;
   }
 
   @PermitAll
