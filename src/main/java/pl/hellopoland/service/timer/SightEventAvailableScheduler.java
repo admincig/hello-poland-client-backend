@@ -2,6 +2,7 @@ package pl.hellopoland.service.timer;
 
 import java.util.List;
 import javax.annotation.PostConstruct;
+import javax.ejb.DependsOn;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Schedule;
@@ -12,6 +13,7 @@ import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.util.HelloTicket;
 
 @Singleton
+@DependsOn("DbFiller")
 public class SightEventAvailableScheduler {
 
   @Inject

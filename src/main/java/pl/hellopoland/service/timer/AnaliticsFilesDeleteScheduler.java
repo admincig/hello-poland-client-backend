@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import javax.ejb.DependsOn;
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.inject.Inject;
@@ -14,6 +15,7 @@ import pl.hellopoland.service.FileDescriptorService;
 import pl.hellopoland.service.ServiceSuperclass;
 
 @Singleton
+@DependsOn("DbFiller")
 public class AnaliticsFilesDeleteScheduler extends ServiceSuperclass {
   final static Path PATH = Paths
       .get(properties.getProperty("dms.root.path") + File.separator + "analitics" + File.separator);

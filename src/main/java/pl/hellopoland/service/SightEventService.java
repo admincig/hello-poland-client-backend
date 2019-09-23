@@ -185,6 +185,10 @@ public class SightEventService extends ServiceSuperclass {
       bo.setOpeningHours(oHoursList);
     }
     bo.recreateSearchIndex();
+    if (sight != null) {
+      em.refresh(sight);
+      sight.recreateSearchIndex();
+    }
     logger.log(Logger.Level.INFO, "Saved new sight event: " + bo.getName());
     return createLanguageVersion(DtoMapper.getDTO(bo), partner, bo.getDefaultLanguage());
   }
@@ -243,6 +247,10 @@ public class SightEventService extends ServiceSuperclass {
       bo.setOpeningHours(null);
       bo.setOpeningHours(oHoursList);
       bo.recreateSearchIndex();
+      if (bo.getSight() != null) {
+        em.refresh(bo.getSight());
+        bo.getSight().recreateSearchIndex();
+      }
       em.flush();
     }
     return translationService.updateEntityLanguageVersion(bo, dto, language);
@@ -585,6 +593,8 @@ public class SightEventService extends ServiceSuperclass {
       HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
       helloTicket.updateSightEvent(DtoMapper.getDTO(bo), partner.getHptToken());
     }
+    bo.recreateSearchIndex();
+    bo.getSight().recreateSearchIndex();
     return bo;
   }
 

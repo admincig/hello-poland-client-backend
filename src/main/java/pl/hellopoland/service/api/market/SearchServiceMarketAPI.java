@@ -96,6 +96,10 @@ public class SearchServiceMarketAPI {
     if (fromDate != null && toDate != null && toDate.before(fromDate)) {
       throw new ConflictingException("toDate[" + toDate + "] is before fromDate[" + fromDate + "]");
     }
+    if (minPrice != null && maxPrice != null && minPrice > maxPrice) {
+      throw new ConflictingException(
+          "minPrice[" + minPrice + "] is lesser then maxPrice[" + maxPrice + "]");
+    }
     seConfig.onlyAvailable();
     seConfig.onlyActive();
     seConfig.onlyPublished();
