@@ -92,7 +92,7 @@ public class SightEventService extends ServiceSuperclass {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
     }
     List<SightEvent> sightEvents = getQuery(config).getResultList();
-    if (config.isFetchCategories()) {
+    if (!sightEvents.isEmpty() && config.isFetchCategories()) {
       List<SightEventCategory> categories = catService.getFor(sightEvents);
       Map<SightEvent, Set<SightEventCategory>> grouped = categories.stream()
           .collect(Collectors.groupingBy(SightEventCategory::getSightEvent, Collectors.toSet()));

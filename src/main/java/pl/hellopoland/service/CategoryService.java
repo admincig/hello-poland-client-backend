@@ -1,5 +1,6 @@
 package pl.hellopoland.service;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -78,6 +79,9 @@ public class CategoryService extends ServiceSuperclass {
   }
 
   public List<SightEventCategory> getFor(List<SightEvent> sightEvents) {
+    if (sightEvents.isEmpty()) {
+      return Collections.emptyList();
+    }
     return em
         .createQuery("from SightEventCategory where sightEvent in (:sightEvents)",
             SightEventCategory.class)
