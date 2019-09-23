@@ -1,9 +1,14 @@
 package pl.hellopoland.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
+import pl.hellopoland.bo.Category;
 import pl.hellopoland.bo.Partner;
+import pl.hellopoland.bo.SightEventCategory;
+import pl.hellopoland.config.PartnerPagedCollectionConfig;
+import pl.hellopoland.util.PagedEntityCollection;
 
 @LocalBean
 @Stateless
@@ -22,5 +27,24 @@ public class PartnerService extends ServiceSuperclass {
 
   public List<Partner> getAll() {
     return em.createQuery("from Partner order by id asc", Partner.class).getResultList();
+  }
+
+  public PagedEntityCollection<Partner> getList(PartnerPagedCollectionConfig config) {
+    List<Partner> list = getQuery(config).getResultList();
+    return new PagedEntityCollection<>(list, config);
+  }
+
+  public Partner getPartnerWithCategoriesAndCities(Long id) {
+    Partner partner = em.find(Partner.class, id);
+    List<Category> categories =
+        partner.getSight().stream().flatMap(sight -> sight.getSightEvents().stream())
+            .flatMap(se -> se.getCategories().stream()).map(SightEventCategory::getCategory)
+            .collect(Collectors.toList());
+    partner.setCategories(categories);
+    List<String> cities =
+        partner.getSight().stream().flatMap(sight -> sight.getSightEvents().stream())
+            .map(se -> se.getLocation().getCity()).collect(Collectors.toList());
+    partner.setCities(cities);
+    return partner;
   }
 }

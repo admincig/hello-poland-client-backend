@@ -3,21 +3,27 @@ package pl.hellopoland.bo;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.soap.p24.enums.BusinessType;
 import pl.hellopoland.soap.p24.enums.Trade;
+import pl.hellopoland.util.Translated;
 
 @Entity
-public class Partner extends ModelSuperclass {
+public class Partner extends ModelSuperclass implements Translated {
 
   private static final long serialVersionUID = 6118414827783500940L;
 
@@ -91,10 +97,33 @@ public class Partner extends ModelSuperclass {
 
   private String shopUrl;
 
+  private String description;
+
   private LocalDateTime created;
 
   @ManyToOne(cascade = CascadeType.PERSIST)
   private ContactPerson technicalContact;
+
+  @ManyToOne
+  private ImageCollector mainImage;
+
+  @Transient
+  private List<Category> categories;
+
+  @Transient
+  private List<String> cities;
+
+  @Transient
+  private LanguageVersion currentLanguage;
+
+  @NotNull
+  @Column(length = 5, nullable = false)
+  @Enumerated(EnumType.STRING)
+  private LanguageVersion defaultLanguage = LanguageVersion.PL_PL;
+  @Column(nullable = false)
+  @ElementCollection
+  @Enumerated(EnumType.STRING)
+  private Set<LanguageVersion> availableLanguageVersions;
 
   public Integer getP24Id() {
     return p24Id;
@@ -319,5 +348,84 @@ public class Partner extends ModelSuperclass {
   public void setCreated(LocalDateTime created) {
     this.created = created;
   }
+
+  public ImageCollector getMainImage() {
+    return mainImage;
+  }
+
+  public void setMainImage(ImageCollector mainImage) {
+    this.mainImage = mainImage;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public List<Category> getCategories() {
+    return categories;
+  }
+
+  public void setCategories(List<Category> categories) {
+    this.categories = categories;
+  }
+
+  public List<String> getCities() {
+    return cities;
+  }
+
+  public void setCities(List<String> cities) {
+    this.cities = cities;
+  }
+
+  @Override
+  public LanguageVersion getDefaultLanguage() {
+    return defaultLanguage;
+  }
+
+  @Override
+  public void setDefaultLanguage(LanguageVersion defaultLanguage) {
+    this.defaultLanguage = defaultLanguage;
+  }
+
+  @Override
+  public Set<LanguageVersion> getAvailableLanguageVersions() {
+    return availableLanguageVersions;
+  }
+
+  @Override
+  public void setAvailableLanguageVersions(Set<LanguageVersion> availableLanguageVersions) {
+    this.availableLanguageVersions = availableLanguageVersions;
+  }
+
+  @Override
+  public boolean addAvailableLanguageVersion(LanguageVersion languageVersion) {
+    if (availableLanguageVersions == null) {
+      availableLanguageVersions = new HashSet<>();
+    }
+    return availableLanguageVersions.add(languageVersion);
+  }
+
+  @Override
+  public boolean deleteAvailableLanguageVersion(LanguageVersion languageVersion) {
+    if (availableLanguageVersions == null) {
+      availableLanguageVersions = new HashSet<>();
+    }
+    return availableLanguageVersions.remove(languageVersion);
+  }
+
+  @Override
+  public LanguageVersion getCurrentLanguage() {
+    return currentLanguage;
+  }
+
+  @Override
+  public void setCurrentLanguage(LanguageVersion currentLanguage) {
+    this.currentLanguage = currentLanguage;
+  }
+
 
 }

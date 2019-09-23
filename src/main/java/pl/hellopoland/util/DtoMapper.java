@@ -32,6 +32,7 @@ import pl.hellopoland.dto.ContactPersonDTO;
 import pl.hellopoland.dto.FileDescriptorDTO;
 import pl.hellopoland.dto.ImageDTO;
 import pl.hellopoland.dto.LocationDTO;
+import pl.hellopoland.dto.MarketPartnerDTO;
 import pl.hellopoland.dto.OpeningHoursDTO;
 import pl.hellopoland.dto.P24PassageCartDTO;
 import pl.hellopoland.dto.P24PassageCartEntryDTO;
@@ -448,6 +449,23 @@ public class DtoMapper {
     dto.regon = bo.getRegon();
     dto.servicesDescription = bo.getServicesDescription();
     dto.shopUrl = bo.getShopUrl();
+    return dto;
+  }
+
+  public static MarketPartnerDTO getMarketDTO(Partner bo) {
+    var dto = new MarketPartnerDTO();
+    dto.name = bo.getName();
+    dto.mainImage = getDTO(bo.getMainImage());
+    return dto;
+  }
+
+  public static MarketPartnerDTO getFullMarketPartnerDTO(Partner bo) {
+    var dto = getMarketDTO(bo);
+    dto.correspondenceAddress = getDTO(bo.getCorrespondenceAddress());
+    dto.description = bo.getDescription();
+    dto.categories =
+        bo.getCategories().stream().map(DtoMapper::getDTO).collect(Collectors.toList());
+    dto.cities = bo.getCities();
     return dto;
   }
 

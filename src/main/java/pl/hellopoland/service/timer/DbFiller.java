@@ -26,6 +26,7 @@ import pl.hellopoland.bo.UserRole.Role;
 import pl.hellopoland.dto.CategoryDTO;
 import pl.hellopoland.dto.FrequencyDataDTO;
 import pl.hellopoland.dto.FrequencyTypeDTO;
+import pl.hellopoland.dto.MarketPartnerDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
@@ -186,7 +187,13 @@ public class DbFiller extends ServiceSuperclass {
     partner.setCommission(commission);
     partner.setEmail(email);
     partner.setAffiliateCode(affiliateCode);
-    return createUser(null, email, password, null, partner, roles);
+    partner.setDescription("pl desc");
+    User user = createUser(null, email, password, null, partner, roles);
+    MarketPartnerDTO dto = new MarketPartnerDTO();
+    dto.description = "pl desc";
+    translationService.createEntityLanguageVersion(em.find(Partner.class, partner.getId()), dto,
+        LanguageVersion.PL_PL);
+    return user;
   }
 
   private User createUser(String name, String email, String password, String hptToken,

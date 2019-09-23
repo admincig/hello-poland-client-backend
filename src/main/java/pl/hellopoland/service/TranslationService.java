@@ -30,7 +30,8 @@ public class TranslationService extends ServiceSuperclass {
   private static final List<String> EXCLUDED_FIELDS_NAMES =
       List.of("Sight.email", "Sight.phone", "Sight.defaultLanguage", "SightEvent.email",
           "SightEvent.phone", "SightEvent.defaultLanguage", "Agreement.linkUrl",
-          "Category.defaultLanguage", "Category.iconUrl");
+          "Category.defaultLanguage", "Category.iconUrl",
+          "Partner.defaultLanguage");
 
   /**
    * Checks whether the entity object implements interface Translated.
