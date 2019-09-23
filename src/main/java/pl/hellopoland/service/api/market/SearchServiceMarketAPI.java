@@ -111,7 +111,7 @@ public class SearchServiceMarketAPI {
     PagedEntityCollection<SightEvent> sesPagedList = seService.getList(seConfig, languageVersion);
     List<SightEvent> ses =
         sesPagedList.items.stream().filter(SightEvent::isAccessible).collect(toList());
-    if (fromDate != null || toDate != null) {
+    if (!ses.isEmpty() && (fromDate != null || toDate != null)) {
       HelloTicket hptClient = new HelloTicket(seService.getPortal("Hello Ticket Cloud").getUrl());
       ses = hptClient.getSightEventsInDateRange(new ArrayList<SightEvent>(ses),
           fromDate, toDate);
