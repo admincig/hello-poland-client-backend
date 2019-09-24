@@ -15,7 +15,7 @@ public class SightPagedCollectionConfig extends PagedCollectionConfig<Sight> {
   public void setSearchQuery(String searchQuery) {
     if (searchQuery != null) {
       addCondition("searchQuery",
-          searchQuery, "tsearch(e.searchIndex, :searchQuery) = true");
+          searchQuery, "tsearch('polish_hunspell', e.searchIndex, :searchQuery) = true");
       /*
         "%" + searchQuery.toLowerCase() + "%",
         "((unaccent(lower(e.name)) like unaccent(:searchQuery))"
