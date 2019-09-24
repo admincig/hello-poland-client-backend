@@ -7,6 +7,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -17,6 +18,7 @@ import pl.hellopoland.dto.UserAuthDTO;
 import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.rest.RestService;
 import pl.hellopoland.rest.dto.PagedCollection;
+import pl.hellopoland.service.api.partner.PartnerServicePartnerAPI;
 import pl.hellopoland.service.api.partner.UserServicePartnerAPI;
 
 @Path("/partner")
@@ -26,37 +28,39 @@ import pl.hellopoland.service.api.partner.UserServicePartnerAPI;
 public class PartnerRestService {
 
   @Inject
-  private UserServicePartnerAPI service;
+  private UserServicePartnerAPI userService;
+  @Inject
+  private PartnerServicePartnerAPI service;
 
   @POST
   @Path("/ushers")
   public Response createUsher(UserDTO usher) {
-    return Response.ok(service.createUsher(usher)).build();
+    return Response.ok(userService.createUsher(usher)).build();
   }
 
   @GET
   @Path("/ushers")
   public PagedCollection getUshers() {
-    return service.getUshers();
+    return userService.getUshers();
   }
 
   @GET
   @Path("/ushers/{id}")
   public Response getUsher(@PathParam("id") long usherId) {
-    return Response.ok(service.getUsher(usherId)).build();
+    return Response.ok(userService.getUsher(usherId)).build();
   }
 
   @PATCH
   @Path("/ushers/{id}")
   public Response updateUsher(@PathParam("id") long usherId, UserDTO usher) {
     usher.id = usherId;
-    return Response.ok(service.updateUsher(usher)).build();
+    return Response.ok(userService.updateUsher(usher)).build();
   }
 
   @PATCH
   @Path("/ushers/{id}/password")
   public Response changePasswordForUsher(@PathParam("id") long usherId, UserAuthDTO usherDTO) {
-    service.changePasswordForUsher(usherId, usherDTO);
+    userService.changePasswordForUsher(usherId, usherDTO);
     return Response.ok().build();
   }
 
@@ -64,5 +68,12 @@ public class PartnerRestService {
   @Path("/card")
   public MarketPartnerDTO getCard(@HeaderParam("Content-Language") String langString) {
     return service.getCard(RestService.parseLang(langString));
+  }
+
+  @PUT
+  @Path("/mainImage")
+  @Consumes({"image/jpeg", "image/jpg"})
+  public MarketPartnerDTO uploadIcon(@PathParam("id") Long id, byte[] icon) {
+    return service.uploadMainImage(id, icon);
   }
 }

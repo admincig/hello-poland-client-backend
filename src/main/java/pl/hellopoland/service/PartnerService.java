@@ -1,10 +1,12 @@
 package pl.hellopoland.service;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import pl.hellopoland.bo.Category;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.SightEventCategory;
@@ -15,6 +17,9 @@ import pl.hellopoland.util.PagedEntityCollection;
 @LocalBean
 @Stateless
 public class PartnerService extends ServiceSuperclass {
+
+  @Inject
+  ImageService iService;
 
   public Partner findByUserEmail(String email) {
     return em.createQuery(
@@ -52,5 +57,11 @@ public class PartnerService extends ServiceSuperclass {
             .collect(Collectors.toList());
     partner.setCities(cities);
     return partner;
+  }
+
+  public Partner uploadMainImage(Partner bo, byte[] icon) {
+    bo.setMainImage(
+        iService.validateAndStoreImageCollector(new ByteArrayInputStream(icon), "jpeg", null));
+    return bo;
   }
 }
