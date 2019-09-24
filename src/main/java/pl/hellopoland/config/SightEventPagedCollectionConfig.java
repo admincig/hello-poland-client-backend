@@ -2,6 +2,7 @@ package pl.hellopoland.config;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 
@@ -94,6 +95,10 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
 
   public void setSight(Sight sight) {
     addCondition("sight", sight, "e.sight=:sight");
+  }
+
+  public void setExcludedIds(Set<Long> ids) {
+    addCondition("ids", ids, "e.id not in (:ids)");
   }
 
 }
