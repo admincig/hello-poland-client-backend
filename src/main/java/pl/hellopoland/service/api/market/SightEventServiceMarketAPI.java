@@ -107,7 +107,7 @@ public class SightEventServiceMarketAPI {
 
   @PermitAll
   public PagedCollection getRecommended(Integer count, LanguageVersion languageVersion) {
-    SightEventPagedCollectionConfig config = prepareConfigForRandom(6);
+    SightEventPagedCollectionConfig config = prepareConfigForRandom(count);
     PagedEntityCollection<SightEvent> pagedCollection = service.getList(config, languageVersion);
     return new PagedCollection(
         pagedCollection.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList()),
