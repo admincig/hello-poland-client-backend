@@ -2,6 +2,7 @@ package pl.hellopoland.service.api.market;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
@@ -88,6 +89,7 @@ public class SightServiceMarketAPI {
   private List<SightDTO> getSimilar(Sight bo, LanguageVersion language) {
     SightPagedCollectionConfig config = prepareConfigForRandom(6);
     config.setPartner(bo.getPartner().getId());
+    config.setExcludedIds(Set.of(bo.getId()));
     return service.getList(config, language).items.stream().map(DtoMapper::getDTO)
         .collect(Collectors.toList());
   }

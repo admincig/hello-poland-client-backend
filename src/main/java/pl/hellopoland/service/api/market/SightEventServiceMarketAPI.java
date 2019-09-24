@@ -5,6 +5,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
@@ -117,6 +118,7 @@ public class SightEventServiceMarketAPI {
   private List<SightEventDTO> getSimilar(SightEvent bo, LanguageVersion language) {
     SightEventPagedCollectionConfig config = prepareConfigForRandom(6);
     config.setSight(bo.getSight());
+    config.setExcludedIds(Set.of(bo.getId()));
     return service.getList(config, language).items.stream().map(DtoMapper::getDTO)
         .collect(Collectors.toList());
   }

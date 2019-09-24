@@ -1,5 +1,6 @@
 package pl.hellopoland.config;
 
+import java.util.Set;
 import pl.hellopoland.bo.Sight;
 
 public class SightPagedCollectionConfig extends PagedCollectionConfig<Sight> {
@@ -59,6 +60,10 @@ public class SightPagedCollectionConfig extends PagedCollectionConfig<Sight> {
     if (city != null) {
       addCondition("city", city.toLowerCase(), "lower(e.location.city)=:city");
     }
+  }
+
+  public void setExcludedIds(Set<Long> ids) {
+    addCondition("ids", ids, "e.id not in (:ids)");
   }
 
 }
