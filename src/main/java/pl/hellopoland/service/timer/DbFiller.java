@@ -13,6 +13,7 @@ import javax.annotation.PostConstruct;
 import javax.ejb.DependsOn;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.Location;
@@ -26,7 +27,6 @@ import pl.hellopoland.bo.UserRole.Role;
 import pl.hellopoland.dto.CategoryDTO;
 import pl.hellopoland.dto.FrequencyDataDTO;
 import pl.hellopoland.dto.FrequencyTypeDTO;
-import pl.hellopoland.dto.MarketPartnerDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
@@ -45,6 +45,7 @@ import pl.hellopoland.util.DtoMapper;
 @Startup
 @Singleton
 @DependsOn({"Configuration"})
+@ApplicationScoped
 public class DbFiller extends ServiceSuperclass {
 
   @Inject
@@ -127,7 +128,7 @@ public class DbFiller extends ServiceSuperclass {
     logger.log(Logger.Level.INFO, "Envi: " + System.getenv("ProgramFiles(x86)"));
     createPortals();
     createUsers();
-    createImageCollectors();
+    // createImageCollectors();
     createLocations();
     createSights();
     createSightsEnglishVersion(hpWroc, hpKielce, geoparkKielce, zeromKielce, zooWro, stadGd,
@@ -189,10 +190,6 @@ public class DbFiller extends ServiceSuperclass {
     partner.setAffiliateCode(affiliateCode);
     partner.setDescription("pl desc");
     User user = createUser(null, email, password, null, partner, roles);
-    MarketPartnerDTO dto = new MarketPartnerDTO();
-    dto.description = "pl desc";
-    translationService.createEntityLanguageVersion(em.find(Partner.class, partner.getId()), dto,
-        LanguageVersion.PL_PL);
     return user;
   }
 

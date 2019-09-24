@@ -67,7 +67,7 @@ public class UserServicePartnerAPI {
   public MarketPartnerDTO getCard(LanguageVersion parseLang) {
     Long loggedPartnerId = service.getLoggedPartner().getId();
     Partner partner = partnerService.getPartnerWithCategoriesAndCities(loggedPartnerId);
-    transService.translateEntity(partner, parseLang, true);
+    // transService.translateEntity(partner, parseLang, false);
     return DtoMapper.getFullMarketPartnerDTO(partner);
   }
 
