@@ -461,11 +461,13 @@ public class DtoMapper {
 
   public static MarketPartnerDTO getFullMarketPartnerDTO(Partner bo) {
     var dto = getMarketDTO(bo);
-    dto.correspondenceAddress = getDTO(bo.getCorrespondenceAddress());
+    dto.location = getDTO(bo.getCorrespondenceAddress());
     dto.description = bo.getDescription();
     dto.categories =
         bo.getCategories().stream().map(DtoMapper::getDTO).collect(Collectors.toList());
     dto.cities = bo.getCities();
+    dto.email = bo.getEmail();
+    dto.phone = bo.getPhone();
     return dto;
   }
 
