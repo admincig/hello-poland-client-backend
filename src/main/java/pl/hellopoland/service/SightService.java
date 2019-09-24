@@ -100,10 +100,11 @@ public class SightService extends ServiceSuperclass {
         sightEventBos.forEach(se -> se.setAgreements(agreementBos));
       }
     }
-    return createLanguageVesrion(DtoMapper.getDTO(bo), bo.getDefaultLanguage());
+    bo.recreateSearchIndex();
+    return createLanguageVersion(DtoMapper.getDTO(bo), bo.getDefaultLanguage());
   }
 
-  public Sight createLanguageVesrion(SightDTO dto, LanguageVersion language) {
+  public Sight createLanguageVersion(SightDTO dto, LanguageVersion language) {
     return translationService.createEntityLanguageVersion(getForLoggedPartner(dto.id), dto,
         language);
   }
@@ -143,7 +144,7 @@ public class SightService extends ServiceSuperclass {
     if (!translationService.isTranslated(bo, language)) {
       // throw new ConflictingException(
       // "Translation for language " + language.getLanuage() + " doesn't exists");
-      createLanguageVesrion(dto, language);
+      createLanguageVersion(dto, language);
     }
     if (bo.getDefaultLanguage().equals(language)) {
       DtoMapper.copy(dto, bo);
@@ -171,6 +172,7 @@ public class SightService extends ServiceSuperclass {
         }
       }
     }
+    bo.recreateSearchIndex();
     return translationService.updateEntityLanguageVersion(getForLoggedPartner(dto.id), dto,
         language);
   }

@@ -96,6 +96,10 @@ public class SearchServiceMarketAPI {
     if (fromDate != null && toDate != null && toDate.before(fromDate)) {
       throw new ConflictingException("toDate[" + toDate + "] is before fromDate[" + fromDate + "]");
     }
+    if (minPrice != null && maxPrice != null && minPrice > maxPrice) {
+      throw new ConflictingException(
+          "minPrice[" + minPrice + "] is lesser then maxPrice[" + maxPrice + "]");
+    }
     seConfig.onlyAvailable();
     seConfig.onlyActive();
     seConfig.onlyPublished();
@@ -107,7 +111,7 @@ public class SearchServiceMarketAPI {
     PagedEntityCollection<SightEvent> sesPagedList = seService.getList(seConfig, languageVersion);
     List<SightEvent> ses =
         sesPagedList.items.stream().filter(SightEvent::isAccessible).collect(toList());
-    if (fromDate != null || toDate != null) {
+    if (!ses.isEmpty() && (fromDate != null || toDate != null)) {
       HelloTicket hptClient = new HelloTicket(seService.getPortal("Hello Ticket Cloud").getUrl());
       ses = hptClient.getSightEventsInDateRange(new ArrayList<SightEvent>(ses),
           fromDate, toDate);

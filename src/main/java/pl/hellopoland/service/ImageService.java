@@ -103,7 +103,7 @@ public class ImageService extends ServiceSuperclass {
       ImageIO.write(buffImage, extension, file);
       logger.log(Logger.Level.DEBUG, "Saved file " + extension + " of size" + size);
     } catch (Exception ioe) {
-      throw new RuntimeException("File NOT stored", ioe);
+      throw new RuntimeException("File NOT stored: " + ioe.getMessage(), ioe);
     }
     ImageVariant image = new ImageVariant();
     image.setPath(path);

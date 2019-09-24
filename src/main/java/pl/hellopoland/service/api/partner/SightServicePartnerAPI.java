@@ -26,7 +26,7 @@ public class SightServicePartnerAPI {
 
   @RolesAllowed("partner")
   public SightDTO createLanguageVesrion(SightDTO dto, LanguageVersion language) {
-    return DtoMapper.getFullDTO(service.createLanguageVesrion(dto, language));
+    return DtoMapper.getFullDTO(service.createLanguageVersion(dto, language));
   }
 
   @RolesAllowed("partner")

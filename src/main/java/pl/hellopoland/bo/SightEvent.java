@@ -400,10 +400,10 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
   }
 
   public void recreateSearchIndex() {
-    this.searchIndex = sight.getSearchIndex() + ", " +
-        Stream.of(email, name, phone)
-            .filter(Objects::nonNull)
-            .flatMap(s -> Stream.of(s.split(" ")))
-            .collect(Collectors.joining(", "));
+    this.searchIndex = Stream.of(email, name, phone)
+        .filter(Objects::nonNull)
+        .flatMap(s -> Stream.of(s.split(" ")))
+        .distinct()
+        .collect(Collectors.joining(","));
   }
 }
