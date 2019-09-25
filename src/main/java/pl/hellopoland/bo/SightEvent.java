@@ -407,7 +407,7 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
                 Stream.of(email, phone, location.getStreet(), partner.getName()))
             .filter(Objects::nonNull)
             .flatMap(s -> Stream.of(s.split(" ")))
-            .map(w -> w.replaceAll("[^\\w\\d]", ""))
+            .map(w -> w.replaceAll("[^a-zA-Zą-żĄ-Ż0-9]", ""))
             .distinct()
             .filter(w -> !w.isBlank())
             .collect(Collectors.joining(","));
