@@ -303,7 +303,9 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
             words.stream()).flatMap(s -> s)
             .filter(Objects::nonNull)
             .flatMap(s -> Stream.of(s.split(" ")))
+            .map(w -> w.replaceAll("\\s", ""))
             .distinct()
+            .filter(w -> !w.isBlank())
             .collect(Collectors.joining(","));
   }
 
