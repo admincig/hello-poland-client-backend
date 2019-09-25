@@ -14,6 +14,8 @@ import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.AnalyticsService;
 import pl.hellopoland.service.HellopolandService;
 import pl.hellopoland.service.OrderService;
+import pl.hellopoland.service.SightEventService;
+import pl.hellopoland.service.SightService;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.PagedEntityCollection;
 
@@ -25,6 +27,10 @@ public class ServiceHelpdeskAPI {
   private AnalyticsService analyticsService;
   @Inject
   private OrderService orderService;
+  @Inject
+  private SightService sightService;
+  @Inject
+  private SightEventService sightEventService;
 
   @RolesAllowed({"admin", "salesman"})
   public PartnerDTO addPartner(PartnerDTO partner) {
@@ -46,6 +52,12 @@ public class ServiceHelpdeskAPI {
   @RolesAllowed("admin")
   public EmailSendingReportDTO sendTicketCopy(String P24Statement) {
     return orderService.sendTicketCopy(P24Statement);
+  }
+
+  @RolesAllowed("admin")
+  public void rebuildSearchIndices() {
+    sightEventService.rebuildSearchIndices();
+    sightService.rebuildSearchIndices();
   }
 
 }

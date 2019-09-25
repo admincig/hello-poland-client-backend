@@ -205,7 +205,7 @@ public class TranslationService extends ServiceSuperclass {
         }).forEach(collection -> collection.size());
   }
 
-  private List<Translation> getTranslations(Translated bo, LanguageVersion language) {
+  public List<Translation> getTranslations(Translated bo, LanguageVersion language) {
     return em
         .createQuery("from Translation t where t.key like :key and language = :language",
             Translation.class)
