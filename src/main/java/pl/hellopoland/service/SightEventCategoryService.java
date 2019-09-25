@@ -9,7 +9,7 @@ import pl.hellopoland.bo.SightEventCategory;
 public class SightEventCategoryService extends ServiceSuperclass {
 
   public SightEvent addCategory(SightEvent se, Category cat) {
-    if (se.getCategories().stream().filter(cat::equals)
+    if (se.getCategories().stream().filter(c -> cat.getId().equals(c.getCategory().getId()))
         .findFirst().isEmpty()) {
       SightEventCategory sec = new SightEventCategory();
       sec.setCategory(cat);
@@ -23,7 +23,7 @@ public class SightEventCategoryService extends ServiceSuperclass {
   }
 
   public SightEvent removeCategory(SightEvent se, Category cat) {
-    se.getCategories().stream().filter(cat::equals)
+    se.getCategories().stream().filter(c -> cat.getId().equals(c.getCategory().getId()))
         .findFirst().ifPresent(sec -> {
           se.getCategories().remove(sec);
           em.remove(sec);
