@@ -12,6 +12,7 @@ import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.SightEventCategory;
 import pl.hellopoland.config.PartnerPagedCollectionConfig;
 import pl.hellopoland.dto.MarketPartnerDTO;
+import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.util.BeanUtils;
 import pl.hellopoland.util.DtoMapper;
@@ -90,8 +91,29 @@ public class PartnerService extends ServiceSuperclass {
     return translationService.updateEntityLanguageVersion(bo, dto, lang);
   }
 
+  public Partner update(Partner bo, PartnerDTO dto, LanguageVersion lang) {
+    if (!translationService.isTranslated(bo, lang)) {
+      translationService.createEntityLanguageVersion(bo, dto, lang);
+    }
+    if (bo.getDefaultLanguage().equals(lang)) {
+      DtoMapper.copy(dto, bo);
+      em.flush();
+    }
+    return translationService.updateEntityLanguageVersion(bo, dto, lang);
+  }
+
   public Partner createLanguageVersion(MarketPartnerDTO dto, LanguageVersion language) {
-    Partner bo = em.find(Partner.class, dto.id);
+    Partner bo = get(dto.id);
     return translationService.createEntityLanguageVersion(bo, dto, language);
   }
+
+  public Partner createLanguageVersion(PartnerDTO dto, LanguageVersion language) {
+    Partner bo = get(dto.id);
+    return translationService.createEntityLanguageVersion(bo, dto, language);
+  }
+
+  public Partner get(Long id) {
+    return em.find(Partner.class, id);
+  }
+
 }

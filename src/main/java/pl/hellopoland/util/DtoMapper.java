@@ -45,6 +45,7 @@ import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.soap.p24.enums.BusinessType;
 
 public class DtoMapper {
 
@@ -449,6 +450,9 @@ public class DtoMapper {
     dto.regon = bo.getRegon();
     dto.servicesDescription = bo.getServicesDescription();
     dto.shopUrl = bo.getShopUrl();
+    dto.description = bo.getDescription();
+    dto.language = bo.getCurrentLanguage().getLanuage();
+    dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
     return dto;
   }
 
@@ -486,6 +490,8 @@ public class DtoMapper {
     dto.representatives =
         Optional.ofNullable(bo.getRepresentatives()).orElse(Collections.emptyList()).stream()
             .map(DtoMapper::getDTO).collect(Collectors.toList());
+    dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
+        .map(lang -> lang.getLanuage()).collect(Collectors.toSet());
     return dto;
   }
 
@@ -527,6 +533,29 @@ public class DtoMapper {
 
   public static void copy(MarketPartnerDTO dto, Partner bo) {
     bo.setDescription(dto.description);
+  }
+
+  public static void copy(PartnerDTO dto, Partner bo) {
+    // bo.setAddress(address);
+    bo.setAffiliateCode(dto.affiliateCode);
+    bo.setBankAccount(dto.bankAccount);
+    bo.setBusinessType(BusinessType.getBusinessType(dto.businessType));
+    bo.setCommission(dto.commission);
+    // bo.setContactPerson(contactPerson);
+    // bo.setCorrespondenceAddress(correspondenceAddress);
+    bo.setDescription(dto.description);
+    bo.setEmail(dto.email);
+    bo.setInvoiceEmail(dto.invoiceEmail);
+    bo.setKrs(dto.krs);
+    bo.setName(dto.name);
+    bo.setP24Id(dto.p24MerchantId);
+    bo.setPhone(dto.phone);
+    bo.setRegon(dto.regon);
+    bo.setServicesDescription(dto.servicesDescription);
+    bo.setShopUrl(dto.shopUrl);
+    bo.setSocialNumber(Long.valueOf(dto.socialNumber));
+    bo.setTaxNumber(dto.taxNumber);
+    // bo.setTechnicalContact(technicalContact);
   }
 
 }
