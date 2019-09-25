@@ -8,6 +8,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.ejb.DependsOn;
@@ -340,7 +341,7 @@ public class DbFiller extends ServiceSuperclass {
     bo.setDefaultLanguage(LanguageVersion.PL_PL);
     bo.setAvailableLanguageVersions(new HashSet<>(Arrays.asList(LanguageVersion.PL_PL)));
     em.persist(bo);
-    bo.recreateSearchIndex();
+    bo.recreateSearchIndex(Set.of(description, name));
     var dto = DtoMapper.getDTO(bo);
     dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
         .map(lang -> lang.getLanuage()).collect(Collectors.toSet());
