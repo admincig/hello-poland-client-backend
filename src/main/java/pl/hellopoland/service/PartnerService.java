@@ -11,6 +11,10 @@ import pl.hellopoland.bo.Category;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.SightEventCategory;
 import pl.hellopoland.config.PartnerPagedCollectionConfig;
+import pl.hellopoland.dto.MarketPartnerDTO;
+import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.util.BeanUtils;
+import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.Located;
 import pl.hellopoland.util.PagedEntityCollection;
 
@@ -20,6 +24,8 @@ public class PartnerService extends ServiceSuperclass {
 
   @Inject
   ImageService iService;
+  @Inject
+  TranslationService translationService;
 
   public Partner findByUserEmail(String email) {
     return em.createQuery(
@@ -63,5 +69,29 @@ public class PartnerService extends ServiceSuperclass {
     bo.setMainImage(
         iService.validateAndStoreImageCollector(new ByteArrayInputStream(icon), "jpeg", null));
     return bo;
+  }
+
+  public Partner changeDefaultLanguage(Partner bo, LanguageVersion lang) {
+    Partner translation = translationService.translateEntity(bo, lang, true);
+    bo.setDefaultLanguage(lang);
+    bo = BeanUtils.copyNotNullProperties(translation, bo);
+    em.merge(bo);
+    return bo;
+  }
+
+  public Partner update(Partner bo, MarketPartnerDTO dto, LanguageVersion lang) {
+    if (!translationService.isTranslated(bo, lang)) {
+      translationService.createEntityLanguageVersion(bo, dto, lang);
+    }
+    if (bo.getDefaultLanguage().equals(lang)) {
+      DtoMapper.copy(dto, bo);
+      em.flush();
+    }
+    return translationService.updateEntityLanguageVersion(bo, dto, lang);
+  }
+
+  public Partner createLanguageVersion(MarketPartnerDTO dto, LanguageVersion language) {
+    Partner bo = em.find(Partner.class, dto.id);
+    return translationService.createEntityLanguageVersion(bo, dto, language);
   }
 }

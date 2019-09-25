@@ -3,6 +3,7 @@ package pl.hellopoland.rest.partner;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PATCH;
@@ -16,6 +17,7 @@ import javax.ws.rs.core.Response;
 import pl.hellopoland.dto.MarketPartnerDTO;
 import pl.hellopoland.dto.UserAuthDTO;
 import pl.hellopoland.dto.UserDTO;
+import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.rest.RestService;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.api.partner.PartnerServicePartnerAPI;
@@ -73,7 +75,40 @@ public class PartnerRestService {
   @PUT
   @Path("/mainImage")
   @Consumes({"image/jpeg", "image/jpg"})
-  public MarketPartnerDTO uploadIcon(@PathParam("id") Long id, byte[] icon) {
-    return service.uploadMainImage(id, icon);
+  public MarketPartnerDTO uploadIcon(byte[] icon) {
+    return service.uploadMainImage(icon);
   }
+
+  @DELETE
+  @Path("/languageVersion/{language}")
+  public Response deleteLanguageVersion(@PathParam("language") String language) {
+    LanguageVersion lang = RestService.parseLang(language);
+    service.deleteLanguageVersion(lang);
+    return Response.ok().build();
+  }
+
+  @PATCH
+  @Path("/defaultLanguage")
+  public MarketPartnerDTO changeDefaultLanguage(
+      @HeaderParam("Content-Language") String contentLanguage) {
+    LanguageVersion lang = RestService.parseLang(contentLanguage);
+    return service.changeDefaultLanguage(lang);
+  }
+
+  @PUT
+  @Path("/languageVersion/{language}")
+  public MarketPartnerDTO update(@PathParam("language") String language,
+      MarketPartnerDTO dto) {
+    LanguageVersion lang = RestService.parseLang(language);
+    return service.update(dto, lang);
+  }
+
+  @POST
+  public MarketPartnerDTO createLanguageVersion(
+      @HeaderParam("Content-Language") String contentLanguage,
+      MarketPartnerDTO dto) {
+    LanguageVersion lang = RestService.parseLang(contentLanguage);
+    return service.createLanguageVersion(dto, lang);
+  }
+
 }

@@ -454,6 +454,7 @@ public class DtoMapper {
 
   public static MarketPartnerDTO getMarketDTO(Partner bo) {
     var dto = new MarketPartnerDTO();
+    dto.id = bo.getId();
     dto.name = bo.getName();
     dto.mainImage = getDTO(bo.getMainImage());
     return dto;
@@ -522,6 +523,10 @@ public class DtoMapper {
     dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
         .map(lv -> lv.getLanuage()).collect(Collectors.toSet());
     return dto;
+  }
+
+  public static void copy(MarketPartnerDTO dto, Partner bo) {
+    bo.setDescription(dto.description);
   }
 
 }
