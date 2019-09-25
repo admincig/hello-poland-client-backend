@@ -59,8 +59,9 @@ public class PartnerService extends ServiceSuperclass {
         Stream.<Located>concat(
             partner.getSight().stream(),
             partner.getSightEvents().stream())
-            .map(se -> se.getLocation().getCity())
+            .map(se -> se.getLocation().getCity().strip())
             .distinct()
+            .filter(city -> !city.isBlank())
             .collect(Collectors.toList());
     partner.setCities(cities);
     return partner;
