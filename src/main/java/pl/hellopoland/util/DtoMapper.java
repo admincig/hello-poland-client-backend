@@ -463,8 +463,10 @@ public class DtoMapper {
     var dto = getMarketDTO(bo);
     dto.location = getDTO(bo.getCorrespondenceAddress());
     dto.description = bo.getDescription();
-    dto.categories =
-        bo.getCategories().stream().map(DtoMapper::getDTO).collect(Collectors.toList());
+    if (bo.getCategories() != null) {
+      dto.categories =
+          bo.getCategories().stream().map(DtoMapper::getDTO).collect(Collectors.toList());
+    }
     dto.cities = bo.getCities();
     dto.email = bo.getEmail();
     dto.phone = bo.getPhone();

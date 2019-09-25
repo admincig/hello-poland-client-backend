@@ -8,11 +8,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
 import org.apache.commons.lang3.StringUtils;
+import pl.hellopoland.annotation.Multilingual;
 import pl.hellopoland.bo.Translation;
 import pl.hellopoland.dto.DTOSuperclass;
 import pl.hellopoland.enums.LanguageVersion;
@@ -23,15 +25,6 @@ import pl.hellopoland.util.Translated;
 @LocalBean
 @Stateless
 public class TranslationService extends ServiceSuperclass {
-
-  /**
-   * The list of the names of the fields excluded from translation.
-   */
-  private static final List<String> EXCLUDED_FIELDS_NAMES =
-      List.of("Sight.email", "Sight.phone", "Sight.defaultLanguage", "SightEvent.email",
-          "SightEvent.phone", "SightEvent.defaultLanguage", "Agreement.linkUrl",
-          "Category.defaultLanguage", "Category.iconUrl",
-          "Partner.defaultLanguage");
 
   /**
    * Checks whether the entity object implements interface Translated.
@@ -66,25 +59,24 @@ public class TranslationService extends ServiceSuperclass {
       removeTranslations(bo, language);
     }
 
-    Predicate<? super Field> predicate = f -> (f.getType().equals(String.class)
-        && !EXCLUDED_FIELDS_NAMES.contains(bo.getClass().getSimpleName() + "." + f.getName()));
-
-    List<Field> dtoStringFields = Arrays.asList(dto.getClass().getFields()).stream()
-        .filter(predicate).collect(Collectors.toList());
+    List<Field> dtoStringFields = Stream.of(dto.getClass().getFields())
+        .filter(f -> f.getType().equals(String.class))
+        .collect(Collectors.toList());
 
     for (Field field : dtoStringFields) {
-      var translation = new Translation();
-      translation.setLanguage(language);
-      translation.generateKey(bo, field.getName());
       try {
-        bo.getClass().getDeclaredField(field.getName());
-        translation.setValue((String) field.get(dto));
+        if (bo.getClass().getDeclaredField(field.getName())
+            .isAnnotationPresent(Multilingual.class)) {
+          var translation = new Translation();
+          translation.setValue((String) field.get(dto));
+          translation.setLanguage(language);
+          translation.generateKey(bo, field.getName());
+          em.persist(translation);
+          em.flush();
+        }
       } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException e) {
+        logger.log(Level.DEBUG, "Failed to translate field " + field.getName(), e);
         continue;
-      }
-      try {
-        em.persist(translation);
-        em.flush();
       } catch (Exception e) {
         throw new ConflictingException(
             "Can not create a new language version because it already exists");
@@ -119,7 +111,7 @@ public class TranslationService extends ServiceSuperclass {
       fetchColections(bo);
     }
     var translations = getTranslations(bo, language);
-    em.detach(bo);
+    em.clear();
     for (Translation translation : translations) {
       if (StringUtils.isNotBlank(translation.getValue())) {
         var key = translation.getKey();

@@ -27,6 +27,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
+import pl.hellopoland.annotation.Multilingual;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.util.Imaged;
 import pl.hellopoland.util.Located;
@@ -40,6 +41,7 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
   private static final long serialVersionUID = -34796485244638912L;
 
   @NotNull
+  @Multilingual
   private String name;
   private Date date;
   private Boolean generalAdmission;
@@ -55,8 +57,10 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
   private Collection<TicketDefinition> tickets;
   @ManyToMany
   private Set<Agreement> agreements;
+  @Multilingual
   private String lead;
   @Column(columnDefinition = "varchar(2500)")
+  @Multilingual
   private String description;
   private Integer duration;
   @Transient

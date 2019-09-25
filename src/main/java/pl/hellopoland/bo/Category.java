@@ -9,6 +9,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+import pl.hellopoland.annotation.Multilingual;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.util.Translated;
 
@@ -16,6 +17,7 @@ import pl.hellopoland.util.Translated;
 public class Category extends ModelSuperclass implements Translated {
   private static final long serialVersionUID = -3526668470989917639L;
 
+  @Multilingual
   private String label;
   @NotNull
   @Column(length = 5, nullable = false)

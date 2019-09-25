@@ -17,6 +17,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+import pl.hellopoland.annotation.Multilingual;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.soap.p24.enums.BusinessType;
 import pl.hellopoland.soap.p24.enums.Trade;
@@ -67,18 +68,18 @@ public class Partner extends ModelSuperclass implements Translated {
   @Enumerated(EnumType.STRING)
   private Trade trade;
 
-  @ManyToMany(cascade = CascadeType.PERSIST)
+  @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.DETACH})
   private List<PartnerRepresentative> representatives;
 
-  @ManyToOne(cascade = CascadeType.PERSIST)
+  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH})
   private Address address;
 
-  @ManyToOne(cascade = CascadeType.PERSIST)
+  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH})
   private Address correspondenceAddress;
 
   private String bankAccount;
 
-  @ManyToOne(cascade = CascadeType.PERSIST)
+  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH})
   private ContactPerson contactPerson;
 
   private String invoiceEmail;
@@ -97,6 +98,7 @@ public class Partner extends ModelSuperclass implements Translated {
 
   private String shopUrl;
 
+  @Multilingual
   private String description;
 
   private LocalDateTime created;

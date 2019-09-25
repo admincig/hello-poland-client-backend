@@ -25,6 +25,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+import pl.hellopoland.annotation.Multilingual;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.util.Imaged;
 import pl.hellopoland.util.Located;
@@ -35,10 +36,12 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
 
   private static final long serialVersionUID = -6821312294116712881L;
 
-  @Column
+  @Multilingual
   private String name;
+  @Multilingual
   private String lead;
   @Column(columnDefinition = "varchar(2500)")
+  @Multilingual
   private String description;
   private Float score;
   @ManyToOne
