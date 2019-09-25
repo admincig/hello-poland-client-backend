@@ -13,6 +13,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import io.swagger.v3.oas.annotations.Operation;
 import pl.hellopoland.annotation.DateFormat;
 import pl.hellopoland.service.api.helpdesk.ServiceHelpdeskAPI;
 
@@ -40,6 +41,14 @@ public class HelpdeskRestService {
   @Path("/bookings/{p24Statement}/sendTicketCopy")
   public Response sendTicketCopy(@PathParam("p24Statement") String p24Statement) {
     service.sendTicketCopy(p24Statement);
+    return Response.ok().build();
+  }
+
+  @GET
+  @Path("/rebuildSearchIndices")
+  @Operation(hidden = true)
+  public Response rebuildSearchIndices() {
+    service.rebuildSearchIndices();
     return Response.ok().build();
   }
 

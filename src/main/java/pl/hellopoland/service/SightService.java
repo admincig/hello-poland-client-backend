@@ -16,6 +16,7 @@ import pl.hellopoland.bo.OpeningHours;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.bo.Translation;
 import pl.hellopoland.config.SightPagedCollectionConfig;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.dto.SightEventDTO;
@@ -100,8 +101,9 @@ public class SightService extends ServiceSuperclass {
         sightEventBos.forEach(se -> se.setAgreements(agreementBos));
       }
     }
-    bo.recreateSearchIndex();
-    return createLanguageVersion(DtoMapper.getDTO(bo), bo.getDefaultLanguage());
+    final var bo2 = createLanguageVersion(DtoMapper.getDTO(bo), bo.getDefaultLanguage());
+    recreateSearchIndex(bo2);
+    return bo2;
   }
 
   public Sight createLanguageVersion(SightDTO dto, LanguageVersion language) {
@@ -172,9 +174,10 @@ public class SightService extends ServiceSuperclass {
         }
       }
     }
-    bo.recreateSearchIndex();
-    return translationService.updateEntityLanguageVersion(getForLoggedPartner(dto.id), dto,
+    final var bo2 = translationService.updateEntityLanguageVersion(getForLoggedPartner(dto.id), dto,
         language);
+    recreateSearchIndex(bo2);
+    return bo2;
   }
 
   private boolean hasActiveSightEvents(List<SightEvent> sightEvents) {
@@ -267,4 +270,19 @@ public class SightService extends ServiceSuperclass {
     return bo;
   }
 
+  public void rebuildSearchIndices() {
+    SightPagedCollectionConfig config = new SightPagedCollectionConfig();
+    List<Sight> sightEvents = getQuery(config).getResultList();
+    sightEvents.forEach(this::recreateSearchIndex);
+  }
+
+  public void recreateSearchIndex(Sight s) {
+    {
+      Set<String> words = s.getAvailableLanguageVersions().stream()
+          .flatMap(
+              lv -> translationService.getTranslations(s, lv).stream().map(Translation::getValue))
+          .collect(Collectors.toSet());
+      s.recreateSearchIndex(words);
+    }
+  }
 }

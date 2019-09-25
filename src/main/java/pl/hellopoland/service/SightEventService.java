@@ -32,6 +32,7 @@ import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.SightEventCategory;
 import pl.hellopoland.bo.TicketDefinition;
+import pl.hellopoland.bo.Translation;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.AvailableTicketNumberAssociationDTO;
 import pl.hellopoland.dto.PushDTO;
@@ -184,10 +185,10 @@ public class SightEventService extends ServiceSuperclass {
       });
       bo.setOpeningHours(oHoursList);
     }
-    bo.recreateSearchIndex();
+    recreateSearchIndex(bo);
     if (sight != null) {
       em.refresh(sight);
-      sight.recreateSearchIndex();
+      sightService.recreateSearchIndex(sight);
     }
     logger.log(Logger.Level.INFO, "Saved new sight event: " + bo.getName());
     return createLanguageVersion(DtoMapper.getDTO(bo), partner, bo.getDefaultLanguage());
@@ -246,10 +247,10 @@ public class SightEventService extends ServiceSuperclass {
       }
       bo.setOpeningHours(null);
       bo.setOpeningHours(oHoursList);
-      bo.recreateSearchIndex();
+      recreateSearchIndex(bo);
       if (bo.getSight() != null) {
         em.refresh(bo.getSight());
-        bo.getSight().recreateSearchIndex();
+        sightService.recreateSearchIndex(bo.getSight());
       }
       em.flush();
     }
@@ -593,8 +594,8 @@ public class SightEventService extends ServiceSuperclass {
       HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
       helloTicket.updateSightEvent(DtoMapper.getDTO(bo), partner.getHptToken());
     }
-    bo.recreateSearchIndex();
-    bo.getSight().recreateSearchIndex();
+    recreateSearchIndex(bo);
+    sightService.recreateSearchIndex(bo.getSight());
     return bo;
   }
 
@@ -624,6 +625,22 @@ public class SightEventService extends ServiceSuperclass {
         "select distinct location.city from SightEvent where active = true "
             + "and published = true and blocked = false and available = true",
         String.class).getResultList();
+  }
+
+  public void rebuildSearchIndices() {
+    SightEventPagedCollectionConfig config = new SightEventPagedCollectionConfig();
+    List<SightEvent> sightEvents = getQuery(config).getResultList();
+    sightEvents.forEach(this::recreateSearchIndex);
+  }
+
+  private void recreateSearchIndex(SightEvent se) {
+    {
+      Set<String> words = se.getAvailableLanguageVersions().stream()
+          .flatMap(
+              lv -> translationService.getTranslations(se, lv).stream().map(Translation::getValue))
+          .collect(Collectors.toSet());
+      se.recreateSearchIndex(words);
+    }
   }
 
 }

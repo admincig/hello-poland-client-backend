@@ -74,6 +74,7 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
   private Set<LanguageVersion> availableLanguageVersions;
   @Transient
   private LanguageVersion currentLanguage;
+  @Column(columnDefinition = "varchar")
   private String searchIndex;
   @Transient
   private Set<Category> categories;
@@ -293,15 +294,18 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
     this.searchIndex = searchIndex;
   }
 
-  public void recreateSearchIndex() {
+  public void recreateSearchIndex(Set<String> words) {
     this.searchIndex =
-        Stream.concat(
+        Stream.of(
             Optional.ofNullable(sightEvents).stream().flatMap(se -> se.stream())
                 .flatMap(se -> Stream.of(se.getSearchIndex().split(","))),
-            Stream.of(email, name, phone))
+            Stream.of(email, name, phone),
+            words.stream()).flatMap(s -> s)
             .filter(Objects::nonNull)
             .flatMap(s -> Stream.of(s.split(" ")))
+            .map(w -> w.replaceAll("[^a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]", ""))
             .distinct()
+            .filter(w -> !w.isBlank())
             .collect(Collectors.joining(","));
   }
 

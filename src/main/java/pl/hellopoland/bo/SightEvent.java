@@ -95,6 +95,7 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
   private Integer promotion;
   @OneToMany(mappedBy = "sightEvent")
   private Set<SightEventCategory> categories;
+  @Column(columnDefinition = "varchar")
   private String searchIndex;
 
   public String getName() {
@@ -399,11 +400,16 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
     this.searchIndex = searchIndex;
   }
 
-  public void recreateSearchIndex() {
-    this.searchIndex = Stream.of(email, name, phone)
-        .filter(Objects::nonNull)
-        .flatMap(s -> Stream.of(s.split(" ")))
-        .distinct()
-        .collect(Collectors.joining(","));
+  public void recreateSearchIndex(Set<String> words) {
+    this.searchIndex =
+        Stream
+            .concat(words.stream(),
+                Stream.of(email, phone, location.getStreet(), partner.getName()))
+            .filter(Objects::nonNull)
+            .flatMap(s -> Stream.of(s.split(" ")))
+            .map(w -> w.replaceAll("[^a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]", ""))
+            .distinct()
+            .filter(w -> !w.isBlank())
+            .collect(Collectors.joining(","));
   }
 }
