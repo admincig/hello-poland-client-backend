@@ -79,9 +79,22 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
     }
   }
 
+  public void setTagsIds(List<Long> tagsIds) {
+    if (tagsIds != null && !tagsIds.isEmpty()) {
+      addCondition("ids", tagsIds,
+          "e.id in (select sightEvent.id from SightEventTag where tag.id in (:ids))");
+    }
+  }
+
   public void setCategoriesIdsArray(Long[] categoryIds) {
     if (categoryIds != null && categoryIds.length > 0) {
       setCategoriesIds(Arrays.asList(categoryIds));
+    }
+  }
+
+  public void setTagsIdsArray(Long[] tagIds) {
+    if (tagIds != null && tagIds.length > 0) {
+      setTagsIds(Arrays.asList(tagIds));
     }
   }
 
@@ -100,5 +113,6 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
   public void setExcludedIds(Set<Long> ids) {
     addCondition("ids", ids, "e.id not in (:ids)");
   }
+
 
 }

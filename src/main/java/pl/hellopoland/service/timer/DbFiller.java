@@ -30,6 +30,7 @@ import pl.hellopoland.dto.FrequencyDataDTO;
 import pl.hellopoland.dto.FrequencyTypeDTO;
 import pl.hellopoland.dto.MarketPartnerDTO;
 import pl.hellopoland.dto.SightEventDTO;
+import pl.hellopoland.dto.TagDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.enums.LanguageVersion;
@@ -39,6 +40,7 @@ import pl.hellopoland.service.ImageService;
 import pl.hellopoland.service.ServiceSuperclass;
 import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.service.SightService;
+import pl.hellopoland.service.TagService;
 import pl.hellopoland.service.TicketDefinitionService;
 import pl.hellopoland.service.TicketPoolDefinitionService;
 import pl.hellopoland.service.TranslationService;
@@ -62,6 +64,8 @@ public class DbFiller extends ServiceSuperclass {
   TicketDefinitionService tdService;
   @Inject
   CategoryService categoryService;
+  @Inject
+  TagService tagService;
   @Inject
   private PasswordEncoder passwordEncoder;
   @Inject
@@ -140,12 +144,19 @@ public class DbFiller extends ServiceSuperclass {
         zwZooEvent, zwKielcEvent, zeromEvent, geoparkKielcEvent);
     createTicketPoolDefinitions();
     createCategories();
+    createTags();
     logger.log(Logger.Level.INFO, "dbfiller finished");
   }
 
   private void createCategories() {
     for (int i = 0; i < 10; i++) {
       createCategory("kategoria " + i);
+    }
+  }
+
+  private void createTags() {
+    for (int i = 0; i < 10; i++) {
+      createCategory("tag " + i);
     }
   }
 
@@ -157,6 +168,16 @@ public class DbFiller extends ServiceSuperclass {
     dto.language = "pl-pl";
     dto.iconUrl = "https://static.thenounproject.com/png/22802-200.png";
     categoryService.create(dto);
+  }
+
+  private void createTag(String label) {
+    TagDTO dto = new TagDTO();
+    dto.label = label;
+    dto.recommended = random.nextBoolean();
+    dto.restricted = random.nextBoolean();
+    dto.language = "pl-pl";
+    dto.iconUrl = "https://static.thenounproject.com/png/22802-200.png";
+    tagService.create(dto);
   }
 
   private void createUsers() {

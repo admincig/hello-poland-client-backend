@@ -22,7 +22,7 @@ public class PartnerServicePartnerAPI {
   @RolesAllowed("partner")
   public MarketPartnerDTO getCard(LanguageVersion parseLang) {
     Long loggedPartnerId = service.getLoggedPartner().getId();
-    Partner partner = service.getPartnerWithCategoriesAndCities(loggedPartnerId);
+    Partner partner = service.getPartnerWithCategoriesAndTagsAndCities(loggedPartnerId);
     transService.translateEntity(partner, parseLang, false);
     return DtoMapper.getFullMarketPartnerDTO(partner);
   }

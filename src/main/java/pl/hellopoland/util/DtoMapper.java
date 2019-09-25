@@ -23,6 +23,8 @@ import pl.hellopoland.bo.PassageCartEntry;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.SightEventCategory;
+import pl.hellopoland.bo.SightEventTag;
+import pl.hellopoland.bo.Tag;
 import pl.hellopoland.bo.TicketDefinition;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole;
@@ -42,6 +44,7 @@ import pl.hellopoland.dto.PartnerRepresentativeDTO;
 import pl.hellopoland.dto.RoleDTO;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.dto.SightEventDTO;
+import pl.hellopoland.dto.TagDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.enums.LanguageVersion;
@@ -130,6 +133,9 @@ public class DtoMapper {
     if (bo.getCategories() != null && !bo.getCategories().isEmpty()) {
       dto.categories = bo.getCategories().stream().map(DtoMapper::getDTO).collect(toSet());
     }
+    if (bo.getTags() != null && !bo.getTags().isEmpty()) {
+      dto.tags = bo.getTags().stream().map(DtoMapper::getDTO).collect(toSet());
+    }
     return dto;
   }
 
@@ -181,6 +187,10 @@ public class DtoMapper {
     }
     if (bo.getCategories() != null && !bo.getCategories().isEmpty()) {
       dto.categories = bo.getCategories().stream().map(SightEventCategory::getCategory)
+          .map(DtoMapper::getDTO).collect(toSet());
+    }
+    if (bo.getTags() != null && !bo.getTags().isEmpty()) {
+      dto.tags = bo.getTags().stream().map(SightEventTag::getTag)
           .map(DtoMapper::getDTO).collect(toSet());
     }
     dto.pdfAttachment = bo.getPdfAttachment() != null ? getFullDTO(bo.getPdfAttachment()) : null;
@@ -525,6 +535,27 @@ public class DtoMapper {
   }
 
   public static CategoryDTO getFullDTO(Category bo) {
+    var dto = getDTO(bo);
+    dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
+        .map(lv -> lv.getLanuage()).collect(Collectors.toSet());
+    return dto;
+  }
+
+  public static TagDTO getDTO(Tag bo) {
+    var dto = new TagDTO();
+    dto.id = bo.getId();
+    dto.label = bo.getLabel();
+    dto.iconUrl = bo.getIconUrl();
+    dto.restricted = bo.isRestricted();
+    dto.assignedItemsCount = bo.getAssignedItemsCount();
+    dto.recommended = bo.isRecommended();
+    dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
+    dto.language = bo.getCurrentLanguage() == null ? dto.defaultLanguage
+        : bo.getCurrentLanguage().getLanuage();
+    return dto;
+  }
+
+  public static TagDTO getFullDTO(Tag bo) {
     var dto = getDTO(bo);
     dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
         .map(lv -> lv.getLanuage()).collect(Collectors.toSet());

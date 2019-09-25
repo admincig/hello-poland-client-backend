@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import pl.hellopoland.bo.Category;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.SightEventCategory;
+import pl.hellopoland.bo.Tag;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.enums.LanguageVersion;
@@ -16,6 +17,8 @@ import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.CategoryService;
 import pl.hellopoland.service.SightEventCategoryService;
 import pl.hellopoland.service.SightEventService;
+import pl.hellopoland.service.SightEventTagService;
+import pl.hellopoland.service.TagService;
 import pl.hellopoland.service.TranslationService;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.PagedEntityCollection;
@@ -30,7 +33,11 @@ public class SightEventServiceHelpdeskAPI {
   @Inject
   private SightEventCategoryService secService;
   @Inject
+  private SightEventTagService setService;
+  @Inject
   private CategoryService catService;
+  @Inject
+  private TagService tagService;
 
 
 
@@ -114,6 +121,22 @@ public class SightEventServiceHelpdeskAPI {
     SightEvent se = service.get(id);
     Category cat = catService.get(categoryId);
     se = secService.removeCategory(se, cat);
+    return DtoMapper.getFullDTO(se);
+  }
+
+  @RolesAllowed("admin")
+  public SightEventDTO addTag(Long id, Long tagId) {
+    SightEvent se = service.get(id);
+    Tag tag = tagService.get(tagId);
+    se = setService.addTag(se, tag);
+    return DtoMapper.getFullDTO(se);
+  }
+
+  @RolesAllowed("admin")
+  public SightEventDTO removeTag(Long id, Long tagId) {
+    SightEvent se = service.get(id);
+    Tag tag = tagService.get(tagId);
+    se = setService.removeTag(se, tag);
     return DtoMapper.getFullDTO(se);
   }
 

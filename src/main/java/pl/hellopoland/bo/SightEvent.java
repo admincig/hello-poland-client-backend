@@ -99,6 +99,8 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
   private Integer promotion;
   @OneToMany(mappedBy = "sightEvent")
   private Set<SightEventCategory> categories;
+  @OneToMany(mappedBy = "sightEvent")
+  private Set<SightEventTag> tags;
   @Column(columnDefinition = "varchar")
   private String searchIndex;
 
@@ -402,6 +404,14 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
 
   public void setSearchIndex(String searchIndex) {
     this.searchIndex = searchIndex;
+  }
+
+  public Set<SightEventTag> getTags() {
+    return tags;
+  }
+
+  public void setTags(Set<SightEventTag> tags) {
+    this.tags = tags;
   }
 
   public void recreateSearchIndex(Set<String> words) {

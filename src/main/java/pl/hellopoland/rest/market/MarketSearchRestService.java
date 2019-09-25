@@ -29,6 +29,7 @@ public class MarketSearchRestService {
   public SearchResultDTO search(
       @QueryParam("query") String query,
       @QueryParam("categories") Long[] categoryIds,
+      @QueryParam("tags") Long[] tagIds,
       @QueryParam("city") String city,
       @QueryParam("fromDate") @DateFormat Date fromDate,
       @QueryParam("toDate") @DateFormat Date toDate,
@@ -39,6 +40,7 @@ public class MarketSearchRestService {
         RestService.parseLang(contentLanguage),
         query,
         categoryIds,
+        tagIds,
         city,
         fromDate,
         toDate,

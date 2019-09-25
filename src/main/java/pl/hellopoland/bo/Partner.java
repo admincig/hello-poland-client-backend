@@ -113,6 +113,9 @@ public class Partner extends ModelSuperclass implements Translated {
   private List<Category> categories;
 
   @Transient
+  private List<Tag> tags;
+
+  @Transient
   private List<String> cities;
 
   @Transient
@@ -381,6 +384,14 @@ public class Partner extends ModelSuperclass implements Translated {
 
   public void setCities(List<String> cities) {
     this.cities = cities;
+  }
+
+  public List<Tag> getTags() {
+    return tags;
+  }
+
+  public void setTags(List<Tag> tags) {
+    this.tags = tags;
   }
 
   @Override

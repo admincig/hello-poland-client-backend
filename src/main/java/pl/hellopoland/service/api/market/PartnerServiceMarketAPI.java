@@ -35,7 +35,7 @@ public class PartnerServiceMarketAPI {
 
   @PermitAll
   public MarketPartnerDTO get(Long id, LanguageVersion parseLang) {
-    Partner bo = service.getPartnerWithCategoriesAndCities(id);
+    Partner bo = service.getPartnerWithCategoriesAndTagsAndCities(id);
     bo = transService.translateEntity(bo, parseLang, true);
     return DtoMapper.getFullMarketPartnerDTO(bo);
   }

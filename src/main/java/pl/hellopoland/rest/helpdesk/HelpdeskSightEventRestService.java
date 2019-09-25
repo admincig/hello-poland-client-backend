@@ -126,6 +126,22 @@ public class HelpdeskSightEventRestService {
     return service.removeCategory(id, categoryId);
   }
 
+  @PATCH
+  @Path("/{id}/tags/{tId}")
+  public SightEventDTO addTag(
+      @PathParam("id") Long id,
+      @PathParam("tId") Long tagId) {
+    return service.addTag(id, tagId);
+  }
+
+  @DELETE
+  @Path("/{id}/tags/{tId}")
+  public SightEventDTO removeTag(
+      @PathParam("id") Long id,
+      @PathParam("tId") Long tagId) {
+    return service.removeTag(id, tagId);
+  }
+
   @POST
   @Path("/{id}/pdf")
   @Consumes("application/pdf")

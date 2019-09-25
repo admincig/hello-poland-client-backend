@@ -12,6 +12,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.SightEventCategory;
+import pl.hellopoland.bo.SightEventTag;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.enums.LanguageVersion;
@@ -92,6 +93,8 @@ public class SightEventServiceMarketAPI {
         bo = translationService.translateEntity(bo, language, true);
         translationService.translateEntities(bo.getCategories().stream()
             .map(SightEventCategory::getCategory).collect(Collectors.toSet()), language, false);
+        translationService.translateEntities(bo.getTags().stream()
+            .map(SightEventTag::getTag).collect(Collectors.toSet()), language, false);
       } else {
         language = bo.getDefaultLanguage();
       }

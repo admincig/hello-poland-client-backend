@@ -10,6 +10,8 @@ import javax.inject.Inject;
 import pl.hellopoland.bo.Category;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.SightEventCategory;
+import pl.hellopoland.bo.SightEventTag;
+import pl.hellopoland.bo.Tag;
 import pl.hellopoland.config.PartnerPagedCollectionConfig;
 import pl.hellopoland.dto.MarketPartnerDTO;
 import pl.hellopoland.dto.PartnerDTO;
@@ -48,13 +50,18 @@ public class PartnerService extends ServiceSuperclass {
     return new PagedEntityCollection<>(list, config);
   }
 
-  public Partner getPartnerWithCategoriesAndCities(Long id) {
+  public Partner getPartnerWithCategoriesAndTagsAndCities(Long id) {
     Partner partner = em.find(Partner.class, id);
     List<Category> categories =
         partner.getSight().stream().flatMap(sight -> sight.getSightEvents().stream())
             .flatMap(se -> se.getCategories().stream()).map(SightEventCategory::getCategory)
             .collect(Collectors.toList());
     partner.setCategories(categories);
+    List<Tag> tags =
+        partner.getSight().stream().flatMap(sight -> sight.getSightEvents().stream())
+            .flatMap(se -> se.getTags().stream()).map(SightEventTag::getTag)
+            .collect(Collectors.toList());
+    partner.setTags(tags);
     List<String> cities =
         Stream.<Located>concat(
             partner.getSight().stream(),
