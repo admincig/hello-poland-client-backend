@@ -151,7 +151,7 @@ public class SightEventService extends ServiceSuperclass {
       partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
     }
     Sight sight = sightService.get(dto.sightId);
-    if (!sight.getPartner().equals(partner)) {
+    if (!sight.getPartner().getId().equals(partner.getId())) {
       throw new AccessDeniedException();
     }
     var defLang = dto.defaultLanguage;
