@@ -324,8 +324,11 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public SightEvent getForPartner(Long sightEventId, Partner partner) {
-    return em.createQuery("from SightEvent where id=:id and partner=:partner", SightEvent.class)
-        .setParameter("id", sightEventId).setParameter("partner", partner).getSingleResult();
+    SightEvent sightEvent =
+        em.createQuery("from SightEvent where id=:id and partner=:partner", SightEvent.class)
+            .setParameter("id", sightEventId).setParameter("partner", partner).getSingleResult();
+    sightEvent.fetchCollections();
+    return sightEvent;
   }
 
   public void deleteForLoggedUser(Long id) {

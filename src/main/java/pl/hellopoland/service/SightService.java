@@ -209,9 +209,11 @@ public class SightService extends ServiceSuperclass {
   }
 
   public Sight getActiveForLoggedPartner(Long id) {
-    return em
+    Sight sight = em
         .createQuery("from Sight where id=:id and active=true and partner=:partner", Sight.class)
         .setParameter("id", id).setParameter("partner", getLoggedPartner()).getSingleResult();
+    sight.fetchCollections();
+    return sight;
   }
 
   public Sight getActiveForLoggedUser(Long id, LanguageVersion language) {
@@ -244,9 +246,11 @@ public class SightService extends ServiceSuperclass {
 
   private Sight getForLoggedPartner(Long sightId) {
     var partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
-    return em.createQuery("from Sight where partner = :partner and id = :id", Sight.class)
+    Sight sight = em.createQuery("from Sight where partner = :partner and id = :id", Sight.class)
         .setParameter("partner", partner).setParameter("id", sightId).getResultStream().findFirst()
         .orElseThrow(ResourceNotFoundException::new);
+    sight.fetchCollections();
+    return sight;
   }
 
   public Sight changeDefaultLanguage(Long id, LanguageVersion language) {
