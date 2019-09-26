@@ -461,7 +461,9 @@ public class DtoMapper {
     dto.servicesDescription = bo.getServicesDescription();
     dto.shopUrl = bo.getShopUrl();
     dto.description = bo.getDescription();
-    dto.language = bo.getCurrentLanguage().getLanuage();
+    if (bo.getCurrentLanguage() != null) {
+      dto.language = bo.getCurrentLanguage().getLanuage();
+    }
     dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
     return dto;
   }
