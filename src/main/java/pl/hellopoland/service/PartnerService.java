@@ -52,13 +52,14 @@ public class PartnerService extends ServiceSuperclass {
 
   public Partner getPartnerWithCategoriesAndTagsAndCities(Long id) {
     Partner partner = em.find(Partner.class, id);
+    partner.fetchCollections();
     List<Category> categories =
-        partner.getSight().stream().flatMap(sight -> sight.getSightEvents().stream())
+        partner.getSightEvents().stream()
             .flatMap(se -> se.getCategories().stream()).map(SightEventCategory::getCategory)
             .collect(Collectors.toList());
     partner.setCategories(categories);
     List<Tag> tags =
-        partner.getSight().stream().flatMap(sight -> sight.getSightEvents().stream())
+        partner.getSightEvents().stream()
             .flatMap(se -> se.getTags().stream()).map(SightEventTag::getTag)
             .collect(Collectors.toList());
     partner.setTags(tags);
@@ -121,7 +122,9 @@ public class PartnerService extends ServiceSuperclass {
   }
 
   public Partner get(Long id) {
-    return em.find(Partner.class, id);
+    Partner partner = em.find(Partner.class, id);
+    partner.fetchCollections();
+    return partner;
   }
 
 }

@@ -440,5 +440,13 @@ public class Partner extends ModelSuperclass implements Translated {
     this.currentLanguage = currentLanguage;
   }
 
+  public void fetchCollections() {
+    this.getAvailableLanguageVersions().size();
+    this.getRepresentatives().size();
+    this.getUsers().size();
+    this.getSight().size();
+    this.getSightEvents().size();
+  }
+
 
 }
