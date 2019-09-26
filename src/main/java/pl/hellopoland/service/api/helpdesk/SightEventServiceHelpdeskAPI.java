@@ -99,6 +99,7 @@ public class SightEventServiceHelpdeskAPI {
               + "doesn't exists");
     }
     bo = service.changeDefaultLanguage(bo, language);
+    bo.fetchCollections();
     return DtoMapper.getFullDTO(bo);
   }
 
