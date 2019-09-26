@@ -51,7 +51,7 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
       joinColumns = {@JoinColumn(name = "sight_id", referencedColumnName = "id")},
       inverseJoinColumns = {
           @JoinColumn(name = "imagecollector_id", referencedColumnName = "id", unique = true)})
-  private Collection<ImageCollector> images;
+  private Collection<ImageCollector> images = new ArrayList<>();
   private String email;
   private String phone;
   @Embedded
@@ -60,11 +60,11 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
   private Partner partner;
   private boolean active = true;
   @OneToMany(mappedBy = "sight")
-  private List<SightEvent> sightEvents;
+  private List<SightEvent> sightEvents = new ArrayList<>();
   @OneToMany(mappedBy = "sight")
-  private List<OpeningHours> openingHours;
+  private List<OpeningHours> openingHours = new ArrayList<>();
   @ManyToMany
-  private Set<Agreement> agreements;
+  private Set<Agreement> agreements = new HashSet<>();
   private boolean published;
   private boolean blocked;
   @NotNull
