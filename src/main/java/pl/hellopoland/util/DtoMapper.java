@@ -467,6 +467,7 @@ public class DtoMapper {
     dto.language = bo.getCurrentLanguage() == null ? dto.defaultLanguage
         : bo.getCurrentLanguage().getLanuage();
     dto.blocked = bo.isBlocked();
+    dto.mainImage = DtoMapper.getDTO(bo.getMainImage());
     return dto;
   }
 
