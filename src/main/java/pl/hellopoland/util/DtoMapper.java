@@ -590,7 +590,9 @@ public class DtoMapper {
     bo.setRegon(dto.regon);
     bo.setServicesDescription(dto.servicesDescription);
     bo.setShopUrl(dto.shopUrl);
-    bo.setSocialNumber(Long.valueOf(dto.socialNumber));
+    if (dto.socialNumber != null) {
+      bo.setSocialNumber(Long.valueOf(dto.socialNumber));
+    }
     bo.setTaxNumber(dto.taxNumber);
     // bo.setTechnicalContact(technicalContact);
   }
