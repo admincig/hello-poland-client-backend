@@ -3,6 +3,8 @@ package pl.hellopoland.util;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
@@ -51,6 +53,8 @@ import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.soap.p24.enums.BusinessType;
 
 public class DtoMapper {
+
+  private final static Logger logger = System.getLogger(DtoMapper.class.getName());
 
   public static void copy(SightDTO source, Sight target) {
     target.setName(source.name);
@@ -590,8 +594,10 @@ public class DtoMapper {
     bo.setRegon(dto.regon);
     bo.setServicesDescription(dto.servicesDescription);
     bo.setShopUrl(dto.shopUrl);
-    if (dto.socialNumber != null) {
+    try {
       bo.setSocialNumber(Long.valueOf(dto.socialNumber));
+    } catch (Exception e) {
+      logger.log(Level.DEBUG, "social number cant be parsed");
     }
     bo.setTaxNumber(dto.taxNumber);
     // bo.setTechnicalContact(technicalContact);
