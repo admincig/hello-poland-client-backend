@@ -52,11 +52,11 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
       joinColumns = {@JoinColumn(name = "sightevent_id", referencedColumnName = "id")},
       inverseJoinColumns = {
           @JoinColumn(name = "imagecollector_id", referencedColumnName = "id", unique = true)})
-  private Collection<ImageCollector> images;
+  private Collection<ImageCollector> images = new ArrayList<>();
   @OneToMany(mappedBy = "sightEvent")
-  private Collection<TicketDefinition> tickets;
+  private Collection<TicketDefinition> tickets = new ArrayList<>();
   @ManyToMany
-  private Set<Agreement> agreements;
+  private Set<Agreement> agreements = new HashSet<>();
   @Multilingual
   private String lead;
   @Column(columnDefinition = "varchar(2500)")
@@ -73,7 +73,7 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
   @ManyToOne
   private FileDescriptor pdfAttachment;
   @OneToMany(mappedBy = "sightEvent")
-  private Collection<OpeningHours> openingHours;
+  private Collection<OpeningHours> openingHours = new ArrayList<>();
   @ManyToOne
   private Portal portal;
   @ManyToOne(fetch = FetchType.EAGER)
@@ -93,14 +93,14 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
   @Column(nullable = false)
   @ElementCollection
   @Enumerated(EnumType.STRING)
-  private Set<LanguageVersion> availableLanguageVersions;
+  private Set<LanguageVersion> availableLanguageVersions = new HashSet<>();
   @Transient
   private LanguageVersion currentLanguage;
   private Integer promotion;
   @OneToMany(mappedBy = "sightEvent")
-  private Set<SightEventCategory> categories;
+  private Set<SightEventCategory> categories = new HashSet<>();
   @OneToMany(mappedBy = "sightEvent")
-  private Set<SightEventTag> tags;
+  private Set<SightEventTag> tags = new HashSet<>();
   @Column(columnDefinition = "varchar")
   private String searchIndex;
 
