@@ -111,6 +111,8 @@ public class DtoMapper {
     dto.blocked = bo.isBlocked();
     dto.published = bo.isPublished();
     dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
+    dto.language = bo.getCurrentLanguage() == null ? dto.defaultLanguage
+        : bo.getCurrentLanguage().getLanuage();
     return dto;
   }
 
@@ -461,10 +463,9 @@ public class DtoMapper {
     dto.servicesDescription = bo.getServicesDescription();
     dto.shopUrl = bo.getShopUrl();
     dto.description = bo.getDescription();
-    if (bo.getCurrentLanguage() != null) {
-      dto.language = bo.getCurrentLanguage().getLanuage();
-    }
     dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
+    dto.language = bo.getCurrentLanguage() == null ? dto.defaultLanguage
+        : bo.getCurrentLanguage().getLanuage();
     return dto;
   }
 

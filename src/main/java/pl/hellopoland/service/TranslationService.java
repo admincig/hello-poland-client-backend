@@ -123,9 +123,9 @@ public class TranslationService extends ServiceSuperclass {
             | NoSuchMethodException | SecurityException e) {
           continue;
         }
-        bo.setCurrentLanguage(language);
       }
     }
+    bo.setCurrentLanguage(language);
     return bo;
   }
 
