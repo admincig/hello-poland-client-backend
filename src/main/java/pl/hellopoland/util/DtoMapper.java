@@ -466,6 +466,7 @@ public class DtoMapper {
     dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
     dto.language = bo.getCurrentLanguage() == null ? dto.defaultLanguage
         : bo.getCurrentLanguage().getLanuage();
+    dto.blocked = bo.isBlocked();
     return dto;
   }
 
@@ -573,6 +574,7 @@ public class DtoMapper {
     // bo.setAddress(address);
     bo.setAffiliateCode(dto.affiliateCode);
     bo.setBankAccount(dto.bankAccount);
+    bo.setBlocked(dto.blocked);
     bo.setBusinessType(BusinessType.getBusinessType(dto.businessType));
     bo.setCommission(dto.commission);
     // bo.setContactPerson(contactPerson);

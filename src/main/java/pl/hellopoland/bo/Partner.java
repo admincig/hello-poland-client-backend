@@ -125,10 +125,13 @@ public class Partner extends ModelSuperclass implements Translated {
   @Column(length = 5, nullable = false)
   @Enumerated(EnumType.STRING)
   private LanguageVersion defaultLanguage = LanguageVersion.PL_PL;
+
   @Column(nullable = false)
   @ElementCollection
   @Enumerated(EnumType.STRING)
   private Set<LanguageVersion> availableLanguageVersions;
+
+  private boolean blocked;
 
   public Integer getP24Id() {
     return p24Id;
@@ -438,6 +441,14 @@ public class Partner extends ModelSuperclass implements Translated {
   @Override
   public void setCurrentLanguage(LanguageVersion currentLanguage) {
     this.currentLanguage = currentLanguage;
+  }
+
+  public boolean isBlocked() {
+    return blocked;
+  }
+
+  public void setBlocked(boolean blocked) {
+    this.blocked = blocked;
   }
 
   public void fetchCollections() {

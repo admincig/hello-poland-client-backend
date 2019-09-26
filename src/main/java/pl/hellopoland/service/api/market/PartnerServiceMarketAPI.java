@@ -26,6 +26,7 @@ public class PartnerServiceMarketAPI {
   @PermitAll
   public PagedCollection list(LanguageVersion languageVersion) {
     PartnerPagedCollectionConfig config = new PartnerPagedCollectionConfig();
+    config.setBlocked(false);
     PagedEntityCollection<Partner> pec = service.getList(config);
     pec.items = transService.translateEntities(pec.items, languageVersion, false);
     List<MarketPartnerDTO> dtos =

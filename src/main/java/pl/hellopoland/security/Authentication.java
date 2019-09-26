@@ -30,8 +30,10 @@ public class Authentication implements IdentityStore {
 
       Optional<User> user = userDao.findByEmail(usernamePassword.getCaller());
 
-      if (user.isPresent() && passwordEncoder.matches(
-          new String(usernamePassword.getPassword().getValue()), user.get().getPassword())) {
+      if (user.isPresent()
+          && (user.get().getPartner() == null || !user.get().getPartner().isBlocked())
+          && passwordEncoder.matches(
+              new String(usernamePassword.getPassword().getValue()), user.get().getPassword())) {
         return new CredentialValidationResult(usernamePassword.getCaller());
       }
     }

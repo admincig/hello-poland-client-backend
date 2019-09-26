@@ -46,6 +46,7 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
   public void onlyPublished() {
     addCondition("published", true, "e.published=:published");
     addCondition("blocked", false, "e.blocked=:blocked");
+    addCondition("pBlocked", false, "e.partner.blocked=:pBlocked");
   }
 
   public void onlyCurrentPartner(boolean only) {
