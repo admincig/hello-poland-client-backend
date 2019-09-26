@@ -122,12 +122,7 @@ public class SightEventService extends ServiceSuperclass {
 
   public SightEvent get(Long id) {
     SightEvent se = em.find(SightEvent.class, id);
-    se.getAvailableLanguageVersions().size();
-    se.getAgreements().size();
-    se.getCategories().size();
-    se.getImages().size();
-    se.getTags().size();
-    se.getTickets().size();
+    se.fetchCollections();
     return se;
   }
 

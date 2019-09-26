@@ -414,6 +414,16 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
     this.tags = tags;
   }
 
+  public void fetchCollections() {
+    this.getAgreements().size();
+    this.getAvailableLanguageVersions().size();
+    this.getCategories().size();
+    this.getImages().size();
+    this.getOpeningHours().size();
+    this.getTags().size();
+    this.getTickets().size();
+  }
+
   public void recreateSearchIndex(Set<String> words) {
     this.searchIndex =
         Stream

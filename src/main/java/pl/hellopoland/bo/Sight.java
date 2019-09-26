@@ -330,4 +330,11 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
     this.tags = tags;
   }
 
+  public void fetchCollections() {
+    this.getAvailableLanguageVersions().size();
+    this.getAgreements().size();
+    this.getImages().size();
+    this.getOpeningHours().size();
+  }
+
 }
