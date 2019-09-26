@@ -100,7 +100,7 @@ public class SightServicePartnerAPI {
 
   @RolesAllowed("partner")
   public SightDTO changeDefaultLanguage(Long id, LanguageVersion language) {
-    Sight bo = service.changeDefaultLanguage(id, language);
+    Sight bo = service.changeDefaultLanguageForLoggedUser(id, language);
     return DtoMapper.getFullDTO(bo);
   }
 

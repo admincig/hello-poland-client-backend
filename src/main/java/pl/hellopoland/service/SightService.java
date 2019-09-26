@@ -136,6 +136,10 @@ public class SightService extends ServiceSuperclass {
 
   public Sight updateForLoggedUser(SightDTO dto, LanguageVersion language) {
     Sight bo = getActiveForLoggedPartner(dto.id);
+    return update(bo, dto, language);
+  }
+
+  public Sight update(Sight bo, SightDTO dto, LanguageVersion language) {
     if (!translationService.isTranslated(bo, language)) {
       // throw new ConflictingException(
       // "Translation for language " + language.getLanuage() + " doesn't exists");
@@ -189,6 +193,10 @@ public class SightService extends ServiceSuperclass {
 
   public Sight uploadMainImageForLoggedUser(Long id, byte[] icon) {
     Sight bo = getActiveForLoggedPartner(id);
+    return uploadMainImage(bo, icon);
+  }
+
+  public Sight uploadMainImage(Sight bo, byte[] icon) {
     bo.setMainImage(
         imageService.validateAndStoreImageCollector(new ByteArrayInputStream(icon), "jpeg", null));
     return bo;
@@ -235,6 +243,10 @@ public class SightService extends ServiceSuperclass {
 
   public void deleteForLoggedUser(Long id) {
     Sight bo = getActiveForLoggedPartner(id);
+    delete(bo);
+  }
+
+  public void delete(Sight bo) {
     if (hasActiveSightEvents(bo.getSightEvents())) {
       throw exceptionFactory.sightHasAssignedSightEventsException();
     } else {
@@ -256,8 +268,12 @@ public class SightService extends ServiceSuperclass {
     return sight;
   }
 
-  public Sight changeDefaultLanguage(Long id, LanguageVersion language) {
+  public Sight changeDefaultLanguageForLoggedUser(Long id, LanguageVersion language) {
     Sight bo = getForLoggedPartner(id);
+    return changeDefaultLanguage(bo, language);
+  }
+
+  public Sight changeDefaultLanguage(Sight bo, LanguageVersion language) {
     if (!translationService.isTranslated(bo, language)) {
       throw new ConflictingException(
           "Can not change the default language. Translation for language " + language.getLanuage()
