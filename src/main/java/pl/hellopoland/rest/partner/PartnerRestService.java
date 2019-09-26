@@ -3,7 +3,6 @@ package pl.hellopoland.rest.partner;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PATCH;
@@ -77,14 +76,6 @@ public class PartnerRestService {
   @Consumes({"image/jpeg", "image/jpg"})
   public MarketPartnerDTO uploadIcon(byte[] icon) {
     return service.uploadMainImage(icon);
-  }
-
-  @DELETE
-  @Path("/languageVersion/{language}")
-  public Response deleteLanguageVersion(@PathParam("language") String language) {
-    LanguageVersion lang = RestService.parseLang(language);
-    service.deleteLanguageVersion(lang);
-    return Response.ok().build();
   }
 
   @PATCH

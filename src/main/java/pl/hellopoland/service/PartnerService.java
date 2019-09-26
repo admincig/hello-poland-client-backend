@@ -83,8 +83,8 @@ public class PartnerService extends ServiceSuperclass {
 
   public Partner changeDefaultLanguage(Partner bo, LanguageVersion lang) {
     Partner translation = translationService.translateEntity(bo, lang, true);
-    bo.setDefaultLanguage(lang);
     bo = BeanUtils.copyNotNullProperties(translation, bo);
+    bo.setDefaultLanguage(lang);
     em.merge(bo);
     return bo;
   }

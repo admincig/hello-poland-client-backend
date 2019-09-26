@@ -80,4 +80,11 @@ public class PartnerServiceHelpdeskAPI {
     return get(dto.id, lang);
   }
 
+  @RolesAllowed("admin")
+  public PartnerDTO uploadMainImage(Long id, byte[] icon) {
+    Partner bo = service.get(id);
+    service.uploadMainImage(bo, icon);
+    return get(id, bo.getDefaultLanguage());
+  }
+
 }

@@ -77,6 +77,13 @@ public class HelpdeskPartnerRestService {
   }
 
   @PUT
+  @Path("/{id}/mainImage")
+  @Consumes({"image/jpeg", "image/jpg"})
+  public PartnerDTO uploadIcon(@PathParam("id") Long id, byte[] icon) {
+    return service.uploadMainImage(id, icon);
+  }
+
+  @PUT
   @Path("/{id}/languageVersion/{language}")
   public PartnerDTO update(@PathParam("id") Long id,
       @PathParam("language") String language,
