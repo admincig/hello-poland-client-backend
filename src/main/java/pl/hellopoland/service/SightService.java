@@ -114,15 +114,10 @@ public class SightService extends ServiceSuperclass {
   public Sight get(Long id) {
     Sight bo = em.createQuery("from Sight sight where sight.id=:sightId", Sight.class)
         .setParameter("sightId", id).getSingleResult();
-    // fetch events
-    if (bo.getSightEvents() != null) {
-      bo.getSightEvents().forEach(se -> {
-        // fetch tickets
-        if (se.getTickets() != null) {
-          se.getTickets().size();
-        }
-      });
-    }
+    bo.getSightEvents().forEach(se -> {
+      se.getTickets().size();
+      se.getImages().size();
+    });
     bo.getAvailableLanguageVersions().size();
     bo.getAgreements().size();
     bo.getImages().size();
