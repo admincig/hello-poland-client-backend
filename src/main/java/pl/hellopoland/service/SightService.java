@@ -214,6 +214,7 @@ public class SightService extends ServiceSuperclass {
         .setParameter("id", id).setParameter("partner", getLoggedPartner()).getSingleResult();
     sight.fetchCollections();
     sight.getSightEvents().forEach(SightEvent::fetchCollections);
+
     return sight;
   }
 
