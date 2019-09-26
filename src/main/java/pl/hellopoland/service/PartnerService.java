@@ -87,6 +87,7 @@ public class PartnerService extends ServiceSuperclass {
     bo = BeanUtils.copyNotNullProperties(translation, bo);
     bo.setDefaultLanguage(lang);
     em.merge(bo);
+    em.flush();
     return bo;
   }
 
