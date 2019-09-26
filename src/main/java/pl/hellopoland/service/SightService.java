@@ -123,6 +123,11 @@ public class SightService extends ServiceSuperclass {
         }
       });
     }
+    bo.getAvailableLanguageVersions().size();
+    bo.getAgreements().size();
+    bo.getCategories().size();
+    bo.getImages().size();
+    bo.getOpeningHours().size();
     return bo;
   }
 

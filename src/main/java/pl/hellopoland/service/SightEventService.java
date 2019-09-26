@@ -121,7 +121,14 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public SightEvent get(Long id) {
-    return em.find(SightEvent.class, id);
+    SightEvent se = em.find(SightEvent.class, id);
+    se.getAvailableLanguageVersions().size();
+    se.getAgreements().size();
+    se.getCategories().size();
+    se.getImages().size();
+    se.getTags().size();
+    se.getTickets().size();
+    return se;
   }
 
   public void savePush(PushDTO push) {
