@@ -29,15 +29,12 @@ public class HelpdeskPartnerRestService {
   @Inject
   private PartnerServiceHelpdeskAPI service;
 
-  @POST
-  public PartnerDTO add(PartnerDTO partner) {
-    return service.addPartner(partner);
-  }
 
   @GET
-  public Response listPartners() {
+  public Response listPartners(@HeaderParam("Content-Language") String contentLanguage) {
     var config = new PartnerPagedCollectionConfig();
-    return Response.ok(service.listPartners(config)).build();
+    return Response.ok(service.listPartners(config, RestService.parseLang(contentLanguage)))
+        .build();
   }
 
   @POST
@@ -45,7 +42,11 @@ public class HelpdeskPartnerRestService {
       @HeaderParam("Content-Language") String contentLanguage,
       PartnerDTO dto) {
     LanguageVersion lang = RestService.parseLang(contentLanguage);
-    return service.createLanguageVersion(dto, lang);
+    if (dto.id != null) {
+      return service.createLanguageVersion(dto, lang);
+    } else {
+      return service.addPartner(dto);
+    }
   }
 
   @GET

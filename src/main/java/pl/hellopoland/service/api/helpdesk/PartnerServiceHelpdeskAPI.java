@@ -32,9 +32,11 @@ public class PartnerServiceHelpdeskAPI {
   }
 
   @RolesAllowed("admin")
-  public PagedCollection listPartners(PartnerPagedCollectionConfig config) {
+  public PagedCollection listPartners(PartnerPagedCollectionConfig config,
+      LanguageVersion language) {
     PagedEntityCollection<Partner> bos = service.getList(config);
-    var dtos = bos.items.stream().map(DtoMapper::getFullDTO).collect(Collectors.toList());
+    bos.items = transService.translateEntities(bos.items, language, false);
+    var dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
     return new PagedCollection(dtos, bos.config);
   }
 
