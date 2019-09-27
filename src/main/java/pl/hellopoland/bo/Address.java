@@ -20,6 +20,8 @@ public class Address extends ModelSuperclass {
   @NotBlank
   private String street;
 
+  private String directions;
+
   public String getCountry() {
     return country;
   }
@@ -50,6 +52,14 @@ public class Address extends ModelSuperclass {
 
   public void setStreet(String street) {
     this.street = street;
+  }
+
+  public String getDirections() {
+    return directions;
+  }
+
+  public void setDirections(String directions) {
+    this.directions = directions;
   }
 
 }

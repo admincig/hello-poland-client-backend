@@ -248,6 +248,7 @@ public class DtoMapper {
       dto.zipCode = address.getPostCode();
       dto.city = address.getCity();
       dto.country = address.getCountry();
+      dto.directions = address.getDirections();
       return dto;
     }
     return null;
@@ -584,6 +585,11 @@ public class DtoMapper {
     bo.setCommission(dto.commission);
     // bo.setContactPerson(contactPerson);
     // bo.setCorrespondenceAddress(correspondenceAddress);
+    bo.getAddress().setCity(dto.location.city);
+    bo.getAddress().setCountry(dto.location.country);
+    bo.getAddress().setPostCode(dto.location.zipCode);
+    bo.getAddress().setStreet(dto.location.street);
+    bo.getAddress().setDirections(dto.location.directions);
     bo.setDescription(dto.description);
     bo.setEmail(dto.email);
     bo.setInvoiceEmail(dto.invoiceEmail);
