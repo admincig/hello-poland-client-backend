@@ -116,7 +116,7 @@ public class PartnerService extends ServiceSuperclass {
     }
     if (bo.getDefaultLanguage().equals(lang)) {
       DtoMapper.copy(dto, bo);
-      dto.location.directions = bo.getAddress().getDirections();
+      bo.getAddress().setDirections(dto.location.directions);
       em.flush();
     }
     translationService.updateEntityLanguageVersion(bo.getAddress(), dto.location, lang);

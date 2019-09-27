@@ -113,16 +113,14 @@ public class TranslationService extends ServiceSuperclass {
     var translations = getTranslations(bo, language);
     em.clear();
     for (Translation translation : translations) {
-      if (StringUtils.isNotBlank(translation.getValue())) {
-        var key = translation.getKey();
-        var fieldName = key.substring(key.lastIndexOf(Translation.KEY_DELIMITER) + 1);
-        try {
-          bo.getClass().getMethod("set" + StringUtils.capitalize(fieldName), String.class)
-              .invoke(bo, translation.getValue());
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
-            | NoSuchMethodException | SecurityException e) {
-          continue;
-        }
+      var key = translation.getKey();
+      var fieldName = key.substring(key.lastIndexOf(Translation.KEY_DELIMITER) + 1);
+      try {
+        bo.getClass().getMethod("set" + StringUtils.capitalize(fieldName), String.class)
+            .invoke(bo, translation.getValue());
+      } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+          | NoSuchMethodException | SecurityException e) {
+        continue;
       }
     }
     bo.setCurrentLanguage(language);
