@@ -171,7 +171,7 @@ public class SightService extends ServiceSuperclass {
         }
       }
     }
-    final var bo2 = translationService.updateEntityLanguageVersion(getForLoggedPartner(dto.id), dto,
+    final var bo2 = translationService.updateEntityLanguageVersion(get(dto.id), dto,
         language);
     recreateSearchIndex(bo2);
     return bo2;
