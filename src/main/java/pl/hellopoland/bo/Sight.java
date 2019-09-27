@@ -81,8 +81,6 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
   private String searchIndex;
   @Transient
   private Set<Category> categories;
-  @Transient
-  private Set<Tag> tags;
 
   public Sight() {}
 
@@ -322,19 +320,11 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
     this.categories = categories;
   }
 
-  public Set<Tag> getTags() {
-    return tags;
-  }
-
-  public void setTags(Set<Tag> tags) {
-    this.tags = tags;
-  }
-
   public void fetchCollections() {
-    this.getAvailableLanguageVersions().size();
-    this.getAgreements().size();
-    this.getImages().size();
-    this.getOpeningHours().size();
+    Optional.ofNullable(this.getAvailableLanguageVersions()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getAgreements()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getImages()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getOpeningHours()).ifPresent(Collection::size);
   }
 
 }

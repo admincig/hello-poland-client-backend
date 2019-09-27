@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -415,13 +416,13 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
   }
 
   public void fetchCollections() {
-    this.getAgreements().size();
-    this.getAvailableLanguageVersions().size();
-    this.getCategories().size();
-    this.getImages().size();
-    this.getOpeningHours().size();
-    this.getTags().size();
-    this.getTickets().size();
+    Optional.ofNullable(this.getAvailableLanguageVersions()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getAgreements()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getImages()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getOpeningHours()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getCategories()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getTags()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getTickets()).ifPresent(Collection::size);
   }
 
   public void recreateSearchIndex(Set<String> words) {
