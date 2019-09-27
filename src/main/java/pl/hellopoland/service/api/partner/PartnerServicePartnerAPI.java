@@ -3,6 +3,7 @@ package pl.hellopoland.service.api.partner;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import pl.hellopoland.bo.Address;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.dto.MarketPartnerDTO;
 import pl.hellopoland.enums.LanguageVersion;
@@ -23,7 +24,9 @@ public class PartnerServicePartnerAPI {
   public MarketPartnerDTO getCard(LanguageVersion parseLang) {
     Long loggedPartnerId = service.getLoggedPartner().getId();
     Partner partner = service.getPartnerWithCategoriesAndTagsAndCities(loggedPartnerId);
-    transService.translateEntity(partner, parseLang, false);
+    Address address = transService.translateEntity(partner.getAddress(), parseLang, false);
+    partner = transService.translateEntity(partner, parseLang, true);
+    partner.setAddress(address);
     return DtoMapper.getFullMarketPartnerDTO(partner);
   }
 
@@ -38,6 +41,7 @@ public class PartnerServicePartnerAPI {
   public void deleteLanguageVersion(LanguageVersion lang) {
     Partner bo = service.getLoggedPartner();
     transService.deleteEntityTranslations(bo, lang);
+    transService.deleteEntityTranslations(bo.getAddress(), lang);
   }
 
   @RolesAllowed("partner")

@@ -71,7 +71,7 @@ public class Partner extends ModelSuperclass implements Translated {
   @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.DETACH})
   private List<PartnerRepresentative> representatives;
 
-  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH})
+  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE})
   private Address address;
 
   @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH})

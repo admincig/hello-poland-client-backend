@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import pl.hellopoland.bo.Address;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.config.PartnerPagedCollectionConfig;
 import pl.hellopoland.dto.MarketPartnerDTO;
@@ -37,7 +38,9 @@ public class PartnerServiceMarketAPI {
   @PermitAll
   public MarketPartnerDTO get(Long id, LanguageVersion parseLang) {
     Partner bo = service.getPartnerWithCategoriesAndTagsAndCities(id);
+    Address address = transService.translateEntity(bo.getAddress(), parseLang, false);
     bo = transService.translateEntity(bo, parseLang, true);
+    bo.setAddress(address);
     return DtoMapper.getFullMarketPartnerDTO(bo);
   }
 }

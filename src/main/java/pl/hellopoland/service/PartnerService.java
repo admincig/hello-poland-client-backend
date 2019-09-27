@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import pl.hellopoland.bo.Address;
 import pl.hellopoland.bo.Category;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.SightEventCategory;
@@ -84,8 +85,11 @@ public class PartnerService extends ServiceSuperclass {
 
   public Partner changeDefaultLanguage(Partner bo, LanguageVersion lang) {
     Partner translation = translationService.translateEntity(bo, lang, true);
+    Address aTranslation = translationService.translateEntity(bo.getAddress(), lang, false);
     bo = BeanUtils.copyNotNullProperties(translation, bo);
     bo.setDefaultLanguage(lang);
+    bo.getAddress().setDefaultLanguage(lang);
+    bo.getAddress().setDirections(aTranslation.getDirections());
     em.merge(bo);
     em.flush();
     return bo;
@@ -94,32 +98,40 @@ public class PartnerService extends ServiceSuperclass {
   public Partner update(Partner bo, MarketPartnerDTO dto, LanguageVersion lang) {
     if (!translationService.isTranslated(bo, lang)) {
       translationService.createEntityLanguageVersion(bo, dto, lang);
+      translationService.createEntityLanguageVersion(bo.getAddress(), dto, lang);
     }
     if (bo.getDefaultLanguage().equals(lang)) {
       DtoMapper.copy(dto, bo);
+      bo.getAddress().setDirections(dto.location.directions);
       em.flush();
     }
+    translationService.updateEntityLanguageVersion(bo.getAddress(), dto.location, lang);
     return translationService.updateEntityLanguageVersion(bo, dto, lang);
   }
 
   public Partner update(Partner bo, PartnerDTO dto, LanguageVersion lang) {
     if (!translationService.isTranslated(bo, lang)) {
       translationService.createEntityLanguageVersion(bo, dto, lang);
+      translationService.createEntityLanguageVersion(bo.getAddress(), dto.location, lang);
     }
     if (bo.getDefaultLanguage().equals(lang)) {
       DtoMapper.copy(dto, bo);
+      dto.location.directions = bo.getAddress().getDirections();
       em.flush();
     }
+    translationService.updateEntityLanguageVersion(bo.getAddress(), dto.location, lang);
     return translationService.updateEntityLanguageVersion(bo, dto, lang);
   }
 
   public Partner createLanguageVersion(MarketPartnerDTO dto, LanguageVersion language) {
     Partner bo = get(dto.id);
+    translationService.createEntityLanguageVersion(bo.getAddress(), dto.location, language);
     return translationService.createEntityLanguageVersion(bo, dto, language);
   }
 
   public Partner createLanguageVersion(PartnerDTO dto, LanguageVersion language) {
     Partner bo = get(dto.id);
+    translationService.createEntityLanguageVersion(bo.getAddress(), dto.location, language);
     return translationService.createEntityLanguageVersion(bo, dto, language);
   }
 

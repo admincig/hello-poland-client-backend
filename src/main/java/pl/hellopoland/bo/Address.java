@@ -1,10 +1,20 @@
 package pl.hellopoland.bo;
 
+import java.util.HashSet;
+import java.util.Set;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
+import pl.hellopoland.annotation.Multilingual;
+import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.util.Translated;
 
 @Entity
-public class Address extends ModelSuperclass {
+public class Address extends ModelSuperclass implements Translated {
   private static final long serialVersionUID = -1990557956651882571L;
 
   @NotBlank
@@ -20,7 +30,19 @@ public class Address extends ModelSuperclass {
   @NotBlank
   private String street;
 
+  @Multilingual
   private String directions;
+
+  @Column(length = 5)
+  @Enumerated(EnumType.STRING)
+  private LanguageVersion defaultLanguage;
+
+  @ElementCollection
+  @Enumerated(EnumType.STRING)
+  private Set<LanguageVersion> availableLanguageVersions;
+
+  @Transient
+  private LanguageVersion currentLanguage;
 
   public String getCountry() {
     return country;
@@ -60,6 +82,52 @@ public class Address extends ModelSuperclass {
 
   public void setDirections(String directions) {
     this.directions = directions;
+  }
+
+  @Override
+  public LanguageVersion getDefaultLanguage() {
+    return defaultLanguage;
+  }
+
+  @Override
+  public void setDefaultLanguage(LanguageVersion defaultLanguage) {
+    this.defaultLanguage = defaultLanguage;
+  }
+
+  @Override
+  public Set<LanguageVersion> getAvailableLanguageVersions() {
+    return availableLanguageVersions;
+  }
+
+  @Override
+  public void setAvailableLanguageVersions(Set<LanguageVersion> availableLanguageVersions) {
+    this.availableLanguageVersions = availableLanguageVersions;
+  }
+
+  @Override
+  public boolean addAvailableLanguageVersion(LanguageVersion languageVersion) {
+    if (availableLanguageVersions == null) {
+      availableLanguageVersions = new HashSet<>();
+    }
+    return availableLanguageVersions.add(languageVersion);
+  }
+
+  @Override
+  public boolean deleteAvailableLanguageVersion(LanguageVersion languageVersion) {
+    if (availableLanguageVersions == null) {
+      availableLanguageVersions = new HashSet<>();
+    }
+    return availableLanguageVersions.remove(languageVersion);
+  }
+
+  @Override
+  public LanguageVersion getCurrentLanguage() {
+    return currentLanguage;
+  }
+
+  @Override
+  public void setCurrentLanguage(LanguageVersion currentLanguage) {
+    this.currentLanguage = currentLanguage;
   }
 
 }

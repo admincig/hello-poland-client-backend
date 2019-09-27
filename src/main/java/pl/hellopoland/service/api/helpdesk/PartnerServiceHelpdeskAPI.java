@@ -4,6 +4,7 @@ import java.util.stream.Collectors;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import pl.hellopoland.bo.Address;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.config.PartnerPagedCollectionConfig;
 import pl.hellopoland.dto.PartnerDTO;
@@ -61,7 +62,9 @@ public class PartnerServiceHelpdeskAPI {
   @RolesAllowed("admin")
   public PartnerDTO get(Long id, LanguageVersion lang) {
     Partner bo = service.get(id);
-    bo = transService.translateEntity(bo, lang, false);
+    Address address = transService.translateEntity(bo.getAddress(), lang, false);
+    bo = transService.translateEntity(bo, lang, true);
+    bo.setAddress(address);
     return DtoMapper.getFullDTO(bo);
   }
 
