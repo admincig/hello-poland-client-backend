@@ -3,8 +3,10 @@ package pl.hellopoland.bo;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -452,12 +454,12 @@ public class Partner extends ModelSuperclass implements Translated {
   }
 
   public void fetchCollections() {
-    this.getAvailableLanguageVersions().size();
-    this.getRepresentatives().size();
-    this.getUsers().size();
-    this.getSight().size();
-    this.getSightEvents().size();
+    Optional.ofNullable(this.getAgreements()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getAvailableLanguageVersions()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getRepresentatives()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getUsers()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getSight()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getSightEvents()).ifPresent(Collection::size);
   }
-
 
 }
