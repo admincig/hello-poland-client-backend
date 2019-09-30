@@ -139,8 +139,7 @@ public class TranslationService extends ServiceSuperclass {
           .equals(language)) {
         throw new ConflictingException("Deleting default language version is forbidden.");
       }
-      if ((boolean) bo.getClass().getMethod("deleteAvailableLanguageVersion", LanguageVersion.class)
-          .invoke(bo, language)) {
+      if (bo.deleteAvailableLanguageVersion(language)) {
         em.flush();
         getTranslations(bo, language).forEach(t -> t.setDeleted(true));
       } else {
@@ -205,14 +204,8 @@ public class TranslationService extends ServiceSuperclass {
 
   private <T extends Translated> void addAvailableLanguageVersion(T bo,
       LanguageVersion language) {
-    try {
-      bo.getClass().getMethod("addAvailableLanguageVersion", LanguageVersion.class).invoke(bo,
-          language);
-      em.flush();
-    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
-        | NoSuchMethodException | SecurityException e) {
-      logger.log(Level.ERROR, "failed to invoke reflection method", e);
-    }
+    bo.addAvailableLanguageVersion(language);
+    em.flush();
   }
 
   private String getKey(Translated bo) {

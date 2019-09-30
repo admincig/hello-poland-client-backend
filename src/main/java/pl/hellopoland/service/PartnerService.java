@@ -97,8 +97,9 @@ public class PartnerService extends ServiceSuperclass {
 
   public Partner update(Partner bo, MarketPartnerDTO dto, LanguageVersion lang) {
     if (!translationService.isTranslated(bo, lang)) {
-      translationService.createEntityLanguageVersion(bo, dto, lang);
       translationService.createEntityLanguageVersion(bo.getAddress(), dto, lang);
+      bo = em.merge(bo);
+      translationService.createEntityLanguageVersion(bo, dto, lang);
     }
     if (bo.getDefaultLanguage().equals(lang)) {
       DtoMapper.copy(dto, bo);
@@ -111,8 +112,9 @@ public class PartnerService extends ServiceSuperclass {
 
   public Partner update(Partner bo, PartnerDTO dto, LanguageVersion lang) {
     if (!translationService.isTranslated(bo, lang)) {
-      translationService.createEntityLanguageVersion(bo, dto, lang);
       translationService.createEntityLanguageVersion(bo.getAddress(), dto.location, lang);
+      bo = em.merge(bo);
+      translationService.createEntityLanguageVersion(bo, dto, lang);
     }
     if (bo.getDefaultLanguage().equals(lang)) {
       DtoMapper.copy(dto, bo);
@@ -126,12 +128,14 @@ public class PartnerService extends ServiceSuperclass {
   public Partner createLanguageVersion(MarketPartnerDTO dto, LanguageVersion language) {
     Partner bo = get(dto.id);
     translationService.createEntityLanguageVersion(bo.getAddress(), dto.location, language);
+    bo = em.merge(bo);
     return translationService.createEntityLanguageVersion(bo, dto, language);
   }
 
   public Partner createLanguageVersion(PartnerDTO dto, LanguageVersion language) {
     Partner bo = get(dto.id);
     translationService.createEntityLanguageVersion(bo.getAddress(), dto.location, language);
+    bo = em.merge(bo);
     return translationService.createEntityLanguageVersion(bo, dto, language);
   }
 
