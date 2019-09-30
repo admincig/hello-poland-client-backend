@@ -107,7 +107,7 @@ public class SightService extends ServiceSuperclass {
   }
 
   public Sight createLanguageVersion(SightDTO dto, LanguageVersion language) {
-    return translationService.createEntityLanguageVersion(getForLoggedPartner(dto.id), dto,
+    return translationService.createEntityLanguageVersion(get(dto.id), dto,
         language);
   }
 
