@@ -156,7 +156,7 @@ public class DbFiller extends ServiceSuperclass {
 
   private void createTags() {
     for (int i = 0; i < 10; i++) {
-      createCategory("tag " + i);
+      createTag("tag " + i);
     }
   }
 
