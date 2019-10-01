@@ -137,7 +137,7 @@ public class SightEventService extends ServiceSuperclass {
   public void delete(Long id) {
     SightEvent bo = get(id);
 
-    Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
+    Partner partner = bo.getPartner();
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
     helloTicket.deleteSightEvent(bo, partner.getHptToken());
