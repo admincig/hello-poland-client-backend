@@ -65,21 +65,30 @@ public class PartnerRestService {
     return Response.ok().build();
   }
 
-  @GET
-  @Path("/card")
-  public MarketPartnerDTO getCard(@HeaderParam("Content-Language") String langString) {
-    return service.getCard(RestService.parseLang(langString));
-  }
-
   @PUT
-  @Path("/mainImage")
+  @Path("/company/mainImage")
   @Consumes({"image/jpeg", "image/jpg"})
   public MarketPartnerDTO uploadIcon(byte[] icon) {
     return service.uploadMainImage(icon);
   }
 
+  @GET
+  @Path("/company/card")
+  public MarketPartnerDTO getCard(@HeaderParam("Content-Language") String langString) {
+    return service.getCard(RestService.parseLang(langString));
+  }
+
+  @POST
+  @Path("/company/card")
+  public MarketPartnerDTO createLanguageVersion(
+      @HeaderParam("Content-Language") String contentLanguage,
+      MarketPartnerDTO dto) {
+    LanguageVersion lang = RestService.parseLang(contentLanguage);
+    return service.createLanguageVersion(dto, lang);
+  }
+
   @PATCH
-  @Path("/defaultLanguage")
+  @Path("/company/card/defaultLanguage")
   public MarketPartnerDTO changeDefaultLanguage(
       @HeaderParam("Content-Language") String contentLanguage) {
     LanguageVersion lang = RestService.parseLang(contentLanguage);
@@ -87,19 +96,11 @@ public class PartnerRestService {
   }
 
   @PUT
-  @Path("/languageVersion/{language}")
+  @Path("/company/card/languageVersion/{language}")
   public MarketPartnerDTO update(@PathParam("language") String language,
       MarketPartnerDTO dto) {
     LanguageVersion lang = RestService.parseLang(language);
     return service.update(dto, lang);
-  }
-
-  @POST
-  public MarketPartnerDTO createLanguageVersion(
-      @HeaderParam("Content-Language") String contentLanguage,
-      MarketPartnerDTO dto) {
-    LanguageVersion lang = RestService.parseLang(contentLanguage);
-    return service.createLanguageVersion(dto, lang);
   }
 
 }
