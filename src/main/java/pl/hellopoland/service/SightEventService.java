@@ -593,6 +593,7 @@ public class SightEventService extends ServiceSuperclass {
     bo.setDefaultLanguage(language);
     bo = BeanUtils.copyNotNullProperties(translation, bo);
     em.merge(bo);
+    bo = get(bo.getId());
     if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
       Partner partner = bo.getPartner();
       Portal hpt = getPortal("Hello Ticket Cloud");

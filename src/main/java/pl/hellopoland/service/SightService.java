@@ -283,6 +283,8 @@ public class SightService extends ServiceSuperclass {
     bo.setDefaultLanguage(language);
     bo = BeanUtils.copyNotNullProperties(translation, bo);
     em.merge(bo);
+    bo = get(bo.getId());
+    recreateSearchIndex(bo);
     return bo;
   }
 
