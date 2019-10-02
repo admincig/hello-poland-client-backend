@@ -78,6 +78,9 @@ public class TranslationService extends ServiceSuperclass {
 
   public <T extends Translated> T translateEntity(T bo, LanguageVersion language,
       boolean fetchColections) {
+    if (bo == null) {
+      return null;
+    }
     if (fetchColections) {
       fetchColections(bo);
     }
