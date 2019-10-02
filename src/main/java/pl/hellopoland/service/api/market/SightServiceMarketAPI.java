@@ -1,10 +1,8 @@
 package pl.hellopoland.service.api.market;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -22,7 +20,6 @@ import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.service.SightService;
 import pl.hellopoland.service.TranslationService;
 import pl.hellopoland.util.DtoMapper;
-import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PagedEntityCollection;
 
 @Stateless
@@ -96,14 +93,16 @@ public class SightServiceMarketAPI {
     config.setPartner(bo.getPartner().getId());
     config.setExcludedIds(Set.of(bo.getId()));
     Collection<Sight> sights = service.getList(config, language).items;
-    HelloTicket hptClient =
-        new HelloTicket(sightEventService.getPortal("Hello Ticket Cloud").getUrl());
-    hptClient
-        .getSightEventsInDateRange(
-            new ArrayList<SightEvent>(sights.stream()
-                .flatMap(sight -> sight.getSightEvents().stream()).collect(Collectors.toList())),
-            null, null);
-    return sights.stream().map(minPriceMapper)
+    // HelloTicket hptClient =
+    // new HelloTicket(sightEventService.getPortal("Hello Ticket Cloud").getUrl());
+    // hptClient
+    // .getSightEventsInDateRange(
+    // new ArrayList<SightEvent>(sights.stream()
+    // .flatMap(sight -> sight.getSightEvents().stream()).collect(Collectors.toList())),
+    // null, null);
+    return sights.stream()
+        // .map(minPriceMapper)
+        .map(DtoMapper::getDTO)
         .collect(Collectors.toList());
   }
 
@@ -124,20 +123,23 @@ public class SightServiceMarketAPI {
   public PagedCollection getRecommended(Integer count, LanguageVersion languageVersion) {
     SightPagedCollectionConfig config = prepareConfigForRandom(count);
     PagedEntityCollection<Sight> pagedCollection = service.getList(config, languageVersion);
-    List<SightEvent> sightEvents = new ArrayList<>();
-    for (Sight s : pagedCollection.items) {
-      sightEvents.addAll(s.getSightEvents());
-    }
-    HelloTicket hptClient =
-        new HelloTicket(sightEventService.getPortal("Hello Ticket Cloud").getUrl());
-    Map<Long, List<SightEvent>> grouped =
-        hptClient.getSightEventsInDateRange(sightEvents, null, null).stream()
-            .collect(Collectors.groupingBy(se -> se.getSight().getId()));
-    for (Sight s : pagedCollection.items) {
-      s.setSightEvents(grouped.get(s.getId()));
-    }
+    // List<SightEvent> sightEvents = new ArrayList<>();
+    // for (Sight s : pagedCollection.items) {
+    // sightEvents.addAll(s.getSightEvents());
+    // }
+    // HelloTicket hptClient =
+    // new HelloTicket(sightEventService.getPortal("Hello Ticket Cloud").getUrl());
+    // Map<Long, List<SightEvent>> grouped =
+    // hptClient.getSightEventsInDateRange(sightEvents, null, null).stream()
+    // .collect(Collectors.groupingBy(se -> se.getSight().getId()));
+    // for (Sight s : pagedCollection.items) {
+    // s.setSightEvents(grouped.get(s.getId()));
+    // }
     return new PagedCollection(
-        pagedCollection.items.stream().map(minPriceMapper).collect(Collectors.toList()),
+        pagedCollection.items.stream()
+            // .map(minPriceMapper)
+            .map(DtoMapper::getDTO)
+            .collect(Collectors.toList()),
         pagedCollection.config);
   }
 
@@ -147,7 +149,7 @@ public class SightServiceMarketAPI {
     config.setOrderColumn("random()");
     config.onlyActive();
     config.onlyPublished();
-    config.fetchSightEvents(true);
+    // config.fetchSightEvents(true);
     return config;
   }
 
