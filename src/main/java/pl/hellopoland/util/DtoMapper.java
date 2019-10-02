@@ -589,6 +589,9 @@ public class DtoMapper {
     bo.setCommission(dto.commission);
     // bo.setContactPerson(contactPerson);
     // bo.setCorrespondenceAddress(correspondenceAddress);
+    if (bo.getAddress() == null) {
+      bo.setAddress(new Address());
+    }
     bo.getAddress().setCity(dto.location.city);
     bo.getAddress().setCountry(dto.location.country);
     bo.getAddress().setPostCode(dto.location.zipCode);
