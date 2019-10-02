@@ -41,6 +41,9 @@ public class PartnerServiceMarketAPI {
     Address address = transService.translateEntity(bo.getAddress(), parseLang, false);
     bo = transService.translateEntity(bo, parseLang, false);
     bo.setAddress(address);
+    bo.setCategories(transService.translateEntities(bo.getCategories(), parseLang, false));
+    bo.setSight(transService.translateEntities(bo.getSight(), parseLang, false));
+    bo.setSightEvents(transService.translateEntities(bo.getSightEvents(), parseLang, false));
     return DtoMapper.getFullMarketPartnerDTO(bo);
   }
 }

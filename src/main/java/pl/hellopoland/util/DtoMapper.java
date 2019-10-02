@@ -489,6 +489,13 @@ public class DtoMapper {
       dto.categories =
           bo.getCategories().stream().map(DtoMapper::getDTO).collect(Collectors.toList());
     }
+    if (bo.getSight() != null) {
+      dto.sights = bo.getSight().stream().map(DtoMapper::getDTO).collect(Collectors.toList());
+    }
+    if (bo.getSightEvents() != null) {
+      dto.sightEvents =
+          bo.getSightEvents().stream().map(DtoMapper::getDTO).collect(Collectors.toList());
+    }
     dto.cities = bo.getCities();
     dto.email = bo.getEmail();
     dto.phone = bo.getPhone();
