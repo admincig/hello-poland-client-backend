@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -94,8 +95,6 @@ public class SightServiceMarketAPI {
     SightPagedCollectionConfig config = prepareConfigForRandom(6);
     config.setPartner(bo.getPartner().getId());
     config.setExcludedIds(Set.of(bo.getId()));
-    HelloTicket hptClient =
-        new HelloTicket(sightEventService.getPortal("Hello Ticket Cloud").getUrl());
     Collection<Sight> sights = service.getList(config, language).items;
     hptClient
         .getSightEventsInDateRange(
@@ -119,18 +118,23 @@ public class SightServiceMarketAPI {
     return dto;
   };
 
+  HelloTicket hptClient =
+      new HelloTicket(sightEventService.getPortal("Hello Ticket Cloud").getUrl());
+
   @PermitAll
   public PagedCollection getRecommended(Integer count, LanguageVersion languageVersion) {
     SightPagedCollectionConfig config = prepareConfigForRandom(count);
     PagedEntityCollection<Sight> pagedCollection = service.getList(config, languageVersion);
-    HelloTicket hptClient =
-        new HelloTicket(sightEventService.getPortal("Hello Ticket Cloud").getUrl());
-    Collection<Sight> sights = service.getList(config, languageVersion).items;
     List<SightEvent> sightEvents = new ArrayList<>();
-    for (Sight s : sights) {
+    for (Sight s : pagedCollection.items) {
       sightEvents.addAll(s.getSightEvents());
     }
-    hptClient.getSightEventsInDateRange(sightEvents, null, null);
+    Map<Long, List<SightEvent>> grouped =
+        hptClient.getSightEventsInDateRange(sightEvents, null, null).stream()
+            .collect(Collectors.groupingBy(se -> se.getSight().getId()));
+    for (Sight s : pagedCollection.items) {
+      s.setSightEvents(grouped.get(s.getId()));
+    }
     return new PagedCollection(
         pagedCollection.items.stream().map(minPriceMapper).collect(Collectors.toList()),
         pagedCollection.config);
