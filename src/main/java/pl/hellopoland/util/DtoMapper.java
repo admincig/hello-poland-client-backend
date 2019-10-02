@@ -117,6 +117,8 @@ public class DtoMapper {
     dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
     dto.language = bo.getCurrentLanguage() == null ? dto.defaultLanguage
         : bo.getCurrentLanguage().getLanuage();
+    dto.partnerId = bo.getPartner().getId();
+    dto.partnerName = bo.getPartner().getName();
     return dto;
   }
 
