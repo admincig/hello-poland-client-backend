@@ -3,6 +3,7 @@ package pl.hellopoland.service.api.market;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
@@ -90,16 +91,30 @@ public class SightServiceMarketAPI {
     SightPagedCollectionConfig config = prepareConfigForRandom(6);
     config.setPartner(bo.getPartner().getId());
     config.setExcludedIds(Set.of(bo.getId()));
-    return service.getList(config, language).items.stream().map(DtoMapper::getDTO)
+    return service.getList(config, language).items.stream().map(minPriceMapper)
         .collect(Collectors.toList());
   }
+
+  private Function<Sight, SightDTO> minPriceMapper = s -> {
+    SightDTO dto = DtoMapper.getDTO(s);
+    sightEventService.fetchTicketPoolDefinitions(s.getSightEvents(), dto.sightEvents, false);
+    dto.sightEvents = dto.sightEvents.stream()
+        .filter(se -> sightEventService.isAvailable(se, null, null)).map(se -> {
+          se.ticketPoolDefinitions = null;
+          se.partnerAffiliateCode = null;
+          return se;
+        }).collect(Collectors.toList());
+    dto.minPrice = dto.sightEvents.stream().min(Comparator.comparing(seDto -> seDto.minPrice))
+        .map(seDto -> seDto.minPrice).orElse(null);
+    return dto;
+  };
 
   @PermitAll
   public PagedCollection getRecommended(Integer count, LanguageVersion languageVersion) {
     SightPagedCollectionConfig config = prepareConfigForRandom(count);
     PagedEntityCollection<Sight> pagedCollection = service.getList(config, languageVersion);
     return new PagedCollection(
-        pagedCollection.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList()),
+        pagedCollection.items.stream().map(minPriceMapper).collect(Collectors.toList()),
         pagedCollection.config);
   }
 
@@ -109,6 +124,7 @@ public class SightServiceMarketAPI {
     config.setOrderColumn("random()");
     config.onlyActive();
     config.onlyPublished();
+    config.fetchSightEvents(true);
     return config;
   }
 

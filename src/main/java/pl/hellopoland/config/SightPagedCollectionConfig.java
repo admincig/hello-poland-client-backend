@@ -6,10 +6,11 @@ import pl.hellopoland.bo.Sight;
 public class SightPagedCollectionConfig extends PagedCollectionConfig<Sight> {
 
   private boolean currentPartner;
+  private boolean fetchSightEvents;
 
   @Override
   public String joins() {
-    return "left join fetch e.mainImage mi";// join fetch e.sightEvents ses";
+    return "left join fetch e.mainImage mi join fetch e.partner p";
   }
 
   public void setSearchQuery(String searchQuery) {
@@ -65,6 +66,18 @@ public class SightPagedCollectionConfig extends PagedCollectionConfig<Sight> {
 
   public void setExcludedIds(Set<Long> ids) {
     addCondition("ids", ids, "e.id not in (:ids)");
+  }
+
+  public void fetchSightEvents(boolean fetchSightEvents) {
+    this.fetchSightEvents = fetchSightEvents;
+  }
+
+  public boolean isFetchSightEvents() {
+    return fetchSightEvents;
+  }
+
+  public void setFetchSightEvents(boolean fetchSightEvents) {
+    this.fetchSightEvents = fetchSightEvents;
   }
 
 }

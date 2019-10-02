@@ -59,8 +59,15 @@ public class SightService extends ServiceSuperclass {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
     }
     List<Sight> sights = getQuery(config).getResultList();
+    if (config.isFetchSightEvents()) {
+      sights.forEach(s -> s.getSightEvents().size());
+    }
     if (language != null) {
       sights = translationService.translateEntities(sights, language, false);
+      if (config.isFetchSightEvents()) {
+        sights.stream().flatMap(s -> s.getSightEvents().stream())
+            .forEach(se -> translationService.translateEntity(se, language, false));
+      }
     }
     Collections.sort(sights, getNamesComparator(Sight::getName, new Locale("pl_PL")));
 
