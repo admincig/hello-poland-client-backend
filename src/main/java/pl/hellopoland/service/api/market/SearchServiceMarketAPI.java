@@ -125,6 +125,7 @@ public class SearchServiceMarketAPI {
     seConfig.setSearchQuery(query);
     seConfig.setCity(city);
     seConfig.setFetchCategories(true);
+    seConfig.setFetchTags(true);
     PagedEntityCollection<SightEvent> sesPagedList = seService.getList(seConfig, languageVersion);
     List<SightEvent> ses =
         sesPagedList.items.stream().filter(SightEvent::isAccessible).collect(toList());

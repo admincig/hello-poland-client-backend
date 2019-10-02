@@ -10,6 +10,7 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
 
   private boolean currentPartner;
   private boolean fetchCategories;
+  private boolean fetchTags;
 
   @Override
   public String joins() {
@@ -115,5 +116,12 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
     addCondition("ids", ids, "e.id not in (:ids)");
   }
 
+  public void setFetchTags(boolean fetchTags) {
+    this.fetchTags = fetchTags;
+  }
+
+  public boolean isFetchTags() {
+    return fetchTags;
+  }
 
 }
