@@ -39,7 +39,7 @@ public class PartnerServiceMarketAPI {
   public MarketPartnerDTO get(Long id, LanguageVersion parseLang) {
     Partner bo = service.getPartnerWithCategoriesAndTagsAndCities(id);
     Address address = transService.translateEntity(bo.getAddress(), parseLang, false);
-    bo = transService.translateEntity(bo, parseLang, true);
+    bo = transService.translateEntity(bo, parseLang, false);
     bo.setAddress(address);
     return DtoMapper.getFullMarketPartnerDTO(bo);
   }

@@ -11,8 +11,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.InvocationContext;
 import org.apache.commons.lang3.StringUtils;
 import pl.hellopoland.annotation.Multilingual;
 import pl.hellopoland.bo.Translation;
@@ -25,33 +23,6 @@ import pl.hellopoland.util.Translated;
 @LocalBean
 @Stateless
 public class TranslationService extends ServiceSuperclass {
-
-  /**
-   * Checks whether the entity object implements interface Translated.
-   */
-  @SuppressWarnings("unchecked")
-  @AroundInvoke
-  public Object intercept(InvocationContext ctx) throws Exception {
-    Translated param = null;
-    Collection<Translated> collectionParam = null;
-    for (int i = 0; i < ctx.getParameters().length; i++) {
-      try {
-        param = (Translated) ctx.getParameters()[i];
-        break;
-      } catch (ClassCastException e1) {
-        try {
-          collectionParam = (Collection<Translated>) ctx.getParameters()[i];
-          break;
-        } catch (ClassCastException e2) {
-          continue;
-        }
-      }
-    }
-    if (param == null && collectionParam == null) {
-      throw new ConflictingException("Entity does not implement interface Translated");
-    }
-    return ctx.proceed();
-  }
 
   public <T extends Translated, D extends DTOSuperclass> T createEntityLanguageVersion(T bo,
       D dto, LanguageVersion language) {
