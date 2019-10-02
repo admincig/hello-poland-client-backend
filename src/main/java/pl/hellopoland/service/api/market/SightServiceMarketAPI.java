@@ -1,6 +1,7 @@
 package pl.hellopoland.service.api.market;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -93,18 +94,22 @@ public class SightServiceMarketAPI {
     SightPagedCollectionConfig config = prepareConfigForRandom(6);
     config.setPartner(bo.getPartner().getId());
     config.setExcludedIds(Set.of(bo.getId()));
-    return service.getList(config, language).items.stream().map(minPriceMapper)
+    HelloTicket hptClient =
+        new HelloTicket(sightEventService.getPortal("Hello Ticket Cloud").getUrl());
+    Collection<Sight> sights = service.getList(config, language).items;
+    hptClient
+        .getSightEventsInDateRange(
+            new ArrayList<SightEvent>(sights.stream()
+                .flatMap(sight -> sight.getSightEvents().stream()).collect(Collectors.toList())),
+            null, null);
+    return sights.stream().map(minPriceMapper)
         .collect(Collectors.toList());
   }
 
   private Function<Sight, SightDTO> minPriceMapper = s -> {
     SightDTO dto = DtoMapper.getDTO(s);
-    HelloTicket hptClient =
-        new HelloTicket(sightEventService.getPortal("Hello Ticket Cloud").getUrl());
-    List<SightEvent> ses = hptClient
-        .getSightEventsInDateRange(new ArrayList<SightEvent>(s.getSightEvents()), null, null);
     dto.sightEvents =
-        ses.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
+        s.getSightEvents().stream().map(DtoMapper::getDTO).collect(Collectors.toList());
     dto.minPrice = dto.sightEvents.stream().min(Comparator.comparing(seDto -> seDto.minPrice))
         .map(seDto -> seDto.minPrice).orElse(null);
     return dto;
@@ -114,6 +119,14 @@ public class SightServiceMarketAPI {
   public PagedCollection getRecommended(Integer count, LanguageVersion languageVersion) {
     SightPagedCollectionConfig config = prepareConfigForRandom(count);
     PagedEntityCollection<Sight> pagedCollection = service.getList(config, languageVersion);
+    HelloTicket hptClient =
+        new HelloTicket(sightEventService.getPortal("Hello Ticket Cloud").getUrl());
+    Collection<Sight> sights = service.getList(config, languageVersion).items;
+    hptClient
+        .getSightEventsInDateRange(
+            new ArrayList<SightEvent>(sights.stream()
+                .flatMap(sight -> sight.getSightEvents().stream()).collect(Collectors.toList())),
+            null, null);
     return new PagedCollection(
         pagedCollection.items.stream().map(minPriceMapper).collect(Collectors.toList()),
         pagedCollection.config);
