@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -112,10 +111,11 @@ public class SightServiceMarketAPI {
     dto.sightEvents =
         s.getSightEvents().stream()
             .map(DtoMapper::getDTO)
-            .filter(Objects::nonNull)
             .collect(Collectors.toList());
-    dto.minPrice = dto.sightEvents.stream().min(Comparator.comparing(seDto -> seDto.minPrice))
-        .map(seDto -> seDto.minPrice).orElse(null);
+    dto.minPrice = dto.sightEvents.stream()
+        .min(Comparator.comparing(seDto -> seDto.minPrice))
+        .map(seDto -> seDto.minPrice)
+        .orElse(null);
     return dto;
   };
 
@@ -126,11 +126,11 @@ public class SightServiceMarketAPI {
     HelloTicket hptClient =
         new HelloTicket(sightEventService.getPortal("Hello Ticket Cloud").getUrl());
     Collection<Sight> sights = service.getList(config, languageVersion).items;
-    hptClient
-        .getSightEventsInDateRange(
-            new ArrayList<SightEvent>(sights.stream()
-                .flatMap(sight -> sight.getSightEvents().stream()).collect(Collectors.toList())),
-            null, null);
+    List<SightEvent> sightEvents = new ArrayList<>();
+    for (Sight s : sights) {
+      sightEvents.addAll(s.getSightEvents());
+    }
+    hptClient.getSightEventsInDateRange(sightEvents, null, null);
     return new PagedCollection(
         pagedCollection.items.stream().map(minPriceMapper).collect(Collectors.toList()),
         pagedCollection.config);
