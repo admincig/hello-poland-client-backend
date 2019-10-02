@@ -1,5 +1,6 @@
 package pl.hellopoland.service.api.market;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -19,6 +20,7 @@ import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.service.SightService;
 import pl.hellopoland.service.TranslationService;
 import pl.hellopoland.util.DtoMapper;
+import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PagedEntityCollection;
 
 @Stateless
@@ -97,15 +99,12 @@ public class SightServiceMarketAPI {
 
   private Function<Sight, SightDTO> minPriceMapper = s -> {
     SightDTO dto = DtoMapper.getDTO(s);
+    HelloTicket hptClient =
+        new HelloTicket(sightEventService.getPortal("Hello Ticket Cloud").getUrl());
+    List<SightEvent> ses = hptClient
+        .getSightEventsInDateRange(new ArrayList<SightEvent>(s.getSightEvents()), null, null);
     dto.sightEvents =
-        s.getSightEvents().stream().map(DtoMapper::getDTO).collect(Collectors.toList());
-    sightEventService.fetchTicketPoolDefinitions(s.getSightEvents(), dto.sightEvents, false);
-    dto.sightEvents = dto.sightEvents.stream()
-        .filter(se -> sightEventService.isAvailable(se, null, null)).map(se -> {
-          se.ticketPoolDefinitions = null;
-          se.partnerAffiliateCode = null;
-          return se;
-        }).collect(Collectors.toList());
+        ses.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
     dto.minPrice = dto.sightEvents.stream().min(Comparator.comparing(seDto -> seDto.minPrice))
         .map(seDto -> seDto.minPrice).orElse(null);
     return dto;
