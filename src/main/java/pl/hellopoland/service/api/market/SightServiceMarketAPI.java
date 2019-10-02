@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -109,7 +110,10 @@ public class SightServiceMarketAPI {
   private Function<Sight, SightDTO> minPriceMapper = s -> {
     SightDTO dto = DtoMapper.getDTO(s);
     dto.sightEvents =
-        s.getSightEvents().stream().map(DtoMapper::getDTO).collect(Collectors.toList());
+        s.getSightEvents().stream()
+            .map(DtoMapper::getDTO)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
     dto.minPrice = dto.sightEvents.stream().min(Comparator.comparing(seDto -> seDto.minPrice))
         .map(seDto -> seDto.minPrice).orElse(null);
     return dto;
