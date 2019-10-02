@@ -31,6 +31,7 @@ import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.SightEventCategory;
+import pl.hellopoland.bo.SightEventTag;
 import pl.hellopoland.bo.TicketDefinition;
 import pl.hellopoland.bo.Translation;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
@@ -81,6 +82,9 @@ public class SightEventService extends ServiceSuperclass {
   @Inject
   private CategoryService catService;
 
+  @Inject
+  private TagService tagService;
+
   public List<SightEvent> getAllActiveAndPublishedAndNotBlocked() {
     return em.createQuery(
         "from SightEvent where active is true and published is true and blocked is false",
@@ -98,6 +102,12 @@ public class SightEventService extends ServiceSuperclass {
       Map<SightEvent, Set<SightEventCategory>> grouped = categories.stream()
           .collect(Collectors.groupingBy(SightEventCategory::getSightEvent, Collectors.toSet()));
       sightEvents.forEach(se -> se.setCategories(grouped.get(se)));
+    }
+    if (!sightEvents.isEmpty() && config.isFetchTags()) {
+      List<SightEventTag> tags = tagService.getFor(sightEvents);
+      Map<SightEvent, Set<SightEventTag>> grouped = tags.stream()
+          .collect(Collectors.groupingBy(SightEventTag::getSightEvent, Collectors.toSet()));
+      sightEvents.forEach(se -> se.setTags(grouped.get(se)));
     }
     if (language != null) {
       sightEvents = translationService.translateEntities(sightEvents, language, false);
