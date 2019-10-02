@@ -1,6 +1,5 @@
 package pl.hellopoland.service.api.market;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -98,7 +97,8 @@ public class SightServiceMarketAPI {
 
   private Function<Sight, SightDTO> minPriceMapper = s -> {
     SightDTO dto = DtoMapper.getDTO(s);
-    dto.sightEvents = new ArrayList<>();
+    dto.sightEvents =
+        s.getSightEvents().stream().map(DtoMapper::getDTO).collect(Collectors.toList());
     sightEventService.fetchTicketPoolDefinitions(s.getSightEvents(), dto.sightEvents, false);
     dto.sightEvents = dto.sightEvents.stream()
         .filter(se -> sightEventService.isAvailable(se, null, null)).map(se -> {
