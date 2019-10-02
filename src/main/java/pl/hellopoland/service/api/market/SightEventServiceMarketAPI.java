@@ -112,17 +112,24 @@ public class SightEventServiceMarketAPI {
   @PermitAll
   public PagedCollection getRecommended(Integer count, LanguageVersion languageVersion) {
     SightEventPagedCollectionConfig config = prepareConfigForRandom(count);
-    PagedEntityCollection<SightEvent> pagedCollection = service.getList(config, languageVersion);
-    return new PagedCollection(
-        pagedCollection.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList()),
-        pagedCollection.config);
+    PagedEntityCollection<SightEvent> pc = service.getList(config, languageVersion);
+    HelloTicket hptClient = new HelloTicket(service.getPortal("Hello Ticket Cloud").getUrl());
+    List<SightEvent> ses = hptClient.getSightEventsInDateRange(new ArrayList<SightEvent>(pc.items),
+        new Date(), null);
+    List<SightEventDTO> dtos = ses.stream().map(DtoMapper::getDTO)
+        .collect(Collectors.toList());
+    return new PagedCollection(dtos, pc.config);
   }
 
   private List<SightEventDTO> getSimilar(SightEvent bo, LanguageVersion language) {
     SightEventPagedCollectionConfig config = prepareConfigForRandom(6);
     config.setSight(bo.getSight());
     config.setExcludedIds(Set.of(bo.getId()));
-    return service.getList(config, language).items.stream().map(DtoMapper::getDTO)
+    PagedEntityCollection<SightEvent> pc = service.getList(config, language);
+    HelloTicket hptClient = new HelloTicket(service.getPortal("Hello Ticket Cloud").getUrl());
+    List<SightEvent> ses = hptClient.getSightEventsInDateRange(new ArrayList<SightEvent>(pc.items),
+        new Date(), null);
+    return ses.stream().map(DtoMapper::getDTO)
         .collect(Collectors.toList());
   }
 
