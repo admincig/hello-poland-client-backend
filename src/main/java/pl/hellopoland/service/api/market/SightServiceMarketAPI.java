@@ -96,6 +96,8 @@ public class SightServiceMarketAPI {
     config.setPartner(bo.getPartner().getId());
     config.setExcludedIds(Set.of(bo.getId()));
     Collection<Sight> sights = service.getList(config, language).items;
+    HelloTicket hptClient =
+        new HelloTicket(sightEventService.getPortal("Hello Ticket Cloud").getUrl());
     hptClient
         .getSightEventsInDateRange(
             new ArrayList<SightEvent>(sights.stream()
@@ -118,9 +120,6 @@ public class SightServiceMarketAPI {
     return dto;
   };
 
-  HelloTicket hptClient =
-      new HelloTicket(sightEventService.getPortal("Hello Ticket Cloud").getUrl());
-
   @PermitAll
   public PagedCollection getRecommended(Integer count, LanguageVersion languageVersion) {
     SightPagedCollectionConfig config = prepareConfigForRandom(count);
@@ -129,6 +128,8 @@ public class SightServiceMarketAPI {
     for (Sight s : pagedCollection.items) {
       sightEvents.addAll(s.getSightEvents());
     }
+    HelloTicket hptClient =
+        new HelloTicket(sightEventService.getPortal("Hello Ticket Cloud").getUrl());
     Map<Long, List<SightEvent>> grouped =
         hptClient.getSightEventsInDateRange(sightEvents, null, null).stream()
             .collect(Collectors.groupingBy(se -> se.getSight().getId()));
