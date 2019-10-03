@@ -71,7 +71,10 @@ public class TagService extends ServiceSuperclass {
   }
 
   public void delete(Long id) {
-    em.remove(get(id));
+    Tag tag = get(id);
+    em.createQuery("delete from SightEventTag where tag=:tag")
+        .setParameter("tag", tag).executeUpdate();
+    em.remove(tag);
   }
 
   public void deleteLanguageVersion(Long id, LanguageVersion lang) {

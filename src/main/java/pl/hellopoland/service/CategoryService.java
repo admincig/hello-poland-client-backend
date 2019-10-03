@@ -71,7 +71,10 @@ public class CategoryService extends ServiceSuperclass {
   }
 
   public void delete(Long id) {
-    em.remove(get(id));
+    Category category = get(id);
+    em.createQuery("delete from SightEventCategory where category=:category")
+        .setParameter("category", category).executeUpdate();
+    em.remove(category);
   }
 
   public void deleteLanguageVersion(Long id, LanguageVersion lang) {
