@@ -541,6 +541,7 @@ public class DtoMapper {
     dto.id = bo.getId();
     dto.label = bo.getLabel();
     dto.iconUrl = bo.getIconUrl();
+    dto.backgroundUrl = bo.getBackgroundUrl();
     dto.restricted = bo.isRestricted();
     dto.assignedItemsCount = bo.getAssignedItemsCount();
     dto.recommended = bo.isRecommended();

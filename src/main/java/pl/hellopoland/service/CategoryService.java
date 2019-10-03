@@ -14,7 +14,6 @@ import pl.hellopoland.config.CategoryPagedCollectionConfig;
 import pl.hellopoland.dto.CategoryDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
-import pl.hellopoland.util.BeanUtils;
 import pl.hellopoland.util.PagedEntityCollection;
 
 @Stateless
@@ -27,6 +26,7 @@ public class CategoryService extends ServiceSuperclass {
     Category cat = new Category();
     cat.setLabel(dto.label);
     cat.setIconUrl(dto.iconUrl);
+    cat.setBackgroundUrl(dto.backgroundUrl);
     cat.setRestricted(Boolean.TRUE.equals(dto.restricted));
     cat.setRecommended(Boolean.TRUE.equals(dto.recommended));
     cat.setDefaultLanguage(LanguageVersion.getForCreateAndUpdateEntity(dto.language));
@@ -57,6 +57,7 @@ public class CategoryService extends ServiceSuperclass {
       bo.setRecommended(dto.recommended);
       bo.setRestricted(dto.restricted);
       bo.setIconUrl(dto.iconUrl);
+      bo.setBackgroundUrl(dto.backgroundUrl);
       em.flush();
     }
     return tService.updateEntityLanguageVersion(bo, dto, lang);
@@ -66,7 +67,7 @@ public class CategoryService extends ServiceSuperclass {
     Category bo = get(id);
     Category translation = tService.translateEntity(bo, language, true);
     bo.setDefaultLanguage(language);
-    bo = BeanUtils.copyNotNullProperties(translation, bo);
+    bo.setLabel(translation.getLabel());
     return em.merge(bo);
   }
 

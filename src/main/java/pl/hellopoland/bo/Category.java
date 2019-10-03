@@ -30,6 +30,7 @@ public class Category extends ModelSuperclass implements Translated {
   private boolean restricted;
   private boolean recommended;
   private String iconUrl;
+  private String backgroundUrl;
   private int assignedItemsCount;
   @Transient
   private LanguageVersion currentLanguage;
@@ -84,6 +85,14 @@ public class Category extends ModelSuperclass implements Translated {
 
   public void setIconUrl(String iconUrl) {
     this.iconUrl = iconUrl;
+  }
+
+  public String getBackgroundUrl() {
+    return backgroundUrl;
+  }
+
+  public void setBackgroundUrl(String backgroundUrl) {
+    this.backgroundUrl = backgroundUrl;
   }
 
   public int getAssignedItemsCount() {
