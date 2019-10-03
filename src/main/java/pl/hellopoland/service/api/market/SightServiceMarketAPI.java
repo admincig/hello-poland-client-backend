@@ -104,14 +104,16 @@ public class SightServiceMarketAPI {
 
   private Function<Sight, SightDTO> minPriceMapper = s -> {
     SightDTO dto = DtoMapper.getDTO(s);
-    dto.sightEvents =
-        s.getSightEvents().stream()
-            .map(DtoMapper::getDTO)
-            .collect(Collectors.toList());
-    dto.minPrice = dto.sightEvents.stream()
-        .min(Comparator.comparing(seDto -> seDto.minPrice))
-        .map(seDto -> seDto.minPrice)
-        .orElse(null);
+    if (s.getSightEvents() != null && !s.getSightEvents().isEmpty()) {
+      dto.sightEvents =
+          s.getSightEvents().stream()
+              .map(DtoMapper::getDTO)
+              .collect(Collectors.toList());
+      dto.minPrice = dto.sightEvents.stream()
+          .min(Comparator.comparing(seDto -> seDto.minPrice))
+          .map(seDto -> seDto.minPrice)
+          .orElse(null);
+    }
     return dto;
   };
 
