@@ -639,7 +639,7 @@ public class SightEventService extends ServiceSuperclass {
   public List<String> getCitiesForPublicEvents() {
     return em.createQuery(
         "select distinct location.city from SightEvent where active = true "
-            + "and published = true and blocked = false and available = true",
+            + "and published = true and blocked = false and available = true order by location.city asc",
         String.class).getResultStream().filter(city -> !city.isBlank())
         .collect(Collectors.toList());
   }
