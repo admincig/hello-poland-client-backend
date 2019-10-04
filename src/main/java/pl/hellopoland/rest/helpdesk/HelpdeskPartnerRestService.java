@@ -57,6 +57,15 @@ public class HelpdeskPartnerRestService {
     return service.get(id, RestService.parseLang(contentLanguage));
   }
 
+  @PATCH
+  @Path("/{id}")
+  public PartnerDTO setBlocked(
+      @HeaderParam("Content-Language") String contentLanguage,
+      @PathParam("id") Long id,
+      PartnerDTO dto) {
+    return service.setBlocked(id, dto.blocked, RestService.parseLang(contentLanguage));
+  }
+
   @DELETE
   @Path("/{id}/languageVersion/{language}")
   public Response deleteLanguageVersion(

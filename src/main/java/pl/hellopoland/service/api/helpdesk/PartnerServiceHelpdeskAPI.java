@@ -90,4 +90,11 @@ public class PartnerServiceHelpdeskAPI {
     return get(id, bo.getDefaultLanguage());
   }
 
+  @RolesAllowed("admin")
+  public PartnerDTO setBlocked(Long id, boolean blocked, LanguageVersion lang) {
+    Partner bo = service.get(id);
+    service.setBlocked(bo, blocked);
+    return get(id, lang);
+  }
+
 }

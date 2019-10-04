@@ -145,4 +145,9 @@ public class PartnerService extends ServiceSuperclass {
     return partner;
   }
 
+  public void setBlocked(Partner bo, boolean blocked) {
+    bo.setBlocked(blocked);
+    em.flush();
+  }
+
 }
