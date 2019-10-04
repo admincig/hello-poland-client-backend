@@ -34,8 +34,8 @@ public class ServiceHelpdeskAPI {
 
   @RolesAllowed("admin")
   public void rebuildSearchIndices() {
-    sightEventService.rebuildSearchIndices();
     sightService.rebuildSearchIndices();
+    sightEventService.rebuildSearchIndices();
   }
 
 }

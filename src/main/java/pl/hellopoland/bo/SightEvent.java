@@ -429,9 +429,11 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
 
   public void recreateSearchIndex(Set<String> words) {
     this.searchIndex =
-        Stream
-            .concat(words.stream(),
-                Stream.of(email, phone, name, location.getStreet(), partner.getName()))
+        Stream.of(
+            words.stream(),
+            Stream.of(email, phone, name, location.getStreet(), partner.getName()),
+            Stream.of(sight.getSearchIndex().split(",")))
+            .flatMap(s -> s)
             .filter(Objects::nonNull)
             .flatMap(s -> Stream.of(s.split(" ")))
             .map(w -> w.replaceAll("[^a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]", ""))

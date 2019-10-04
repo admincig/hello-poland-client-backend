@@ -197,11 +197,9 @@ public class SightEventService extends ServiceSuperclass {
       });
       bo.setOpeningHours(oHoursList);
     }
+    em.refresh(sight);
+    sightService.recreateSearchIndex(sight);
     recreateSearchIndex(bo);
-    if (sight != null) {
-      em.refresh(sight);
-      sightService.recreateSearchIndex(sight);
-    }
     logger.log(Logger.Level.INFO, "Saved new sight event: " + bo.getName());
     return createLanguageVersion(DtoMapper.getDTO(bo), partner, bo.getDefaultLanguage());
   }
@@ -259,11 +257,9 @@ public class SightEventService extends ServiceSuperclass {
       }
       bo.setOpeningHours(null);
       bo.setOpeningHours(oHoursList);
+      em.refresh(bo.getSight());
+      sightService.recreateSearchIndex(bo.getSight());
       recreateSearchIndex(bo);
-      if (bo.getSight() != null) {
-        em.refresh(bo.getSight());
-        sightService.recreateSearchIndex(bo.getSight());
-      }
       em.flush();
     }
     return translationService.updateEntityLanguageVersion(bo, dto, language);
@@ -610,8 +606,8 @@ public class SightEventService extends ServiceSuperclass {
       HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
       helloTicket.updateSightEvent(DtoMapper.getDTO(bo), partner.getHptToken());
     }
-    recreateSearchIndex(bo);
     sightService.recreateSearchIndex(bo.getSight());
+    recreateSearchIndex(bo);
     return bo;
   }
 

@@ -302,8 +302,6 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
   public void recreateSearchIndex(Set<String> words) {
     this.searchIndex =
         Stream.of(
-            Optional.ofNullable(sightEvents).stream().flatMap(se -> se.stream())
-                .flatMap(se -> Stream.of(se.getSearchIndex().split(","))),
             Stream.of(email, name, phone),
             words.stream()).flatMap(s -> s)
             .filter(Objects::nonNull)
