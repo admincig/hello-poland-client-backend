@@ -65,7 +65,7 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
 
   public void setCity(String city) {
     if (city != null) {
-      addCondition("city", city.toLowerCase(), "lower(e.location.city)=:city");
+      addCondition("city", city.toUpperCase(), "upper(e.location.city)=:city");
     }
   }
 
