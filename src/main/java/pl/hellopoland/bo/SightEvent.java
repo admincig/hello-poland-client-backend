@@ -431,7 +431,7 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
     this.searchIndex =
         Stream
             .concat(words.stream(),
-                Stream.of(email, phone, location.getStreet(), partner.getName()))
+                Stream.of(email, phone, name, location.getStreet(), partner.getName()))
             .filter(Objects::nonNull)
             .flatMap(s -> Stream.of(s.split(" ")))
             .map(w -> w.replaceAll("[^a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]", ""))
