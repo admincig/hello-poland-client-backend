@@ -21,6 +21,7 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
     if (searchQuery != null) {
       addCondition("searchQuery",
           searchQuery, "tsearch('polish_hunspell', e.searchIndex, :searchQuery) = true");
+
       /*
         "%" + searchQuery.toLowerCase() + "%",
         "((unaccent(lower(e.name)) like unaccent(:searchQuery))" +

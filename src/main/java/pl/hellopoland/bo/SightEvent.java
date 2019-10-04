@@ -24,6 +24,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
@@ -74,6 +75,7 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
   @ManyToOne
   private FileDescriptor pdfAttachment;
   @OneToMany(mappedBy = "sightEvent")
+  @OrderBy("day asc")
   private Collection<OpeningHours> openingHours = new ArrayList<>();
   @ManyToOne
   private Portal portal;
