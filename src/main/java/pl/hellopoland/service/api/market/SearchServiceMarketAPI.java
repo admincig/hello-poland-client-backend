@@ -77,11 +77,13 @@ public class SearchServiceMarketAPI {
           .filter(event -> event.getCategories() != null)
           .flatMap(event -> event.getCategories().stream())
           .map(SightEventCategory::getCategory)
+          .distinct()
           .collect(toList());
       List<Tag> tags = se.stream()
           .filter(event -> event.getTags() != null)
           .flatMap(event -> event.getTags().stream())
           .map(SightEventTag::getTag)
+          .distinct()
           .collect(toList());
 
       SightDTO dto = DtoMapper.getDTO(s);
