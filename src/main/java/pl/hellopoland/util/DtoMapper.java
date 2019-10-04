@@ -7,7 +7,6 @@ import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import pl.hellopoland.bo.Address;
@@ -187,7 +186,7 @@ public class DtoMapper {
     // }
     if (bo.getOpeningHours() != null && !bo.getOpeningHours().isEmpty()) {
       dto.openingHours = bo.getOpeningHours().stream().map(DtoMapper::getDTO)
-          .sorted(Comparator.comparing(oh -> oh.day))
+          .sorted((oh1, oh2) -> oh1.day.compareTo(oh2.day))
           .collect(toList());
     }
     if (bo.getAgreements() != null && !bo.getAgreements().isEmpty()) {
