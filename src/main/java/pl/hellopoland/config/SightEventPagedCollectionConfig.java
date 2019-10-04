@@ -33,12 +33,6 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
     }
   }
 
-  public void setName(String name) {
-    if (name != null) {
-      addCondition("name", name.toLowerCase(), "lower(e.name)=:name");
-    }
-  }
-
   public void onlyAvailable() {
     addCondition("available", true, "e.available=:available");
   }
@@ -67,7 +61,7 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
 
   public void setCity(String city) {
     if (city != null) {
-      addCondition("city", city, "e.location.city=:city");
+      addCondition("city", CaseUtils.toCamelCase(city, true, ' '), "e.location.city=:city");
     }
   }
 
