@@ -186,7 +186,6 @@ public class DtoMapper {
     // }
     if (bo.getOpeningHours() != null && !bo.getOpeningHours().isEmpty()) {
       dto.openingHours = bo.getOpeningHours().stream().map(DtoMapper::getDTO)
-          .sorted((oh1, oh2) -> oh1.day.compareTo(oh2.day))
           .collect(toList());
     }
     if (bo.getAgreements() != null && !bo.getAgreements().isEmpty()) {

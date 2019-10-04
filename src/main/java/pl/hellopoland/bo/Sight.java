@@ -23,6 +23,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import pl.hellopoland.annotation.Multilingual;
@@ -62,6 +63,7 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
   @OneToMany(mappedBy = "sight")
   private List<SightEvent> sightEvents = new ArrayList<>();
   @OneToMany(mappedBy = "sight")
+  @OrderBy("day asc")
   private List<OpeningHours> openingHours = new ArrayList<>();
   @ManyToMany
   private Set<Agreement> agreements = new HashSet<>();
