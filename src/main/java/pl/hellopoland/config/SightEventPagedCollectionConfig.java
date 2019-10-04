@@ -3,7 +3,7 @@ package pl.hellopoland.config;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.text.CaseUtils;
+import org.apache.commons.text.WordUtils;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 
@@ -21,7 +21,7 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
   public void setSearchQuery(String searchQuery) {
     if (searchQuery != null) {
       addCondition("searchQuery",
-          CaseUtils.toCamelCase(searchQuery, true, ' '),
+          WordUtils.capitalizeFully(searchQuery),
           "tsearch('polish_hunspell', e.searchIndex, :searchQuery) = true");
 
       /*
@@ -61,7 +61,7 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
 
   public void setCity(String city) {
     if (city != null) {
-      addCondition("city", CaseUtils.toCamelCase(city, true, ' '), "e.location.city=:city");
+      addCondition("city", WordUtils.capitalizeFully(city), "e.location.city=:city");
     }
   }
 
