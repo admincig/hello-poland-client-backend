@@ -115,7 +115,7 @@ public class SightEventService extends ServiceSuperclass {
     // List<SightEvent> sightEvents = getQuery(config).getResultList().stream()
     // .sorted(sightEventDatesComparator()).collect(toList());
     Collections.sort(sightEvents, sightEventPromotionComparator()
-        .thenComparing(sightEventNamesComparator(new Locale("pl_PL"))));
+        .thenComparing(sightEventNamesComparator()));
     return new PagedEntityCollection<>(sightEvents, config);
   }
 
@@ -124,10 +124,8 @@ public class SightEventService extends ServiceSuperclass {
         Comparator.nullsLast(Comparator.naturalOrder())));
   }
 
-  private Comparator<SightEvent> sightEventNamesComparator(Locale locale) {
-    var collator = Collator.getInstance(locale);
-    collator.setStrength(Collator.CANONICAL_DECOMPOSITION);
-    return Comparator.comparing(SightEvent::getName, collator);
+  private Comparator<SightEvent> sightEventNamesComparator() {
+    return Comparator.comparing(SightEvent::getName, polishComparator());
   }
 
   public SightEvent get(Long id) {
@@ -637,7 +635,14 @@ public class SightEventService extends ServiceSuperclass {
         "select distinct location.city from SightEvent where active = true "
             + "and published = true and blocked = false and available = true order by location.city asc",
         String.class).getResultStream().filter(city -> !city.isBlank())
+        .sorted(polishComparator())
         .collect(Collectors.toList());
+  }
+
+  private Comparator<Object> polishComparator() {
+    var collator = Collator.getInstance(new Locale("pl_PL"));
+    collator.setStrength(Collator.CANONICAL_DECOMPOSITION);
+    return collator;
   }
 
   public void rebuildSearchIndices() {
