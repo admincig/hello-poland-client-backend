@@ -73,7 +73,7 @@ public class TranslationService extends ServiceSuperclass {
         continue;
       }
     }
-    return translateEntity(bo, language, true);
+    return translateEntity(bo, language, false);
   }
 
   public <T extends Translated> T translateEntity(T bo, LanguageVersion language,
