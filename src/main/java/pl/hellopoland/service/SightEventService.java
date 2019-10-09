@@ -41,7 +41,6 @@ import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.AvailableTicketNumberAssociationDTO;
 import pl.hellopoland.dto.PushDTO;
 import pl.hellopoland.dto.SightEventDTO;
-import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.enums.LanguageVersion;
@@ -330,9 +329,8 @@ public class SightEventService extends ServiceSuperclass {
         Partner partner = entry.getKey();
         Stream<TicketPoolDefinitionDTO> poolDefinitionsDtos =
             downloadHptTpds(partner, showDeletedTPD);
-        List<TicketDefinitionDTO> ticketDefinitions = new ArrayList<>();
-        poolDefinitionsDtos.map(p -> p.ticketDefinitions).forEach(ticketDefinitions::addAll);
-        List<Long> ticketsExternalIds = ticketDefinitions.stream().map(t -> t.id).collect(toList());
+        List<Long> ticketsExternalIds = poolDefinitionsDtos
+            .flatMap(p -> p.ticketDefinitions.stream()).map(td -> td.id).collect(toList());
         ticketsGroupedByExternalId.putAll(getTds(ticketsExternalIds));
 
         var poolDefinitionsGroupedBySightEventId =
@@ -372,12 +370,15 @@ public class SightEventService extends ServiceSuperclass {
     return ticketBos.collect(groupingBy(TicketDefinition::getExternalId));
   }
 
-  private Stream<TicketPoolDefinitionDTO> downloadHptTpds(Partner partner, boolean showDeletedTPD) {
+  private Stream<TicketPoolDefinitionDTO> downloadHptTpds(Partner partner,
+      boolean showDeletedAndOverdued) {
     HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
     Stream<TicketPoolDefinitionDTO> poolDefinitions =
         hpt.getTicketPoolDefinitions(partner.getHptToken()).stream();
-    if (!showDeletedTPD) {
-      poolDefinitions = poolDefinitions.filter(tpd -> !tpd.deleted);
+    if (!showDeletedAndOverdued) {
+      poolDefinitions = poolDefinitions.filter(tpd -> !tpd.deleted).filter(tpd -> {
+        return tpd.isCyclic && tpd.frequencyData.endDate.before(new Date());
+      });
     }
     return poolDefinitions;
   }
