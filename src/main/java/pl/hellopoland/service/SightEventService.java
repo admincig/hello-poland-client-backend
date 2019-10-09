@@ -46,7 +46,6 @@ import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.AccessDeniedException;
-import pl.hellopoland.service.timer.SightEventFetcherCacheScheduler;
 import pl.hellopoland.util.BeanUtils;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
@@ -56,9 +55,6 @@ import pl.hellopoland.util.Triplet;
 @LocalBean
 @Stateless
 public class SightEventService extends ServiceSuperclass {
-
-  @Inject
-  private SightEventFetcherCacheScheduler cache;
 
   @Inject
   private ImageService iService;
@@ -617,7 +613,7 @@ public class SightEventService extends ServiceSuperclass {
   public List<String> getCitiesForPublicEvents() {
     return em.createQuery(
         "select distinct location.city from SightEvent where active = true "
-            + "and published = true and blocked = false and available = true order by location.city asc",
+            + "and published = true and blocked = false and available = true and partner.blocked = false order by location.city asc",
         String.class).getResultStream()
         .map(String::strip)
         .filter(city -> !city.isBlank())
