@@ -617,6 +617,7 @@ public class HelloTicket {
     is = conn.getInputStream();
     logger.log(System.Logger.Level.INFO, "Server responded with code: " + respCode);
     var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
+    logger.log(System.Logger.Level.DEBUG, "Server responded with body: " + resp);
     is.close();
     return resp;
   }
