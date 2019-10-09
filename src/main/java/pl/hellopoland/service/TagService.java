@@ -64,7 +64,7 @@ public class TagService extends ServiceSuperclass {
 
   public Tag changeDefaultLanguage(Long id, LanguageVersion language) {
     Tag bo = get(id);
-    Tag translation = tService.translateEntity(bo, language, true);
+    Tag translation = tService.translateEntity(bo, language);
     bo.setDefaultLanguage(language);
     bo = BeanUtils.copyNotNullProperties(translation, bo);
     return em.merge(bo);

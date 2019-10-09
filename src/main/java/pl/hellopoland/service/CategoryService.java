@@ -65,7 +65,7 @@ public class CategoryService extends ServiceSuperclass {
 
   public Category changeDefaultLanguage(Long id, LanguageVersion language) {
     Category bo = get(id);
-    Category translation = tService.translateEntity(bo, language, true);
+    Category translation = tService.translateEntity(bo, language);
     bo.setDefaultLanguage(language);
     bo.setLabel(translation.getLabel());
     return em.merge(bo);

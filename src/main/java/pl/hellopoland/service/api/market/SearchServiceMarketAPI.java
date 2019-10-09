@@ -70,7 +70,7 @@ public class SearchServiceMarketAPI {
 
     SearchResultDTO oro = new SearchResultDTO();
     oro.sights = ss.entrySet().stream().map(entry -> {
-      Sight s = tService.translateEntity(entry.getKey(), languageVersion, false);
+      Sight s = tService.translateEntity(entry.getKey(), languageVersion);
       List<SightEvent> se = entry.getValue();
       List<Category> categories = se.stream()
           .filter(event -> event.getCategories() != null)
@@ -94,10 +94,10 @@ public class SearchServiceMarketAPI {
           .filter(Objects::nonNull)
           .min(Comparator.naturalOrder())
           .orElse(null);
-      dto.categories = tService.translateEntities(categories, languageVersion, false).stream()
+      dto.categories = tService.translateEntities(categories, languageVersion).stream()
           .map(DtoMapper::getDTO)
           .collect(toSet());
-      dto.tags = tService.translateEntities(tags, languageVersion, false).stream()
+      dto.tags = tService.translateEntities(tags, languageVersion).stream()
           .map(DtoMapper::getDTO)
           .collect(toSet());
       return dto;

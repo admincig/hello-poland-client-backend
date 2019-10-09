@@ -2,6 +2,7 @@ package pl.hellopoland.service.api.partner;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJBAccessException;
@@ -55,9 +56,10 @@ public class SightEventServicePartnerAPI {
   public SightEventDTO get(Long id, String contentLanguageSymbol) {
     LanguageVersion lang = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
     SightEvent bo = service.getForLoggedUser(id);
-    bo = tService.translateEntity(bo, lang, true);
-    tService.translateEntities(bo.getCategories().stream().map(SightEventCategory::getCategory)
-        .collect(Collectors.toSet()), lang, false);
+    bo = tService.translateEntity(bo, lang);
+    Set<Category> categories = bo.getCategories().stream().map(SightEventCategory::getCategory)
+        .collect(Collectors.toSet());
+    tService.translateEntities(categories, lang);
     var dto = DtoMapper.getFullDTO(bo);
     return dto;
   }

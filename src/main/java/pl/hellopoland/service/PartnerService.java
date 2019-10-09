@@ -84,8 +84,8 @@ public class PartnerService extends ServiceSuperclass {
   }
 
   public Partner changeDefaultLanguage(Partner bo, LanguageVersion lang) {
-    Partner translation = translationService.translateEntity(bo, lang, true);
-    Address aTranslation = translationService.translateEntity(bo.getAddress(), lang, false);
+    Partner translation = translationService.translateEntity(bo, lang);
+    Address aTranslation = translationService.translateEntity(bo.getAddress(), lang);
     bo = BeanUtils.copyNotNullProperties(translation, bo);
     bo.setDefaultLanguage(lang);
     bo.getAddress().setDefaultLanguage(lang);

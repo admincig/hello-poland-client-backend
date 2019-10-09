@@ -68,11 +68,11 @@ public class SightServiceMarketAPI {
       bo.setTags(bo.getSightEvents().stream().flatMap(se -> se.getTags().stream())
           .map(SightEventTag::getTag).collect(Collectors.toSet()));
       if (language != null) {
-        bo = translationService.translateEntity(bo, language, true);
-        translationService.translateEntities(bo.getCategories(), language, false);
+        bo = translationService.translateEntity(bo, language);
+        translationService.translateEntities(bo.getCategories(), language);
         var sightEvents = bo.getSightEvents();
         if (sightEvents != null && !sightEvents.isEmpty()) {
-          bo.setSightEvents(translationService.translateEntities(sightEvents, language, true));
+          bo.setSightEvents(translationService.translateEntities(sightEvents, language));
         }
       } else {
         language = bo.getDefaultLanguage();

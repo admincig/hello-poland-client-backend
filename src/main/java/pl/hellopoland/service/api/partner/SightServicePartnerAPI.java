@@ -58,7 +58,7 @@ public class SightServicePartnerAPI {
     Set<Category> categories =
         bo.getSightEvents().stream().flatMap(se -> se.getCategories().stream())
             .map(SightEventCategory::getCategory).collect(Collectors.toSet());
-    categories = new HashSet<>(transService.translateEntities(categories, lang, false));
+    categories = new HashSet<>(transService.translateEntities(categories, lang));
     bo.setCategories(categories);
     var dto = DtoMapper.getFullDTO(bo);
     return dto;

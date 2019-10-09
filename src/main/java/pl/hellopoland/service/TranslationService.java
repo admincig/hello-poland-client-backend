@@ -3,10 +3,8 @@ package pl.hellopoland.service;
 import java.lang.System.Logger.Level;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.ejb.LocalBean;
@@ -54,7 +52,7 @@ public class TranslationService extends ServiceSuperclass {
       }
     }
     addAvailableLanguageVersion(bo, language);
-    return translateEntity(bo, language, true);
+    return translateEntity(bo, language);
   }
 
   public <T extends Translated, D extends DTOSuperclass> T updateEntityLanguageVersion(T bo,
@@ -73,16 +71,12 @@ public class TranslationService extends ServiceSuperclass {
         continue;
       }
     }
-    return translateEntity(bo, language, false);
+    return translateEntity(bo, language);
   }
 
-  public <T extends Translated> T translateEntity(T bo, LanguageVersion language,
-      boolean fetchColections) {
+  public <T extends Translated> T translateEntity(T bo, LanguageVersion language) {
     if (bo == null) {
       return null;
-    }
-    if (fetchColections) {
-      fetchColections(bo);
     }
     var translations = getTranslations(bo, language);
     em.clear();
@@ -102,8 +96,8 @@ public class TranslationService extends ServiceSuperclass {
   }
 
   public <T extends Translated> List<T> translateEntities(Collection<T> bos,
-      LanguageVersion language, boolean fetchColections) {
-    return bos.stream().map(bo -> bo = translateEntity(bo, language, fetchColections))
+      LanguageVersion language) {
+    return bos.stream().map(bo -> bo = translateEntity(bo, language))
         .collect(Collectors.toList());
   }
 
@@ -137,36 +131,6 @@ public class TranslationService extends ServiceSuperclass {
             Translation.class)
         .setParameter("key", getKey(bo)).setParameter("language", language).setMaxResults(1)
         .getResultList().size() == 1;
-  }
-
-  private <T extends Translated> void fetchColections(T bo) {
-    Predicate<? super Field> predicateNotEmptyCollection = field -> {
-      try {
-        return Collection.class.isAssignableFrom(field.getType())
-            && bo.getClass().getMethod("get" + StringUtils.capitalize(field.getName()))
-                .invoke(bo) != null
-            && !((Collection<?>) bo.getClass()
-                .getMethod("get" + StringUtils.capitalize(field.getName())).invoke(bo)).isEmpty();
-      } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
-          | NoSuchMethodException | SecurityException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-      return false;
-    };
-
-    Arrays.asList(bo.getClass().getDeclaredFields()).stream().filter(predicateNotEmptyCollection)
-        .map(field -> {
-          try {
-            return (Collection<?>) bo.getClass()
-                .getMethod("get" + StringUtils.capitalize(field.getName())).invoke(bo);
-          } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
-              | NoSuchMethodException | SecurityException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-          }
-          return null;
-        }).forEach(collection -> collection.size());
   }
 
   public List<Translation> getTranslations(Translated bo, LanguageVersion language) {

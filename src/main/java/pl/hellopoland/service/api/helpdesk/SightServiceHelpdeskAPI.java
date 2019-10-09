@@ -55,7 +55,7 @@ public class SightServiceHelpdeskAPI {
         bo.getSightEvents().stream().flatMap(se -> se.getCategories().stream())
             .map(SightEventCategory::getCategory).collect(Collectors.toSet());
     bo.setCategories(categories);
-    bo = tService.translateEntity(bo, language, true);
+    bo = tService.translateEntity(bo, language);
     SightDTO dto = DtoMapper.getFullDTO(bo);
     return dto;
   }

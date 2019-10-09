@@ -1,6 +1,7 @@
 package pl.hellopoland.service.api.helpdesk;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
@@ -75,9 +76,10 @@ public class SightEventServiceHelpdeskAPI {
   @RolesAllowed("admin")
   public SightEventDTO get(Long id, LanguageVersion language) {
     SightEvent bo = service.get(id);
-    bo = tService.translateEntity(bo, language, true);
-    tService.translateEntities(bo.getCategories().stream().map(SightEventCategory::getCategory)
-        .collect(Collectors.toSet()), language, false);
+    bo = tService.translateEntity(bo, language);
+    Set<Category> categories = bo.getCategories().stream().map(SightEventCategory::getCategory)
+        .collect(Collectors.toSet());
+    tService.translateEntities(categories, language);
     SightEventDTO dto = DtoMapper.getFullDTO(bo);
     service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), false);
     return dto;

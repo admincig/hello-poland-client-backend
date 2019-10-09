@@ -26,7 +26,7 @@ public class TagServicePartnerAPI {
   public PagedCollection pagedList(LanguageVersion language) {
     var config = new TagPagedCollectionConfig();
     var bos = service.pagedList(config);
-    bos.items = tService.translateEntities(bos.items, language, false);
+    bos.items = tService.translateEntities(bos.items, language);
     List<TagDTO> dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
     return new PagedCollection(dtos, bos.config);
   }
@@ -34,7 +34,7 @@ public class TagServicePartnerAPI {
   @RolesAllowed("partner")
   public TagDTO get(Long id, LanguageVersion language) {
     Tag tag = service.get(id);
-    tag = tService.translateEntity(tag, language, true);
+    tag = tService.translateEntity(tag, language);
     return DtoMapper.getFullDTO(tag);
   }
 

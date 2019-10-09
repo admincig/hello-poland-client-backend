@@ -108,7 +108,7 @@ public class SightEventService extends ServiceSuperclass {
       sightEvents.forEach(se -> se.setTags(grouped.get(se)));
     }
     if (language != null) {
-      sightEvents = translationService.translateEntities(sightEvents, language, false);
+      sightEvents = translationService.translateEntities(sightEvents, language);
     }
     // List<SightEvent> sightEvents = getQuery(config).getResultList().stream()
     // .sorted(sightEventDatesComparator()).collect(toList());
@@ -574,7 +574,7 @@ public class SightEventService extends ServiceSuperclass {
           "Can not change the default language. Translation for language " + language.getLanuage()
               + "doesn't exists");
     }
-    SightEvent translation = translationService.translateEntity(bo, language, true);
+    SightEvent translation = translationService.translateEntity(bo, language);
     bo.setDefaultLanguage(language);
     bo = BeanUtils.copyNotNullProperties(translation, bo);
     em.merge(bo);

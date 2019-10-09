@@ -60,11 +60,11 @@ public class SightService extends ServiceSuperclass {
     }
     List<Sight> sights = getQuery(config).getResultList();
     if (language != null) {
-      sights = translationService.translateEntities(sights, language, false);
+      sights = translationService.translateEntities(sights, language);
       if (config.isFetchSightEvents()) {
         sights.stream().forEach(s -> {
           s.setSightEvents(
-              translationService.translateEntities(s.getSightEvents(), language, false));
+              translationService.translateEntities(s.getSightEvents(), language));
         });
       }
     }
@@ -137,7 +137,7 @@ public class SightService extends ServiceSuperclass {
     if (language == null) {
       return bos;
     }
-    return translationService.translateEntities(bos, language, false);
+    return translationService.translateEntities(bos, language);
   }
 
   public Sight updateForLoggedUser(SightDTO dto, LanguageVersion language) {
@@ -237,7 +237,7 @@ public class SightService extends ServiceSuperclass {
     if (language == null) {
       return bo;
     }
-    return translationService.translateEntity(bo, language, true);
+    return translationService.translateEntity(bo, language);
   }
 
   private ArrayList<OpeningHours> getOpeningHoursCollectionFromDTO(SightDTO dto) {
@@ -285,7 +285,7 @@ public class SightService extends ServiceSuperclass {
           "Can not change the default language. Translation for language " + language.getLanuage()
               + "doesn't exists");
     }
-    Sight translation = translationService.translateEntity(bo, language, true);
+    Sight translation = translationService.translateEntity(bo, language);
     bo.setDefaultLanguage(language);
     bo = BeanUtils.copyNotNullProperties(translation, bo);
     em.merge(bo);
