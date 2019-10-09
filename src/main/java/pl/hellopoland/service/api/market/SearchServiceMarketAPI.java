@@ -60,8 +60,7 @@ public class SearchServiceMarketAPI {
 
   @PermitAll
   public SearchResultDTO search(LanguageVersion languageVersion, String query, Long[] categoryIds,
-      Long[] tagIds,
-      String city, Date fromDate, Date toDate, Integer minPrice, Integer maxPrice) {
+      Long[] tagIds, String city, Date fromDate, Date toDate, Integer minPrice, Integer maxPrice) {
 
     List<SightEvent> ses = getSightEvents(languageVersion, query, categoryIds, tagIds, city,
         fromDate, toDate, minPrice, maxPrice);

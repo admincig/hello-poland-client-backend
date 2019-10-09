@@ -374,7 +374,8 @@ public class SightEventService extends ServiceSuperclass {
         hpt.getTicketPoolDefinitions(partner.getHptToken()).stream();
     if (!showDeletedAndOverdued) {
       poolDefinitions = poolDefinitions.filter(tpd -> !tpd.deleted).filter(tpd -> {
-        return !tpd.isCyclic || tpd.frequencyData.endDate.after(new Date());
+        return !tpd.isCyclic
+            || (tpd.frequencyData.endDate != null && tpd.frequencyData.endDate.after(new Date()));
       });
     }
     return poolDefinitions.collect(toList());
