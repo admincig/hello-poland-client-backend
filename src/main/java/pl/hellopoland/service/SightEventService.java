@@ -327,14 +327,15 @@ public class SightEventService extends ServiceSuperclass {
       Map<Long, List<TicketDefinition>> ticketsGroupedByExternalId = new HashMap<>();
       for (var entry : sightEventsWithHptIdsGroupedByPartner.entrySet()) {
         Partner partner = entry.getKey();
-        Stream<TicketPoolDefinitionDTO> poolDefinitionsDtos =
+        List<TicketPoolDefinitionDTO> poolDefinitionsDtos =
             downloadHptTpds(partner, showDeletedTPD);
-        List<Long> ticketsExternalIds = poolDefinitionsDtos
-            .flatMap(p -> p.ticketDefinitions.stream()).map(td -> td.id).collect(toList());
+        List<Long> ticketsExternalIds = poolDefinitionsDtos.stream()
+            .flatMap(p -> p.ticketDefinitions.stream()).map(td -> td.id)
+            .collect(toList());
         ticketsGroupedByExternalId.putAll(getTds(ticketsExternalIds));
 
-        var poolDefinitionsGroupedBySightEventId =
-            poolDefinitionsDtos.collect(groupingBy(pool -> pool.sightEventId));
+        var poolDefinitionsGroupedBySightEventId = poolDefinitionsDtos.stream()
+            .collect(groupingBy(pool -> pool.sightEventId));
         // assign tpds to sightevents
         for (var pair : entry.getValue()) {
           pair.getRight().ticketPoolDefinitions =
@@ -370,7 +371,7 @@ public class SightEventService extends ServiceSuperclass {
     return ticketBos.collect(groupingBy(TicketDefinition::getExternalId));
   }
 
-  private Stream<TicketPoolDefinitionDTO> downloadHptTpds(Partner partner,
+  private List<TicketPoolDefinitionDTO> downloadHptTpds(Partner partner,
       boolean showDeletedAndOverdued) {
     HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
     Stream<TicketPoolDefinitionDTO> poolDefinitions =
@@ -380,7 +381,7 @@ public class SightEventService extends ServiceSuperclass {
         return tpd.isCyclic && tpd.frequencyData.endDate.before(new Date());
       });
     }
-    return poolDefinitions;
+    return poolDefinitions.collect(toList());
   }
 
   private Map<Partner, List<Pair<Long, SightEventDTO>>> groupDtosWithHptIdByPartner(
