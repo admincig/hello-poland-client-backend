@@ -1,5 +1,9 @@
 package pl.hellopoland.service;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import java.io.ByteArrayInputStream;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
@@ -17,7 +21,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -100,13 +103,13 @@ public class SightEventService extends ServiceSuperclass {
     if (!sightEvents.isEmpty() && config.isFetchCategories()) {
       List<SightEventCategory> categories = catService.getFor(sightEvents);
       Map<SightEvent, Set<SightEventCategory>> grouped = categories.stream()
-          .collect(Collectors.groupingBy(SightEventCategory::getSightEvent, Collectors.toSet()));
+          .collect(groupingBy(SightEventCategory::getSightEvent, toSet()));
       sightEvents.forEach(se -> se.setCategories(grouped.get(se)));
     }
     if (!sightEvents.isEmpty() && config.isFetchTags()) {
       List<SightEventTag> tags = tagService.getFor(sightEvents);
       Map<SightEvent, Set<SightEventTag>> grouped = tags.stream()
-          .collect(Collectors.groupingBy(SightEventTag::getSightEvent, Collectors.toSet()));
+          .collect(groupingBy(SightEventTag::getSightEvent, toSet()));
       sightEvents.forEach(se -> se.setTags(grouped.get(se)));
     }
     if (language != null) {
@@ -205,7 +208,7 @@ public class SightEventService extends ServiceSuperclass {
   private ArrayList<OpeningHours> getOpeningHoursCollectionFromDTO(SightEventDTO dto) {
     return Optional.ofNullable(dto.openingHours)
         .map(l -> l.stream().map(oh -> DtoMapper.copy(oh, new OpeningHours()))
-            .collect(Collectors.toCollection(ArrayList::new)))
+            .collect(toCollection(ArrayList::new)))
         .orElse(null);
   }
 
@@ -271,32 +274,6 @@ public class SightEventService extends ServiceSuperclass {
         SightEvent.class).setParameter("partner", partner).getResultList();
   }
 
-  private Comparator<SightEvent> sightEventDatesComparator() {
-    return new Comparator<>() {
-      @Override
-      public int compare(SightEvent sightEvent1, SightEvent sightEvent2) {
-        Date current = new Date();
-
-        if (sightEvent1.getDate() == null) {
-          return -1;
-        }
-        if (sightEvent2.getDate() == null) {
-          return 1;
-        }
-        if (areAllUpToDate(sightEvent1, sightEvent2, current)) {
-          return sightEvent1.getDate().compareTo(sightEvent2.getDate());
-        } else {
-          return sightEvent1.getDate().compareTo(sightEvent2.getDate()) * -1;
-        }
-      }
-
-      private boolean areAllUpToDate(SightEvent sightEvent1, SightEvent sightEvent2, Date current) {
-        return sightEvent1.getDate().compareTo(current) > 0
-            && sightEvent2.getDate().compareTo(current) > 0;
-      }
-    };
-  }
-
   public SightEvent uploadMainImageForLoggedUser(Long id, byte[] icon) {
     SightEvent bo = getForLoggedUser(id);
     return uploadMainImage(bo, icon);
@@ -345,52 +322,39 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public void fetchTicketPoolDefinitions(Collection<SightEvent> bos,
-      List<SightEventDTO> sightEventDtos, boolean showDeletedTPD) {
+      List<SightEventDTO> dtos, boolean showDeletedTPD) {
     if (hasAnyHptCloudEvent(bos)) {
-      var pairedByIds = pairBosWithDtos(bos, sightEventDtos);
-      var groupedByPartner = groupByPartner(pairedByIds);
-      HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
-      Map<Long, List<TicketDefinition>> externalIdToTicket = null;
-      // Map<Long, TicketDefinition> externalIdToTicket = null;
-      for (var entry : groupedByPartner.entrySet()) {
+      var sightEventsWithHptIdsGroupedByPartner = groupDtosWithHptIdByPartner(bos, dtos);
+      Map<Long, List<TicketDefinition>> ticketsGroupedByExternalId = new HashMap<>();
+      for (var entry : sightEventsWithHptIdsGroupedByPartner.entrySet()) {
         Partner partner = entry.getKey();
-        List<TicketPoolDefinitionDTO> poolDefinitions =
-            hpt.getTicketPoolDefinitions(partner.getHptToken());
-        if (!showDeletedTPD) {
-          poolDefinitions =
-              poolDefinitions.stream().filter(tpd -> !tpd.deleted).collect(Collectors.toList());
-        }
+        Stream<TicketPoolDefinitionDTO> poolDefinitionsDtos =
+            downloadHptTpds(partner, showDeletedTPD);
         List<TicketDefinitionDTO> ticketDefinitions = new ArrayList<>();
-        poolDefinitions.forEach(p -> ticketDefinitions.addAll(p.ticketDefinitions));
-        List<TicketDefinition> ticketBos = ticketService.getTicketsByExternalIds(
-            ticketDefinitions.stream().map(t -> t.id).collect(Collectors.toList()));
-        if (externalIdToTicket == null) {
-          externalIdToTicket =
-              ticketBos.stream().collect(Collectors.groupingBy(TicketDefinition::getExternalId));
-          // ticketBos.stream().collect(Collectors.toMap(TicketDefinition::getExternalId, t -> t));
-        } else {
-          externalIdToTicket.putAll(
-              ticketBos.stream().collect(Collectors.groupingBy(TicketDefinition::getExternalId)));
-          // .collect(Collectors.toMap(TicketDefinition::getExternalId, t -> t)));
-        }
+        poolDefinitionsDtos.map(p -> p.ticketDefinitions).forEach(ticketDefinitions::addAll);
+        List<Long> ticketsExternalIds = ticketDefinitions.stream().map(t -> t.id).collect(toList());
+        ticketsGroupedByExternalId.putAll(getTds(ticketsExternalIds));
+
         var poolDefinitionsGroupedBySightEventId =
-            poolDefinitions.stream().collect(Collectors.groupingBy(pool -> pool.sightEventId));
-        List<Pair<Long, SightEventDTO>> sightEvents = entry.getValue();
-        for (var pair : sightEvents) {
+            poolDefinitionsDtos.collect(groupingBy(pool -> pool.sightEventId));
+        // assign tpds to sightevents
+        for (var pair : entry.getValue()) {
           pair.getRight().ticketPoolDefinitions =
               poolDefinitionsGroupedBySightEventId.get(pair.getLeft());
         }
       }
-      for (var sightEventDto : sightEventDtos) {
+
+      for (var sightEventDto : dtos) {
         if (sightEventDto.ticketPoolDefinitions != null) {
           int minPrice = Integer.MAX_VALUE;
-          for (var poolDefinitionDto : sightEventDto.ticketPoolDefinitions) {
-            poolDefinitionDto.sightEventId = sightEventDto.id;
-            for (var t : poolDefinitionDto.ticketDefinitions) {
-              t.id = externalIdToTicket.get(t.id).stream()
-                  .filter(tBo -> tBo.getPoolId().equals(poolDefinitionDto.id)).findFirst().get()
+          for (var poolDef : sightEventDto.ticketPoolDefinitions) {
+            poolDef.sightEventId = sightEventDto.id;
+            for (var t : poolDef.ticketDefinitions) {
+              t.id = ticketsGroupedByExternalId.get(t.id).stream()
+                  .filter(tBo -> tBo.getPoolId().equals(poolDef.id))
+                  .findFirst()
+                  .get()
                   .getId();
-              // t.id = externalIdToTicket.get(t.id).getId();
               minPrice = Math.min(minPrice, t.price);
             }
           }
@@ -402,8 +366,25 @@ public class SightEventService extends ServiceSuperclass {
     }
   }
 
-  private Map<Partner, List<Pair<Long, SightEventDTO>>> groupByPartner(
-      List<Triplet<Long, SightEvent, SightEventDTO>> groupedById) {
+  private Map<Long, List<TicketDefinition>> getTds(List<Long> ids) {
+    Stream<TicketDefinition> ticketBos =
+        ticketService.getTicketsByExternalIds(ids).stream();
+    return ticketBos.collect(groupingBy(TicketDefinition::getExternalId));
+  }
+
+  private Stream<TicketPoolDefinitionDTO> downloadHptTpds(Partner partner, boolean showDeletedTPD) {
+    HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
+    Stream<TicketPoolDefinitionDTO> poolDefinitions =
+        hpt.getTicketPoolDefinitions(partner.getHptToken()).stream();
+    if (!showDeletedTPD) {
+      poolDefinitions = poolDefinitions.filter(tpd -> !tpd.deleted);
+    }
+    return poolDefinitions;
+  }
+
+  private Map<Partner, List<Pair<Long, SightEventDTO>>> groupDtosWithHptIdByPartner(
+      Collection<SightEvent> bos, List<SightEventDTO> dtos) {
+    var groupedById = pairBosWithDtosByHptId(bos, dtos);
     var groupedByPartner = new HashMap<Partner, List<Pair<Long, SightEventDTO>>>();
     groupedById.forEach(triplet -> {
       Partner partner = triplet.second.getPartner();
@@ -420,7 +401,8 @@ public class SightEventService extends ServiceSuperclass {
         .anyMatch(se -> se.getPortal().getType().equals(Portal.Type.HELLOTICKET_CLOUD_1));
   }
 
-  private List<Triplet<Long, SightEvent, SightEventDTO>> pairBosWithDtos(Collection<SightEvent> bos,
+  private List<Triplet<Long, SightEvent, SightEventDTO>> pairBosWithDtosByHptId(
+      Collection<SightEvent> bos,
       List<SightEventDTO> dtos) {
     var grouped = new ArrayList<Triplet<Long, SightEvent, SightEventDTO>>();
     bos.forEach(bo -> {
@@ -453,7 +435,7 @@ public class SightEventService extends ServiceSuperclass {
     }
 
     var tdOBs = ticketService.getTicketsByExternalIds(tdExternalIds).stream().distinct()
-        .collect(Collectors.toList());
+        .collect(toList());
 
     if (tpdDTOs != null && !tpdDTOs.isEmpty()) {
       for (var tpdDto : tpdDTOs) {
@@ -523,7 +505,7 @@ public class SightEventService extends ServiceSuperclass {
       return !tpds.stream()
           .filter(tpd -> !tpd.deleted && isInDateRange(tpd, fromDate, toDate)
               && ticketAreAvailable(dto, tpd, fromDate, toDate))
-          .collect(Collectors.toList()).isEmpty();
+          .collect(toList()).isEmpty();
     }
     return false;
   }
@@ -637,7 +619,7 @@ public class SightEventService extends ServiceSuperclass {
         String.class).getResultStream()
         .filter(city -> !city.isBlank())
         .sorted(Comparator.comparing(String::toLowerCase, polishComparator()))
-        .collect(Collectors.toList());
+        .collect(toList());
   }
 
   private Comparator<Object> polishComparator() {
@@ -657,7 +639,7 @@ public class SightEventService extends ServiceSuperclass {
       Set<String> words = se.getAvailableLanguageVersions().stream()
           .flatMap(
               lv -> translationService.getTranslations(se, lv).stream().map(Translation::getValue))
-          .collect(Collectors.toSet());
+          .collect(toSet());
       se.recreateSearchIndex(words);
     }
   }
