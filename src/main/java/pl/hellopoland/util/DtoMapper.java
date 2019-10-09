@@ -484,6 +484,9 @@ public class DtoMapper {
     dto.id = bo.getId();
     dto.name = bo.getName();
     dto.mainImage = getDTO(bo.getMainImage());
+    dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
+    dto.language = bo.getCurrentLanguage() == null ? dto.defaultLanguage
+        : bo.getCurrentLanguage().getLanuage();
     return dto;
   }
 
@@ -502,6 +505,8 @@ public class DtoMapper {
       dto.sightEvents =
           bo.getSightEvents().stream().map(DtoMapper::getDTO).collect(Collectors.toList());
     }
+    dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
+        .map(lang -> lang.getLanuage()).collect(Collectors.toSet());
     dto.cities = bo.getCities();
     dto.email = bo.getEmail();
     dto.phone = bo.getPhone();
