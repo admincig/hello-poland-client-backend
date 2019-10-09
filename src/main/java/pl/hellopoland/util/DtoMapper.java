@@ -489,7 +489,7 @@ public class DtoMapper {
 
   public static MarketPartnerDTO getFullMarketPartnerDTO(Partner bo) {
     var dto = getMarketDTO(bo);
-    dto.location = getDTO(bo.getCorrespondenceAddress());
+    dto.location = getDTO(bo.getAddress());
     dto.description = bo.getDescription();
     if (bo.getCategories() != null) {
       dto.categories =
