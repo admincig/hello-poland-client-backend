@@ -319,7 +319,8 @@ public class SightEventService extends ServiceSuperclass {
   public void fetchTicketPoolDefinitions(Collection<SightEvent> bos,
       List<SightEventDTO> dtos, boolean showDeletedTPD) {
     if (hasAnyHptCloudEvent(bos)) {
-      var sightEventsWithHptIdsGroupedByPartner = groupDtosWithHptIdByPartner(bos, dtos);
+      Map<Partner, List<Pair<Long, SightEventDTO>>> sightEventsWithHptIdsGroupedByPartner =
+          groupDtosWithHptIdByPartner(bos, dtos);
       Map<Long, List<TicketDefinition>> ticketsGroupedByExternalId = new HashMap<>();
       for (var entry : sightEventsWithHptIdsGroupedByPartner.entrySet()) {
         Partner partner = entry.getKey();
@@ -330,10 +331,11 @@ public class SightEventService extends ServiceSuperclass {
             .collect(toList());
         ticketsGroupedByExternalId.putAll(getTds(ticketsExternalIds));
 
-        var poolDefinitionsGroupedBySightEventId = poolDefinitionsDtos.stream()
-            .collect(groupingBy(pool -> pool.sightEventId));
+        Map<Long, List<TicketPoolDefinitionDTO>> poolDefinitionsGroupedBySightEventId =
+            poolDefinitionsDtos.stream()
+                .collect(groupingBy(pool -> pool.sightEventId));
         // assign tpds to sightevents
-        for (var pair : entry.getValue()) {
+        for (Pair<Long, SightEventDTO> pair : entry.getValue()) {
           pair.getRight().ticketPoolDefinitions =
               poolDefinitionsGroupedBySightEventId.get(pair.getLeft());
         }
@@ -375,7 +377,7 @@ public class SightEventService extends ServiceSuperclass {
     if (!showDeletedAndOverdued) {
       poolDefinitions = poolDefinitions.filter(tpd -> !tpd.deleted).filter(tpd -> {
         return !tpd.isCyclic
-            || (tpd.frequencyData.endDate != null && tpd.frequencyData.endDate.after(new Date()));
+            || (tpd.frequencyData.endDate == null || tpd.frequencyData.endDate.after(new Date()));
       });
     }
     return poolDefinitions.collect(toList());
@@ -502,7 +504,8 @@ public class SightEventService extends ServiceSuperclass {
     List<TicketPoolDefinitionDTO> tpds = dto.ticketPoolDefinitions;
     if (tpds != null && !tpds.isEmpty()) {
       return !tpds.stream()
-          .filter(tpd -> !tpd.deleted && isInDateRange(tpd, fromDate, toDate)
+          .filter(tpd -> !tpd.deleted
+              && isInDateRange(tpd, fromDate, toDate)
               && ticketAreAvailable(dto, tpd, fromDate, toDate))
           .collect(toList()).isEmpty();
     }
