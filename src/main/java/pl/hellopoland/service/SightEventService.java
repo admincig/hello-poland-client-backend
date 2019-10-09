@@ -619,7 +619,9 @@ public class SightEventService extends ServiceSuperclass {
         "select distinct location.city from SightEvent where active = true "
             + "and published = true and blocked = false and available = true order by location.city asc",
         String.class).getResultStream()
+        .map(String::strip)
         .filter(city -> !city.isBlank())
+        .distinct()
         .sorted(Comparator.comparing(String::toLowerCase, polishComparator()))
         .collect(toList());
   }
