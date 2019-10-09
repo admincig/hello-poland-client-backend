@@ -377,7 +377,8 @@ public class SightEventService extends ServiceSuperclass {
     if (!showDeletedAndOverdued) {
       poolDefinitions = poolDefinitions.filter(tpd -> !tpd.deleted).filter(tpd -> {
         return !tpd.isCyclic
-            || (tpd.frequencyData.endDate == null || tpd.frequencyData.endDate.after(new Date()));
+            || tpd.frequencyData.endDate == null
+            || tpd.frequencyData.endDate.after(new Date());
       });
     }
     return poolDefinitions.collect(toList());
