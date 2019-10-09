@@ -136,6 +136,7 @@ public class SightEventServiceMarketAPI {
     config.setOrderColumn("random()");
     config.onlyActive();
     config.onlyPublished();
+    config.onlyAvailable();
     return config;
   }
 
