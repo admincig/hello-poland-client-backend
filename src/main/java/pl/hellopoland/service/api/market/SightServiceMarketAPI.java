@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.SightEventCategory;
+import pl.hellopoland.bo.SightEventTag;
 import pl.hellopoland.config.SightPagedCollectionConfig;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.enums.LanguageVersion;
@@ -64,6 +65,8 @@ public class SightServiceMarketAPI {
           .collect(Collectors.toList()));
       bo.setCategories(bo.getSightEvents().stream().flatMap(se -> se.getCategories().stream())
           .map(SightEventCategory::getCategory).collect(Collectors.toSet()));
+      bo.setTags(bo.getSightEvents().stream().flatMap(se -> se.getTags().stream())
+          .map(SightEventTag::getTag).collect(Collectors.toSet()));
       if (language != null) {
         bo = translationService.translateEntity(bo, language, true);
         translationService.translateEntities(bo.getCategories(), language, false);

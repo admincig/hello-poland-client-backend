@@ -141,6 +141,9 @@ public class DtoMapper {
     if (bo.getCategories() != null && !bo.getCategories().isEmpty()) {
       dto.categories = bo.getCategories().stream().map(DtoMapper::getDTO).collect(toSet());
     }
+    if (bo.getTags() != null && !bo.getTags().isEmpty()) {
+      dto.tags = bo.getTags().stream().map(DtoMapper::getDTO).collect(toSet());
+    }
     return dto;
   }
 
