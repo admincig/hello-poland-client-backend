@@ -6,6 +6,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserDetails;
+import pl.hellopoland.dto.UserAuthDTO;
 import pl.hellopoland.dto.UserInfoDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.dto.UserORO;
@@ -26,9 +27,7 @@ public class UserServiceMarketAPI {
 
   @PermitAll
   public UserORO register(UserInfoDTO userDTO) {
-    if (!userDTO.password.equals(userDTO.passwordConfirmation)) {
-      throw new ConflictingException("Passwords are not the same");
-    }
+    validatePassword(userDTO.password, userDTO.passwordConfirmation);
 
     User newUser = service.create(userDTO.email, userDTO.password, userDTO.tosAgreement);
     var dto = new UserORO(newUser);
@@ -49,6 +48,18 @@ public class UserServiceMarketAPI {
     User newUser = service.updateUserDetailsForUserWithEmail(userDTO.email, details);
     var dto = new UserORO(newUser);
     return dto;
+  }
+
+  @RolesAllowed("user")
+  public void updatePassword(UserAuthDTO userAuthDTO) {
+    service.changePasswordForLoggedUser(userAuthDTO);
+  }
+
+  private void validatePassword(String password, String passwordConfirmation) {
+    if (password == null || passwordConfirmation == null
+        || !password.equals(passwordConfirmation)) {
+      throw new ConflictingException("Passwords are not the same");
+    }
   }
 
   // TODO delete this

@@ -132,6 +132,14 @@ public class UserService extends ServiceSuperclass {
     ht.changeUsherPassword(usherId, userAuthDTO, getLoggedPartner().getHptToken());
   }
 
+  public void changePasswordForLoggedUser(UserAuthDTO userAuthDTO) {
+    if (passwordEncoder.matches(userAuthDTO.oldPassword, getLoggedUser().getPassword())) {
+      getLoggedUser().setPassword(passwordEncoder.encode(userAuthDTO.password));
+    } else {
+      throw new ConflictingException("Incorrect old password.");
+    }
+  }
+
   public List<UserDTO> getUshers() {
     Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
     Portal hpt = getPortal("Hello Ticket Cloud");
