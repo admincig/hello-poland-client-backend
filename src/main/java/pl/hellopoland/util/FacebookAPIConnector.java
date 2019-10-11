@@ -7,7 +7,7 @@ import java.net.URLConnection;
 import java.util.logging.Logger;
 import javax.json.JsonObject;
 import pl.hellopoland.bo.User;
-import pl.hellopoland.bo.UserLocation;
+import pl.hellopoland.bo.UserDetails;
 import pl.hellopoland.rest.JsonbConfig;
 
 public class FacebookAPIConnector {
@@ -24,14 +24,14 @@ public class FacebookAPIConnector {
       logger.info(me.toString());
       User user = new User();
       user.setEmail(me.getString("email"));
-      user.setName(me.getString("name"));
+      user.setDetails(new UserDetails(me.getString("name")));
+
       user.setPicture(me.getJsonObject("picture").getJsonObject("data").getString("url"));
       JsonObject jsonLocation = me.getJsonObject("location");
       if (jsonLocation != null) {
-        UserLocation location = new UserLocation();
-        location.setCity(NameAndAddressSplitter.getCity(jsonLocation.getString("name")));
-        location.setCountry(NameAndAddressSplitter.getCountry(jsonLocation.getString("name")));
-        user.setLocation(location);
+        user.getDetails().setCity(NameAndAddressSplitter.getCity(jsonLocation.getString("name")));
+        user.getDetails()
+            .setCountry(NameAndAddressSplitter.getCountry(jsonLocation.getString("name")));
       }
       return user;
     } catch (Exception e) {

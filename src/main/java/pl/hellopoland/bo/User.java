@@ -32,11 +32,10 @@ public class User extends ModelSuperclass {
   @NotNull
   @Email
   private String email;
-  private String name;
   private String password;
   private String picture;
   @Embedded
-  private UserLocation location;
+  private UserDetails details;
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = EAGER)
   private List<UserRole> roles;
   @ManyToOne(cascade = PERSIST)
@@ -49,14 +48,6 @@ public class User extends ModelSuperclass {
 
   public void setEmail(String email) {
     this.email = email;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
   }
 
   public String getPassword() {
@@ -75,12 +66,12 @@ public class User extends ModelSuperclass {
     this.picture = picture;
   }
 
-  public UserLocation getLocation() {
-    return location;
+  public UserDetails getDetails() {
+    return details;
   }
 
-  public void setLocation(UserLocation location) {
-    this.location = location;
+  public void setDetails(UserDetails details) {
+    this.details = details;
   }
 
   public List<UserRole> getRoles() {

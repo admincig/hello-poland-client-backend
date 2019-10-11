@@ -12,7 +12,7 @@ import javax.persistence.NoResultException;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.User;
-import pl.hellopoland.bo.UserLocation;
+import pl.hellopoland.bo.UserDetails;
 import pl.hellopoland.bo.UserRole;
 import pl.hellopoland.bo.UserRole.Role;
 import pl.hellopoland.dto.UserAuthDTO;
@@ -21,6 +21,7 @@ import pl.hellopoland.exception.UnauthorizedException;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.security.password.PasswordEncoder;
 import pl.hellopoland.util.HelloTicket;
+import pl.hellopoland.util.NameAndAddressSplitter;
 
 @LocalBean
 @Stateless
@@ -36,9 +37,8 @@ public class UserService extends ServiceSuperclass {
 
   public User getOrCreateSocialMedia(User user) {
     String email = user.getEmail();
-    String name = user.getName();
     String picture = user.getPicture();
-    UserLocation location = user.getLocation();
+    UserDetails details = user.getDetails();
     try {
       User bo = findOneByEmail(email);
       bo.setPicture(picture);
@@ -47,34 +47,67 @@ public class UserService extends ServiceSuperclass {
       }
       return bo;
     } catch (NoResultException e) {
-      return create(email, null, name, picture, location);
+      return create(email, null, picture, details);
     }
   }
 
-  private User create(String email, String password, String name, String picture,
-      UserLocation location) {
+  private User create(String email, String password, String picture,
+      UserDetails details) {
     User bo = new User(Role.USER);
     bo.setEmail(email.toLowerCase());
-    bo.setName(name);
     bo.setPassword(password);
     bo.setPicture(picture);
-    bo.setLocation(location);
+    bo.setDetails(details);
+
+    em.persist(bo);
+    return bo;
+  }
+
+  public User create(String email, String decodedPassword, Boolean tosAgreement) {
+    User bo = new User(Role.USER);
+    bo.setEmail(email.toLowerCase());
+    bo.setPassword(passwordEncoder.encode(decodedPassword));
+
+    if (tosAgreement != null) {
+      UserDetails details = new UserDetails();
+      details.setTosAgreement(tosAgreement);
+      bo.setDetails(details);
+    }
 
     em.persist(bo);
     return bo;
   }
 
   public User create(String email, String decodedPassword, String name, String picture,
-      UserLocation location, Partner partner, UserRole.Role... roles) {
+      Partner partner, UserRole.Role... roles) {
     User bo = new User(roles);
     bo.setEmail(email.toLowerCase());
-    bo.setName(name);
     bo.setPassword(passwordEncoder.encode(decodedPassword));
     bo.setPicture(picture);
-    bo.setLocation(location);
     bo.setPartner(partner);
+
+    bo.setDetails(new UserDetails(NameAndAddressSplitter.getFirstName(name),
+        NameAndAddressSplitter.getLastName(name)));
     em.persist(bo);
     return bo;
+  }
+
+  public User update(String email, String firstName, String lastName, String phone, String street,
+      String zipCode, String city, String country) {
+    User user = findOneByEmail(email);
+
+    UserDetails details = new UserDetails();
+    details.setCity(city);
+    details.setCountry(country);
+    details.setFirstName(firstName);
+    details.setLastName(lastName);
+    details.setLastName(lastName);
+    details.setPhone(phone);
+    details.setZipCode(zipCode);
+
+    user.setDetails(details);
+    em.merge(user);
+    return user;
   }
 
   public User findOneByEmail(String email) {
