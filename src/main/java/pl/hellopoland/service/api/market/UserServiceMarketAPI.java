@@ -52,8 +52,8 @@ public class UserServiceMarketAPI {
   }
 
   // TODO delete this
-  // @RolesAllowed("user")
-  @PermitAll
+  @RolesAllowed("admin")
+  // @PermitAll
   public void globalRework() {
     service.globalRework();
   }
