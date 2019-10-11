@@ -41,8 +41,11 @@ public class TagService extends ServiceSuperclass {
   }
 
   public Tag get(long id) {
-    return Optional.ofNullable(em.find(Tag.class, id))
-        .orElseThrow(() -> new ResourceNotFoundException());
+    Tag tag = em.find(Tag.class, id);
+    return Optional.ofNullable(tag).map(t -> {
+      t.getAvailableLanguageVersions().size();
+      return t;
+    }).orElseThrow(() -> new ResourceNotFoundException());
   }
 
   public PagedEntityCollection<Tag> pagedList(TagPagedCollectionConfig config) {

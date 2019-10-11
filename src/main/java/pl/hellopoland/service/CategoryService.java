@@ -41,8 +41,11 @@ public class CategoryService extends ServiceSuperclass {
   }
 
   public Category get(long id) {
-    return Optional.ofNullable(em.find(Category.class, id))
-        .orElseThrow(() -> new ResourceNotFoundException());
+    Category cat = em.find(Category.class, id);
+    return Optional.ofNullable(cat).map(c -> {
+      c.getAvailableLanguageVersions().size();
+      return c;
+    }).orElseThrow(() -> new ResourceNotFoundException());
   }
 
   public PagedEntityCollection<Category> pagedList(CategoryPagedCollectionConfig config) {

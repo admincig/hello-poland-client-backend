@@ -44,7 +44,7 @@ public class TranslationService extends ServiceSuperclass {
           em.flush();
         }
       } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException e) {
-        logger.log(Level.DEBUG, "Failed to translate field " + field.getName(), e);
+        logger.log(Level.TRACE, "Failed to translate field " + field.getName(), e);
         continue;
       } catch (Exception e) {
         throw new ConflictingException(
