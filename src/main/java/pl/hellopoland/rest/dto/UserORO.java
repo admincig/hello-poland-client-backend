@@ -10,14 +10,16 @@ public class UserORO {
   public String lastName;
   public UserLocationRO location;
   public String picture;
+  public UserDetailsRO details;
 
   public UserORO(User user) {
     this.email = user.getEmail();
 
     if (user.getDetails() != null) {
+      this.details = new UserDetailsRO(user.getDetails());
       this.location = new UserLocationRO(user.getDetails());
-      this.firstName = user.getDetails().getFirstName();
-      this.lastName = user.getDetails().getLastName();
+      this.firstName = details.firstName;
+      this.lastName = details.lastName;
       this.name = firstName + " " + lastName;
     }
 
