@@ -180,4 +180,32 @@ public class UserService extends ServiceSuperclass {
         .collect(Collectors.toSet());
   }
 
+  // TODO delete this
+  public void globalRework() {
+    List<User> all = getAll();
+    for (User user : all) {
+      String oldName = user.getName();
+
+      try {
+        if (user.getDetails() != null) {
+          user.getDetails().setFirstName(NameAndAddressSplitter.getFirstName(oldName));
+          user.getDetails().setLastName(NameAndAddressSplitter.getLastName(oldName));
+        } else {
+          UserDetails details = new UserDetails(NameAndAddressSplitter.getFirstName(oldName),
+              NameAndAddressSplitter.getLastName(oldName));
+          user.setDetails(details);
+        }
+      } catch (ConflictingException e) {
+
+      }
+
+      em.merge(user);
+    }
+  }
+
+  public List<User> getAll() {
+    return em.createQuery("from User", User.class)
+        .getResultList();
+  }
+
 }

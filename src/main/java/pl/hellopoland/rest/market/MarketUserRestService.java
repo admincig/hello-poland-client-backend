@@ -8,6 +8,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import pl.hellopoland.dto.UserInfoDTO;
 import pl.hellopoland.rest.dto.UserORO;
 import pl.hellopoland.service.api.market.UserServiceMarketAPI;
@@ -35,7 +36,15 @@ public class MarketUserRestService {
 
   @POST
   @Path("/update")
-  public UserORO udpate(UserInfoDTO dto) {
+  public UserORO update(UserInfoDTO dto) {
     return service.update(dto);
+  }
+
+  // TODO do usunięcia
+  @GET
+  @Path("/globalUserNameRefactor")
+  public Response globalUserNameRefactor() {
+    service.globalRework();
+    return Response.ok().build();
   }
 }

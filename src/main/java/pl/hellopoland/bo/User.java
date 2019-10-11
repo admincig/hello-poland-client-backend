@@ -33,6 +33,9 @@ public class User extends ModelSuperclass {
   @Email
   private String email;
   private String password;
+  // TODO delete name after rework
+  private String name;
+
   private String picture;
   @Embedded
   private UserDetails details;
@@ -110,6 +113,10 @@ public class User extends ModelSuperclass {
 
   public void setHptToken(String hptToken) {
     this.hptToken = hptToken;
+  }
+
+  public String getName() {
+    return this.name;
   }
 
 }

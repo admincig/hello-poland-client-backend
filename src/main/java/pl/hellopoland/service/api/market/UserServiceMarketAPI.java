@@ -50,4 +50,11 @@ public class UserServiceMarketAPI {
     var dto = new UserORO(newUser);
     return dto;
   }
+
+  // TODO delete this
+  // @RolesAllowed("user")
+  @PermitAll
+  public void globalRework() {
+    service.globalRework();
+  }
 }
