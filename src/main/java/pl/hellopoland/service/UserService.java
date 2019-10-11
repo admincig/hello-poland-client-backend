@@ -92,18 +92,8 @@ public class UserService extends ServiceSuperclass {
     return bo;
   }
 
-  public User update(String email, String firstName, String lastName, String phone, String street,
-      String zipCode, String city, String country) {
+  public User updateUserDetailsForUserWithEmail(String email, UserDetails details) {
     User user = findOneByEmail(email);
-
-    UserDetails details = new UserDetails();
-    details.setCity(city);
-    details.setCountry(country);
-    details.setFirstName(firstName);
-    details.setLastName(lastName);
-    details.setLastName(lastName);
-    details.setPhone(phone);
-    details.setZipCode(zipCode);
 
     user.setDetails(details);
     em.merge(user);

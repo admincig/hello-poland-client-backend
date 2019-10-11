@@ -5,6 +5,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.User;
+import pl.hellopoland.bo.UserDetails;
 import pl.hellopoland.dto.UserInfoDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.dto.UserORO;
@@ -36,15 +37,16 @@ public class UserServiceMarketAPI {
 
   @RolesAllowed("user")
   public UserORO update(UserInfoDTO userDTO) {
-    User newUser = service.update(
-        userDTO.email,
-        userDTO.firstName,
-        userDTO.lastName,
-        userDTO.phone,
-        userDTO.street,
-        userDTO.zipCode,
-        userDTO.city,
-        userDTO.country);
+    UserDetails details = new UserDetails();
+    details.setStreet(userDTO.street);
+    details.setCity(userDTO.city);
+    details.setCountry(userDTO.country);
+    details.setFirstName(userDTO.firstName);
+    details.setLastName(userDTO.lastName);
+    details.setPhone(userDTO.phone);
+    details.setZipCode(userDTO.zipCode);
+
+    User newUser = service.updateUserDetailsForUserWithEmail(userDTO.email, details);
     var dto = new UserORO(newUser);
     return dto;
   }
