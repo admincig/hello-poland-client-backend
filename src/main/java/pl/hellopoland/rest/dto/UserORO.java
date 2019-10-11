@@ -18,7 +18,7 @@ public class UserORO {
       this.location = new UserLocationRO(user.getDetails());
       this.firstName = user.getDetails().getFirstName();
       this.lastName = user.getDetails().getLastName();
-      this.name = firstName + lastName;
+      this.name = firstName + " " + lastName;
     }
 
     this.picture = user.getPicture();

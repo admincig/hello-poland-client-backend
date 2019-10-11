@@ -446,7 +446,7 @@ public class DtoMapper {
     var dto = new UserDTO();
     dto.id = bo.getId();
     if (bo.getDetails() != null) {
-      dto.name = bo.getDetails().getFirstName() + bo.getDetails().getLastName();
+      dto.name = bo.getDetails().getFirstName() + " " + bo.getDetails().getLastName();
     }
     dto.email = bo.getEmail();
     dto.roles = Optional.ofNullable(bo.getRoles()).orElse(Collections.emptyList()).stream()
