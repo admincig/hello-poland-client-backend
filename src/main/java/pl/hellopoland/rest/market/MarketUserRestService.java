@@ -43,7 +43,7 @@ public class MarketUserRestService {
   }
 
   @PATCH
-  @Path("/update")
+  @Path("/password")
   public Response updatePassword(UserAuthDTO userAuthDTO) {
     service.updatePassword(userAuthDTO);
     return Response.ok().build();
