@@ -106,6 +106,8 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
   private Set<SightEventTag> tags = new HashSet<>();
   @Column(columnDefinition = "varchar")
   private String searchIndex;
+  @ManyToMany
+  private Set<User> users = new HashSet<>();
 
   public String getName() {
     return name;

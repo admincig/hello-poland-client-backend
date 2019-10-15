@@ -85,6 +85,8 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
   private Set<Category> categories;
   @Transient
   private Set<Tag> tags;
+  @ManyToMany
+  private Set<User> users = new HashSet<>();
 
   public Sight() {}
 
@@ -330,8 +332,17 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
     this.tags = tags;
   }
 
+  public Set<User> getUsers() {
+    return users;
+  }
+
+  public void addUser(User user) {
+    this.users.add(user);
+  }
+
   public void fetchCollections() {
-    Optional.ofNullable(this.getAvailableLanguageVersions()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getAvailableLanguageVersions())
+        .ifPresent(Collection::size);
     Optional.ofNullable(this.getAgreements()).ifPresent(Collection::size);
     Optional.ofNullable(this.getImages()).ifPresent(Collection::size);
     Optional.ofNullable(this.getOpeningHours()).ifPresent(Collection::size);

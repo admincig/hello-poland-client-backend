@@ -4,9 +4,11 @@ import static javax.persistence.CascadeType.PERSIST;
 import static javax.persistence.FetchType.EAGER;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -42,6 +44,10 @@ public class User extends ModelSuperclass {
   @ManyToOne(cascade = PERSIST)
   private Partner partner;
   private String hptToken;
+  @ManyToMany(mappedBy = "users")
+  private Set<Sight> sights;
+  @ManyToMany(mappedBy = "users")
+  private Set<SightEvent> sightEvents;
 
   public String getEmail() {
     return email;

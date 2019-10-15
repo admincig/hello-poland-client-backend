@@ -22,6 +22,7 @@ import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.service.SightService;
 import pl.hellopoland.service.TranslationService;
+import pl.hellopoland.service.UserService;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PagedEntityCollection;
@@ -34,6 +35,8 @@ public class SightServiceMarketAPI {
 
   @Inject
   SightEventService sightEventService;
+  @Inject
+  UserService userService;
 
   @Inject
   private TranslationService translationService;
@@ -155,6 +158,12 @@ public class SightServiceMarketAPI {
     config.onlyPublished();
     config.fetchSightEvents(true);
     return config;
+  }
+
+  public SightDTO favourite(Long id) {
+    Sight bo = service.get(id);
+    bo.addUser(userService.getLoggedUser());
+    return DtoMapper.getFullDTO(bo);
   }
 
 }

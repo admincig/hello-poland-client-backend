@@ -6,6 +6,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -50,6 +51,12 @@ public class MarketSightRestService {
       @HeaderParam("Accept-Language") String acceptLanguage,
       @HeaderParam("Content-Language") String contentLanguage) {
     return service.get(id, contentLanguage != null ? contentLanguage : acceptLanguage);
+  }
+
+  @PATCH
+  @Path("/{id}/favourite")
+  public SightDTO favourite(@PathParam("id") Long id) {
+    return service.favourite(id);
   }
 
   @GET
