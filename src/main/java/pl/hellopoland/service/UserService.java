@@ -66,6 +66,9 @@ public class UserService extends ServiceSuperclass {
 
   public User create(String email, String decodedPassword, boolean tosAgreement) {
     User bo = new User(Role.USER);
+    if (email == null) {
+      throw new ConflictingException("Cannot create user with empty email");
+    }
     bo.setEmail(email.toLowerCase());
     bo.setPassword(passwordEncoder.encode(decodedPassword));
 
@@ -80,6 +83,9 @@ public class UserService extends ServiceSuperclass {
   public User create(String email, String decodedPassword, String name, String picture,
       Partner partner, UserRole.Role... roles) {
     User bo = new User(roles);
+    if (email == null) {
+      throw new ConflictingException("Cannot create user with empty email");
+    }
     bo.setEmail(email.toLowerCase());
     bo.setPassword(passwordEncoder.encode(decodedPassword));
     bo.setPicture(picture);
