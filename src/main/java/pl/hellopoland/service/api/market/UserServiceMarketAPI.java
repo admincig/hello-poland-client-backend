@@ -45,7 +45,7 @@ public class UserServiceMarketAPI {
     details.setPhone(userDTO.phone);
     details.setZipCode(userDTO.zipCode);
 
-    User newUser = service.updateUserDetailsForUserWithEmail(userDTO.email, details);
+    User newUser = service.updateUserDetailsForLoggedUser(details);
     var dto = new UserORO(newUser);
     return dto;
   }
@@ -62,10 +62,4 @@ public class UserServiceMarketAPI {
     }
   }
 
-  // TODO delete this
-  @RolesAllowed("admin")
-  // @PermitAll
-  public void globalRework() {
-    service.globalRework();
-  }
 }

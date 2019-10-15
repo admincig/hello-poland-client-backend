@@ -49,11 +49,4 @@ public class MarketUserRestService {
     return Response.ok().build();
   }
 
-  // TODO do usunięcia
-  @GET
-  @Path("/globalUserNameRefactor")
-  public Response globalUserNameRefactor() {
-    service.globalRework();
-    return Response.ok().build();
-  }
 }

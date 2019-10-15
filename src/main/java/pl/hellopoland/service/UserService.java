@@ -1,5 +1,6 @@
 package pl.hellopoland.service;
 
+import java.lang.System.Logger.Level;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -63,16 +64,14 @@ public class UserService extends ServiceSuperclass {
     return bo;
   }
 
-  public User create(String email, String decodedPassword, Boolean tosAgreement) {
+  public User create(String email, String decodedPassword, boolean tosAgreement) {
     User bo = new User(Role.USER);
     bo.setEmail(email.toLowerCase());
     bo.setPassword(passwordEncoder.encode(decodedPassword));
 
-    if (tosAgreement != null) {
-      UserDetails details = new UserDetails();
-      details.setTosAgreement(tosAgreement);
-      bo.setDetails(details);
-    }
+    UserDetails details = new UserDetails();
+    details.setTosAgreement(tosAgreement);
+    bo.setDetails(details);
 
     em.persist(bo);
     return bo;
@@ -92,9 +91,8 @@ public class UserService extends ServiceSuperclass {
     return bo;
   }
 
-  public User updateUserDetailsForUserWithEmail(String email, UserDetails details) {
-    User user = findOneByEmail(email);
-
+  public User updateUserDetailsForLoggedUser(UserDetails details) {
+    User user = getLoggedUser();
     user.setDetails(details);
     em.merge(user);
     return user;
@@ -195,20 +193,19 @@ public class UserService extends ServiceSuperclass {
       String oldName = user.getName();
 
       try {
-        if (user.getDetails() != null) {
-          user.getDetails().setFirstName(NameAndAddressSplitter.getFirstName(oldName));
-          user.getDetails().setLastName(NameAndAddressSplitter.getLastName(oldName));
-        } else {
-          UserDetails details = new UserDetails(NameAndAddressSplitter.getFirstName(oldName),
-              NameAndAddressSplitter.getLastName(oldName));
-          user.setDetails(details);
+        if (user.getDetails() == null) {
+          user.setDetails(new UserDetails());
         }
+        user.getDetails().setFirstName(NameAndAddressSplitter.getFirstName(oldName));
+        user.getDetails().setLastName(NameAndAddressSplitter.getLastName(oldName));
       } catch (ConflictingException e) {
-
+        logger.log(Level.ERROR,
+            "Did not updated first and last name for user[id:" + user.getId() + "]");
       }
 
       em.merge(user);
     }
+
   }
 
   public List<User> getAll() {

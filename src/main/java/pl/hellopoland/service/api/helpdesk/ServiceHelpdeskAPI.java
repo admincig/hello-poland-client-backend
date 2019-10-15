@@ -10,6 +10,7 @@ import pl.hellopoland.service.AnalyticsService;
 import pl.hellopoland.service.OrderService;
 import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.service.SightService;
+import pl.hellopoland.service.UserService;
 
 @Stateless
 public class ServiceHelpdeskAPI {
@@ -21,6 +22,8 @@ public class ServiceHelpdeskAPI {
   private SightService sightService;
   @Inject
   private SightEventService sightEventService;
+  @Inject
+  private UserService userService;
 
   @RolesAllowed("admin")
   public File getOrdersCsvFile(Date fromDate, Date toDate) {
@@ -38,4 +41,9 @@ public class ServiceHelpdeskAPI {
     sightEventService.rebuildSearchIndices();
   }
 
+  // TODO delete this
+  @RolesAllowed("admin")
+  public void globalRework() {
+    userService.globalRework();
+  }
 }
