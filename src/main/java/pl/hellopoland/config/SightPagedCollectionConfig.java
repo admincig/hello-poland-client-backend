@@ -54,7 +54,6 @@ public class SightPagedCollectionConfig extends PagedCollectionConfig<Sight> {
     addCondition("userId", userId, "u.id=:userId");
   }
 
-
   public void onlyCurrentPartner(boolean only) {
     currentPartner = only;
   }

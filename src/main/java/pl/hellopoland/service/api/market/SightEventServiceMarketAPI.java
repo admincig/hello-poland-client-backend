@@ -24,6 +24,7 @@ import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.service.TicketPoolDefinitionService;
 import pl.hellopoland.service.TranslationService;
+import pl.hellopoland.service.UserService;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PagedEntityCollection;
@@ -33,7 +34,8 @@ public class SightEventServiceMarketAPI {
 
   @Inject
   SightEventService service;
-
+  @Inject
+  UserService userService;
   @Inject
   TicketPoolDefinitionService tpdService;
 
@@ -166,6 +168,27 @@ public class SightEventServiceMarketAPI {
                 .atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant())
             : null;
     return toDateEndDay;
+  }
+
+  @PermitAll
+  public SightEventDTO addFavourite(Long id) {
+    SightEvent bo = service.get(id);
+    bo.addUser(userService.getLoggedUser());
+    return DtoMapper.getFullDTO(bo);
+  }
+
+  @PermitAll
+  public void removeFavourite(Long id) {
+    SightEvent bo = service.get(id);
+    bo.removeUser(userService.getLoggedUser());
+  }
+
+  @PermitAll
+  public PagedCollection favourites(SightEventPagedCollectionConfig config, Date fromDate,
+      Date toDate,
+      String contentLanguageSymbol) {
+    config.onlyFavourite(userService.getLoggedUser().getId());
+    return getList(config, fromDate, toDate, contentLanguageSymbol);
   }
 
 }

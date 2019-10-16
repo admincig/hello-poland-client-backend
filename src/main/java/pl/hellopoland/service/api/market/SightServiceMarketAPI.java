@@ -70,7 +70,6 @@ public class SightServiceMarketAPI {
           .map(SightEventCategory::getCategory).collect(Collectors.toSet()));
       bo.setTags(bo.getSightEvents().stream().flatMap(se -> se.getTags().stream())
           .map(SightEventTag::getTag).collect(Collectors.toSet()));
-      bo.setFavourite(bo.getUsers().contains(userService.getLoggedUser()));
       if (language != null) {
         bo = translationService.translateEntity(bo, language);
         translationService.translateEntities(bo.getCategories(), language);

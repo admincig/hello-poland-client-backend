@@ -127,6 +127,7 @@ public class SightService extends ServiceSuperclass {
         .setParameter("sightId", id).getSingleResult();
     bo.fetchCollections();
     bo.getSightEvents().forEach(SightEvent::fetchCollections);
+    bo.setFavourite(bo.getUsers().contains(userService.getLoggedUser()));
     return bo;
   }
 
