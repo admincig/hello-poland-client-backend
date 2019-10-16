@@ -3,6 +3,7 @@ package pl.hellopoland.rest.market;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -13,6 +14,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import pl.hellopoland.config.SightPagedCollectionConfig;
 import pl.hellopoland.dto.FiltersContainerDTO;
 import pl.hellopoland.dto.SightDTO;
@@ -55,8 +57,25 @@ public class MarketSightRestService {
 
   @PATCH
   @Path("/{id}/favourite")
-  public SightDTO favourite(@PathParam("id") Long id) {
-    return service.favourite(id);
+  public SightDTO addToFavourite(@PathParam("id") Long id) {
+    return service.addFavourite(id);
+  }
+
+  @DELETE
+  @Path("/{id}/favourite")
+  public Response removeFavourite(@PathParam("id") Long id) {
+    service.removeFavourite(id);
+    return Response.ok().build();
+  }
+
+  @GET
+  @Path("/favourites")
+  public PagedCollection favourites(@HeaderParam("Accept-Language") String acceptLanguage,
+      @HeaderParam("Content-Language") String contentLanguage) {
+    var config = new SightPagedCollectionConfig();
+    config.onlyActive();
+    config.onlyPublished();
+    return service.favourites(config, contentLanguage != null ? contentLanguage : acceptLanguage);
   }
 
   @GET

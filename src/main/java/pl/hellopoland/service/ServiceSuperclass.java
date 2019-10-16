@@ -62,7 +62,7 @@ public abstract class ServiceSuperclass {
   protected Logger logger = System.getLogger(this.getClass().getName());
 
   protected <E extends ModelSuperclass> TypedQuery<E> getQuery(PagedCollectionConfig<E> config) {
-    String query = "from " + config.entityClass().getSimpleName() + " e " + config.joins();
+    String query = "select e from " + config.entityClass().getSimpleName() + " e " + config.joins();
     if (config.getConditions() != null) {
       query += " where ";
       query +=

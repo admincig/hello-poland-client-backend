@@ -119,6 +119,7 @@ public class DtoMapper {
         : bo.getCurrentLanguage().getLanuage();
     dto.partnerId = bo.getPartner().getId();
     dto.partnerName = bo.getPartner().getName();
+    dto.favourite = bo.isFavourite();
     return dto;
   }
 

@@ -70,6 +70,7 @@ public class SightServiceMarketAPI {
           .map(SightEventCategory::getCategory).collect(Collectors.toSet()));
       bo.setTags(bo.getSightEvents().stream().flatMap(se -> se.getTags().stream())
           .map(SightEventTag::getTag).collect(Collectors.toSet()));
+      bo.setFavourite(bo.getUsers().contains(userService.getLoggedUser()));
       if (language != null) {
         bo = translationService.translateEntity(bo, language);
         translationService.translateEntities(bo.getCategories(), language);
@@ -160,10 +161,24 @@ public class SightServiceMarketAPI {
     return config;
   }
 
-  public SightDTO favourite(Long id) {
+  @PermitAll
+  public SightDTO addFavourite(Long id) {
     Sight bo = service.get(id);
     bo.addUser(userService.getLoggedUser());
     return DtoMapper.getFullDTO(bo);
+  }
+
+  @PermitAll
+  public void removeFavourite(Long id) {
+    Sight bo = service.get(id);
+    bo.removeUser(userService.getLoggedUser());
+  }
+
+  @PermitAll
+  public PagedCollection favourites(SightPagedCollectionConfig config,
+      String contentLanguageSymbol) {
+    config.onlyFavourite(userService.getLoggedUser().getId());
+    return getList(config, contentLanguageSymbol);
   }
 
 }

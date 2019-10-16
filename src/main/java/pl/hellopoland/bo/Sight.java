@@ -87,6 +87,8 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
   private Set<Tag> tags;
   @ManyToMany
   private Set<User> users = new HashSet<>();
+  @Transient
+  private boolean favourite;
 
   public Sight() {}
 
@@ -338,6 +340,18 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
 
   public void addUser(User user) {
     this.users.add(user);
+  }
+
+  public void removeUser(User user) {
+    this.users.remove(user);
+  }
+
+  public boolean isFavourite() {
+    return favourite;
+  }
+
+  public void setFavourite(boolean favourite) {
+    this.favourite = favourite;
   }
 
   public void fetchCollections() {
