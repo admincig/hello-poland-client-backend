@@ -103,6 +103,9 @@ public class PartnerService extends ServiceSuperclass {
     }
     if (bo.getDefaultLanguage().equals(lang)) {
       DtoMapper.copy(dto, bo);
+      if (bo.getAddress() == null) {
+        bo.setAddress(new Address());
+      }
       bo.getAddress().setDirections(dto.location.directions);
       em.flush();
     }
