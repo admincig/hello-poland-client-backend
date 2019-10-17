@@ -1,15 +1,20 @@
 package pl.hellopoland.service.api.partner;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import pl.hellopoland.bo.Category;
 import pl.hellopoland.bo.Sight;
+import pl.hellopoland.bo.SightEventCategory;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.SightService;
+import pl.hellopoland.service.TranslationService;
 import pl.hellopoland.util.DtoMapper;
 
 @Stateless
@@ -17,6 +22,8 @@ public class SightServicePartnerAPI {
 
   @Inject
   SightService service;
+  @Inject
+  TranslationService transService;
 
   @RolesAllowed("partner")
   public SightDTO create(SightDTO dto) {
@@ -26,7 +33,7 @@ public class SightServicePartnerAPI {
 
   @RolesAllowed("partner")
   public SightDTO createLanguageVesrion(SightDTO dto, LanguageVersion language) {
-    return DtoMapper.getFullDTO(service.createLanguageVesrion(dto, language));
+    return DtoMapper.getFullDTO(service.createLanguageVersion(dto, language));
   }
 
   @RolesAllowed("partner")
@@ -48,11 +55,12 @@ public class SightServicePartnerAPI {
   public SightDTO get(Long id, String contentLanguageSymbol) {
     LanguageVersion lang = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
     Sight bo = service.getActiveForLoggedUser(id, lang);
+    Set<Category> categories =
+        bo.getSightEvents().stream().flatMap(se -> se.getCategories().stream())
+            .map(SightEventCategory::getCategory).collect(Collectors.toSet());
+    categories = new HashSet<>(transService.translateEntities(categories, lang));
+    bo.setCategories(categories);
     var dto = DtoMapper.getFullDTO(bo);
-    if (lang == null) {
-      lang = bo.getDefaultLanguage();
-    }
-    dto.language = lang.getLanuage();
     return dto;
   }
 
@@ -92,7 +100,7 @@ public class SightServicePartnerAPI {
 
   @RolesAllowed("partner")
   public SightDTO changeDefaultLanguage(Long id, LanguageVersion language) {
-    Sight bo = service.changeDefaultLanguage(id, language);
+    Sight bo = service.changeDefaultLanguageForLoggedUser(id, language);
     return DtoMapper.getFullDTO(bo);
   }
 

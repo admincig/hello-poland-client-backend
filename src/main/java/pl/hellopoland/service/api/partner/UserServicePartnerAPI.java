@@ -8,6 +8,8 @@ import pl.hellopoland.dto.UserAuthDTO;
 import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.rest.dto.UserORO;
+import pl.hellopoland.service.PartnerService;
+import pl.hellopoland.service.TranslationService;
 import pl.hellopoland.service.UserService;
 
 @Stateless
@@ -15,6 +17,10 @@ public class UserServicePartnerAPI {
 
   @Inject
   UserService service;
+  @Inject
+  PartnerService partnerService;
+  @Inject
+  TranslationService transService;
 
   @RolesAllowed("partner")
   public UserORO me() {

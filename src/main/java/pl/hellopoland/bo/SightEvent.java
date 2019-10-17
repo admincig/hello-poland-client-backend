@@ -6,8 +6,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
@@ -20,10 +24,12 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
+import pl.hellopoland.annotation.Multilingual;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.util.Imaged;
 import pl.hellopoland.util.Located;
@@ -37,6 +43,7 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
   private static final long serialVersionUID = -34796485244638912L;
 
   @NotNull
+  @Multilingual
   private String name;
   private Date date;
   private Boolean generalAdmission;
@@ -47,15 +54,18 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
       joinColumns = {@JoinColumn(name = "sightevent_id", referencedColumnName = "id")},
       inverseJoinColumns = {
           @JoinColumn(name = "imagecollector_id", referencedColumnName = "id", unique = true)})
-  private Collection<ImageCollector> images;
+  private Collection<ImageCollector> images = new ArrayList<>();
   @OneToMany(mappedBy = "sightEvent")
-  private Collection<TicketDefinition> tickets;
+  private Collection<TicketDefinition> tickets = new ArrayList<>();
   @ManyToMany
-  private Set<Agreement> agreements;
+  private Set<Agreement> agreements = new HashSet<>();
+  @Multilingual
   private String lead;
   @Column(columnDefinition = "varchar(2500)")
+  @Multilingual
   private String description;
   private Integer duration;
+  @Transient
   private Integer minPrice;
   private Float score;
   @Embedded
@@ -65,7 +75,8 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
   @ManyToOne
   private FileDescriptor pdfAttachment;
   @OneToMany(mappedBy = "sightEvent")
-  private Collection<OpeningHours> openingHours;
+  @OrderBy("day asc")
+  private Collection<OpeningHours> openingHours = new ArrayList<>();
   @ManyToOne
   private Portal portal;
   @ManyToOne(fetch = FetchType.EAGER)
@@ -85,12 +96,16 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
   @Column(nullable = false)
   @ElementCollection
   @Enumerated(EnumType.STRING)
-  private Set<LanguageVersion> availableLanguageVersions;
+  private Set<LanguageVersion> availableLanguageVersions = new HashSet<>();
   @Transient
   private LanguageVersion currentLanguage;
   private Integer promotion;
   @OneToMany(mappedBy = "sightEvent")
-  private Set<SightEventCategory> categories;
+  private Set<SightEventCategory> categories = new HashSet<>();
+  @OneToMany(mappedBy = "sightEvent")
+  private Set<SightEventTag> tags = new HashSet<>();
+  @Column(columnDefinition = "varchar")
+  private String searchIndex;
 
   public String getName() {
     return name;
@@ -386,4 +401,44 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
     this.currentLanguage = currentLanguage;
   }
 
+  public String getSearchIndex() {
+    return searchIndex;
+  }
+
+  public void setSearchIndex(String searchIndex) {
+    this.searchIndex = searchIndex;
+  }
+
+  public Set<SightEventTag> getTags() {
+    return tags;
+  }
+
+  public void setTags(Set<SightEventTag> tags) {
+    this.tags = tags;
+  }
+
+  public void fetchCollections() {
+    Optional.ofNullable(this.getAvailableLanguageVersions()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getAgreements()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getImages()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getOpeningHours()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getCategories()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getTags()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getTickets()).ifPresent(Collection::size);
+  }
+
+  public void recreateSearchIndex(Set<String> words) {
+    this.searchIndex =
+        Stream.of(
+            words.stream(),
+            Stream.of(email, phone, name, location.getStreet(), partner.getName()),
+            Stream.of(sight.getSearchIndex().split(",")))
+            .flatMap(s -> s)
+            .filter(Objects::nonNull)
+            .flatMap(s -> Stream.of(s.split(" ")))
+            .map(w -> w.replaceAll("[^a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]", ""))
+            .distinct()
+            .filter(w -> !w.isBlank())
+            .collect(Collectors.joining(","));
+  }
 }

@@ -6,8 +6,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
@@ -19,8 +23,10 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+import pl.hellopoland.annotation.Multilingual;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.util.Imaged;
 import pl.hellopoland.util.Located;
@@ -31,10 +37,12 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
 
   private static final long serialVersionUID = -6821312294116712881L;
 
-  @Column
+  @Multilingual
   private String name;
+  @Multilingual
   private String lead;
   @Column(columnDefinition = "varchar(2500)")
+  @Multilingual
   private String description;
   private Float score;
   @ManyToOne
@@ -44,7 +52,7 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
       joinColumns = {@JoinColumn(name = "sight_id", referencedColumnName = "id")},
       inverseJoinColumns = {
           @JoinColumn(name = "imagecollector_id", referencedColumnName = "id", unique = true)})
-  private Collection<ImageCollector> images;
+  private Collection<ImageCollector> images = new ArrayList<>();
   private String email;
   private String phone;
   @Embedded
@@ -53,11 +61,12 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
   private Partner partner;
   private boolean active = true;
   @OneToMany(mappedBy = "sight")
-  private List<SightEvent> sightEvents;
+  private List<SightEvent> sightEvents = new ArrayList<>();
   @OneToMany(mappedBy = "sight")
-  private List<OpeningHours> openingHours;
+  @OrderBy("day asc")
+  private List<OpeningHours> openingHours = new ArrayList<>();
   @ManyToMany
-  private Set<Agreement> agreements;
+  private Set<Agreement> agreements = new HashSet<>();
   private boolean published;
   private boolean blocked;
   @NotNull
@@ -70,8 +79,12 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
   private Set<LanguageVersion> availableLanguageVersions;
   @Transient
   private LanguageVersion currentLanguage;
+  @Column(columnDefinition = "varchar")
+  private String searchIndex;
   @Transient
   private Set<Category> categories;
+  @Transient
+  private Set<Tag> tags;
 
   public Sight() {}
 
@@ -280,12 +293,48 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
     this.currentLanguage = currentLanguage;
   }
 
+  public String getSearchIndex() {
+    return searchIndex;
+  }
+
+  public void setSearchIndex(String searchIndex) {
+    this.searchIndex = searchIndex;
+  }
+
+  public void recreateSearchIndex(Set<String> words) {
+    this.searchIndex =
+        Stream.of(
+            Stream.of(email, name, phone),
+            words.stream()).flatMap(s -> s)
+            .filter(Objects::nonNull)
+            .flatMap(s -> Stream.of(s.split(" ")))
+            .map(w -> w.replaceAll("[^a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]", ""))
+            .distinct()
+            .filter(w -> !w.isBlank())
+            .collect(Collectors.joining(","));
+  }
+
   public Set<Category> getCategories() {
     return categories;
   }
 
   public void setCategories(Set<Category> categories) {
     this.categories = categories;
+  }
+
+  public Set<Tag> getTags() {
+    return tags;
+  }
+
+  public void setTags(Set<Tag> tags) {
+    this.tags = tags;
+  }
+
+  public void fetchCollections() {
+    Optional.ofNullable(this.getAvailableLanguageVersions()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getAgreements()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getImages()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getOpeningHours()).ifPresent(Collection::size);
   }
 
 }

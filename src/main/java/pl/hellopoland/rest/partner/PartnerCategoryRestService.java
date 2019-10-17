@@ -11,8 +11,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import pl.hellopoland.dto.CategoryDTO;
 import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.rest.RestService;
 import pl.hellopoland.rest.dto.PagedCollection;
-import pl.hellopoland.rest.helpdesk.HelpdeskRestService;
 import pl.hellopoland.service.api.partner.CategoryServicePartnerAPI;
 
 @RequestScoped
@@ -27,7 +27,7 @@ public class PartnerCategoryRestService {
   @GET
   public PagedCollection getCategories(
       @HeaderParam("Content-Language") String contentLanguage) {
-    LanguageVersion lang = HelpdeskRestService.parseLang(contentLanguage);
+    LanguageVersion lang = RestService.parseLang(contentLanguage);
     return service.pagedList(lang);
   }
 
@@ -36,7 +36,7 @@ public class PartnerCategoryRestService {
   public CategoryDTO get(
       @HeaderParam("Content-Language") String contentLanguage,
       @PathParam("id") Long id) {
-    LanguageVersion lang = HelpdeskRestService.parseLang(contentLanguage);
+    LanguageVersion lang = RestService.parseLang(contentLanguage);
     return service.get(id, lang);
   }
 

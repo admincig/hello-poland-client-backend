@@ -3,21 +3,30 @@ package pl.hellopoland.bo;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
+import pl.hellopoland.annotation.Multilingual;
+import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.soap.p24.enums.BusinessType;
 import pl.hellopoland.soap.p24.enums.Trade;
+import pl.hellopoland.util.Translated;
 
 @Entity
-public class Partner extends ModelSuperclass {
+public class Partner extends ModelSuperclass implements Translated {
 
   private static final long serialVersionUID = 6118414827783500940L;
 
@@ -61,18 +70,18 @@ public class Partner extends ModelSuperclass {
   @Enumerated(EnumType.STRING)
   private Trade trade;
 
-  @ManyToMany(cascade = CascadeType.PERSIST)
+  @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.DETACH})
   private List<PartnerRepresentative> representatives;
 
-  @ManyToOne(cascade = CascadeType.PERSIST)
+  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE})
   private Address address;
 
-  @ManyToOne(cascade = CascadeType.PERSIST)
+  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH})
   private Address correspondenceAddress;
 
   private String bankAccount;
 
-  @ManyToOne(cascade = CascadeType.PERSIST)
+  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH})
   private ContactPerson contactPerson;
 
   private String invoiceEmail;
@@ -91,10 +100,40 @@ public class Partner extends ModelSuperclass {
 
   private String shopUrl;
 
+  @Multilingual
+  private String description;
+
   private LocalDateTime created;
 
   @ManyToOne(cascade = CascadeType.PERSIST)
   private ContactPerson technicalContact;
+
+  @ManyToOne
+  private ImageCollector mainImage;
+
+  @Transient
+  private List<Category> categories;
+
+  @Transient
+  private List<Tag> tags;
+
+  @Transient
+  private List<String> cities;
+
+  @Transient
+  private LanguageVersion currentLanguage;
+
+  @NotNull
+  @Column(length = 5, nullable = false)
+  @Enumerated(EnumType.STRING)
+  private LanguageVersion defaultLanguage = LanguageVersion.PL_PL;
+
+  @Column(nullable = false)
+  @ElementCollection
+  @Enumerated(EnumType.STRING)
+  private Set<LanguageVersion> availableLanguageVersions;
+
+  private boolean blocked;
 
   public Integer getP24Id() {
     return p24Id;
@@ -318,6 +357,109 @@ public class Partner extends ModelSuperclass {
 
   public void setCreated(LocalDateTime created) {
     this.created = created;
+  }
+
+  public ImageCollector getMainImage() {
+    return mainImage;
+  }
+
+  public void setMainImage(ImageCollector mainImage) {
+    this.mainImage = mainImage;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public List<Category> getCategories() {
+    return categories;
+  }
+
+  public void setCategories(List<Category> categories) {
+    this.categories = categories;
+  }
+
+  public List<String> getCities() {
+    return cities;
+  }
+
+  public void setCities(List<String> cities) {
+    this.cities = cities;
+  }
+
+  public List<Tag> getTags() {
+    return tags;
+  }
+
+  public void setTags(List<Tag> tags) {
+    this.tags = tags;
+  }
+
+  @Override
+  public LanguageVersion getDefaultLanguage() {
+    return defaultLanguage;
+  }
+
+  @Override
+  public void setDefaultLanguage(LanguageVersion defaultLanguage) {
+    this.defaultLanguage = defaultLanguage;
+  }
+
+  @Override
+  public Set<LanguageVersion> getAvailableLanguageVersions() {
+    return availableLanguageVersions;
+  }
+
+  @Override
+  public void setAvailableLanguageVersions(Set<LanguageVersion> availableLanguageVersions) {
+    this.availableLanguageVersions = availableLanguageVersions;
+  }
+
+  @Override
+  public boolean addAvailableLanguageVersion(LanguageVersion languageVersion) {
+    if (availableLanguageVersions == null) {
+      availableLanguageVersions = new HashSet<>();
+    }
+    return availableLanguageVersions.add(languageVersion);
+  }
+
+  @Override
+  public boolean deleteAvailableLanguageVersion(LanguageVersion languageVersion) {
+    if (availableLanguageVersions == null) {
+      availableLanguageVersions = new HashSet<>();
+    }
+    return availableLanguageVersions.remove(languageVersion);
+  }
+
+  @Override
+  public LanguageVersion getCurrentLanguage() {
+    return currentLanguage;
+  }
+
+  @Override
+  public void setCurrentLanguage(LanguageVersion currentLanguage) {
+    this.currentLanguage = currentLanguage;
+  }
+
+  public boolean isBlocked() {
+    return blocked;
+  }
+
+  public void setBlocked(boolean blocked) {
+    this.blocked = blocked;
+  }
+
+  public void fetchCollections() {
+    Optional.ofNullable(this.getAgreements()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getAvailableLanguageVersions()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getRepresentatives()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getUsers()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getSight()).ifPresent(Collection::size);
+    Optional.ofNullable(this.getSightEvents()).ifPresent(Collection::size);
   }
 
 }

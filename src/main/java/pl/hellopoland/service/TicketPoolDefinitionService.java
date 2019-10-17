@@ -30,7 +30,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     if (se == null) {
       throw new ResourceNotFoundException();
     }
-    if (se.getPartner() != partner) {
+    if (!se.getPartner().getId().equals(partner.getId())) {
       throw new AccessDeniedException();
     }
     validateDates(dto);

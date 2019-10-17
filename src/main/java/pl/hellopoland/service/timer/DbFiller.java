@@ -8,11 +8,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.ejb.DependsOn;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.Location;
@@ -26,7 +28,9 @@ import pl.hellopoland.bo.UserRole.Role;
 import pl.hellopoland.dto.CategoryDTO;
 import pl.hellopoland.dto.FrequencyDataDTO;
 import pl.hellopoland.dto.FrequencyTypeDTO;
+import pl.hellopoland.dto.MarketPartnerDTO;
 import pl.hellopoland.dto.SightEventDTO;
+import pl.hellopoland.dto.TagDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.enums.LanguageVersion;
@@ -36,6 +40,7 @@ import pl.hellopoland.service.ImageService;
 import pl.hellopoland.service.ServiceSuperclass;
 import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.service.SightService;
+import pl.hellopoland.service.TagService;
 import pl.hellopoland.service.TicketDefinitionService;
 import pl.hellopoland.service.TicketPoolDefinitionService;
 import pl.hellopoland.service.TranslationService;
@@ -44,6 +49,7 @@ import pl.hellopoland.util.DtoMapper;
 @Startup
 @Singleton
 @DependsOn({"Configuration"})
+@ApplicationScoped
 public class DbFiller extends ServiceSuperclass {
 
   @Inject
@@ -58,6 +64,8 @@ public class DbFiller extends ServiceSuperclass {
   TicketDefinitionService tdService;
   @Inject
   CategoryService categoryService;
+  @Inject
+  TagService tagService;
   @Inject
   private PasswordEncoder passwordEncoder;
   @Inject
@@ -126,7 +134,7 @@ public class DbFiller extends ServiceSuperclass {
     logger.log(Logger.Level.INFO, "Envi: " + System.getenv("ProgramFiles(x86)"));
     createPortals();
     createUsers();
-    createImageCollectors();
+    // createImageCollectors();
     createLocations();
     createSights();
     createSightsEnglishVersion(hpWroc, hpKielce, geoparkKielce, zeromKielce, zooWro, stadGd,
@@ -136,12 +144,19 @@ public class DbFiller extends ServiceSuperclass {
         zwZooEvent, zwKielcEvent, zeromEvent, geoparkKielcEvent);
     createTicketPoolDefinitions();
     createCategories();
+    createTags();
     logger.log(Logger.Level.INFO, "dbfiller finished");
   }
 
   private void createCategories() {
     for (int i = 0; i < 10; i++) {
       createCategory("kategoria " + i);
+    }
+  }
+
+  private void createTags() {
+    for (int i = 0; i < 10; i++) {
+      createTag("tag " + i);
     }
   }
 
@@ -153,6 +168,16 @@ public class DbFiller extends ServiceSuperclass {
     dto.language = "pl-pl";
     dto.iconUrl = "https://static.thenounproject.com/png/22802-200.png";
     categoryService.create(dto);
+  }
+
+  private void createTag(String label) {
+    TagDTO dto = new TagDTO();
+    dto.label = label;
+    dto.recommended = random.nextBoolean();
+    dto.restricted = random.nextBoolean();
+    dto.language = "pl-pl";
+    dto.iconUrl = "https://static.thenounproject.com/png/22802-200.png";
+    tagService.create(dto);
   }
 
   private void createUsers() {
@@ -186,7 +211,14 @@ public class DbFiller extends ServiceSuperclass {
     partner.setCommission(commission);
     partner.setEmail(email);
     partner.setAffiliateCode(affiliateCode);
-    return createUser(null, email, password, null, partner, roles);
+    partner.setDescription("pl desc");
+    User user = createUser(null, email, password, null, partner, roles);
+    MarketPartnerDTO dto = new MarketPartnerDTO();
+    dto.description = "pl desc";
+    translationService.createEntityLanguageVersion(partner, dto, LanguageVersion.PL_PL);
+    dto.description = "en desc";
+    translationService.createEntityLanguageVersion(partner, dto, LanguageVersion.EN_GB);
+    return user;
   }
 
   private User createUser(String name, String email, String password, String hptToken,
@@ -340,6 +372,7 @@ public class DbFiller extends ServiceSuperclass {
     bo.setDefaultLanguage(LanguageVersion.PL_PL);
     bo.setAvailableLanguageVersions(new HashSet<>(Arrays.asList(LanguageVersion.PL_PL)));
     em.persist(bo);
+    bo.recreateSearchIndex(Set.of(description, name));
     var dto = DtoMapper.getDTO(bo);
     dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
         .map(lang -> lang.getLanuage()).collect(Collectors.toSet());

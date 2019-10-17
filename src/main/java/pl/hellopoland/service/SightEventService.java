@@ -1,5 +1,9 @@
 package pl.hellopoland.service;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import java.io.ByteArrayInputStream;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
@@ -17,7 +21,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -30,18 +33,19 @@ import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.bo.SightEventCategory;
+import pl.hellopoland.bo.SightEventTag;
 import pl.hellopoland.bo.TicketDefinition;
+import pl.hellopoland.bo.Translation;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.AvailableTicketNumberAssociationDTO;
 import pl.hellopoland.dto.PushDTO;
 import pl.hellopoland.dto.SightEventDTO;
-import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.AccessDeniedException;
-import pl.hellopoland.service.timer.SightEventFetcherCacheScheduler;
 import pl.hellopoland.util.BeanUtils;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
@@ -51,9 +55,6 @@ import pl.hellopoland.util.Triplet;
 @LocalBean
 @Stateless
 public class SightEventService extends ServiceSuperclass {
-
-  @Inject
-  private SightEventFetcherCacheScheduler cache;
 
   @Inject
   private ImageService iService;
@@ -76,6 +77,12 @@ public class SightEventService extends ServiceSuperclass {
   @Inject
   private TranslationService translationService;
 
+  @Inject
+  private CategoryService catService;
+
+  @Inject
+  private TagService tagService;
+
   public List<SightEvent> getAllActiveAndPublishedAndNotBlocked() {
     return em.createQuery(
         "from SightEvent where active is true and published is true and blocked is false",
@@ -88,13 +95,25 @@ public class SightEventService extends ServiceSuperclass {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
     }
     List<SightEvent> sightEvents = getQuery(config).getResultList();
+    if (!sightEvents.isEmpty() && config.isFetchCategories()) {
+      List<SightEventCategory> categories = catService.getFor(sightEvents);
+      Map<SightEvent, Set<SightEventCategory>> grouped = categories.stream()
+          .collect(groupingBy(SightEventCategory::getSightEvent, toSet()));
+      sightEvents.forEach(se -> se.setCategories(grouped.get(se)));
+    }
+    if (!sightEvents.isEmpty() && config.isFetchTags()) {
+      List<SightEventTag> tags = tagService.getFor(sightEvents);
+      Map<SightEvent, Set<SightEventTag>> grouped = tags.stream()
+          .collect(groupingBy(SightEventTag::getSightEvent, toSet()));
+      sightEvents.forEach(se -> se.setTags(grouped.get(se)));
+    }
     if (language != null) {
-      sightEvents = translationService.translateEntities(sightEvents, language, false);
+      sightEvents = translationService.translateEntities(sightEvents, language);
     }
     // List<SightEvent> sightEvents = getQuery(config).getResultList().stream()
     // .sorted(sightEventDatesComparator()).collect(toList());
     Collections.sort(sightEvents, sightEventPromotionComparator()
-        .thenComparing(sightEventNamesComparator(new Locale("pl_PL"))));
+        .thenComparing(sightEventNamesComparator()));
     return new PagedEntityCollection<>(sightEvents, config);
   }
 
@@ -103,14 +122,14 @@ public class SightEventService extends ServiceSuperclass {
         Comparator.nullsLast(Comparator.naturalOrder())));
   }
 
-  private Comparator<SightEvent> sightEventNamesComparator(Locale locale) {
-    var collator = Collator.getInstance(locale);
-    collator.setStrength(Collator.CANONICAL_DECOMPOSITION);
-    return Comparator.comparing(SightEvent::getName, collator);
+  private Comparator<SightEvent> sightEventNamesComparator() {
+    return Comparator.comparing(SightEvent::getName, polishComparator());
   }
 
   public SightEvent get(Long id) {
-    return em.find(SightEvent.class, id);
+    SightEvent se = em.find(SightEvent.class, id);
+    se.fetchCollections();
+    return se;
   }
 
   public void savePush(PushDTO push) {
@@ -124,7 +143,7 @@ public class SightEventService extends ServiceSuperclass {
   public void delete(Long id) {
     SightEvent bo = get(id);
 
-    Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
+    Partner partner = bo.getPartner();
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
     helloTicket.deleteSightEvent(bo, partner.getHptToken());
@@ -140,7 +159,7 @@ public class SightEventService extends ServiceSuperclass {
       partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
     }
     Sight sight = sightService.get(dto.sightId);
-    if (!sight.getPartner().equals(partner)) {
+    if (!sight.getPartner().getId().equals(partner.getId())) {
       throw new AccessDeniedException();
     }
     var defLang = dto.defaultLanguage;
@@ -174,6 +193,9 @@ public class SightEventService extends ServiceSuperclass {
       });
       bo.setOpeningHours(oHoursList);
     }
+    em.refresh(sight);
+    sightService.recreateSearchIndex(sight);
+    recreateSearchIndex(bo);
     logger.log(Logger.Level.INFO, "Saved new sight event: " + bo.getName());
     return createLanguageVersion(DtoMapper.getDTO(bo), partner, bo.getDefaultLanguage());
   }
@@ -181,7 +203,7 @@ public class SightEventService extends ServiceSuperclass {
   private ArrayList<OpeningHours> getOpeningHoursCollectionFromDTO(SightEventDTO dto) {
     return Optional.ofNullable(dto.openingHours)
         .map(l -> l.stream().map(oh -> DtoMapper.copy(oh, new OpeningHours()))
-            .collect(Collectors.toCollection(ArrayList::new)))
+            .collect(toCollection(ArrayList::new)))
         .orElse(null);
   }
 
@@ -231,6 +253,9 @@ public class SightEventService extends ServiceSuperclass {
       }
       bo.setOpeningHours(null);
       bo.setOpeningHours(oHoursList);
+      em.refresh(bo.getSight());
+      sightService.recreateSearchIndex(bo.getSight());
+      recreateSearchIndex(bo);
       em.flush();
     }
     return translationService.updateEntityLanguageVersion(bo, dto, language);
@@ -242,32 +267,6 @@ public class SightEventService extends ServiceSuperclass {
     return em.createQuery(
         "from SightEvent event where event.sight.partner=:partner order by event.id desc",
         SightEvent.class).setParameter("partner", partner).getResultList();
-  }
-
-  private Comparator<SightEvent> sightEventDatesComparator() {
-    return new Comparator<>() {
-      @Override
-      public int compare(SightEvent sightEvent1, SightEvent sightEvent2) {
-        Date current = new Date();
-
-        if (sightEvent1.getDate() == null) {
-          return -1;
-        }
-        if (sightEvent2.getDate() == null) {
-          return 1;
-        }
-        if (areAllUpToDate(sightEvent1, sightEvent2, current)) {
-          return sightEvent1.getDate().compareTo(sightEvent2.getDate());
-        } else {
-          return sightEvent1.getDate().compareTo(sightEvent2.getDate()) * -1;
-        }
-      }
-
-      private boolean areAllUpToDate(SightEvent sightEvent1, SightEvent sightEvent2, Date current) {
-        return sightEvent1.getDate().compareTo(current) > 0
-            && sightEvent2.getDate().compareTo(current) > 0;
-      }
-    };
   }
 
   public SightEvent uploadMainImageForLoggedUser(Long id, byte[] icon) {
@@ -301,8 +300,11 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public SightEvent getForPartner(Long sightEventId, Partner partner) {
-    return em.createQuery("from SightEvent where id=:id and partner=:partner", SightEvent.class)
-        .setParameter("id", sightEventId).setParameter("partner", partner).getSingleResult();
+    SightEvent sightEvent =
+        em.createQuery("from SightEvent where id=:id and partner=:partner", SightEvent.class)
+            .setParameter("id", sightEventId).setParameter("partner", partner).getSingleResult();
+    sightEvent.fetchCollections();
+    return sightEvent;
   }
 
   public void deleteForLoggedUser(Long id) {
@@ -315,52 +317,41 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public void fetchTicketPoolDefinitions(Collection<SightEvent> bos,
-      List<SightEventDTO> sightEventDtos, boolean showDeletedTPD) {
+      List<SightEventDTO> dtos, boolean showDeletedTPD) {
     if (hasAnyHptCloudEvent(bos)) {
-      var pairedByIds = pairBosWithDtos(bos, sightEventDtos);
-      var groupedByPartner = groupByPartner(pairedByIds);
-      HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
-      Map<Long, List<TicketDefinition>> externalIdToTicket = null;
-      // Map<Long, TicketDefinition> externalIdToTicket = null;
-      for (var entry : groupedByPartner.entrySet()) {
+      Map<Partner, List<Pair<Long, SightEventDTO>>> sightEventsWithHptIdsGroupedByPartner =
+          groupDtosWithHptIdByPartner(bos, dtos);
+      Map<Long, List<TicketDefinition>> ticketsGroupedByExternalId = new HashMap<>();
+      for (var entry : sightEventsWithHptIdsGroupedByPartner.entrySet()) {
         Partner partner = entry.getKey();
-        List<TicketPoolDefinitionDTO> poolDefinitions =
-            hpt.getTicketPoolDefinitions(partner.getHptToken());
-        if (!showDeletedTPD) {
-          poolDefinitions =
-              poolDefinitions.stream().filter(tpd -> !tpd.deleted).collect(Collectors.toList());
-        }
-        List<TicketDefinitionDTO> ticketDefinitions = new ArrayList<>();
-        poolDefinitions.forEach(p -> ticketDefinitions.addAll(p.ticketDefinitions));
-        List<TicketDefinition> ticketBos = ticketService.getTicketsByExternalIds(
-            ticketDefinitions.stream().map(t -> t.id).collect(Collectors.toList()));
-        if (externalIdToTicket == null) {
-          externalIdToTicket =
-              ticketBos.stream().collect(Collectors.groupingBy(TicketDefinition::getExternalId));
-          // ticketBos.stream().collect(Collectors.toMap(TicketDefinition::getExternalId, t -> t));
-        } else {
-          externalIdToTicket.putAll(
-              ticketBos.stream().collect(Collectors.groupingBy(TicketDefinition::getExternalId)));
-          // .collect(Collectors.toMap(TicketDefinition::getExternalId, t -> t)));
-        }
-        var poolDefinitionsGroupedBySightEventId =
-            poolDefinitions.stream().collect(Collectors.groupingBy(pool -> pool.sightEventId));
-        List<Pair<Long, SightEventDTO>> sightEvents = entry.getValue();
-        for (var pair : sightEvents) {
+        List<TicketPoolDefinitionDTO> poolDefinitionsDtos =
+            downloadHptTpds(partner, showDeletedTPD);
+        List<Long> ticketsExternalIds = poolDefinitionsDtos.stream()
+            .flatMap(p -> p.ticketDefinitions.stream()).map(td -> td.id)
+            .collect(toList());
+        ticketsGroupedByExternalId.putAll(getTds(ticketsExternalIds));
+
+        Map<Long, List<TicketPoolDefinitionDTO>> poolDefinitionsGroupedBySightEventId =
+            poolDefinitionsDtos.stream()
+                .collect(groupingBy(pool -> pool.sightEventId));
+        // assign tpds to sightevents
+        for (Pair<Long, SightEventDTO> pair : entry.getValue()) {
           pair.getRight().ticketPoolDefinitions =
               poolDefinitionsGroupedBySightEventId.get(pair.getLeft());
         }
       }
-      for (var sightEventDto : sightEventDtos) {
+
+      for (var sightEventDto : dtos) {
         if (sightEventDto.ticketPoolDefinitions != null) {
           int minPrice = Integer.MAX_VALUE;
-          for (var poolDefinitionDto : sightEventDto.ticketPoolDefinitions) {
-            poolDefinitionDto.sightEventId = sightEventDto.id;
-            for (var t : poolDefinitionDto.ticketDefinitions) {
-              t.id = externalIdToTicket.get(t.id).stream()
-                  .filter(tBo -> tBo.getPoolId().equals(poolDefinitionDto.id)).findFirst().get()
+          for (var poolDef : sightEventDto.ticketPoolDefinitions) {
+            poolDef.sightEventId = sightEventDto.id;
+            for (var t : poolDef.ticketDefinitions) {
+              t.id = ticketsGroupedByExternalId.get(t.id).stream()
+                  .filter(tBo -> tBo.getPoolId().equals(poolDef.id))
+                  .findFirst()
+                  .get()
                   .getId();
-              // t.id = externalIdToTicket.get(t.id).getId();
               minPrice = Math.min(minPrice, t.price);
             }
           }
@@ -372,8 +363,30 @@ public class SightEventService extends ServiceSuperclass {
     }
   }
 
-  private Map<Partner, List<Pair<Long, SightEventDTO>>> groupByPartner(
-      List<Triplet<Long, SightEvent, SightEventDTO>> groupedById) {
+  private Map<Long, List<TicketDefinition>> getTds(List<Long> ids) {
+    Stream<TicketDefinition> ticketBos =
+        ticketService.getTicketsByExternalIds(ids).stream();
+    return ticketBos.collect(groupingBy(TicketDefinition::getExternalId));
+  }
+
+  private List<TicketPoolDefinitionDTO> downloadHptTpds(Partner partner,
+      boolean showDeletedAndOverdued) {
+    HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
+    Stream<TicketPoolDefinitionDTO> poolDefinitions =
+        hpt.getTicketPoolDefinitions(partner.getHptToken()).stream();
+    if (!showDeletedAndOverdued) {
+      poolDefinitions = poolDefinitions.filter(tpd -> !tpd.deleted).filter(tpd -> {
+        return !tpd.isCyclic
+            || tpd.frequencyData.endDate == null
+            || tpd.frequencyData.endDate.after(new Date());
+      });
+    }
+    return poolDefinitions.collect(toList());
+  }
+
+  private Map<Partner, List<Pair<Long, SightEventDTO>>> groupDtosWithHptIdByPartner(
+      Collection<SightEvent> bos, List<SightEventDTO> dtos) {
+    var groupedById = pairBosWithDtosByHptId(bos, dtos);
     var groupedByPartner = new HashMap<Partner, List<Pair<Long, SightEventDTO>>>();
     groupedById.forEach(triplet -> {
       Partner partner = triplet.second.getPartner();
@@ -390,7 +403,8 @@ public class SightEventService extends ServiceSuperclass {
         .anyMatch(se -> se.getPortal().getType().equals(Portal.Type.HELLOTICKET_CLOUD_1));
   }
 
-  private List<Triplet<Long, SightEvent, SightEventDTO>> pairBosWithDtos(Collection<SightEvent> bos,
+  private List<Triplet<Long, SightEvent, SightEventDTO>> pairBosWithDtosByHptId(
+      Collection<SightEvent> bos,
       List<SightEventDTO> dtos) {
     var grouped = new ArrayList<Triplet<Long, SightEvent, SightEventDTO>>();
     bos.forEach(bo -> {
@@ -423,7 +437,7 @@ public class SightEventService extends ServiceSuperclass {
     }
 
     var tdOBs = ticketService.getTicketsByExternalIds(tdExternalIds).stream().distinct()
-        .collect(Collectors.toList());
+        .collect(toList());
 
     if (tpdDTOs != null && !tpdDTOs.isEmpty()) {
       for (var tpdDto : tpdDTOs) {
@@ -491,9 +505,10 @@ public class SightEventService extends ServiceSuperclass {
     List<TicketPoolDefinitionDTO> tpds = dto.ticketPoolDefinitions;
     if (tpds != null && !tpds.isEmpty()) {
       return !tpds.stream()
-          .filter(tpd -> !tpd.deleted && isInDateRange(tpd, fromDate, toDate)
+          .filter(tpd -> !tpd.deleted
+              && isInDateRange(tpd, fromDate, toDate)
               && ticketAreAvailable(dto, tpd, fromDate, toDate))
-          .collect(Collectors.toList()).isEmpty();
+          .collect(toList()).isEmpty();
     }
     return false;
   }
@@ -563,16 +578,19 @@ public class SightEventService extends ServiceSuperclass {
           "Can not change the default language. Translation for language " + language.getLanuage()
               + "doesn't exists");
     }
-    SightEvent translation = translationService.translateEntity(bo, language, true);
+    SightEvent translation = translationService.translateEntity(bo, language);
     bo.setDefaultLanguage(language);
     bo = BeanUtils.copyNotNullProperties(translation, bo);
     em.merge(bo);
+    bo = get(bo.getId());
     if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
       Partner partner = bo.getPartner();
       Portal hpt = getPortal("Hello Ticket Cloud");
       HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
       helloTicket.updateSightEvent(DtoMapper.getDTO(bo), partner.getHptToken());
     }
+    sightService.recreateSearchIndex(bo.getSight());
+    recreateSearchIndex(bo);
     return bo;
   }
 
@@ -595,6 +613,40 @@ public class SightEventService extends ServiceSuperclass {
     var bo = Optional.ofNullable(get(id))
         .orElseThrow(() -> new ConflictingException("Resource not found"));
     return bo;
+  }
+
+  public List<String> getCitiesForPublicEvents() {
+    return em.createQuery(
+        "select distinct location.city from SightEvent where active = true "
+            + "and published = true and blocked = false and available = true and partner.blocked = false order by location.city asc",
+        String.class).getResultStream()
+        .map(String::strip)
+        .filter(city -> !city.isBlank())
+        .distinct()
+        .sorted(Comparator.comparing(String::toLowerCase, polishComparator()))
+        .collect(toList());
+  }
+
+  private Comparator<Object> polishComparator() {
+    var collator = Collator.getInstance(new Locale("pl", "PL"));
+    collator.setStrength(Collator.CANONICAL_DECOMPOSITION);
+    return collator;
+  }
+
+  public void rebuildSearchIndices() {
+    SightEventPagedCollectionConfig config = new SightEventPagedCollectionConfig();
+    List<SightEvent> sightEvents = getQuery(config).getResultList();
+    sightEvents.forEach(this::recreateSearchIndex);
+  }
+
+  private void recreateSearchIndex(SightEvent se) {
+    {
+      Set<String> words = se.getAvailableLanguageVersions().stream()
+          .flatMap(
+              lv -> translationService.getTranslations(se, lv).stream().map(Translation::getValue))
+          .collect(toSet());
+      se.recreateSearchIndex(words);
+    }
   }
 
 }

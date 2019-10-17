@@ -26,7 +26,7 @@ public class CategoryServiceMarketAPI {
   public PagedCollection pagedList(LanguageVersion language) {
     var config = new CategoryPagedCollectionConfig();
     var bos = service.pagedList(config);
-    bos.items = tService.translateEntities(bos.items, language, false);
+    bos.items = tService.translateEntities(bos.items, language);
     List<CategoryDTO> dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
     return new PagedCollection(dtos, bos.config);
   }
@@ -34,7 +34,7 @@ public class CategoryServiceMarketAPI {
   @PermitAll
   public CategoryDTO get(Long id, LanguageVersion language) {
     Category cat = service.get(id);
-    cat = tService.translateEntity(cat, language, true);
+    cat = tService.translateEntity(cat, language);
     return DtoMapper.getFullDTO(cat);
   }
 

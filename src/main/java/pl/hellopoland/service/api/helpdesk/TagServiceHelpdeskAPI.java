@@ -5,53 +5,53 @@ import java.util.stream.Collectors;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import pl.hellopoland.bo.Category;
-import pl.hellopoland.config.CategoryPagedCollectionConfig;
-import pl.hellopoland.dto.CategoryDTO;
+import pl.hellopoland.bo.Tag;
+import pl.hellopoland.config.TagPagedCollectionConfig;
+import pl.hellopoland.dto.TagDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.dto.PagedCollection;
-import pl.hellopoland.service.CategoryService;
+import pl.hellopoland.service.TagService;
 import pl.hellopoland.service.TranslationService;
 import pl.hellopoland.util.DtoMapper;
 
 @Stateless
-public class CategoryServiceHelpdeskAPI {
+public class TagServiceHelpdeskAPI {
 
   @Inject
-  CategoryService service;
+  TagService service;
   @Inject
   TranslationService tService;
 
   @RolesAllowed("admin")
-  public CategoryDTO create(CategoryDTO dto) {
+  public TagDTO create(TagDTO dto) {
     return DtoMapper.getFullDTO(service.create(dto));
   }
 
   @RolesAllowed("admin")
-  public CategoryDTO createLanguageVesrion(CategoryDTO dto, LanguageVersion lang) {
+  public TagDTO createLanguageVesrion(TagDTO dto, LanguageVersion lang) {
     return DtoMapper.getFullDTO(service.createLanguageVesrion(dto, lang));
   }
 
   @RolesAllowed("admin")
   public PagedCollection pagedList(LanguageVersion language) {
-    var config = new CategoryPagedCollectionConfig();
+    var config = new TagPagedCollectionConfig();
     var bos = service.pagedList(config);
     bos.items = tService.translateEntities(bos.items, language);
-    List<CategoryDTO> dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
+    List<TagDTO> dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
     return new PagedCollection(dtos, bos.config);
   }
 
   @RolesAllowed("admin")
-  public CategoryDTO get(Long id, LanguageVersion language) {
-    Category cat = service.get(id);
+  public TagDTO get(Long id, LanguageVersion language) {
+    Tag cat = service.get(id);
     cat = tService.translateEntity(cat, language);
     return DtoMapper.getFullDTO(cat);
   }
 
   @RolesAllowed("admin")
-  public CategoryDTO changeDefaultLanguage(Long id, LanguageVersion language) {
-    Category bo = service.get(id);
+  public TagDTO changeDefaultLanguage(Long id, LanguageVersion language) {
+    Tag bo = service.get(id);
     if (!tService.isTranslated(bo, language)) {
       throw new ConflictingException(
           "Can not change the default language. Translation for language " + language.getLanuage()
@@ -62,8 +62,8 @@ public class CategoryServiceHelpdeskAPI {
   }
 
   @RolesAllowed("admin")
-  public CategoryDTO update(CategoryDTO dto, LanguageVersion lang) {
-    Category bo = service.update(dto, lang);
+  public TagDTO update(TagDTO dto, LanguageVersion lang) {
+    Tag bo = service.update(dto, lang);
     return DtoMapper.getFullDTO(bo);
   }
 
@@ -76,6 +76,5 @@ public class CategoryServiceHelpdeskAPI {
   public void deleteLanguageVersion(Long id, LanguageVersion lang) {
     service.deleteLanguageVersion(id, lang);
   }
-
 
 }

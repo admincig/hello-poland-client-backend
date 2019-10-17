@@ -1,4 +1,4 @@
-package pl.hellopoland.rest.market;
+package pl.hellopoland.rest.partner;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -9,20 +9,20 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import pl.hellopoland.dto.CategoryDTO;
+import pl.hellopoland.dto.TagDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.rest.RestService;
 import pl.hellopoland.rest.dto.PagedCollection;
-import pl.hellopoland.service.api.market.CategoryServiceMarketAPI;
+import pl.hellopoland.service.api.partner.TagServicePartnerAPI;
 
-@Path("/market/categories")
 @RequestScoped
+@Path("/partner/tags")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class MarketCategoryRestService {
+public class PartnerTagRestService {
 
   @Inject
-  CategoryServiceMarketAPI service;
+  TagServicePartnerAPI service;
 
   @GET
   public PagedCollection getCategories(
@@ -33,7 +33,7 @@ public class MarketCategoryRestService {
 
   @GET
   @Path("/{id}")
-  public CategoryDTO get(
+  public TagDTO get(
       @HeaderParam("Content-Language") String contentLanguage,
       @PathParam("id") Long id) {
     LanguageVersion lang = RestService.parseLang(contentLanguage);

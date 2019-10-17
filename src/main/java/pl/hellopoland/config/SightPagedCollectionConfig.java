@@ -1,22 +1,29 @@
 package pl.hellopoland.config;
 
+import java.util.Set;
 import pl.hellopoland.bo.Sight;
 
 public class SightPagedCollectionConfig extends PagedCollectionConfig<Sight> {
 
   private boolean currentPartner;
+  private boolean fetchSightEvents;
 
   @Override
   public String joins() {
-    return "left join fetch e.mainImage mi";
+    return "left join fetch e.mainImage mi join fetch e.partner p"
+        + (fetchSightEvents ? " left join fetch e.sightEvents ses" : "");
   }
 
   public void setSearchQuery(String searchQuery) {
     if (searchQuery != null) {
-      addCondition("searchQuery", "%" + searchQuery.toLowerCase() + "%",
-          "((unaccent(lower(e.name)) like unaccent(:searchQuery))"
-              + " or (unaccent(lower(e.lead)) like unaccent(:searchQuery))"
-              + " or (unaccent(lower(e.location.city)) like unaccent(:searchQuery)))");
+      addCondition("searchQuery",
+          searchQuery, "tsearch('polish_hunspell', e.searchIndex, :searchQuery) = true");
+      /*
+        "%" + searchQuery.toLowerCase() + "%",
+        "((unaccent(lower(e.name)) like unaccent(:searchQuery))"
+            + " or (unaccent(lower(e.lead)) like unaccent(:searchQuery))"
+            + " or (unaccent(lower(e.location.city)) like unaccent(:searchQuery)))");
+      */
     }
   }
 
@@ -37,6 +44,7 @@ public class SightPagedCollectionConfig extends PagedCollectionConfig<Sight> {
   public void onlyPublished() {
     addCondition("published", true, "e.published=:published");
     addCondition("blocked", false, "e.blocked=:blocked");
+    addCondition("pBlocked", false, "e.partner.blocked=:pBlocked");
   }
 
   public void onlyCurrentPartner(boolean only) {
@@ -55,6 +63,22 @@ public class SightPagedCollectionConfig extends PagedCollectionConfig<Sight> {
     if (city != null) {
       addCondition("city", city.toLowerCase(), "lower(e.location.city)=:city");
     }
+  }
+
+  public void setExcludedIds(Set<Long> ids) {
+    addCondition("ids", ids, "e.id not in (:ids)");
+  }
+
+  public void fetchSightEvents(boolean fetchSightEvents) {
+    this.fetchSightEvents = fetchSightEvents;
+  }
+
+  public boolean isFetchSightEvents() {
+    return fetchSightEvents;
+  }
+
+  public void setFetchSightEvents(boolean fetchSightEvents) {
+    this.fetchSightEvents = fetchSightEvents;
   }
 
 }

@@ -14,7 +14,7 @@ import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.util.Translated;
 
 @Entity
-public class Category extends ModelSuperclass implements Translated {
+public class Tag extends ModelSuperclass implements Translated {
   private static final long serialVersionUID = -3526668470989917639L;
 
   @Multilingual
@@ -30,7 +30,6 @@ public class Category extends ModelSuperclass implements Translated {
   private boolean restricted;
   private boolean recommended;
   private String iconUrl;
-  private String backgroundUrl;
   private int assignedItemsCount;
   @Transient
   private LanguageVersion currentLanguage;
@@ -85,14 +84,6 @@ public class Category extends ModelSuperclass implements Translated {
 
   public void setIconUrl(String iconUrl) {
     this.iconUrl = iconUrl;
-  }
-
-  public String getBackgroundUrl() {
-    return backgroundUrl;
-  }
-
-  public void setBackgroundUrl(String backgroundUrl) {
-    this.backgroundUrl = backgroundUrl;
   }
 
   public int getAssignedItemsCount() {

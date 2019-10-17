@@ -14,71 +14,56 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import pl.hellopoland.dto.CategoryDTO;
+import pl.hellopoland.config.SightPagedCollectionConfig;
+import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.rest.RestService;
 import pl.hellopoland.rest.dto.PagedCollection;
-import pl.hellopoland.service.api.helpdesk.CategoryServiceHelpdeskAPI;
+import pl.hellopoland.service.api.helpdesk.SightServiceHelpdeskAPI;
 
 @RequestScoped
-@Path("/helpdesk/categories")
+@Path("/helpdesk/sights")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class HelpdeskCategoryRestService {
+public class HelpdeskSightRestService {
 
   @Inject
-  private CategoryServiceHelpdeskAPI service;
+  SightServiceHelpdeskAPI service;
+
 
   @POST
-  public CategoryDTO create(
+  public SightDTO createLanguageVersion(
       @HeaderParam("Content-Language") String contentLanguage,
-      CategoryDTO dto) {
+      SightDTO dto) {
     LanguageVersion lang = RestService.parseLang(contentLanguage);
-    if (dto.id == null) {
-      dto.language = lang.getLanuage();
-      return service.create(dto);
-    }
     return service.createLanguageVesrion(dto, lang);
   }
 
   @GET
-  public PagedCollection getCategories(
+  public PagedCollection list(
       @HeaderParam("Content-Language") String contentLanguage) {
-    LanguageVersion lang = RestService.parseLang(contentLanguage);
-    return service.pagedList(lang);
-  }
-
-  @GET
-  @Path("/{id}")
-  public CategoryDTO get(
-      @HeaderParam("Content-Language") String contentLanguage,
-      @PathParam("id") Long id) {
-    LanguageVersion lang = RestService.parseLang(contentLanguage);
-    return service.get(id, lang);
+    return service.list(new SightPagedCollectionConfig(),
+        RestService.parseLang(contentLanguage));
   }
 
   @DELETE
   @Path("/{id}")
-  public Response deleteCategory(
-      @PathParam("id") Long id) {
+  public Response delete(@PathParam("id") Long id) {
     service.delete(id);
     return Response.ok().build();
   }
 
-  @PUT
-  @Path("/{id}/languageVersion/{language}")
-  public CategoryDTO update(
-      @PathParam("id") Long id,
-      @PathParam("language") String language,
-      CategoryDTO dto) {
-    LanguageVersion lang = RestService.parseLang(language);
-    dto.id = id;
-    return service.update(dto, lang);
+  @GET
+  @Path("/{id}")
+  public SightDTO get(
+      @HeaderParam("Content-Language") String contentLanguage,
+      @PathParam("id") Long id) {
+    return service.get(id, RestService.parseLang(contentLanguage));
   }
 
   @DELETE
   @Path("/{id}/languageVersion/{language}")
-  public Response delete(
+  public Response deleteLanguageVersion(
       @PathParam("id") Long id,
       @PathParam("language") String language) {
     LanguageVersion lang = RestService.parseLang(language);
@@ -88,11 +73,27 @@ public class HelpdeskCategoryRestService {
 
   @PATCH
   @Path("/{id}/defaultLanguage")
-  public CategoryDTO changeDefaultLanguage(
+  public SightDTO changeDefaultLanguage(
       @HeaderParam("Content-Language") String contentLanguage,
       @PathParam("id") Long id) {
     LanguageVersion lang = RestService.parseLang(contentLanguage);
     return service.changeDefaultLanguage(id, lang);
   }
 
+  @PUT
+  @Path("/{id}/languageVersion/{language}")
+  public SightDTO update(@PathParam("id") Long id,
+      @PathParam("language") String language,
+      SightDTO dto) {
+    LanguageVersion lang = RestService.parseLang(language);
+    dto.id = id;
+    return service.update(dto, lang);
+  }
+
+  @PUT
+  @Path("/{id}/mainImage")
+  @Consumes({"image/jpeg", "image/jpg"})
+  public SightDTO uploadIcon(@PathParam("id") Long id, byte[] icon) {
+    return service.uploadMainImage(id, icon);
+  }
 }

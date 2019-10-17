@@ -5,12 +5,16 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import pl.hellopoland.bo.Category;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.SightEventCategory;
+import pl.hellopoland.bo.SightEventTag;
+import pl.hellopoland.bo.Tag;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.enums.LanguageVersion;
@@ -46,7 +50,7 @@ public class SightEventServiceMarketAPI {
     config.onlyAvailable();
     config.onlyActive();
     config.onlyPublished();
-    config.setOrderColumn("name");
+    config.setOrderColumn("e.name");
     config.setOrderDirection("asc");
     PagedEntityCollection<SightEvent> bos = service.getList(config, language);
     bos.items = bos.items.stream().filter(se -> se.isAccessible()).collect(Collectors.toList());
@@ -55,14 +59,8 @@ public class SightEventServiceMarketAPI {
       bos.items = hptClient.getSightEventsInDateRange(new ArrayList<SightEvent>(bos.items),
           fromDate, toDate);
     }
-    List<SightEventDTO> dtos = bos.items.stream().map(bo -> {
-      var dto = DtoMapper.getDTO(bo);
-      dto.language = bo.getDefaultLanguage().getLanuage();
-      return dto;
-    }).collect(Collectors.toList());
-    if (language != null) {
-      dtos.forEach(dto -> dto.language = language.getLanuage());
-    }
+    List<SightEventDTO> dtos =
+        bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
     return new PagedCollection(dtos, bos.config);
   }
 
@@ -72,18 +70,15 @@ public class SightEventServiceMarketAPI {
     config.onlyAvailable();
     config.onlyActive();
     config.onlyPublished();
-    config.setOrderColumn("name");
+    config.setOrderColumn("e.name");
     config.setOrderDirection("asc");
     PagedEntityCollection<SightEvent> bos = service.getList(config, language);
     bos.items = bos.items.stream().filter(se -> se.isAccessible()).collect(Collectors.toList());
-    List<SightEventDTO> dtos = bos.items.stream().map(bo -> {
-      var dto = DtoMapper.getDTO(bo);
-      dto.language = bo.getDefaultLanguage().getLanuage();
-      return dto;
-    }).collect(Collectors.toList());
-    if (language != null) {
-      dtos.forEach(dto -> dto.language = language.getLanuage());
-    }
+    HelloTicket hptClient = new HelloTicket(service.getPortal("Hello Ticket Cloud").getUrl());
+    List<SightEvent> ses = hptClient.getSightEventsInDateRange(new ArrayList<SightEvent>(bos.items),
+        new Date(), null);
+    List<SightEventDTO> dtos = ses.stream().map(DtoMapper::getDTO)
+        .collect(Collectors.toList());
     return new PagedCollection(dtos, bos.config);
   }
 
@@ -91,21 +86,62 @@ public class SightEventServiceMarketAPI {
   public SightEventDTO get(Long id, String contentLanguageSymbol) {
     LanguageVersion language = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
     SightEvent bo = service.get(id);
+    SightEventDTO dto = null;
     if (bo.isAccessible()) {
       if (language != null) {
-        bo = translationService.translateEntity(bo, language, true);
-        translationService.translateEntities(bo.getCategories().stream()
-            .map(SightEventCategory::getCategory).collect(Collectors.toSet()), language, false);
+        bo = translationService.translateEntity(bo, language);
+        Set<Category> categories = bo.getCategories().stream()
+            .map(SightEventCategory::getCategory).collect(Collectors.toSet());
+        translationService.translateEntities(categories, language);
+        Set<Tag> tags = bo.getTags().stream()
+            .map(SightEventTag::getTag).collect(Collectors.toSet());
+        translationService.translateEntities(tags, language);
       } else {
         language = bo.getDefaultLanguage();
       }
-      var dto = DtoMapper.getFullDTO(bo);
+      dto = DtoMapper.getFullDTO(bo);
       dto.partnerAffiliateCode = null;
       dto.language = language.getLanuage();
       service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), false);
-      return service.isAvailable(dto, null, null) ? dto : null;
+      if (service.isAvailable(dto, null, null)) {
+        dto.similar = getSimilar(bo, language);
+      }
     }
-    return null;
+    return dto;
+  }
+
+  @PermitAll
+  public PagedCollection getRecommended(Integer count, LanguageVersion languageVersion) {
+    SightEventPagedCollectionConfig config = prepareConfigForRandom(count);
+    PagedEntityCollection<SightEvent> pc = service.getList(config, languageVersion);
+    HelloTicket hptClient = new HelloTicket(service.getPortal("Hello Ticket Cloud").getUrl());
+    List<SightEvent> ses = hptClient.getSightEventsInDateRange(new ArrayList<SightEvent>(pc.items),
+        new Date(), null);
+    List<SightEventDTO> dtos = ses.stream().map(DtoMapper::getDTO)
+        .collect(Collectors.toList());
+    return new PagedCollection(dtos, pc.config);
+  }
+
+  private List<SightEventDTO> getSimilar(SightEvent bo, LanguageVersion language) {
+    SightEventPagedCollectionConfig config = prepareConfigForRandom(6);
+    config.setSight(bo.getSight());
+    config.setExcludedIds(Set.of(bo.getId()));
+    PagedEntityCollection<SightEvent> pc = service.getList(config, language);
+    HelloTicket hptClient = new HelloTicket(service.getPortal("Hello Ticket Cloud").getUrl());
+    List<SightEvent> ses = hptClient.getSightEventsInDateRange(new ArrayList<SightEvent>(pc.items),
+        new Date(), null);
+    return ses.stream().map(DtoMapper::getDTO)
+        .collect(Collectors.toList());
+  }
+
+  private SightEventPagedCollectionConfig prepareConfigForRandom(Integer count) {
+    SightEventPagedCollectionConfig config = new SightEventPagedCollectionConfig();
+    config.setPageSize(count);
+    config.setOrderColumn("random()");
+    config.onlyActive();
+    config.onlyPublished();
+    config.onlyAvailable();
+    return config;
   }
 
   @PermitAll

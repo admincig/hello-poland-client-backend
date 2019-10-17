@@ -2,6 +2,7 @@ package pl.hellopoland.rest;
 
 import java.io.File;
 import java.lang.System.Logger;
+import java.util.Optional;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -15,6 +16,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.apache.commons.lang3.StringUtils;
+import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.service.FileDescriptorService;
 import pl.hellopoland.service.ImageService;
 
@@ -66,4 +70,11 @@ public class RestService {
     return Response.ok().build();
   }
 
+  public static LanguageVersion parseLang(String contentLanguage) {
+    if (StringUtils.isBlank(contentLanguage)) {
+      throw new ConflictingException("Language is required");
+    }
+    return Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(contentLanguage))
+        .orElseThrow(() -> new ConflictingException("Unsupported language: " + contentLanguage));
+  }
 }

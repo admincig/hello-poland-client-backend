@@ -1,6 +1,7 @@
 package pl.hellopoland.service.api.helpdesk;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
@@ -8,6 +9,7 @@ import javax.inject.Inject;
 import pl.hellopoland.bo.Category;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.SightEventCategory;
+import pl.hellopoland.bo.Tag;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.enums.LanguageVersion;
@@ -16,6 +18,8 @@ import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.CategoryService;
 import pl.hellopoland.service.SightEventCategoryService;
 import pl.hellopoland.service.SightEventService;
+import pl.hellopoland.service.SightEventTagService;
+import pl.hellopoland.service.TagService;
 import pl.hellopoland.service.TranslationService;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.PagedEntityCollection;
@@ -30,7 +34,11 @@ public class SightEventServiceHelpdeskAPI {
   @Inject
   private SightEventCategoryService secService;
   @Inject
+  private SightEventTagService setService;
+  @Inject
   private CategoryService catService;
+  @Inject
+  private TagService tagService;
 
 
 
@@ -68,9 +76,10 @@ public class SightEventServiceHelpdeskAPI {
   @RolesAllowed("admin")
   public SightEventDTO get(Long id, LanguageVersion language) {
     SightEvent bo = service.get(id);
-    bo = tService.translateEntity(bo, language, true);
-    tService.translateEntities(bo.getCategories().stream().map(SightEventCategory::getCategory)
-        .collect(Collectors.toSet()), language, false);
+    bo = tService.translateEntity(bo, language);
+    Set<Category> categories = bo.getCategories().stream().map(SightEventCategory::getCategory)
+        .collect(Collectors.toSet());
+    tService.translateEntities(categories, language);
     SightEventDTO dto = DtoMapper.getFullDTO(bo);
     service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), false);
     return dto;
@@ -92,6 +101,7 @@ public class SightEventServiceHelpdeskAPI {
               + "doesn't exists");
     }
     bo = service.changeDefaultLanguage(bo, language);
+    bo.fetchCollections();
     return DtoMapper.getFullDTO(bo);
   }
 
@@ -114,6 +124,22 @@ public class SightEventServiceHelpdeskAPI {
     SightEvent se = service.get(id);
     Category cat = catService.get(categoryId);
     se = secService.removeCategory(se, cat);
+    return DtoMapper.getFullDTO(se);
+  }
+
+  @RolesAllowed("admin")
+  public SightEventDTO addTag(Long id, Long tagId) {
+    SightEvent se = service.get(id);
+    Tag tag = tagService.get(tagId);
+    se = setService.addTag(se, tag);
+    return DtoMapper.getFullDTO(se);
+  }
+
+  @RolesAllowed("admin")
+  public SightEventDTO removeTag(Long id, Long tagId) {
+    SightEvent se = service.get(id);
+    Tag tag = tagService.get(tagId);
+    se = setService.removeTag(se, tag);
     return DtoMapper.getFullDTO(se);
   }
 

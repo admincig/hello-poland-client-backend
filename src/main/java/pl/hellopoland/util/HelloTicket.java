@@ -12,10 +12,9 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import javax.json.JsonArray;
 import javax.json.JsonException;
@@ -35,6 +34,7 @@ import pl.hellopoland.dto.EmailSendingReportDTO;
 import pl.hellopoland.dto.FileDescriptorDTO;
 import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.dto.SightEventDTO;
+import pl.hellopoland.dto.SightEventPriceDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.dto.UserAuthDTO;
@@ -441,6 +441,7 @@ public class HelloTicket {
   }
 
   public List<SightEvent> getAvailableSightEvents(List<SightEvent> sightEvents) {
+    var result = new ArrayList<SightEvent>();
     String json = JsonbConfig.getInstance()
         .toJson(sightEvents.stream().map(SightEvent::getHptId).collect(Collectors.toSet()));
     try {
@@ -452,7 +453,6 @@ public class HelloTicket {
         var id = jsonb.fromJson(p.toString(), Long.class);
         resp.add(id);
       });
-      var result = new ArrayList<SightEvent>();
       resp.forEach(hptId -> {
         for (SightEvent se : sightEvents) {
           if (hptId.equals(se.getHptId())) {
@@ -461,11 +461,10 @@ public class HelloTicket {
           }
         }
       });
-      return result;
     } catch (Exception e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
-      return null;
     }
+    return result;
   }
 
   public List<SightEvent> getSightEventsInDateRange(List<SightEvent> sightEvents, Date fromDate,
@@ -482,21 +481,20 @@ public class HelloTicket {
       final Jsonb jsonb = JsonbConfig.getInstance();
       JsonStructure respJson = post(urlStr, json, AUTH_TOKEN);
       JsonArray jsonArray = (JsonArray) respJson;
-      Set<Long> resp = new HashSet<>();
-      jsonArray.forEach(p -> {
-        var id = jsonb.fromJson(p.toString(), Long.class);
-        resp.add(id);
-      });
-      var result = new ArrayList<SightEvent>();
-      resp.forEach(hptId -> {
-        for (SightEvent se : sightEvents) {
-          if (hptId.equals(se.getHptId())) {
-            result.add(se);
-            break;
-          }
-        }
-      });
-      return result;
+      return jsonArray
+          .stream()
+          .map(jv -> jsonb.fromJson(jv.toString(), SightEventPriceDTO.class))
+          .map(idPrice -> {
+            for (SightEvent se : sightEvents) {
+              if (idPrice.id.equals(se.getHptId())) {
+                se.setMinPrice(idPrice.price);
+                return se;
+              }
+            }
+            return null; // never happens
+          })
+          .filter(Objects::nonNull)
+          .collect(Collectors.toList());
     } catch (Exception e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
       return null;
@@ -619,6 +617,7 @@ public class HelloTicket {
     is = conn.getInputStream();
     logger.log(System.Logger.Level.INFO, "Server responded with code: " + respCode);
     var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
+    logger.log(System.Logger.Level.DEBUG, "Server responded with body: " + resp);
     is.close();
     return resp;
   }

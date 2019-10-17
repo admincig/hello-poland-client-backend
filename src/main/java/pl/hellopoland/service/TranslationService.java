@@ -3,16 +3,14 @@ package pl.hellopoland.service;
 import java.lang.System.Logger.Level;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.InvocationContext;
 import org.apache.commons.lang3.StringUtils;
+import pl.hellopoland.annotation.Multilingual;
 import pl.hellopoland.bo.Translation;
 import pl.hellopoland.dto.DTOSuperclass;
 import pl.hellopoland.enums.LanguageVersion;
@@ -24,73 +22,37 @@ import pl.hellopoland.util.Translated;
 @Stateless
 public class TranslationService extends ServiceSuperclass {
 
-  /**
-   * The list of the names of the fields excluded from translation.
-   */
-  private static final List<String> EXCLUDED_FIELDS_NAMES =
-      List.of("Sight.email", "Sight.phone", "Sight.defaultLanguage", "SightEvent.email",
-          "SightEvent.phone", "SightEvent.defaultLanguage", "Agreement.linkUrl",
-          "Category.defaultLanguage", "Category.iconUrl");
-
-  /**
-   * Checks whether the entity object implements interface Translated.
-   */
-  @SuppressWarnings("unchecked")
-  @AroundInvoke
-  public Object intercept(InvocationContext ctx) throws Exception {
-    Translated param = null;
-    Collection<Translated> collectionParam = null;
-    for (int i = 0; i < ctx.getParameters().length; i++) {
-      try {
-        param = (Translated) ctx.getParameters()[i];
-        break;
-      } catch (ClassCastException e1) {
-        try {
-          collectionParam = (Collection<Translated>) ctx.getParameters()[i];
-          break;
-        } catch (ClassCastException e2) {
-          continue;
-        }
-      }
-    }
-    if (param == null && collectionParam == null) {
-      throw new ConflictingException("Entity does not implement interface Translated");
-    }
-    return ctx.proceed();
-  }
-
   public <T extends Translated, D extends DTOSuperclass> T createEntityLanguageVersion(T bo,
       D dto, LanguageVersion language) {
     if (isTranslated(bo, language)) {
       removeTranslations(bo, language);
     }
 
-    Predicate<? super Field> predicate = f -> (f.getType().equals(String.class)
-        && !EXCLUDED_FIELDS_NAMES.contains(bo.getClass().getSimpleName() + "." + f.getName()));
-
-    List<Field> dtoStringFields = Arrays.asList(dto.getClass().getFields()).stream()
-        .filter(predicate).collect(Collectors.toList());
+    List<Field> dtoStringFields = Stream.of(dto.getClass().getFields())
+        .filter(f -> f.getType().equals(String.class))
+        .collect(Collectors.toList());
 
     for (Field field : dtoStringFields) {
-      var translation = new Translation();
-      translation.setLanguage(language);
-      translation.generateKey(bo, field.getName());
       try {
-        bo.getClass().getDeclaredField(field.getName());
-        translation.setValue((String) field.get(dto));
+        if (bo.getClass().getDeclaredField(field.getName())
+            .isAnnotationPresent(Multilingual.class)) {
+          var translation = new Translation();
+          translation.setValue((String) field.get(dto));
+          translation.setLanguage(language);
+          translation.generateKey(bo, field.getName());
+          em.persist(translation);
+          em.flush();
+        }
       } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException e) {
+        logger.log(Level.TRACE, "Failed to translate field " + field.getName(), e);
         continue;
-      }
-      try {
-        em.persist(translation);
-        em.flush();
       } catch (Exception e) {
         throw new ConflictingException(
             "Can not create a new language version because it already exists");
       }
     }
     addAvailableLanguageVersion(bo, language);
-    return translateEntity(bo, language, true);
+    return translateEntity(bo, language);
   }
 
   public <T extends Translated, D extends DTOSuperclass> T updateEntityLanguageVersion(T bo,
@@ -109,36 +71,33 @@ public class TranslationService extends ServiceSuperclass {
         continue;
       }
     }
-    return translateEntity(bo, language, true);
+    return translateEntity(bo, language);
   }
 
-  public <T extends Translated> T translateEntity(T bo, LanguageVersion language,
-      boolean fetchColections) {
-    if (fetchColections) {
-      fetchColections(bo);
+  public <T extends Translated> T translateEntity(T bo, LanguageVersion language) {
+    if (bo == null) {
+      return null;
     }
     var translations = getTranslations(bo, language);
-    em.detach(bo);
+    em.clear();
     for (Translation translation : translations) {
-      if (StringUtils.isNotBlank(translation.getValue())) {
-        var key = translation.getKey();
-        var fieldName = key.substring(key.lastIndexOf(Translation.KEY_DELIMITER) + 1);
-        try {
-          bo.getClass().getMethod("set" + StringUtils.capitalize(fieldName), String.class)
-              .invoke(bo, translation.getValue());
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
-            | NoSuchMethodException | SecurityException e) {
-          continue;
-        }
-        bo.setCurrentLanguage(language);
+      var key = translation.getKey();
+      var fieldName = key.substring(key.lastIndexOf(Translation.KEY_DELIMITER) + 1);
+      try {
+        bo.getClass().getMethod("set" + StringUtils.capitalize(fieldName), String.class)
+            .invoke(bo, translation.getValue());
+      } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+          | NoSuchMethodException | SecurityException e) {
+        continue;
       }
     }
+    bo.setCurrentLanguage(language);
     return bo;
   }
 
   public <T extends Translated> List<T> translateEntities(Collection<T> bos,
-      LanguageVersion language, boolean fetchColections) {
-    return bos.stream().map(bo -> bo = translateEntity(bo, language, fetchColections))
+      LanguageVersion language) {
+    return bos.stream().map(bo -> bo = translateEntity(bo, language))
         .collect(Collectors.toList());
   }
 
@@ -148,8 +107,7 @@ public class TranslationService extends ServiceSuperclass {
           .equals(language)) {
         throw new ConflictingException("Deleting default language version is forbidden.");
       }
-      if ((boolean) bo.getClass().getMethod("deleteAvailableLanguageVersion", LanguageVersion.class)
-          .invoke(bo, language)) {
+      if (bo.deleteAvailableLanguageVersion(language)) {
         em.flush();
         getTranslations(bo, language).forEach(t -> t.setDeleted(true));
       } else {
@@ -175,37 +133,7 @@ public class TranslationService extends ServiceSuperclass {
         .getResultList().size() == 1;
   }
 
-  private <T extends Translated> void fetchColections(T bo) {
-    Predicate<? super Field> predicateNotEmptyCollection = field -> {
-      try {
-        return Collection.class.isAssignableFrom(field.getType())
-            && bo.getClass().getMethod("get" + StringUtils.capitalize(field.getName()))
-                .invoke(bo) != null
-            && !((Collection<?>) bo.getClass()
-                .getMethod("get" + StringUtils.capitalize(field.getName())).invoke(bo)).isEmpty();
-      } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
-          | NoSuchMethodException | SecurityException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-      return false;
-    };
-
-    Arrays.asList(bo.getClass().getDeclaredFields()).stream().filter(predicateNotEmptyCollection)
-        .map(field -> {
-          try {
-            return (Collection<?>) bo.getClass()
-                .getMethod("get" + StringUtils.capitalize(field.getName())).invoke(bo);
-          } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
-              | NoSuchMethodException | SecurityException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-          }
-          return null;
-        }).forEach(collection -> collection.size());
-  }
-
-  private List<Translation> getTranslations(Translated bo, LanguageVersion language) {
+  public List<Translation> getTranslations(Translated bo, LanguageVersion language) {
     return em
         .createQuery("from Translation t where t.key like :key and language = :language",
             Translation.class)
@@ -214,14 +142,8 @@ public class TranslationService extends ServiceSuperclass {
 
   private <T extends Translated> void addAvailableLanguageVersion(T bo,
       LanguageVersion language) {
-    try {
-      bo.getClass().getMethod("addAvailableLanguageVersion", LanguageVersion.class).invoke(bo,
-          language);
-      em.flush();
-    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
-        | NoSuchMethodException | SecurityException e) {
-      logger.log(Level.ERROR, "failed to invoke reflection method", e);
-    }
+    bo.addAvailableLanguageVersion(language);
+    em.flush();
   }
 
   private String getKey(Translated bo) {

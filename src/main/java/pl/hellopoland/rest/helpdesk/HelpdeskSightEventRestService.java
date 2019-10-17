@@ -18,6 +18,7 @@ import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
+import pl.hellopoland.rest.RestService;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.api.helpdesk.SightEventServiceHelpdeskAPI;
 
@@ -34,7 +35,7 @@ public class HelpdeskSightEventRestService {
   public SightEventDTO createLanguageVersion(
       @HeaderParam("Content-Language") String contentLanguage,
       SightEventDTO dto) {
-    LanguageVersion lang = HelpdeskRestService.parseLang(contentLanguage);
+    LanguageVersion lang = RestService.parseLang(contentLanguage);
     return service.createLanguageVesrion(dto, lang);
   }
 
@@ -42,7 +43,7 @@ public class HelpdeskSightEventRestService {
   public PagedCollection list(
       @HeaderParam("Content-Language") String contentLanguage) {
     return service.list(new SightEventPagedCollectionConfig(),
-        HelpdeskRestService.parseLang(contentLanguage));
+        RestService.parseLang(contentLanguage));
   }
 
   @DELETE
@@ -57,7 +58,7 @@ public class HelpdeskSightEventRestService {
   public SightEventDTO get(
       @HeaderParam("Content-Language") String contentLanguage,
       @PathParam("id") Long id) {
-    return service.get(id, HelpdeskRestService.parseLang(contentLanguage));
+    return service.get(id, RestService.parseLang(contentLanguage));
   }
 
   @DELETE
@@ -65,7 +66,7 @@ public class HelpdeskSightEventRestService {
   public Response deleteLanguageVersion(
       @PathParam("id") Long id,
       @PathParam("language") String language) {
-    LanguageVersion lang = HelpdeskRestService.parseLang(language);
+    LanguageVersion lang = RestService.parseLang(language);
     service.deleteLanguageVersion(id, lang);
     return Response.ok().build();
   }
@@ -75,7 +76,7 @@ public class HelpdeskSightEventRestService {
   public SightEventDTO changeDefaultLanguage(
       @HeaderParam("Content-Language") String contentLanguage,
       @PathParam("id") Long id) {
-    LanguageVersion lang = HelpdeskRestService.parseLang(contentLanguage);
+    LanguageVersion lang = RestService.parseLang(contentLanguage);
     return service.changeDefaultLanguage(id, lang);
   }
 
@@ -84,7 +85,7 @@ public class HelpdeskSightEventRestService {
   public SightEventDTO update(@PathParam("id") Long id,
       @PathParam("language") String language,
       SightEventDTO dto) {
-    LanguageVersion lang = HelpdeskRestService.parseLang(language);
+    LanguageVersion lang = RestService.parseLang(language);
     dto.id = id;
     return service.update(dto, lang);
   }
@@ -123,6 +124,22 @@ public class HelpdeskSightEventRestService {
       @PathParam("id") Long id,
       @PathParam("cId") Long categoryId) {
     return service.removeCategory(id, categoryId);
+  }
+
+  @PATCH
+  @Path("/{id}/tags/{tId}")
+  public SightEventDTO addTag(
+      @PathParam("id") Long id,
+      @PathParam("tId") Long tagId) {
+    return service.addTag(id, tagId);
+  }
+
+  @DELETE
+  @Path("/{id}/tags/{tId}")
+  public SightEventDTO removeTag(
+      @PathParam("id") Long id,
+      @PathParam("tId") Long tagId) {
+    return service.removeTag(id, tagId);
   }
 
   @POST

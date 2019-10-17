@@ -2,6 +2,7 @@ package pl.hellopoland.service.api.partner;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJBAccessException;
@@ -10,6 +11,7 @@ import javax.inject.Inject;
 import pl.hellopoland.bo.Category;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.SightEventCategory;
+import pl.hellopoland.bo.Tag;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.enums.LanguageVersion;
@@ -17,6 +19,8 @@ import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.CategoryService;
 import pl.hellopoland.service.SightEventCategoryService;
 import pl.hellopoland.service.SightEventService;
+import pl.hellopoland.service.SightEventTagService;
+import pl.hellopoland.service.TagService;
 import pl.hellopoland.service.TranslationService;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.PagedEntityCollection;
@@ -29,7 +33,11 @@ public class SightEventServicePartnerAPI {
   @Inject
   CategoryService catService;
   @Inject
+  TagService tagService;
+  @Inject
   SightEventCategoryService secService;
+  @Inject
+  SightEventTagService setService;
   @Inject
   TranslationService tService;
 
@@ -48,9 +56,10 @@ public class SightEventServicePartnerAPI {
   public SightEventDTO get(Long id, String contentLanguageSymbol) {
     LanguageVersion lang = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
     SightEvent bo = service.getForLoggedUser(id);
-    bo = tService.translateEntity(bo, lang, true);
-    tService.translateEntities(bo.getCategories().stream().map(SightEventCategory::getCategory)
-        .collect(Collectors.toSet()), lang, false);
+    bo = tService.translateEntity(bo, lang);
+    Set<Category> categories = bo.getCategories().stream().map(SightEventCategory::getCategory)
+        .collect(Collectors.toSet());
+    tService.translateEntities(categories, lang);
     var dto = DtoMapper.getFullDTO(bo);
     return dto;
   }
@@ -157,6 +166,30 @@ public class SightEventServicePartnerAPI {
 
   private void categoryRestrictionCheck(Long id) {
     if (catService.get(id).isRestricted()) {
+      throw new EJBAccessException();
+    }
+  }
+
+  @RolesAllowed("partner")
+  public SightEventDTO addTag(Long id, Long tagId) {
+    tagRestrictionCheck(tagId);
+    SightEvent se = service.get(id);
+    Tag tag = tagService.get(tagId);
+    se = setService.addTag(se, tag);
+    return DtoMapper.getFullDTO(se);
+  }
+
+  @RolesAllowed("partner")
+  public SightEventDTO removeTag(Long id, Long tagId) {
+    tagRestrictionCheck(tagId);
+    SightEvent se = service.get(id);
+    Tag tag = tagService.get(tagId);
+    se = setService.removeTag(se, tag);
+    return DtoMapper.getFullDTO(se);
+  }
+
+  private void tagRestrictionCheck(Long id) {
+    if (tagService.get(id).isRestricted()) {
       throw new EJBAccessException();
     }
   }

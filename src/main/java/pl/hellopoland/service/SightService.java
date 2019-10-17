@@ -16,6 +16,7 @@ import pl.hellopoland.bo.OpeningHours;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.bo.Translation;
 import pl.hellopoland.config.SightPagedCollectionConfig;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.dto.SightEventDTO;
@@ -59,7 +60,13 @@ public class SightService extends ServiceSuperclass {
     }
     List<Sight> sights = getQuery(config).getResultList();
     if (language != null) {
-      sights = translationService.translateEntities(sights, language, false);
+      sights = translationService.translateEntities(sights, language);
+      if (config.isFetchSightEvents()) {
+        sights.stream().forEach(s -> {
+          s.setSightEvents(
+              translationService.translateEntities(s.getSightEvents(), language));
+        });
+      }
     }
     Collections.sort(sights, getNamesComparator(Sight::getName, new Locale("pl_PL")));
 
@@ -100,26 +107,21 @@ public class SightService extends ServiceSuperclass {
         sightEventBos.forEach(se -> se.setAgreements(agreementBos));
       }
     }
-    return createLanguageVesrion(DtoMapper.getDTO(bo), bo.getDefaultLanguage());
+    final var bo2 = createLanguageVersion(DtoMapper.getDTO(bo), bo.getDefaultLanguage());
+    recreateSearchIndex(bo2);
+    return bo2;
   }
 
-  public Sight createLanguageVesrion(SightDTO dto, LanguageVersion language) {
-    return translationService.createEntityLanguageVersion(getForLoggedPartner(dto.id), dto,
+  public Sight createLanguageVersion(SightDTO dto, LanguageVersion language) {
+    return translationService.createEntityLanguageVersion(get(dto.id), dto,
         language);
   }
 
   public Sight get(Long id) {
     Sight bo = em.createQuery("from Sight sight where sight.id=:sightId", Sight.class)
         .setParameter("sightId", id).getSingleResult();
-    // fetch events
-    if (bo.getSightEvents() != null) {
-      bo.getSightEvents().forEach(se -> {
-        // fetch tickets
-        if (se.getTickets() != null) {
-          se.getTickets().size();
-        }
-      });
-    }
+    bo.fetchCollections();
+    bo.getSightEvents().forEach(SightEvent::fetchCollections);
     return bo;
   }
 
@@ -135,15 +137,19 @@ public class SightService extends ServiceSuperclass {
     if (language == null) {
       return bos;
     }
-    return translationService.translateEntities(bos, language, false);
+    return translationService.translateEntities(bos, language);
   }
 
   public Sight updateForLoggedUser(SightDTO dto, LanguageVersion language) {
     Sight bo = getActiveForLoggedPartner(dto.id);
+    return update(bo, dto, language);
+  }
+
+  public Sight update(Sight bo, SightDTO dto, LanguageVersion language) {
     if (!translationService.isTranslated(bo, language)) {
       // throw new ConflictingException(
       // "Translation for language " + language.getLanuage() + " doesn't exists");
-      createLanguageVesrion(dto, language);
+      createLanguageVersion(dto, language);
     }
     if (bo.getDefaultLanguage().equals(language)) {
       DtoMapper.copy(dto, bo);
@@ -171,8 +177,10 @@ public class SightService extends ServiceSuperclass {
         }
       }
     }
-    return translationService.updateEntityLanguageVersion(getForLoggedPartner(dto.id), dto,
+    final var bo2 = translationService.updateEntityLanguageVersion(get(dto.id), dto,
         language);
+    recreateSearchIndex(bo2);
+    return bo2;
   }
 
   private boolean hasActiveSightEvents(List<SightEvent> sightEvents) {
@@ -191,6 +199,10 @@ public class SightService extends ServiceSuperclass {
 
   public Sight uploadMainImageForLoggedUser(Long id, byte[] icon) {
     Sight bo = getActiveForLoggedPartner(id);
+    return uploadMainImage(bo, icon);
+  }
+
+  public Sight uploadMainImage(Sight bo, byte[] icon) {
     bo.setMainImage(
         imageService.validateAndStoreImageCollector(new ByteArrayInputStream(icon), "jpeg", null));
     return bo;
@@ -211,9 +223,13 @@ public class SightService extends ServiceSuperclass {
   }
 
   public Sight getActiveForLoggedPartner(Long id) {
-    return em
+    Sight sight = em
         .createQuery("from Sight where id=:id and active=true and partner=:partner", Sight.class)
         .setParameter("id", id).setParameter("partner", getLoggedPartner()).getSingleResult();
+    sight.fetchCollections();
+    sight.getSightEvents().forEach(SightEvent::fetchCollections);
+
+    return sight;
   }
 
   public Sight getActiveForLoggedUser(Long id, LanguageVersion language) {
@@ -221,7 +237,7 @@ public class SightService extends ServiceSuperclass {
     if (language == null) {
       return bo;
     }
-    return translationService.translateEntity(bo, language, true);
+    return translationService.translateEntity(bo, language);
   }
 
   private ArrayList<OpeningHours> getOpeningHoursCollectionFromDTO(SightDTO dto) {
@@ -233,6 +249,10 @@ public class SightService extends ServiceSuperclass {
 
   public void deleteForLoggedUser(Long id) {
     Sight bo = getActiveForLoggedPartner(id);
+    delete(bo);
+  }
+
+  public void delete(Sight bo) {
     if (hasActiveSightEvents(bo.getSightEvents())) {
       throw exceptionFactory.sightHasAssignedSightEventsException();
     } else {
@@ -246,23 +266,47 @@ public class SightService extends ServiceSuperclass {
 
   private Sight getForLoggedPartner(Long sightId) {
     var partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
-    return em.createQuery("from Sight where partner = :partner and id = :id", Sight.class)
+    Sight sight = em.createQuery("from Sight where partner = :partner and id = :id", Sight.class)
         .setParameter("partner", partner).setParameter("id", sightId).getResultStream().findFirst()
         .orElseThrow(ResourceNotFoundException::new);
+    sight.fetchCollections();
+    sight.getSightEvents().forEach(SightEvent::fetchCollections);
+    return sight;
   }
 
-  public Sight changeDefaultLanguage(Long id, LanguageVersion language) {
+  public Sight changeDefaultLanguageForLoggedUser(Long id, LanguageVersion language) {
     Sight bo = getForLoggedPartner(id);
+    return changeDefaultLanguage(bo, language);
+  }
+
+  public Sight changeDefaultLanguage(Sight bo, LanguageVersion language) {
     if (!translationService.isTranslated(bo, language)) {
       throw new ConflictingException(
           "Can not change the default language. Translation for language " + language.getLanuage()
               + "doesn't exists");
     }
-    Sight translation = translationService.translateEntity(bo, language, true);
+    Sight translation = translationService.translateEntity(bo, language);
     bo.setDefaultLanguage(language);
     bo = BeanUtils.copyNotNullProperties(translation, bo);
     em.merge(bo);
+    bo = get(bo.getId());
+    recreateSearchIndex(bo);
     return bo;
   }
 
+  public void rebuildSearchIndices() {
+    SightPagedCollectionConfig config = new SightPagedCollectionConfig();
+    List<Sight> sightEvents = getQuery(config).getResultList();
+    sightEvents.forEach(this::recreateSearchIndex);
+  }
+
+  public void recreateSearchIndex(Sight s) {
+    {
+      Set<String> words = s.getAvailableLanguageVersions().stream()
+          .flatMap(
+              lv -> translationService.getTranslations(s, lv).stream().map(Translation::getValue))
+          .collect(Collectors.toSet());
+      s.recreateSearchIndex(words);
+    }
+  }
 }

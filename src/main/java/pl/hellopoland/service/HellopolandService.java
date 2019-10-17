@@ -32,6 +32,7 @@ import pl.hellopoland.config.PartnerPagedCollectionConfig;
 import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.dto.RoleDTO;
 import pl.hellopoland.dto.UserDTO;
+import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.email.EmailSendingRollbackException;
 import pl.hellopoland.soap.p24.enums.BusinessType;
@@ -51,6 +52,8 @@ public class HellopolandService extends ServiceSuperclass {
   private EmailService emailService;
   @Inject
   private P24SOAPClient p24SOAPClient;
+  @Inject
+  private TranslationService translationService;
 
   final Set<UserRole.Role> excludedRoles = Set.of(UserRole.Role.ROOT, UserRole.Role.ADMIN,
       UserRole.Role.PARTNER, UserRole.Role.SALESMAN);
@@ -154,7 +157,7 @@ public class HellopolandService extends ServiceSuperclass {
       throw new ConflictingException("Nie udało się stworzyć partnera w zewnętrznym systemie", e);
     }
 
-    // 4. sending emails to users (with theirs login and password):
+    // 5. sending emails to users (with theirs login and password):
     emailPassword.forEach((key, value) -> {
       try {
         emailService.sendEmail(key, "Nowe konto w Hello Poland.",
@@ -165,6 +168,11 @@ public class HellopolandService extends ServiceSuperclass {
         throw new EmailSendingRollbackException("Błąd podczas wysyłania maila do: " + key);
       }
     });
+
+    // 6. create first translation
+    translationService.createEntityLanguageVersion(partnerBO, partner, LanguageVersion.PL_PL);
+    translationService.createEntityLanguageVersion(partnerBO.getAddress(), partner.location,
+        LanguageVersion.PL_PL);
 
     return partnerBO;
   }

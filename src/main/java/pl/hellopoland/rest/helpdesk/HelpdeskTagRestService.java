@@ -14,25 +14,25 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import pl.hellopoland.dto.CategoryDTO;
+import pl.hellopoland.dto.TagDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.rest.RestService;
 import pl.hellopoland.rest.dto.PagedCollection;
-import pl.hellopoland.service.api.helpdesk.CategoryServiceHelpdeskAPI;
+import pl.hellopoland.service.api.helpdesk.TagServiceHelpdeskAPI;
 
 @RequestScoped
-@Path("/helpdesk/categories")
+@Path("/helpdesk/tags")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class HelpdeskCategoryRestService {
+public class HelpdeskTagRestService {
 
   @Inject
-  private CategoryServiceHelpdeskAPI service;
+  private TagServiceHelpdeskAPI service;
 
   @POST
-  public CategoryDTO create(
+  public TagDTO create(
       @HeaderParam("Content-Language") String contentLanguage,
-      CategoryDTO dto) {
+      TagDTO dto) {
     LanguageVersion lang = RestService.parseLang(contentLanguage);
     if (dto.id == null) {
       dto.language = lang.getLanuage();
@@ -50,7 +50,7 @@ public class HelpdeskCategoryRestService {
 
   @GET
   @Path("/{id}")
-  public CategoryDTO get(
+  public TagDTO get(
       @HeaderParam("Content-Language") String contentLanguage,
       @PathParam("id") Long id) {
     LanguageVersion lang = RestService.parseLang(contentLanguage);
@@ -59,7 +59,7 @@ public class HelpdeskCategoryRestService {
 
   @DELETE
   @Path("/{id}")
-  public Response deleteCategory(
+  public Response deleteTag(
       @PathParam("id") Long id) {
     service.delete(id);
     return Response.ok().build();
@@ -67,10 +67,10 @@ public class HelpdeskCategoryRestService {
 
   @PUT
   @Path("/{id}/languageVersion/{language}")
-  public CategoryDTO update(
+  public TagDTO update(
       @PathParam("id") Long id,
       @PathParam("language") String language,
-      CategoryDTO dto) {
+      TagDTO dto) {
     LanguageVersion lang = RestService.parseLang(language);
     dto.id = id;
     return service.update(dto, lang);
@@ -88,7 +88,7 @@ public class HelpdeskCategoryRestService {
 
   @PATCH
   @Path("/{id}/defaultLanguage")
-  public CategoryDTO changeDefaultLanguage(
+  public TagDTO changeDefaultLanguage(
       @HeaderParam("Content-Language") String contentLanguage,
       @PathParam("id") Long id) {
     LanguageVersion lang = RestService.parseLang(contentLanguage);

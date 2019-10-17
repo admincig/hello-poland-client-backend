@@ -3,6 +3,8 @@ package pl.hellopoland.util;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
@@ -23,6 +25,8 @@ import pl.hellopoland.bo.PassageCartEntry;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.SightEventCategory;
+import pl.hellopoland.bo.SightEventTag;
+import pl.hellopoland.bo.Tag;
 import pl.hellopoland.bo.TicketDefinition;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole;
@@ -32,6 +36,7 @@ import pl.hellopoland.dto.ContactPersonDTO;
 import pl.hellopoland.dto.FileDescriptorDTO;
 import pl.hellopoland.dto.ImageDTO;
 import pl.hellopoland.dto.LocationDTO;
+import pl.hellopoland.dto.MarketPartnerDTO;
 import pl.hellopoland.dto.OpeningHoursDTO;
 import pl.hellopoland.dto.P24PassageCartDTO;
 import pl.hellopoland.dto.P24PassageCartEntryDTO;
@@ -41,11 +46,15 @@ import pl.hellopoland.dto.PartnerRepresentativeDTO;
 import pl.hellopoland.dto.RoleDTO;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.dto.SightEventDTO;
+import pl.hellopoland.dto.TagDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.soap.p24.enums.BusinessType;
 
 public class DtoMapper {
+
+  private final static Logger logger = System.getLogger(DtoMapper.class.getName());
 
   public static void copy(SightDTO source, Sight target) {
     target.setName(source.name);
@@ -106,6 +115,10 @@ public class DtoMapper {
     dto.blocked = bo.isBlocked();
     dto.published = bo.isPublished();
     dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
+    dto.language = bo.getCurrentLanguage() == null ? dto.defaultLanguage
+        : bo.getCurrentLanguage().getLanuage();
+    dto.partnerId = bo.getPartner().getId();
+    dto.partnerName = bo.getPartner().getName();
     return dto;
   }
 
@@ -127,6 +140,9 @@ public class DtoMapper {
     }
     if (bo.getCategories() != null && !bo.getCategories().isEmpty()) {
       dto.categories = bo.getCategories().stream().map(DtoMapper::getDTO).collect(toSet());
+    }
+    if (bo.getTags() != null && !bo.getTags().isEmpty()) {
+      dto.tags = bo.getTags().stream().map(DtoMapper::getDTO).collect(toSet());
     }
     return dto;
   }
@@ -155,6 +171,7 @@ public class DtoMapper {
     dto.sightName = bo.getSight().getName();
     dto.partnerId = bo.getPartner().getId();
     dto.partnerName = bo.getPartner().getName();
+    dto.minPrice = bo.getMinPrice();
     dto.language = bo.getCurrentLanguage() == null ? dto.defaultLanguage
         : bo.getCurrentLanguage().getLanuage();
     return dto;
@@ -171,13 +188,18 @@ public class DtoMapper {
     // dto.ticketDefinitions = bo.getTickets().stream().map(DtoMapper::getDTO).collect(toList());
     // }
     if (bo.getOpeningHours() != null && !bo.getOpeningHours().isEmpty()) {
-      dto.openingHours = bo.getOpeningHours().stream().map(DtoMapper::getDTO).collect(toList());
+      dto.openingHours = bo.getOpeningHours().stream().map(DtoMapper::getDTO)
+          .collect(toList());
     }
     if (bo.getAgreements() != null && !bo.getAgreements().isEmpty()) {
       dto.agreements = bo.getAgreements().stream().map(DtoMapper::getDTO).collect(toList());
     }
     if (bo.getCategories() != null && !bo.getCategories().isEmpty()) {
       dto.categories = bo.getCategories().stream().map(SightEventCategory::getCategory)
+          .map(DtoMapper::getDTO).collect(toSet());
+    }
+    if (bo.getTags() != null && !bo.getTags().isEmpty()) {
+      dto.tags = bo.getTags().stream().map(SightEventTag::getTag)
           .map(DtoMapper::getDTO).collect(toSet());
     }
     dto.pdfAttachment = bo.getPdfAttachment() != null ? getFullDTO(bo.getPdfAttachment()) : null;
@@ -229,6 +251,7 @@ public class DtoMapper {
       dto.zipCode = address.getPostCode();
       dto.city = address.getCity();
       dto.country = address.getCountry();
+      dto.directions = address.getDirections();
       return dto;
     }
     return null;
@@ -447,6 +470,46 @@ public class DtoMapper {
     dto.regon = bo.getRegon();
     dto.servicesDescription = bo.getServicesDescription();
     dto.shopUrl = bo.getShopUrl();
+    dto.description = bo.getDescription();
+    dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
+    dto.language = bo.getCurrentLanguage() == null ? dto.defaultLanguage
+        : bo.getCurrentLanguage().getLanuage();
+    dto.blocked = bo.isBlocked();
+    dto.mainImage = DtoMapper.getDTO(bo.getMainImage());
+    return dto;
+  }
+
+  public static MarketPartnerDTO getMarketDTO(Partner bo) {
+    var dto = new MarketPartnerDTO();
+    dto.id = bo.getId();
+    dto.name = bo.getName();
+    dto.mainImage = getDTO(bo.getMainImage());
+    dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
+    dto.language = bo.getCurrentLanguage() == null ? dto.defaultLanguage
+        : bo.getCurrentLanguage().getLanuage();
+    return dto;
+  }
+
+  public static MarketPartnerDTO getFullMarketPartnerDTO(Partner bo) {
+    var dto = getMarketDTO(bo);
+    dto.location = getDTO(bo.getAddress());
+    dto.description = bo.getDescription();
+    if (bo.getCategories() != null) {
+      dto.categories =
+          bo.getCategories().stream().map(DtoMapper::getDTO).collect(Collectors.toList());
+    }
+    if (bo.getSight() != null) {
+      dto.sights = bo.getSight().stream().map(DtoMapper::getDTO).collect(Collectors.toList());
+    }
+    if (bo.getSightEvents() != null) {
+      dto.sightEvents =
+          bo.getSightEvents().stream().map(DtoMapper::getDTO).collect(Collectors.toList());
+    }
+    dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
+        .map(lang -> lang.getLanuage()).collect(Collectors.toSet());
+    dto.cities = bo.getCities();
+    dto.email = bo.getEmail();
+    dto.phone = bo.getPhone();
     return dto;
   }
 
@@ -462,6 +525,8 @@ public class DtoMapper {
     dto.representatives =
         Optional.ofNullable(bo.getRepresentatives()).orElse(Collections.emptyList()).stream()
             .map(DtoMapper::getDTO).collect(Collectors.toList());
+    dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
+        .map(lang -> lang.getLanuage()).collect(Collectors.toSet());
     return dto;
   }
 
@@ -485,6 +550,7 @@ public class DtoMapper {
     dto.id = bo.getId();
     dto.label = bo.getLabel();
     dto.iconUrl = bo.getIconUrl();
+    dto.backgroundUrl = bo.getBackgroundUrl();
     dto.restricted = bo.isRestricted();
     dto.assignedItemsCount = bo.getAssignedItemsCount();
     dto.recommended = bo.isRecommended();
@@ -499,6 +565,67 @@ public class DtoMapper {
     dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
         .map(lv -> lv.getLanuage()).collect(Collectors.toSet());
     return dto;
+  }
+
+  public static TagDTO getDTO(Tag bo) {
+    var dto = new TagDTO();
+    dto.id = bo.getId();
+    dto.label = bo.getLabel();
+    dto.iconUrl = bo.getIconUrl();
+    dto.restricted = bo.isRestricted();
+    dto.assignedItemsCount = bo.getAssignedItemsCount();
+    dto.recommended = bo.isRecommended();
+    dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
+    dto.language = bo.getCurrentLanguage() == null ? dto.defaultLanguage
+        : bo.getCurrentLanguage().getLanuage();
+    return dto;
+  }
+
+  public static TagDTO getFullDTO(Tag bo) {
+    var dto = getDTO(bo);
+    dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
+        .map(lv -> lv.getLanuage()).collect(Collectors.toSet());
+    return dto;
+  }
+
+  public static void copy(MarketPartnerDTO dto, Partner bo) {
+    bo.setDescription(dto.description);
+  }
+
+  public static void copy(PartnerDTO dto, Partner bo) {
+    // bo.setAddress(address);
+    bo.setAffiliateCode(dto.affiliateCode);
+    bo.setBankAccount(dto.bankAccount);
+    bo.setBlocked(dto.blocked);
+    bo.setBusinessType(BusinessType.getBusinessType(dto.businessType));
+    bo.setCommission(dto.commission);
+    // bo.setContactPerson(contactPerson);
+    // bo.setCorrespondenceAddress(correspondenceAddress);
+    if (bo.getAddress() == null) {
+      bo.setAddress(new Address());
+    }
+    bo.getAddress().setCity(dto.location.city);
+    bo.getAddress().setCountry(dto.location.country);
+    bo.getAddress().setPostCode(dto.location.zipCode);
+    bo.getAddress().setStreet(dto.location.street);
+    bo.getAddress().setDirections(dto.location.directions);
+    bo.setDescription(dto.description);
+    bo.setEmail(dto.email);
+    bo.setInvoiceEmail(dto.invoiceEmail);
+    bo.setKrs(dto.krs);
+    bo.setName(dto.name);
+    bo.setP24Id(dto.p24MerchantId);
+    bo.setPhone(dto.phone);
+    bo.setRegon(dto.regon);
+    bo.setServicesDescription(dto.servicesDescription);
+    bo.setShopUrl(dto.shopUrl);
+    try {
+      bo.setSocialNumber(Long.valueOf(dto.socialNumber));
+    } catch (Exception e) {
+      logger.log(Level.DEBUG, "social number cant be parsed");
+    }
+    bo.setTaxNumber(dto.taxNumber);
+    // bo.setTechnicalContact(technicalContact);
   }
 
 }
