@@ -47,6 +47,7 @@ import pl.hellopoland.exception.email.EmailSendingException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.rest.dto.OrderIRO;
 import pl.hellopoland.rest.dto.OrderIRO.OrderEntryIRO;
+import pl.hellopoland.soap.p24.enums.Country;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PaymentUtils;
 
@@ -76,6 +77,9 @@ public class OrderService extends ServiceSuperclass {
     o.setUser(getLoggedUser());
     var details = iro.details;
     details.setUserLogged(getLoggedUser() != null);
+    if (details.getCountry() == null) {
+      details.setCountry(Country.PL.name());
+    }
     o.setDetails(details);
     em.persist(o);
     Set<Long> ticketsIds =
@@ -225,7 +229,7 @@ public class OrderService extends ServiceSuperclass {
     var amount = orderEntries.stream()
         .collect(Collectors.summingInt(oe -> oe.getUnitPrice() * oe.getQuantity()));
     passageCart.setAmount(amount);
-    passageCart.setCountry("PL");
+    passageCart.setCountry(o.getDetails().getCountry());
     var currency = "PLN";
     passageCart.setCurrency(currency);
     passageCart.setDescription("Hello Poland, " + o.getHash());

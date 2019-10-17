@@ -35,7 +35,7 @@ public class Address extends ModelSuperclass implements Translated {
 
   @Column(length = 5)
   @Enumerated(EnumType.STRING)
-  private LanguageVersion defaultLanguage;
+  private LanguageVersion defaultLanguage = LanguageVersion.PL_PL;
 
   @ElementCollection
   @Enumerated(EnumType.STRING)

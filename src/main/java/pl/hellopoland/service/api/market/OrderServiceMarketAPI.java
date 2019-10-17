@@ -58,11 +58,6 @@ public class OrderServiceMarketAPI {
   }
 
   @PermitAll
-  public void sudoAck(String hash) {
-    service.sudoAck(hash);
-  }
-
-  @PermitAll
   public Status checkStatus(String hash) {
     return service.getStatus(hash);
   }
