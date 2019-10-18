@@ -32,8 +32,9 @@ public class MarketUserRestService {
 
   @POST
   @Path("/register")
-  public UserORO register(UserInfoDTO dto) {
-    return service.register(dto);
+  public Response register(UserInfoDTO dto) {
+    service.register(dto);
+    return Response.ok().build();
   }
 
   @PATCH

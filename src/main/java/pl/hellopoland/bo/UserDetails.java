@@ -90,4 +90,16 @@ public class UserDetails {
     this.tosAgreement = tosAgreement;
   }
 
+
+  public void update(UserDetails incoming) {
+    this.setCity(incoming.getCity());
+    this.setCountry(incoming.getCountry());
+    this.setFirstName(incoming.getFirstName());
+    this.setLastName(incoming.getLastName());
+    this.setPhone(incoming.getPhone());
+    this.setStreet(incoming.getStreet());
+    this.setTosAgreement(incoming.getTosAgreement());
+    this.setZipCode(incoming.getZipCode());
+  }
+
 }

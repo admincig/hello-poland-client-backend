@@ -1,7 +1,9 @@
 package pl.hellopoland.service.api.market;
 
+import java.lang.System.Logger;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
+import javax.ejb.EJBTransactionRolledbackException;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.User;
@@ -14,6 +16,7 @@ import pl.hellopoland.service.UserService;
 
 @Stateless
 public class UserServiceMarketAPI {
+  private static Logger staticLogger = System.getLogger(UserServiceMarketAPI.class.getName());
 
   @Inject
   UserService service;
@@ -26,12 +29,13 @@ public class UserServiceMarketAPI {
   }
 
   @PermitAll
-  public UserORO register(UserInfoDTO userDTO) {
+  public void register(UserInfoDTO userDTO) {
     validatePassword(userDTO.password, userDTO.passwordConfirmation);
-
-    User newUser = service.create(userDTO.email, userDTO.password, userDTO.tosAgreement);
-    var dto = new UserORO(newUser);
-    return dto;
+    try {
+      service.create(userDTO.email, userDTO.password, userDTO.tosAgreement);
+    } catch (EJBTransactionRolledbackException e) {
+      staticLogger.log(Logger.Level.WARNING, "User with email already exists:" + userDTO.email);
+    }
   }
 
   @RolesAllowed("user")
@@ -52,6 +56,7 @@ public class UserServiceMarketAPI {
 
   @RolesAllowed("user")
   public void updatePassword(UserAuthDTO userAuthDTO) {
+    validatePassword(userAuthDTO.password, userAuthDTO.passwordConfirmation);
     service.changePasswordForLoggedUser(userAuthDTO);
   }
 

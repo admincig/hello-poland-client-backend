@@ -97,9 +97,13 @@ public class UserService extends ServiceSuperclass {
     return bo;
   }
 
-  public User updateUserDetailsForLoggedUser(UserDetails details) {
+  public User updateUserDetailsForLoggedUser(UserDetails newDetails) {
     User user = getLoggedUser();
-    user.setDetails(details);
+    UserDetails oldDetails = user.getDetails();
+    if (oldDetails == null && newDetails == null) {
+      oldDetails = new UserDetails();
+    }
+    oldDetails.update(newDetails);
     em.merge(user);
     return user;
   }
