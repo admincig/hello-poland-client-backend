@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.Category;
@@ -170,14 +171,14 @@ public class SightEventServiceMarketAPI {
     return toDateEndDay;
   }
 
-  @PermitAll
+  @RolesAllowed("user")
   public SightEventDTO addFavourite(Long id) {
     SightEvent bo = service.get(id);
     bo.addUser(userService.getLoggedUser());
     return DtoMapper.getFullDTO(bo);
   }
 
-  @PermitAll
+  @RolesAllowed("user")
   public void removeFavourite(Long id) {
     SightEvent bo = service.get(id);
     bo.removeUser(userService.getLoggedUser());
@@ -187,7 +188,9 @@ public class SightEventServiceMarketAPI {
   public PagedCollection favourites(SightEventPagedCollectionConfig config, Date fromDate,
       Date toDate,
       String contentLanguageSymbol) {
-    config.onlyFavourite(userService.getLoggedUser().getId());
+    if (userService.getLoggedUser() != null) {
+      config.onlyFavourite(userService.getLoggedUser().getId());
+    }
     return getList(config, fromDate, toDate, contentLanguageSymbol);
   }
 

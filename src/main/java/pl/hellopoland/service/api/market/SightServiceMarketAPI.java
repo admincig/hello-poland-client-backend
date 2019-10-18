@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.Sight;
@@ -160,14 +161,14 @@ public class SightServiceMarketAPI {
     return config;
   }
 
-  @PermitAll
+  @RolesAllowed("user")
   public SightDTO addFavourite(Long id) {
     Sight bo = service.get(id);
     bo.addUser(userService.getLoggedUser());
     return DtoMapper.getFullDTO(bo);
   }
 
-  @PermitAll
+  @RolesAllowed("user")
   public void removeFavourite(Long id) {
     Sight bo = service.get(id);
     bo.removeUser(userService.getLoggedUser());
@@ -176,7 +177,9 @@ public class SightServiceMarketAPI {
   @PermitAll
   public PagedCollection favourites(SightPagedCollectionConfig config,
       String contentLanguageSymbol) {
-    config.onlyFavourite(userService.getLoggedUser().getId());
+    if (userService.getLoggedUser() != null) {
+      config.onlyFavourite(userService.getLoggedUser().getId());
+    }
     return getList(config, contentLanguageSymbol);
   }
 
