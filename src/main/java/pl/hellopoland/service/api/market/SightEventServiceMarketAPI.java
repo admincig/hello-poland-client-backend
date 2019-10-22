@@ -181,10 +181,13 @@ public class SightEventServiceMarketAPI {
   @RolesAllowed("user")
   public void removeFavourite(Long id) {
     SightEvent bo = service.get(id);
+    if (!bo.getUsers().contains(userService.getLoggedUser())) {
+      throw new ConflictingException("Sight event [id:" + id + "] not in favourites");
+    }
     bo.removeUser(userService.getLoggedUser());
   }
 
-  @PermitAll
+  @RolesAllowed("user")
   public PagedCollection favourites(SightEventPagedCollectionConfig config, Date fromDate,
       Date toDate,
       String contentLanguageSymbol) {

@@ -19,6 +19,7 @@ import pl.hellopoland.bo.SightEventTag;
 import pl.hellopoland.config.SightPagedCollectionConfig;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.service.SightService;
@@ -171,10 +172,13 @@ public class SightServiceMarketAPI {
   @RolesAllowed("user")
   public void removeFavourite(Long id) {
     Sight bo = service.get(id);
+    if (!bo.getUsers().contains(userService.getLoggedUser())) {
+      throw new ConflictingException("Sight [id:" + id + "] not in favourites");
+    }
     bo.removeUser(userService.getLoggedUser());
   }
 
-  @PermitAll
+  @RolesAllowed("user")
   public PagedCollection favourites(SightPagedCollectionConfig config,
       String contentLanguageSymbol) {
     if (userService.getLoggedUser() != null) {
