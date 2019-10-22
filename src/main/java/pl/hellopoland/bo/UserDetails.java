@@ -98,7 +98,6 @@ public class UserDetails {
     this.setLastName(incoming.getLastName());
     this.setPhone(incoming.getPhone());
     this.setStreet(incoming.getStreet());
-    this.setTosAgreement(incoming.getTosAgreement());
     this.setZipCode(incoming.getZipCode());
   }
 
