@@ -4,9 +4,14 @@ import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.PATCH;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import pl.hellopoland.dto.UserAuthDTO;
+import pl.hellopoland.dto.UserInfoDTO;
 import pl.hellopoland.rest.dto.UserORO;
 import pl.hellopoland.service.api.market.UserServiceMarketAPI;
 
@@ -23,6 +28,25 @@ public class MarketUserRestService {
   @Path("/me")
   public UserORO me() {
     return service.me();
+  }
+
+  @POST
+  @Path("/register")
+  public UserORO register(UserInfoDTO dto) {
+    return service.register(dto);
+  }
+
+  @PATCH
+  @Path("/update")
+  public UserORO update(UserInfoDTO dto) {
+    return service.update(dto);
+  }
+
+  @PATCH
+  @Path("/password")
+  public Response updatePassword(UserAuthDTO userAuthDTO) {
+    service.updatePassword(userAuthDTO);
+    return Response.ok().build();
   }
 
 }

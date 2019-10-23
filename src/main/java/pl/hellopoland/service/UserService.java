@@ -1,5 +1,6 @@
 package pl.hellopoland.service;
 
+import java.lang.System.Logger.Level;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -12,7 +13,7 @@ import javax.persistence.NoResultException;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.User;
-import pl.hellopoland.bo.UserLocation;
+import pl.hellopoland.bo.UserDetails;
 import pl.hellopoland.bo.UserRole;
 import pl.hellopoland.bo.UserRole.Role;
 import pl.hellopoland.dto.UserAuthDTO;
@@ -21,6 +22,7 @@ import pl.hellopoland.exception.UnauthorizedException;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.security.password.PasswordEncoder;
 import pl.hellopoland.util.HelloTicket;
+import pl.hellopoland.util.NameAndAddressSplitter;
 
 @LocalBean
 @Stateless
@@ -36,9 +38,8 @@ public class UserService extends ServiceSuperclass {
 
   public User getOrCreateSocialMedia(User user) {
     String email = user.getEmail();
-    String name = user.getName();
     String picture = user.getPicture();
-    UserLocation location = user.getLocation();
+    UserDetails details = user.getDetails();
     try {
       User bo = findOneByEmail(email);
       bo.setPicture(picture);
@@ -47,34 +48,60 @@ public class UserService extends ServiceSuperclass {
       }
       return bo;
     } catch (NoResultException e) {
-      return create(email, null, name, picture, location);
+      return create(email, null, picture, details);
     }
   }
 
-  private User create(String email, String password, String name, String picture,
-      UserLocation location) {
+  private User create(String email, String password, String picture,
+      UserDetails details) {
     User bo = new User(Role.USER);
     bo.setEmail(email.toLowerCase());
-    bo.setName(name);
     bo.setPassword(password);
     bo.setPicture(picture);
-    bo.setLocation(location);
+    bo.setDetails(details);
+
+    em.persist(bo);
+    return bo;
+  }
+
+  public User create(String email, String decodedPassword, boolean tosAgreement) {
+    User bo = new User(Role.USER);
+    if (email == null) {
+      throw new ConflictingException("Cannot create user with empty email");
+    }
+    bo.setEmail(email.toLowerCase());
+    bo.setPassword(passwordEncoder.encode(decodedPassword));
+
+    UserDetails details = new UserDetails();
+    details.setTosAgreement(tosAgreement);
+    bo.setDetails(details);
 
     em.persist(bo);
     return bo;
   }
 
   public User create(String email, String decodedPassword, String name, String picture,
-      UserLocation location, Partner partner, UserRole.Role... roles) {
+      Partner partner, UserRole.Role... roles) {
     User bo = new User(roles);
+    if (email == null) {
+      throw new ConflictingException("Cannot create user with empty email");
+    }
     bo.setEmail(email.toLowerCase());
-    bo.setName(name);
     bo.setPassword(passwordEncoder.encode(decodedPassword));
     bo.setPicture(picture);
-    bo.setLocation(location);
     bo.setPartner(partner);
+
+    bo.setDetails(new UserDetails(NameAndAddressSplitter.getFirstName(name),
+        NameAndAddressSplitter.getLastName(name)));
     em.persist(bo);
     return bo;
+  }
+
+  public User updateUserDetailsForLoggedUser(UserDetails details) {
+    User user = getLoggedUser();
+    user.setDetails(details);
+    em.merge(user);
+    return user;
   }
 
   public User findOneByEmail(String email) {
@@ -107,6 +134,14 @@ public class UserService extends ServiceSuperclass {
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket ht = new HelloTicket(hpt.getUrl());
     ht.changeUsherPassword(usherId, userAuthDTO, getLoggedPartner().getHptToken());
+  }
+
+  public void changePasswordForLoggedUser(UserAuthDTO userAuthDTO) {
+    if (passwordEncoder.matches(userAuthDTO.oldPassword, getLoggedUser().getPassword())) {
+      getLoggedUser().setPassword(passwordEncoder.encode(userAuthDTO.password));
+    } else {
+      throw new ConflictingException("Incorrect old password.");
+    }
   }
 
   public List<UserDTO> getUshers() {
@@ -155,6 +190,33 @@ public class UserService extends ServiceSuperclass {
   public Set<String> getFlatRoles(String email) {
     return findByEmail(email).get().getRoles().stream().map(UserRole::getRole).map(Role::toString)
         .collect(Collectors.toSet());
+  }
+
+  // TODO delete this
+  public void globalRework() {
+    List<User> all = getAll();
+    for (User user : all) {
+      String oldName = user.getName();
+
+      try {
+        if (user.getDetails() == null) {
+          user.setDetails(new UserDetails());
+        }
+        user.getDetails().setFirstName(NameAndAddressSplitter.getFirstName(oldName));
+        user.getDetails().setLastName(NameAndAddressSplitter.getLastName(oldName));
+      } catch (ConflictingException e) {
+        logger.log(Level.ERROR,
+            "Did not updated first and last name for user[id:" + user.getId() + "]");
+      }
+
+      em.merge(user);
+    }
+
+  }
+
+  public List<User> getAll() {
+    return em.createQuery("from User", User.class)
+        .getResultList();
   }
 
 }

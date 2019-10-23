@@ -7,6 +7,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import pl.hellopoland.bo.User;
+import pl.hellopoland.bo.UserDetails;
 
 public class GoogleAPIConnector {
 
@@ -37,9 +38,14 @@ public class GoogleAPIConnector {
       logger.log(Logger.Level.INFO, payload.toPrettyString());
       User user = new User();
       user.setEmail(payload.getEmail());
-      user.setName((String) payload.get("name"));
+      String firstName = (String) payload.get("given_name");
+      String lastName = (String) payload.get("family_name");
+      user.setDetails(new UserDetails(firstName, lastName));
       user.setPicture((String) payload.get("picture"));
       user.setPassword("");
+
+
+
       return user;
     }
     return null;

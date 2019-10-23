@@ -34,11 +34,13 @@ public class User extends ModelSuperclass {
   @NotNull
   @Email
   private String email;
-  private String name;
   private String password;
+  // TODO delete name after rework
+  private String name;
+
   private String picture;
   @Embedded
-  private UserLocation location;
+  private UserDetails details;
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = EAGER)
   private List<UserRole> roles;
   @ManyToOne(cascade = PERSIST)
@@ -57,14 +59,6 @@ public class User extends ModelSuperclass {
     this.email = email;
   }
 
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
   public String getPassword() {
     return password;
   }
@@ -81,12 +75,12 @@ public class User extends ModelSuperclass {
     this.picture = picture;
   }
 
-  public UserLocation getLocation() {
-    return location;
+  public UserDetails getDetails() {
+    return details;
   }
 
-  public void setLocation(UserLocation location) {
-    this.location = location;
+  public void setDetails(UserDetails details) {
+    this.details = details;
   }
 
   public List<UserRole> getRoles() {
@@ -125,6 +119,10 @@ public class User extends ModelSuperclass {
 
   public void setHptToken(String hptToken) {
     this.hptToken = hptToken;
+  }
+
+  public String getName() {
+    return this.name;
   }
 
 }

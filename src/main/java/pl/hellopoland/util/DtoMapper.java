@@ -447,7 +447,9 @@ public class DtoMapper {
   public static UserDTO getDTO(User bo) {
     var dto = new UserDTO();
     dto.id = bo.getId();
-    dto.name = bo.getName();
+    if (bo.getDetails() != null) {
+      dto.name = bo.getDetails().getFirstName() + " " + bo.getDetails().getLastName();
+    }
     dto.email = bo.getEmail();
     dto.roles = Optional.ofNullable(bo.getRoles()).orElse(Collections.emptyList()).stream()
         .map(DtoMapper::getDTO).collect(Collectors.toSet());

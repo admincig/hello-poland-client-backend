@@ -24,6 +24,7 @@ import pl.hellopoland.bo.Portal.Type;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.User;
+import pl.hellopoland.bo.UserDetails;
 import pl.hellopoland.bo.UserRole.Role;
 import pl.hellopoland.dto.CategoryDTO;
 import pl.hellopoland.dto.FrequencyDataDTO;
@@ -224,7 +225,7 @@ public class DbFiller extends ServiceSuperclass {
   private User createUser(String name, String email, String password, String hptToken,
       Partner partner, Role... roles) {
     User user = new User(roles);
-    user.setName(name);
+    user.setDetails(new UserDetails(name, null));
     user.setEmail(email);
     user.setPassword(passwordEncoder.encode(password));
     user.setPartner(partner);

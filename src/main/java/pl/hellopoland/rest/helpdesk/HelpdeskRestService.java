@@ -52,4 +52,13 @@ public class HelpdeskRestService {
     return Response.ok().build();
   }
 
+  // TODO do usunięcia
+  @GET
+  @Path("/globalUserNameRefactor")
+  @Operation(hidden = true)
+  public Response globalUserNameRefactor() {
+    service.globalRework();
+    return Response.ok().build();
+  }
+
 }

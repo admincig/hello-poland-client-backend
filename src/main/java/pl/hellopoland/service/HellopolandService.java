@@ -98,7 +98,7 @@ public class HellopolandService extends ServiceSuperclass {
       user.ifPresentOrElse(us -> {
         us.setPassword(password);
         userService.attachToPartner(us, partnerBO);
-      }, () -> userService.create(partner.email, password, null, null, null, partnerBO,
+      }, () -> userService.create(partner.email, password, null, null, partnerBO,
           UserRole.Role.PARTNER, UserRole.Role.USHER));
       em.flush();
     } catch (Exception e) {
@@ -138,7 +138,7 @@ public class HellopolandService extends ServiceSuperclass {
         Role[] userRoles = getFilteredRolesFromDTO(userDTO.roles);
         if (userRoles.length > 0) {
           String pass = RandomStringUtils.randomAlphanumeric(10);
-          User userBO = userService.create(userDTO.email, pass, userDTO.name, null, null, partnerBO,
+          User userBO = userService.create(userDTO.email, pass, userDTO.name, null, partnerBO,
               userRoles);
           emailPassword.put(userDTO.email, pass);
           partnerBO.addUser(userBO);

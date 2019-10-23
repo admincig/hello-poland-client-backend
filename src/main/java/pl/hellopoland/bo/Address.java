@@ -8,7 +8,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Transient;
-import javax.validation.constraints.NotBlank;
 import pl.hellopoland.annotation.Multilingual;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.util.Translated;
@@ -17,17 +16,13 @@ import pl.hellopoland.util.Translated;
 public class Address extends ModelSuperclass implements Translated {
   private static final long serialVersionUID = -1990557956651882571L;
 
-  @NotBlank
   private String country;
 
-  @NotBlank
   private String city;
 
-  @NotBlank
   // format xx-xxx lub xxxxx
   private String postCode;
 
-  @NotBlank
   private String street;
 
   @Multilingual

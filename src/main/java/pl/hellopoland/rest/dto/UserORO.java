@@ -1,7 +1,6 @@
 package pl.hellopoland.rest.dto;
 
 import pl.hellopoland.bo.User;
-import pl.hellopoland.util.NameAndAddressSplitter;
 
 public class UserORO {
 
@@ -11,15 +10,19 @@ public class UserORO {
   public String lastName;
   public UserLocationRO location;
   public String picture;
+  public UserDetailsRO details;
 
   public UserORO(User user) {
     this.email = user.getEmail();
-    this.name = user.getName();
-    this.firstName = NameAndAddressSplitter.getFirstName(user.getName());
-    this.lastName = NameAndAddressSplitter.getLastName(user.getName());
-    if (user.getLocation() != null) {
-      this.location = new UserLocationRO(user.getLocation());
+
+    if (user.getDetails() != null) {
+      this.details = new UserDetailsRO(user.getDetails());
+      this.location = new UserLocationRO(user.getDetails());
+      this.firstName = details.firstName;
+      this.lastName = details.lastName;
+      this.name = firstName + " " + lastName;
     }
+
     this.picture = user.getPicture();
   }
 
