@@ -106,6 +106,10 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
   private Set<SightEventTag> tags = new HashSet<>();
   @Column(columnDefinition = "varchar")
   private String searchIndex;
+  @ManyToMany
+  private Set<User> users = new HashSet<>();
+  @Transient
+  private boolean favourite;
 
   public String getName() {
     return name;
@@ -415,6 +419,30 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
 
   public void setTags(Set<SightEventTag> tags) {
     this.tags = tags;
+  }
+
+  public Set<User> getUsers() {
+    return users;
+  }
+
+  public void setUsers(Set<User> users) {
+    this.users = users;
+  }
+
+  public void addUser(User user) {
+    this.users.add(user);
+  }
+
+  public void removeUser(User user) {
+    this.users.remove(user);
+  }
+
+  public boolean isFavourite() {
+    return favourite;
+  }
+
+  public void setFavourite(boolean favourite) {
+    this.favourite = favourite;
   }
 
   public void fetchCollections() {

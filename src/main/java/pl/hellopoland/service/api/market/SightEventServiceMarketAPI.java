@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.Category;
@@ -24,6 +25,7 @@ import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.service.TicketPoolDefinitionService;
 import pl.hellopoland.service.TranslationService;
+import pl.hellopoland.service.UserService;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PagedEntityCollection;
@@ -33,7 +35,8 @@ public class SightEventServiceMarketAPI {
 
   @Inject
   SightEventService service;
-
+  @Inject
+  UserService userService;
   @Inject
   TicketPoolDefinitionService tpdService;
 
@@ -166,6 +169,32 @@ public class SightEventServiceMarketAPI {
                 .atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant())
             : null;
     return toDateEndDay;
+  }
+
+  @RolesAllowed("user")
+  public SightEventDTO addFavourite(Long id) {
+    SightEvent bo = service.get(id);
+    bo.addUser(userService.getLoggedUser());
+    return DtoMapper.getFullDTO(bo);
+  }
+
+  @RolesAllowed("user")
+  public void removeFavourite(Long id) {
+    SightEvent bo = service.get(id);
+    if (!bo.getUsers().contains(userService.getLoggedUser())) {
+      throw new ConflictingException("Sight event [id:" + id + "] not in favourites");
+    }
+    bo.removeUser(userService.getLoggedUser());
+  }
+
+  @RolesAllowed("user")
+  public PagedCollection favourites(SightEventPagedCollectionConfig config, Date fromDate,
+      Date toDate,
+      String contentLanguageSymbol) {
+    if (userService.getLoggedUser() != null) {
+      config.onlyFavourite(userService.getLoggedUser().getId());
+    }
+    return getList(config, fromDate, toDate, contentLanguageSymbol);
   }
 
 }

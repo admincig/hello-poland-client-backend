@@ -7,11 +7,13 @@ public class SightPagedCollectionConfig extends PagedCollectionConfig<Sight> {
 
   private boolean currentPartner;
   private boolean fetchSightEvents;
+  private boolean fetchUsers;
 
   @Override
   public String joins() {
     return "left join fetch e.mainImage mi join fetch e.partner p"
-        + (fetchSightEvents ? " left join fetch e.sightEvents ses" : "");
+        + (fetchSightEvents ? " left join fetch e.sightEvents ses" : "")
+        + (fetchUsers ? " inner join e.users u" : "");
   }
 
   public void setSearchQuery(String searchQuery) {
@@ -19,11 +21,11 @@ public class SightPagedCollectionConfig extends PagedCollectionConfig<Sight> {
       addCondition("searchQuery",
           searchQuery, "tsearch('polish_hunspell', e.searchIndex, :searchQuery) = true");
       /*
-        "%" + searchQuery.toLowerCase() + "%",
-        "((unaccent(lower(e.name)) like unaccent(:searchQuery))"
-            + " or (unaccent(lower(e.lead)) like unaccent(:searchQuery))"
-            + " or (unaccent(lower(e.location.city)) like unaccent(:searchQuery)))");
-      */
+       * "%" + searchQuery.toLowerCase() + "%",
+       * "((unaccent(lower(e.name)) like unaccent(:searchQuery))" +
+       * " or (unaccent(lower(e.lead)) like unaccent(:searchQuery))" +
+       * " or (unaccent(lower(e.location.city)) like unaccent(:searchQuery)))");
+       */
     }
   }
 
@@ -45,6 +47,11 @@ public class SightPagedCollectionConfig extends PagedCollectionConfig<Sight> {
     addCondition("published", true, "e.published=:published");
     addCondition("blocked", false, "e.blocked=:blocked");
     addCondition("pBlocked", false, "e.partner.blocked=:pBlocked");
+  }
+
+  public void onlyFavourite(Long userId) {
+    fetchUsers = true;
+    addCondition("userId", userId, "u.id=:userId");
   }
 
   public void onlyCurrentPartner(boolean only) {

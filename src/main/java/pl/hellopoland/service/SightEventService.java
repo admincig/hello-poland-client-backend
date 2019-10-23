@@ -55,6 +55,8 @@ import pl.hellopoland.util.Triplet;
 @LocalBean
 @Stateless
 public class SightEventService extends ServiceSuperclass {
+  @Inject
+  UserService userService;
 
   @Inject
   private ImageService iService;
@@ -95,6 +97,9 @@ public class SightEventService extends ServiceSuperclass {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
     }
     List<SightEvent> sightEvents = getQuery(config).getResultList();
+    sightEvents.stream().forEach(s -> {
+      s.setFavourite(s.getUsers().contains(userService.getLoggedUser()));
+    });
     if (!sightEvents.isEmpty() && config.isFetchCategories()) {
       List<SightEventCategory> categories = catService.getFor(sightEvents);
       Map<SightEvent, Set<SightEventCategory>> grouped = categories.stream()
@@ -129,6 +134,7 @@ public class SightEventService extends ServiceSuperclass {
   public SightEvent get(Long id) {
     SightEvent se = em.find(SightEvent.class, id);
     se.fetchCollections();
+    se.setFavourite(se.getUsers().contains(userService.getLoggedUser()));
     return se;
   }
 

@@ -4,15 +4,18 @@ import java.util.Date;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import pl.hellopoland.annotation.DateFormat;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.FiltersContainerDTO;
@@ -112,6 +115,32 @@ public class MarketSightEventRestService {
       @QueryParam("count") @DefaultValue("6") Integer count) {
     LanguageVersion lang = RestService.parseLang(contentLanguage);
     return service.getRecommended(count, lang);
+  }
+
+  @PATCH
+  @Path("/{id}/favourite")
+  public SightEventDTO addToFavourite(@PathParam("id") Long id) {
+    return service.addFavourite(id);
+  }
+
+  @DELETE
+  @Path("/{id}/favourite")
+  public Response removeFavourite(@PathParam("id") Long id) {
+    service.removeFavourite(id);
+    return Response.ok().build();
+  }
+
+  @GET
+  @Path("/favourites")
+  public PagedCollection favourites(@HeaderParam("Accept-Language") String acceptLanguage,
+      @QueryParam("fromDate") @DateFormat Date fromDate,
+      @QueryParam("toDate") @DateFormat Date toDate,
+      @HeaderParam("Content-Language") String contentLanguage) {
+    var config = new SightEventPagedCollectionConfig();
+    config.onlyActive();
+    config.onlyPublished();
+    return service.favourites(config, fromDate, toDate,
+        contentLanguage != null ? contentLanguage : acceptLanguage);
   }
 
 }

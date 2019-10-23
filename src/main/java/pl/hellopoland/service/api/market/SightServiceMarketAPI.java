@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.Sight;
@@ -18,10 +19,12 @@ import pl.hellopoland.bo.SightEventTag;
 import pl.hellopoland.config.SightPagedCollectionConfig;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.service.SightService;
 import pl.hellopoland.service.TranslationService;
+import pl.hellopoland.service.UserService;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PagedEntityCollection;
@@ -34,6 +37,8 @@ public class SightServiceMarketAPI {
 
   @Inject
   SightEventService sightEventService;
+  @Inject
+  UserService userService;
 
   @Inject
   private TranslationService translationService;
@@ -155,6 +160,31 @@ public class SightServiceMarketAPI {
     config.onlyPublished();
     config.fetchSightEvents(true);
     return config;
+  }
+
+  @RolesAllowed("user")
+  public SightDTO addFavourite(Long id) {
+    Sight bo = service.get(id);
+    bo.addUser(userService.getLoggedUser());
+    return DtoMapper.getFullDTO(bo);
+  }
+
+  @RolesAllowed("user")
+  public void removeFavourite(Long id) {
+    Sight bo = service.get(id);
+    if (!bo.getUsers().contains(userService.getLoggedUser())) {
+      throw new ConflictingException("Sight [id:" + id + "] not in favourites");
+    }
+    bo.removeUser(userService.getLoggedUser());
+  }
+
+  @RolesAllowed("user")
+  public PagedCollection favourites(SightPagedCollectionConfig config,
+      String contentLanguageSymbol) {
+    if (userService.getLoggedUser() != null) {
+      config.onlyFavourite(userService.getLoggedUser().getId());
+    }
+    return getList(config, contentLanguageSymbol);
   }
 
 }
