@@ -1,15 +1,14 @@
 package pl.hellopoland.service.api.market;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
@@ -25,7 +24,6 @@ import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
-import pl.hellopoland.rest.DateCustomAdapter;
 import pl.hellopoland.rest.dto.AvailableDatesORO;
 import pl.hellopoland.rest.dto.AvailableTicketNumberAssociationORO;
 import pl.hellopoland.rest.dto.PagedCollection;
@@ -215,6 +213,7 @@ public class SightEventServiceMarketAPI {
     Date halfYearFromNow = Date.from(new Date().toInstant().plus(180, ChronoUnit.DAYS));
     var asos = service.checkAvailability(id, date, halfYearFromNow);
     AvailableDatesORO oro = new AvailableDatesORO();
+    // FIXME Object, bo jakiś problem z typem daty. do fixnięcia kiedyś, nic pilnego
     List<Object> dates = new ArrayList<>();
     for (var tpd : asos.ticketPoolDefinitions) {
       dates.addAll(tpdService.getStartDates(tpd.id, date, halfYearFromNow));
@@ -226,16 +225,9 @@ public class SightEventServiceMarketAPI {
         dates.add(tp.startDate);
       }
     });
-    DateFormat simpleFormatter = new SimpleDateFormat("yyyy-MM-dd");
-    // jakiś problem z typem daty. do fixnięcia kiedyś
     for (Object dat : dates) {
-      Date d;
-      try {
-        d = DateCustomAdapter.DATE_FORMAT.parse(Objects.toString(dat));
-        oro.availableDates.add(simpleFormatter.format(d));
-      } catch (ParseException e) {
-        e.printStackTrace();
-      }
+      Instant instant = ZonedDateTime.parse(dat.toString()).toInstant();
+      oro.availableDates.add(LocalDate.ofInstant(instant, ZoneId.systemDefault()).toString());
     }
     return oro;
   }
