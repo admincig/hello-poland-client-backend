@@ -110,6 +110,8 @@ public class SightEventServiceMarketAPI {
         dto.similar = getSimilar(bo, language);
       }
     }
+    // hiding
+    dto.pdfAttachment = null;
     return dto;
   }
 
@@ -175,7 +177,7 @@ public class SightEventServiceMarketAPI {
   public SightEventDTO addFavourite(Long id) {
     SightEvent bo = service.get(id);
     bo.addUser(userService.getLoggedUser());
-    return DtoMapper.getFullDTO(bo);
+    return DtoMapper.getDTO(bo);
   }
 
   @RolesAllowed("user")

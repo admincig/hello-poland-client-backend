@@ -94,6 +94,8 @@ public class SightServiceMarketAPI {
       dto.minPrice = dto.sightEvents.stream().min(Comparator.comparing(seDto -> seDto.minPrice))
           .map(seDto -> seDto.minPrice).orElse(null);
       dto.similar = getSimilar(bo, language);
+      // hiding
+      dto.sightEvents.stream().forEach(seDto -> seDto.pdfAttachment = null);
       return dto;
     }
     return null;
@@ -166,7 +168,7 @@ public class SightServiceMarketAPI {
   public SightDTO addFavourite(Long id) {
     Sight bo = service.get(id);
     bo.addUser(userService.getLoggedUser());
-    return DtoMapper.getFullDTO(bo);
+    return DtoMapper.getDTO(bo);
   }
 
   @RolesAllowed("user")
