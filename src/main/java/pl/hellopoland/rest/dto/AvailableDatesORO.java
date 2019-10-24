@@ -1,9 +1,10 @@
 package pl.hellopoland.rest.dto;
 
-import pl.hellopoland.util.DateList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class AvailableDatesORO {
 
-  public DateList availableDates = new DateList();
+  public Set<String> availableDates = new HashSet<>();
 
 }

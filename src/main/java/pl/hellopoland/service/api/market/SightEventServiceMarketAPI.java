@@ -1,10 +1,11 @@
 package pl.hellopoland.service.api.market;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -205,21 +206,26 @@ public class SightEventServiceMarketAPI {
 
   @PermitAll
   public AvailableDatesORO checkAvailableDates(Long id, Date date) {
+    if (date == null) {
+      date = new Date();
+    }
     Date halfYearFromNow = Date.from(new Date().toInstant().plus(180, ChronoUnit.DAYS));
     var asos = service.checkAvailability(id, date, halfYearFromNow);
     AvailableDatesORO oro = new AvailableDatesORO();
-
-    asos.ticketPoolDefinitions.forEach(tpd -> {
-      oro.availableDates.addAll(tpdService.getStartDates(tpd.id, date, halfYearFromNow));
-    });
+    List<Date> dates = new ArrayList<>();
+    for (var tpd : asos.ticketPoolDefinitions) {
+      dates.addAll(tpdService.getStartDates(tpd.id, date, halfYearFromNow));
+    } ;
     asos.ticketPools.stream().forEach(tp -> {
       if (tp.availableTicketsNumber.equals(0)) {
-        oro.availableDates.remove(tp.startDate);
+        dates.remove(tp.startDate);
       } else {
-        oro.availableDates.add(tp.startDate);
+        dates.add(tp.startDate);
       }
     });
-    Collections.sort(oro.availableDates);
+    DateFormat simpleFormatter = new SimpleDateFormat("yyyy-MM-dd");
+    oro.availableDates =
+        dates.stream().map(simpleFormatter::format).sorted().collect(Collectors.toSet());
     return oro;
   }
 
