@@ -2,9 +2,7 @@ package pl.hellopoland.service.api.market;
 
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -21,7 +19,6 @@ import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
-import pl.hellopoland.rest.dto.AvailableDatesORO;
 import pl.hellopoland.rest.dto.AvailableTicketNumberAssociationORO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.SightEventService;
@@ -150,10 +147,8 @@ public class SightEventServiceMarketAPI {
   @PermitAll
   public AvailableTicketNumberAssociationORO checkAvailability(Long sightEventId, Date fromDate,
       Date toDate) {
-    fromDate = getFromDateWithCurrentTime(fromDate);
-    toDate = getToDateForEndDay(toDate);
-    var asos = service.checkAvailability(sightEventId, fromDate, toDate);
-    return new AvailableTicketNumberAssociationORO(asos);
+    return new AvailableTicketNumberAssociationORO(service.checkAvailability(sightEventId,
+        getFromDateWithCurrentTime(fromDate), getToDateForEndDay(toDate)));
   }
 
   private Date getFromDateWithCurrentTime(Date fromDate) {
@@ -171,26 +166,6 @@ public class SightEventServiceMarketAPI {
                 .atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant())
             : null;
     return toDateEndDay;
-  }
-
-  @PermitAll
-  public AvailableDatesORO checkAvailableDates(Long id, Date date) {
-    Date halfYearFromNow = Date.from(new Date().toInstant().plus(180, ChronoUnit.DAYS));
-    var asos = service.checkAvailability(id, date, halfYearFromNow);
-    AvailableDatesORO oro = new AvailableDatesORO();
-
-    asos.ticketPoolDefinitions.forEach(tpd -> {
-      oro.availableDates.addAll(tpdService.getStartDates(tpd.id, date, halfYearFromNow));
-    });
-    asos.ticketPools.stream().forEach(tp -> {
-      if (tp.availableTicketsNumber.equals(0)) {
-        oro.availableDates.remove(tp.startDate);
-      } else {
-        oro.availableDates.add(tp.startDate);
-      }
-    });
-    Collections.sort(oro.availableDates);
-    return oro;
   }
 
 }

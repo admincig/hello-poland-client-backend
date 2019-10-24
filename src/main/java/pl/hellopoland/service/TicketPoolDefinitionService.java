@@ -1,6 +1,5 @@
 package pl.hellopoland.service;
 
-import java.util.Date;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.Partner;
@@ -11,7 +10,6 @@ import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.AccessDeniedException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
-import pl.hellopoland.util.DateList;
 import pl.hellopoland.util.HelloTicket;
 
 @Stateless
@@ -84,11 +82,6 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     hpt.deleteTicketPoolDefinition(getLoggedPartner().getHptToken(), id);
-  }
-
-  public DateList getStartDates(Long hptId, Date date, Date halfYearLater) {
-    HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
-    return hpt.checkAvailableDates(hptId, date, halfYearLater);
   }
 
 }

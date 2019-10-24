@@ -19,7 +19,6 @@ import pl.hellopoland.dto.FiltersContainerDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.rest.RestService;
-import pl.hellopoland.rest.dto.AvailableDatesORO;
 import pl.hellopoland.rest.dto.AvailableTicketNumberAssociationORO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.api.market.FilterMarketAPI;
@@ -104,13 +103,6 @@ public class MarketSightEventRestService {
   public AvailableTicketNumberAssociationORO checkAvailability(@PathParam("id") Long id,
       @QueryParam("date") @DateFormat final Date date) {
     return service.checkAvailability(id, date, null);
-  }
-
-  @GET
-  @Path("/{id}/available-dates")
-  public AvailableDatesORO checkAvailableDates(@PathParam("id") Long id,
-      @QueryParam("date") @DateFormat final Date date) {
-    return service.checkAvailableDates(id, date);
   }
 
   @GET

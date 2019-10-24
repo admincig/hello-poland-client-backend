@@ -48,7 +48,6 @@ import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.conflict.ExternalSystemException;
 import pl.hellopoland.exception.email.EmailSendingException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
-import pl.hellopoland.rest.DateCustomAdapter;
 import pl.hellopoland.rest.JsonbConfig;
 
 public class HelloTicket {
@@ -606,28 +605,21 @@ public class HelloTicket {
     conn.setDoOutput(true);
     conn.connect();
     var respCode = conn.getResponseCode();
-    logger.log(System.Logger.Level.INFO, "Server responded with code: " + respCode);
     InputStream is = conn.getErrorStream();
     if (is != null) {
-      String resp = IOUtils.toString(is);
-      throw new ExternalSystemException(resp);
+      var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
+      try {
+        throw new ExternalSystemException(((JsonString) resp.getValue("/message")).getString());
+      } catch (JsonException e) {
+        throw new ExternalSystemException(resp.toString());
+      }
     }
     is = conn.getInputStream();
-    String resp = IOUtils.toString(is);
+    logger.log(System.Logger.Level.INFO, "Server responded with code: " + respCode);
+    var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
     logger.log(System.Logger.Level.DEBUG, "Server responded with body: " + resp);
-    return JsonbConfig.getInstance().fromJson(resp, JsonStructure.class);
-  }
-
-  public DateList checkAvailableDates(Long tpdId, Date fromDate, Date toDate) {
-    try {
-      String resp = get(("/v1/ticket-pool-definitions/" + tpdId + "/available-dates?fromDate="
-          + DateCustomAdapter.DATE_FORMAT.format(fromDate)
-          + "&toDate=" + DateCustomAdapter.DATE_FORMAT.format(toDate)), AUTH_TOKEN).toString();
-      return JsonbConfig.getInstance().fromJson(resp, DateList.class);
-    } catch (JsonbException | IOException e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
-      throw new ConflictingException(e.getLocalizedMessage());
-    }
+    is.close();
+    return resp;
   }
 
 }
