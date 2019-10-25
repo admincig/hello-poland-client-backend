@@ -12,6 +12,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -618,11 +619,13 @@ public class HelloTicket {
     return JsonbConfig.getInstance().fromJson(resp, JsonStructure.class);
   }
 
-  public DateList checkAvailableDates(Long tpdId, LocalDate fromDate, LocalDate toDate) {
+  public List<LocalDate> checkAvailableDates(Long tpdId, LocalDate fromDate, LocalDate toDate) {
     try {
       String resp = get(("/v1/ticket-pool-definitions/" + tpdId + "/available-dates?fromDate="
           + fromDate + "&toDate=" + toDate), AUTH_TOKEN).toString();
-      return JsonbConfig.getInstance().fromJson(resp, DateList.class);
+      @SuppressWarnings("unchecked")
+      Collection<String> coll = JsonbConfig.getInstance().fromJson(resp, Collection.class);
+      return coll.stream().map(LocalDate::parse).collect(Collectors.toList());
     } catch (JsonbException | IOException e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
       throw new ConflictingException(e.getLocalizedMessage());
