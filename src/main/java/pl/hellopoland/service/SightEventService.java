@@ -46,6 +46,7 @@ import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.AccessDeniedException;
+import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.util.BeanUtils;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
@@ -133,6 +134,9 @@ public class SightEventService extends ServiceSuperclass {
 
   public SightEvent get(Long id) {
     SightEvent se = em.find(SightEvent.class, id);
+    if (se == null) {
+      throw new ResourceNotFoundException();
+    }
     se.fetchCollections();
     se.setFavourite(se.getUsers().contains(userService.getLoggedUser()));
     return se;
