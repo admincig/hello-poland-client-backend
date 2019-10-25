@@ -39,7 +39,7 @@ public class UserServiceMarketAPI {
   }
 
   @RolesAllowed("user")
-  public UserORO update(UserInfoDTO userDTO) {
+  public UserORO updateUserDetails(UserInfoDTO userDTO) {
     UserDetails details = new UserDetails();
     details.setStreet(userDTO.street);
     details.setCity(userDTO.city);
@@ -49,8 +49,18 @@ public class UserServiceMarketAPI {
     details.setPhone(userDTO.phone);
     details.setZipCode(userDTO.zipCode);
 
-    User newUser = service.updateUserDetailsForLoggedUser(details);
-    var dto = new UserORO(newUser);
+    User user = service.updateUserDetailsForLoggedUser(details);
+    var dto = new UserORO(user);
+    return dto;
+  }
+
+  // TODO przygotowanie pod przyszłe zmiany - osobna metoda do updatu agreementów
+  @RolesAllowed("user")
+  public UserORO updateAgreements(UserInfoDTO userDTO) {
+    UserDetails details = new UserDetails();
+    details.setTosAgreement(userDTO.tosAgreement);
+    User user = service.updateAgreementsForLoggedUser(details);
+    var dto = new UserORO(user);
     return dto;
   }
 

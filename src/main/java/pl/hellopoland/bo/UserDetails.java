@@ -101,4 +101,14 @@ public class UserDetails {
     this.setZipCode(incoming.getZipCode());
   }
 
+  public void updateAgreements(UserDetails incoming) {
+    if (incoming.tosAgreement != null) {
+      this.setTosAgreement(incoming.getTosAgreement());
+    }
+  }
+
+  public boolean hasAllRequiredAgreements() {
+    return this.tosAgreement;
+  }
+
 }

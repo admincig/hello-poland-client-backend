@@ -38,9 +38,15 @@ public class MarketUserRestService {
   }
 
   @PATCH
-  @Path("/update")
+  @Path("/me")
   public UserORO update(UserInfoDTO dto) {
-    return service.update(dto);
+    return service.updateUserDetails(dto);
+  }
+
+  @PATCH
+  @Path("/me/agreements")
+  public UserORO updateAgreements(UserInfoDTO dto) {
+    return service.updateAgreements(dto);
   }
 
   @PATCH
