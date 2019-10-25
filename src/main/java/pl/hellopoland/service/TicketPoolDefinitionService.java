@@ -1,6 +1,6 @@
 package pl.hellopoland.service;
 
-import java.util.Date;
+import java.time.LocalDate;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.Partner;
@@ -86,7 +86,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     hpt.deleteTicketPoolDefinition(getLoggedPartner().getHptToken(), id);
   }
 
-  public DateList getStartDates(Long hptId, Date date, Date halfYearLater) {
+  public DateList getStartDates(Long hptId, LocalDate date, LocalDate halfYearLater) {
     HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
     return hpt.checkAvailableDates(hptId, date, halfYearLater);
   }

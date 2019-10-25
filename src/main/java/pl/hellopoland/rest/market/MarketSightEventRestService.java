@@ -1,5 +1,6 @@
 package pl.hellopoland.rest.market;
 
+import java.time.LocalDate;
 import java.util.Date;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -112,7 +113,11 @@ public class MarketSightEventRestService {
   @GET
   @Path("/{id}/available-dates")
   public AvailableDatesORO checkAvailableDates(@PathParam("id") Long id,
-      @QueryParam("date") @DateFormat final Date date) {
+      @QueryParam("date") String dateString) {
+    LocalDate date = null;
+    if (dateString != null) {
+      date = LocalDate.parse(dateString);
+    }
     return service.checkAvailableDates(id, date);
   }
 

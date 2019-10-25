@@ -1,11 +1,8 @@
 package pl.hellopoland.service.api.market;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -206,29 +203,31 @@ public class SightEventServiceMarketAPI {
 
 
   @PermitAll
-  public AvailableDatesORO checkAvailableDates(Long id, Date date) {
+  public AvailableDatesORO checkAvailableDates(Long id, LocalDate date) {
     if (date == null) {
-      date = new Date();
+      date = LocalDate.now();
     }
-    Date halfYearFromNow = Date.from(new Date().toInstant().plus(180, ChronoUnit.DAYS));
-    var asos = service.checkAvailability(id, date, halfYearFromNow);
+    LocalDate halfYearFromNow = LocalDate.now().plusMonths(6);
+
+    var asos = service.checkAvailability(id,
+        Date.from(date.atStartOfDay()
+            .atZone(ZoneId.systemDefault())
+            .toInstant()),
+        Date.from(halfYearFromNow.atStartOfDay()
+            .atZone(ZoneId.systemDefault())
+            .toInstant()));
     AvailableDatesORO oro = new AvailableDatesORO();
-    // FIXME Object, bo jakiś problem z typem daty. do fixnięcia kiedyś, nic pilnego
-    List<Object> dates = new ArrayList<>();
     for (var tpd : asos.ticketPoolDefinitions) {
-      dates.addAll(tpdService.getStartDates(tpd.id, date, halfYearFromNow));
+      oro.availableDates.addAll(tpdService.getStartDates(tpd.id, date, halfYearFromNow));
     }
     asos.ticketPools.stream().forEach(tp -> {
+      LocalDate ld = tp.startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
       if (tp.availableTicketsNumber.equals(0)) {
-        dates.remove(tp.startDate);
+        oro.availableDates.remove(ld);
       } else {
-        dates.add(tp.startDate);
+        oro.availableDates.add(ld);
       }
     });
-    for (Object dat : dates) {
-      Instant instant = ZonedDateTime.parse(dat.toString()).toInstant();
-      oro.availableDates.add(LocalDate.ofInstant(instant, ZoneId.systemDefault()).toString());
-    }
     return oro;
   }
 

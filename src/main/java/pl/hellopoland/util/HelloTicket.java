@@ -10,6 +10,7 @@ import java.lang.System.Logger.Level;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -48,7 +49,6 @@ import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.conflict.ExternalSystemException;
 import pl.hellopoland.exception.email.EmailSendingException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
-import pl.hellopoland.rest.DateCustomAdapter;
 import pl.hellopoland.rest.JsonbConfig;
 
 public class HelloTicket {
@@ -618,11 +618,10 @@ public class HelloTicket {
     return JsonbConfig.getInstance().fromJson(resp, JsonStructure.class);
   }
 
-  public DateList checkAvailableDates(Long tpdId, Date fromDate, Date toDate) {
+  public DateList checkAvailableDates(Long tpdId, LocalDate fromDate, LocalDate toDate) {
     try {
       String resp = get(("/v1/ticket-pool-definitions/" + tpdId + "/available-dates?fromDate="
-          + DateCustomAdapter.DATE_FORMAT.format(fromDate)
-          + "&toDate=" + DateCustomAdapter.DATE_FORMAT.format(toDate)), AUTH_TOKEN).toString();
+          + fromDate + "&toDate=" + toDate), AUTH_TOKEN).toString();
       return JsonbConfig.getInstance().fromJson(resp, DateList.class);
     } catch (JsonbException | IOException e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
