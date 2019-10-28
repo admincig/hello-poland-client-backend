@@ -225,7 +225,7 @@ public class SightEventServiceMarketAPI {
     asos.ticketPools.stream().forEach(tp -> {
       LocalDate ld = tp.startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
       boolean noMoreTickets = tp.availableTicketsNumber.equals(0)
-          || tp.ticketDefinitions.stream().anyMatch(td -> td.availableTicketsNumber.equals(0));
+          || tp.ticketDefinitions.stream().allMatch(td -> td.availableTicketsNumber.equals(0));
       if (noMoreTickets) {
         oro.availableDates.remove(ld);
       } else {
