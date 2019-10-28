@@ -130,12 +130,15 @@ public class MarketSightEventRestService {
     return service.getRecommended(count, lang);
   }
 
-  @GET
+  @POST
   @Path("/personalized")
   public PagedCollection personalized(
+      SightEventPagedCollectionConfig config,
       @HeaderParam("Content-Language") String contentLanguage,
       @QueryParam("count") @DefaultValue("6") Integer count) {
-    // TODO
+    LanguageVersion lang = RestService.parseLang(contentLanguage);
+
+    return service.getPersonalized(config, count, lang);
   }
 
 

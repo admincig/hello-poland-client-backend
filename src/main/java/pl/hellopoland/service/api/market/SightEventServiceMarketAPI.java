@@ -177,6 +177,26 @@ public class SightEventServiceMarketAPI {
     return toDateEndDay;
   }
 
+  @PermitAll
+  public PagedCollection getPersonalized(SightEventPagedCollectionConfig config, Integer count,
+      LanguageVersion languageVersion) {
+    if (config.getExcludedIds() == null || config.getExcludedIds().isEmpty()) {
+      throw new ConflictingException("Cannot generate personalized Sight Events");
+    }
+    config.setPageSize(count);
+    config.onlyActive();
+    config.onlyPublished();
+    config.onlyAvailable();
+    PagedEntityCollection<SightEvent> pc = service.getList(config, languageVersion);
+
+    HelloTicket hptClient = new HelloTicket(service.getPortal("Hello Ticket Cloud").getUrl());
+    List<SightEvent> ses = hptClient.getSightEventsInDateRange(new ArrayList<SightEvent>(pc.items),
+        new Date(), null);
+    List<SightEventDTO> dtos = ses.stream().map(DtoMapper::getDTO)
+        .collect(Collectors.toList());
+    return new PagedCollection(dtos, pc.config);
+  }
+
   @RolesAllowed("user")
   public SightEventDTO addFavourite(Long id) {
     SightEvent bo = service.get(id);
