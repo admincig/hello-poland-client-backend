@@ -253,6 +253,7 @@ public class SightEventService extends ServiceSuperclass {
       }
       bo.setOpeningHours(null);
       bo.setOpeningHours(oHoursList);
+      em.merge(bo);
       em.refresh(bo.getSight());
       sightService.recreateSearchIndex(bo.getSight());
       recreateSearchIndex(bo);
