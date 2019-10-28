@@ -130,6 +130,15 @@ public class MarketSightEventRestService {
     return service.getRecommended(count, lang);
   }
 
+  @GET
+  @Path("/personalized")
+  public PagedCollection personalized(
+      @HeaderParam("Content-Language") String contentLanguage,
+      @QueryParam("count") @DefaultValue("6") Integer count) {
+    // TODO
+  }
+
+
   @PATCH
   @Path("/{id}/favourite")
   public SightEventDTO addToFavourite(@PathParam("id") Long id) {
