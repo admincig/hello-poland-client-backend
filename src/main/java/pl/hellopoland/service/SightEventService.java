@@ -232,7 +232,7 @@ public class SightEventService extends ServiceSuperclass {
     if (!translationService.isTranslated(bo, language)) {
       // throw new ConflictingException(
       // "Translation for language " + language.getLanuage() + " doesn't exists");
-      createLanguageVersionForLoggedUser(dto, language);
+      createLanguageVersion(dto, language);
     }
     if (bo.getDefaultLanguage().equals(language)) {
       if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
