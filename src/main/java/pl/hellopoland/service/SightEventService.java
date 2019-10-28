@@ -242,7 +242,7 @@ public class SightEventService extends ServiceSuperclass {
     if (!translationService.isTranslated(bo, language)) {
       // throw new ConflictingException(
       // "Translation for language " + language.getLanuage() + " doesn't exists");
-      createLanguageVersionForLoggedUser(dto, language);
+      createLanguageVersion(dto, language);
     }
     if (bo.getDefaultLanguage().equals(language)) {
       if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
@@ -263,8 +263,9 @@ public class SightEventService extends ServiceSuperclass {
       }
       bo.setOpeningHours(null);
       bo.setOpeningHours(oHoursList);
-      em.refresh(bo.getSight());
-      sightService.recreateSearchIndex(bo.getSight());
+      Sight sight = em.merge(bo.getSight());
+      em.refresh(sight);
+      sightService.recreateSearchIndex(sight);
       recreateSearchIndex(bo);
       em.flush();
     }
