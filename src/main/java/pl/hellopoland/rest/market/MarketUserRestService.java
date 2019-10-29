@@ -32,18 +32,25 @@ public class MarketUserRestService {
 
   @POST
   @Path("/register")
-  public UserORO register(UserInfoDTO dto) {
-    return service.register(dto);
+  public Response register(UserInfoDTO dto) {
+    service.register(dto);
+    return Response.ok().build();
   }
 
   @PATCH
-  @Path("/update")
+  @Path("/me")
   public UserORO update(UserInfoDTO dto) {
-    return service.update(dto);
+    return service.updateUserDetails(dto);
   }
 
   @PATCH
-  @Path("/password")
+  @Path("/me/agreements")
+  public UserORO updateAgreements(UserInfoDTO dto) {
+    return service.updateAgreements(dto);
+  }
+
+  @PATCH
+  @Path("/me/password")
   public Response updatePassword(UserAuthDTO userAuthDTO) {
     service.updatePassword(userAuthDTO);
     return Response.ok().build();

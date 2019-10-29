@@ -10,6 +10,7 @@ import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
+import javax.ws.rs.InternalServerErrorException;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.User;
@@ -31,6 +32,10 @@ public class UserService extends ServiceSuperclass {
   private PasswordEncoder passwordEncoder;
   @Inject
   private PartnerService partnerService;
+  @Inject
+  private EmailService emailService;
+  @Inject
+  private OrderService orderService;
 
   public User me() {
     return Optional.ofNullable(getLoggedUser()).orElseThrow(UnauthorizedException::new);
@@ -41,7 +46,7 @@ public class UserService extends ServiceSuperclass {
     String picture = user.getPicture();
     UserDetails details = user.getDetails();
     try {
-      User bo = findOneByEmail(email);
+      User bo = findOneUndeletedByEmail(email);
       bo.setPicture(picture);
       if (!bo.hasRole(Role.USER)) {
         createUserRole(bo, Role.USER);
@@ -97,25 +102,74 @@ public class UserService extends ServiceSuperclass {
     return bo;
   }
 
-  public User updateUserDetailsForLoggedUser(UserDetails details) {
+  public User updateUserDetailsForLoggedUser(UserDetails newDetails) {
     User user = getLoggedUser();
-    user.setDetails(details);
+    UserDetails oldDetails = user.getDetails();
+    if (oldDetails == null) {
+      oldDetails = new UserDetails();
+    }
+    oldDetails.update(newDetails);
     em.merge(user);
     return user;
   }
 
-  public User findOneByEmail(String email) {
-    return em.createQuery("from User where lower(email) = :email", User.class)
+  // TODO osobna metoda dla zgód, na przyszły refactor
+  public User updateAgreementsForLoggedUser(UserDetails userAgreements) {
+    User user = getLoggedUser();
+    if (user.getDetails() == null) {
+      user.setDetails(new UserDetails());
+    }
+    UserDetails oldDetails = user.getDetails();
+    oldDetails.updateAgreements(userAgreements);
+    if (!oldDetails.hasAllRequiredAgreements()) {
+      deleteUser(user);
+    }
+    return user;
+  }
+
+  private void deleteUser(User user) {
+    String hplMail = properties.getProperty("mail.hellopoland.biuro");
+    String hplMailContent = "Dane usuniętego użytkownika: " + user.toString();
+    String userEmail = user.getEmail();
+
+    orderService.anonymizeOrdersForUser(user);
+    anonymizeUser(user);
+    try {
+      emailService.sendEmail(hplMail, "Usunięto konto użytkownika", hplMailContent);
+      emailService.sendEmail(userEmail, "Usunięto konto w Hello Poland",
+          "Usunięto Twoje konto w systemie Hello Poland. Usunięto Twoje dane osobowe w związku z cofnięciem zgody na warunki zawarte w naszym regulaminie oraz polityce prywatności.");
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.ERROR, e.getLocalizedMessage());
+      throw new InternalServerErrorException(
+          "Something went wrong while deleting user [id:" + user.getId() + "]");
+    }
+  }
+
+  private void anonymizeUser(User user) {
+    user.setEmail("anon+" + user.getId().toString() + "@hello-poland.pl");
+    UserDetails details = user.getDetails();
+    if (details != null) {
+      details.setFirstName("anon");
+      details.setLastName("anon");
+      details.setStreet("anon");
+      details.setPhone("anon");
+    }
+  }
+
+  public User findOneUndeletedByEmail(String email) {
+    return em.createQuery("from User where lower(email) = :email and deleted=false", User.class)
         .setParameter("email", email.toLowerCase()).getSingleResult();
   }
 
-  public Optional<User> findByEmail(String email) {
-    return em.createQuery("from User where lower(email) = :email", User.class)
+  public Optional<User> findUndeletedByEmail(String email) {
+    return em.createQuery("from User where lower(email) = :email and deleted=false", User.class)
         .setParameter("email", email.toLowerCase()).getResultStream().findFirst();
   }
 
-  public Optional<User> findByEmailWithNullPartner(String email) {
-    return em.createQuery("from User where lower(email) = :email and partner = null", User.class)
+  public Optional<User> findUndeletedByEmailWithNullPartner(String email) {
+    return em
+        .createQuery("from User where lower(email) = :email and partner = null and deleted=false",
+            User.class)
         .setParameter("email", email.toLowerCase()).getResultStream().findFirst();
   }
 
@@ -188,7 +242,8 @@ public class UserService extends ServiceSuperclass {
   }
 
   public Set<String> getFlatRoles(String email) {
-    return findByEmail(email).get().getRoles().stream().map(UserRole::getRole).map(Role::toString)
+    return findUndeletedByEmail(email).get().getRoles().stream().map(UserRole::getRole)
+        .map(Role::toString)
         .collect(Collectors.toSet());
   }
 

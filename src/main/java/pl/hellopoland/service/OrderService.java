@@ -551,4 +551,19 @@ public class OrderService extends ServiceSuperclass {
     return hpt.sendTicketsCopyByPartner(serialNumber, loggedUser.getPartner().getHptToken());
   }
 
+  public void anonymizeOrdersForUser(User user) {
+    em.createQuery("from Order where user=:user",
+        Order.class)
+        .setParameter("user", user).getResultStream()
+        .forEach(o -> {
+          OrderDetails details = o.getDetails();
+          if (details != null) {
+            details.setFirstName("anon");
+            details.setLastName("anon");
+            details.setStreet("anon");
+            details.setPhone("anon");
+          }
+        });
+  }
+
 }

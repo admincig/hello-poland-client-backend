@@ -46,6 +46,7 @@ public class User extends ModelSuperclass {
   @ManyToOne(cascade = PERSIST)
   private Partner partner;
   private String hptToken;
+  private boolean deleted;
   @ManyToMany(mappedBy = "users")
   private Set<Sight> sights;
   @ManyToMany(mappedBy = "users")
@@ -125,4 +126,18 @@ public class User extends ModelSuperclass {
     return this.name;
   }
 
+  @Override
+  public String toString() {
+    String toString = "Email: " + this.email + "\n";
+    UserDetails d = this.getDetails();
+    if (d != null) {
+      if (d.getFirstName() != null) {
+        toString += "Imię: " + d.getFirstName() + "\n";
+      }
+      if (d.getLastName() != null) {
+        toString += "Nazwisko: " + d.getLastName();
+      }
+    }
+    return toString;
+  }
 }
