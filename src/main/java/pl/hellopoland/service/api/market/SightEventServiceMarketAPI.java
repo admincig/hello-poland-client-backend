@@ -193,7 +193,8 @@ public class SightEventServiceMarketAPI {
       int missingAmount = count - pc.items.size();
       SightEventPagedCollectionConfig missingSightsConfig = prepareConfigForRandom(missingAmount);
       missingSightsConfig.setExcludedIds(config.getExcludedIds());
-      PagedEntityCollection<SightEvent> missingPc = service.getList(config, languageVersion);
+      PagedEntityCollection<SightEvent> missingPc =
+          service.getList(missingSightsConfig, languageVersion);
       pc.items.addAll(missingPc.items);
     }
 
