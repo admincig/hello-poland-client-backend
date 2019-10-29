@@ -181,7 +181,8 @@ public class SightEventServiceMarketAPI {
   public PagedCollection getPersonalized(SightEventPagedCollectionConfig config, Integer count,
       LanguageVersion languageVersion) {
     if (config.getExcludedIds() == null || config.getExcludedIds().isEmpty()) {
-      throw new ConflictingException("Cannot generate personalized Sight Events");
+      throw new ConflictingException(
+          "Cannot generate personalized Sight Events. Fill 'sameCategorySightEventIds' array in config.");
     }
     config.setPageSize(count);
     config.onlyActive();

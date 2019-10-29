@@ -87,11 +87,11 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
     }
   }
 
-  public void setSameCategoriesIds(Set<Long> sameCategorySightEventsIds) {
+  public void setSameCategorySightEventIds(Set<Long> sameCategorySightEventIds) {
     setFetchCategories(true);
-    setExcludedIds(sameCategorySightEventsIds);
-    if (sameCategorySightEventsIds != null && !sameCategorySightEventsIds.isEmpty()) {
-      addCondition("sameCategorySightEventsIds", sameCategorySightEventsIds,
+    setExcludedIds(sameCategorySightEventIds);
+    if (sameCategorySightEventIds != null && !sameCategorySightEventIds.isEmpty()) {
+      addCondition("sameCategorySightEventsIds", sameCategorySightEventIds,
           "sec.category.id in (select distinct category.id from SightEventCategory where sightEvent.id in (:sameCategorySightEventsIds))");
     }
   }
