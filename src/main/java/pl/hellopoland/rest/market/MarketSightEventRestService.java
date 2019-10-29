@@ -137,10 +137,8 @@ public class MarketSightEventRestService {
       @HeaderParam("Content-Language") String contentLanguage,
       @QueryParam("count") @DefaultValue("6") Integer count) {
     LanguageVersion lang = RestService.parseLang(contentLanguage);
-
     return service.getPersonalized(config, count, lang);
   }
-
 
   @PATCH
   @Path("/{id}/favourite")

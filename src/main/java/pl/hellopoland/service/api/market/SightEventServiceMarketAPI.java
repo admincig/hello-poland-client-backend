@@ -189,6 +189,14 @@ public class SightEventServiceMarketAPI {
     config.onlyAvailable();
     PagedEntityCollection<SightEvent> pc = service.getList(config, languageVersion);
 
+    if (pc.items.size() < count) {
+      int missingAmount = count - pc.items.size();
+      SightEventPagedCollectionConfig missingSightsConfig = prepareConfigForRandom(missingAmount);
+      missingSightsConfig.setExcludedIds(config.getExcludedIds());
+      PagedEntityCollection<SightEvent> missingPc = service.getList(config, languageVersion);
+      pc.items.addAll(missingPc.items);
+    }
+
     HelloTicket hptClient = new HelloTicket(service.getPortal("Hello Ticket Cloud").getUrl());
     List<SightEvent> ses = hptClient.getSightEventsInDateRange(new ArrayList<SightEvent>(pc.items),
         new Date(), null);
