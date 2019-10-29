@@ -10,7 +10,9 @@ import java.lang.System.Logger.Level;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -605,21 +607,29 @@ public class HelloTicket {
     conn.setDoOutput(true);
     conn.connect();
     var respCode = conn.getResponseCode();
+    logger.log(System.Logger.Level.INFO, "Server responded with code: " + respCode);
     InputStream is = conn.getErrorStream();
     if (is != null) {
-      var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
-      try {
-        throw new ExternalSystemException(((JsonString) resp.getValue("/message")).getString());
-      } catch (JsonException e) {
-        throw new ExternalSystemException(resp.toString());
-      }
+      String resp = IOUtils.toString(is);
+      throw new ExternalSystemException(resp);
     }
     is = conn.getInputStream();
-    logger.log(System.Logger.Level.INFO, "Server responded with code: " + respCode);
-    var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
+    String resp = IOUtils.toString(is);
     logger.log(System.Logger.Level.DEBUG, "Server responded with body: " + resp);
-    is.close();
-    return resp;
+    return JsonbConfig.getInstance().fromJson(resp, JsonStructure.class);
+  }
+
+  public List<LocalDate> checkAvailableDates(Long tpdId, LocalDate fromDate, LocalDate toDate) {
+    try {
+      String resp = get(("/v1/ticket-pool-definitions/" + tpdId + "/available-dates?fromDate="
+          + fromDate + "&toDate=" + toDate), AUTH_TOKEN).toString();
+      @SuppressWarnings("unchecked")
+      Collection<String> coll = JsonbConfig.getInstance().fromJson(resp, Collection.class);
+      return coll.stream().map(LocalDate::parse).collect(Collectors.toList());
+    } catch (JsonbException | IOException e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      throw new ConflictingException(e.getLocalizedMessage());
+    }
   }
 
 }

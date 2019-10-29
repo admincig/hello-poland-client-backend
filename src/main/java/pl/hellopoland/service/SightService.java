@@ -52,6 +52,8 @@ public class SightService extends ServiceSuperclass {
 
   @Inject
   private TranslationService translationService;
+  @Inject
+  private UserService userService;
 
   public PagedEntityCollection<Sight> getList(SightPagedCollectionConfig config,
       LanguageVersion language) {
@@ -59,6 +61,9 @@ public class SightService extends ServiceSuperclass {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
     }
     List<Sight> sights = getQuery(config).getResultList();
+    sights.stream().forEach(s -> {
+      s.setFavourite(s.getUsers().contains(userService.getLoggedUser()));
+    });
     if (language != null) {
       sights = translationService.translateEntities(sights, language);
       if (config.isFetchSightEvents()) {
@@ -122,6 +127,7 @@ public class SightService extends ServiceSuperclass {
         .setParameter("sightId", id).getSingleResult();
     bo.fetchCollections();
     bo.getSightEvents().forEach(SightEvent::fetchCollections);
+    bo.setFavourite(bo.getUsers().contains(userService.getLoggedUser()));
     return bo;
   }
 

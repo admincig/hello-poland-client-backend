@@ -6,7 +6,7 @@ import javax.json.bind.adapter.JsonbAdapter;
 
 public class DateCustomAdapter implements JsonbAdapter<Date, String> {
 
-  private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+  public final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 
   @Override
   public String adaptToJson(Date obj) throws Exception {

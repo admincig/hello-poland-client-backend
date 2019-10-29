@@ -46,6 +46,7 @@ import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.AccessDeniedException;
+import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.util.BeanUtils;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
@@ -55,6 +56,8 @@ import pl.hellopoland.util.Triplet;
 @LocalBean
 @Stateless
 public class SightEventService extends ServiceSuperclass {
+  @Inject
+  UserService userService;
 
   @Inject
   private ImageService iService;
@@ -95,6 +98,9 @@ public class SightEventService extends ServiceSuperclass {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
     }
     List<SightEvent> sightEvents = getQuery(config).getResultList();
+    sightEvents.stream().forEach(s -> {
+      s.setFavourite(s.getUsers().contains(userService.getLoggedUser()));
+    });
     if (!sightEvents.isEmpty() && config.isFetchCategories()) {
       List<SightEventCategory> categories = catService.getFor(sightEvents);
       Map<SightEvent, Set<SightEventCategory>> grouped = categories.stream()
@@ -128,7 +134,11 @@ public class SightEventService extends ServiceSuperclass {
 
   public SightEvent get(Long id) {
     SightEvent se = em.find(SightEvent.class, id);
+    if (se == null) {
+      throw new ResourceNotFoundException();
+    }
     se.fetchCollections();
+    se.setFavourite(se.getUsers().contains(userService.getLoggedUser()));
     return se;
   }
 
@@ -232,7 +242,7 @@ public class SightEventService extends ServiceSuperclass {
     if (!translationService.isTranslated(bo, language)) {
       // throw new ConflictingException(
       // "Translation for language " + language.getLanuage() + " doesn't exists");
-      createLanguageVersionForLoggedUser(dto, language);
+      createLanguageVersion(dto, language);
     }
     if (bo.getDefaultLanguage().equals(language)) {
       if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
@@ -253,8 +263,9 @@ public class SightEventService extends ServiceSuperclass {
       }
       bo.setOpeningHours(null);
       bo.setOpeningHours(oHoursList);
-      em.refresh(bo.getSight());
-      sightService.recreateSearchIndex(bo.getSight());
+      Sight sight = em.merge(bo.getSight());
+      em.refresh(sight);
+      sightService.recreateSearchIndex(sight);
       recreateSearchIndex(bo);
       em.flush();
     }

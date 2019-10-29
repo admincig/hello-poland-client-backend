@@ -1,5 +1,6 @@
 package pl.hellopoland.service.api.market;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.Category;
@@ -19,11 +21,13 @@ import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
+import pl.hellopoland.rest.dto.AvailableDatesORO;
 import pl.hellopoland.rest.dto.AvailableTicketNumberAssociationORO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.service.TicketPoolDefinitionService;
 import pl.hellopoland.service.TranslationService;
+import pl.hellopoland.service.UserService;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PagedEntityCollection;
@@ -33,7 +37,8 @@ public class SightEventServiceMarketAPI {
 
   @Inject
   SightEventService service;
-
+  @Inject
+  UserService userService;
   @Inject
   TicketPoolDefinitionService tpdService;
 
@@ -107,6 +112,8 @@ public class SightEventServiceMarketAPI {
         dto.similar = getSimilar(bo, language);
       }
     }
+    // hiding
+    dto.pdfAttachment = null;
     return dto;
   }
 
@@ -147,8 +154,10 @@ public class SightEventServiceMarketAPI {
   @PermitAll
   public AvailableTicketNumberAssociationORO checkAvailability(Long sightEventId, Date fromDate,
       Date toDate) {
-    return new AvailableTicketNumberAssociationORO(service.checkAvailability(sightEventId,
-        getFromDateWithCurrentTime(fromDate), getToDateForEndDay(toDate)));
+    fromDate = getFromDateWithCurrentTime(fromDate);
+    toDate = getToDateForEndDay(toDate);
+    var asos = service.checkAvailability(sightEventId, fromDate, toDate);
+    return new AvailableTicketNumberAssociationORO(asos);
   }
 
   private Date getFromDateWithCurrentTime(Date fromDate) {
@@ -166,6 +175,64 @@ public class SightEventServiceMarketAPI {
                 .atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant())
             : null;
     return toDateEndDay;
+  }
+
+  @RolesAllowed("user")
+  public SightEventDTO addFavourite(Long id) {
+    SightEvent bo = service.get(id);
+    bo.addUser(userService.getLoggedUser());
+    return DtoMapper.getDTO(bo);
+  }
+
+  @RolesAllowed("user")
+  public void removeFavourite(Long id) {
+    SightEvent bo = service.get(id);
+    if (!bo.getUsers().contains(userService.getLoggedUser())) {
+      throw new ConflictingException("Sight event [id:" + id + "] not in favourites");
+    }
+    bo.removeUser(userService.getLoggedUser());
+  }
+
+  @RolesAllowed("user")
+  public PagedCollection favourites(SightEventPagedCollectionConfig config, Date fromDate,
+      Date toDate,
+      String contentLanguageSymbol) {
+    if (userService.getLoggedUser() != null) {
+      config.onlyFavourite(userService.getLoggedUser().getId());
+    }
+    return getList(config, fromDate, toDate, contentLanguageSymbol);
+  }
+
+
+  @PermitAll
+  public AvailableDatesORO checkAvailableDates(Long id, LocalDate date) {
+    if (date == null) {
+      date = LocalDate.now();
+    }
+    LocalDate halfYearFromNow = LocalDate.now().plusMonths(6);
+
+    var asos = service.checkAvailability(id,
+        Date.from(date.atStartOfDay()
+            .atZone(ZoneId.systemDefault())
+            .toInstant()),
+        Date.from(halfYearFromNow.atStartOfDay()
+            .atZone(ZoneId.systemDefault())
+            .toInstant()));
+    AvailableDatesORO oro = new AvailableDatesORO();
+    for (var tpd : asos.ticketPoolDefinitions) {
+      oro.availableDates.addAll(tpdService.getStartDates(tpd.id, date, halfYearFromNow));
+    }
+    asos.ticketPools.stream().forEach(tp -> {
+      LocalDate ld = tp.startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+      boolean noMoreTickets = tp.availableTicketsNumber.equals(0)
+          || tp.ticketDefinitions.stream().allMatch(td -> td.availableTicketsNumber.equals(0));
+      if (noMoreTickets) {
+        oro.availableDates.remove(ld);
+      } else {
+        oro.availableDates.add(ld);
+      }
+    });
+    return oro;
   }
 
 }
