@@ -122,6 +122,14 @@ public class User extends ModelSuperclass {
     this.hptToken = hptToken;
   }
 
+  public boolean isDeleted() {
+    return deleted;
+  }
+
+  public void setDeleted(boolean deleted) {
+    this.deleted = deleted;
+  }
+
   public String getName() {
     return this.name;
   }
