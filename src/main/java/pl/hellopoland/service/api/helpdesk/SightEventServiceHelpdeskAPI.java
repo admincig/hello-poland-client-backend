@@ -167,4 +167,11 @@ public class SightEventServiceHelpdeskAPI {
     return dto;
   }
 
+  @RolesAllowed("admin")
+  public SightEventDTO deleteImage(Long id, Long imageId) {
+    SightEvent bo = service.removeImageFromGallery(id, imageId);
+    var dto = DtoMapper.getFullDTO(bo);
+    return dto;
+  }
+
 }

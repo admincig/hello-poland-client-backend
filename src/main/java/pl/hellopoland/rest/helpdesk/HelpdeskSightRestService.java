@@ -96,4 +96,10 @@ public class HelpdeskSightRestService {
   public SightDTO uploadIcon(@PathParam("id") Long id, byte[] icon) {
     return service.uploadMainImage(id, icon);
   }
+
+  @DELETE
+  @Path("/{id}/images/{imgId}")
+  public SightDTO deleteImage(@PathParam("id") Long id, @PathParam("imgId") Long imgId) {
+    return service.deleteImage(id, imgId);
+  }
 }

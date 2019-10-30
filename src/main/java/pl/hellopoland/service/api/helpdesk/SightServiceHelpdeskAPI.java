@@ -92,4 +92,11 @@ public class SightServiceHelpdeskAPI {
     return dto;
   }
 
+  @RolesAllowed("admin")
+  public SightDTO deleteImage(Long id, Long imageId) {
+    Sight bo = service.removeImageFromGallery(id, imageId);
+    var dto = DtoMapper.getFullDTO(bo);
+    return dto;
+  }
+
 }
