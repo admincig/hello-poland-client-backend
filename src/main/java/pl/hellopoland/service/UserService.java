@@ -132,6 +132,7 @@ public class UserService extends ServiceSuperclass {
     String hplMailContent = "Dane usuniętego użytkownika: " + user.toString();
     String userEmail = user.getEmail();
 
+    user.setDeleted(true);
     orderService.anonymizeOrdersForUser(user);
     anonymizeUser(user);
     try {
