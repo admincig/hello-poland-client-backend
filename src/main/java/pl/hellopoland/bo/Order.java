@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -28,6 +29,8 @@ public class Order extends ModelSuperclass {
   @OneToMany(mappedBy = "order", cascade = CascadeType.REFRESH)
   private Collection<OrderSightEntry> entries;
   @NotNull
+  // TODO
+  @Column(unique = true)
   private String hash;
   @Embedded
   private OrderDetails details;

@@ -20,4 +20,9 @@ public class OrderDateEntryOnListingORO {
     this.entries =
         ode.getEntries().stream().map(OrderEntryOnListingORO::new).collect(Collectors.toList());
   }
+
+  // 2. z ordera wyciągnąc hash( jest to nr zamówienia) dopytać dawida czy to na pewno to
+  // nazwać pole DTO.
+  // String orderNumber;
+
 }

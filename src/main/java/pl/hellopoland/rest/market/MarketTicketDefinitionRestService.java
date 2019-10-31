@@ -40,4 +40,16 @@ public class MarketTicketDefinitionRestService {
     service.deleteTicketGroup(id);
   }
 
+  @GET
+  @Path("/mine")
+  public void mineTickets() {
+
+  }
+
+  @GET
+  @Path("/mine/archive")
+  public void mineArchivedTickets() {
+
+  }
+
 }
