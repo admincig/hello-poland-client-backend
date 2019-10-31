@@ -133,6 +133,7 @@ public class UserService extends ServiceSuperclass {
     String userEmail = user.getEmail();
 
     user.setDeleted(true);
+    user.setPicture(null);
     orderService.anonymizeOrdersForUser(user);
     anonymizeUser(user);
     try {
