@@ -25,7 +25,7 @@ public class MarketTicketDefinitionRestService {
 
   @GET
   public List<OrderDateEntryOnListingORO> tickets() {
-    return service.getTicketGroupsForLoggedUser();
+    return service.getActiveTicketGroupsForLoggedUser();
   }
 
   @GET
@@ -41,15 +41,9 @@ public class MarketTicketDefinitionRestService {
   }
 
   @GET
-  @Path("/mine")
-  public void mineTickets() {
-
-  }
-
-  @GET
-  @Path("/mine/archive")
-  public void mineArchivedTickets() {
-
+  @Path("/archive")
+  public List<OrderDateEntryOnListingORO> archivedTickets() {
+    return service.getArchivedTicketGroupsForLoggedUser();
   }
 
 }

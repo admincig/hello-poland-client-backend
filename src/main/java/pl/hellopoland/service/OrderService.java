@@ -365,11 +365,28 @@ public class OrderService extends ServiceSuperclass {
     return de;
   }
 
-  public List<OrderDateEntry> getOrderSightDateEntriesForLoggedUser() {
+  public List<OrderDateEntry> getOrderSightDateEntriesInTheFutureForLoggedUser() {
+    Date now = new Date();
     List<OrderDateEntry> osdes = em.createQuery(
-        "from OrderDateEntry osde join fetch osde.sightEntry ose join fetch ose.sightEvent s join fetch ose.order o where osde.deleted=false and o.user=:user and o.status=:status order by osde.date asc",
-        OrderDateEntry.class).setParameter("user", getLoggedUser())
-        .setParameter("status", Order.Status.CONFIRMED).getResultList();
+        "from OrderDateEntry osde join fetch osde.sightEntry ose join fetch ose.sightEvent s join fetch ose.order o where osde.deleted=false and o.user=:user and o.status=:status and osde.date>=:now order by osde.date asc",
+        OrderDateEntry.class)
+        .setParameter("user", getLoggedUser())
+        .setParameter("status", Order.Status.CONFIRMED)
+        .setParameter("now", now)
+        .getResultList();
+    osdes.forEach(osde -> osde.getEntries().size());
+    return osdes;
+  }
+
+  public List<OrderDateEntry> getOrderSightDateEntriesInThePastForLoggedUser() {
+    Date now = new Date();
+    List<OrderDateEntry> osdes = em.createQuery(
+        "from OrderDateEntry osde join fetch osde.sightEntry ose join fetch ose.sightEvent s join fetch ose.order o where osde.deleted=false and o.user=:user and o.status=:status and osde.date<:now order by osde.date asc",
+        OrderDateEntry.class)
+        .setParameter("user", getLoggedUser())
+        .setParameter("status", Order.Status.CONFIRMED)
+        .setParameter("now", now)
+        .getResultList();
     osdes.forEach(osde -> osde.getEntries().size());
     return osdes;
   }

@@ -29,7 +29,6 @@ public class Order extends ModelSuperclass {
   @OneToMany(mappedBy = "order", cascade = CascadeType.REFRESH)
   private Collection<OrderSightEntry> entries;
   @NotNull
-  // TODO
   @Column(unique = true)
   private String hash;
   @Embedded

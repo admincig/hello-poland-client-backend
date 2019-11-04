@@ -11,6 +11,7 @@ public class OrderDateEntryOnListingORO {
   public String date;
   public boolean wholeDay;
   public List<OrderEntryOnListingORO> entries;
+  public String orderHash;
 
   public OrderDateEntryOnListingORO(OrderDateEntry ode) {
     this.id = ode.getId();
@@ -19,10 +20,7 @@ public class OrderDateEntryOnListingORO {
     this.wholeDay = ode.getSightEntry().isWholeDay();
     this.entries =
         ode.getEntries().stream().map(OrderEntryOnListingORO::new).collect(Collectors.toList());
+    this.orderHash = ode.getSightEntry().getOrder().getHash();
   }
-
-  // 2. z ordera wyciągnąc hash( jest to nr zamówienia) dopytać dawida czy to na pewno to
-  // nazwać pole DTO.
-  // String orderNumber;
 
 }
