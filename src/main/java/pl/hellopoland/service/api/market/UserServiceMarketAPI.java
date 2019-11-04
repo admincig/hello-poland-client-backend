@@ -31,6 +31,10 @@ public class UserServiceMarketAPI {
   @PermitAll
   public void register(UserInfoDTO userDTO) {
     validatePassword(userDTO.password, userDTO.passwordConfirmation);
+    if (userDTO.tosAgreement == null) {
+      staticLogger.log(Logger.Level.WARNING, "tosAgreement is required");
+      throw new ConflictingException("tosAgreement is required");
+    }
     try {
       service.create(userDTO.email, userDTO.password, userDTO.tosAgreement);
     } catch (EJBTransactionRolledbackException e) {
