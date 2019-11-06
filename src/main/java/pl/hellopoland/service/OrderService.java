@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -366,26 +367,26 @@ public class OrderService extends ServiceSuperclass {
   }
 
   public List<OrderDateEntry> getOrderSightDateEntriesInTheFutureForLoggedUser() {
-    Date now = new Date();
+    Date nowPlusOneDay = new Date(new Date().getTime() + TimeUnit.DAYS.toMillis(1));
     List<OrderDateEntry> osdes = em.createQuery(
-        "from OrderDateEntry osde join fetch osde.sightEntry ose join fetch ose.sightEvent s join fetch ose.order o where osde.deleted=false and o.user=:user and o.status=:status and osde.date>=:now order by osde.date asc",
+        "from OrderDateEntry osde join fetch osde.sightEntry ose join fetch ose.sightEvent s join fetch ose.order o where osde.deleted=false and o.user=:user and o.status=:status and osde.date>=:date order by osde.date asc",
         OrderDateEntry.class)
         .setParameter("user", getLoggedUser())
         .setParameter("status", Order.Status.CONFIRMED)
-        .setParameter("now", now)
+        .setParameter("date", nowPlusOneDay)
         .getResultList();
     osdes.forEach(osde -> osde.getEntries().size());
     return osdes;
   }
 
   public List<OrderDateEntry> getOrderSightDateEntriesInThePastForLoggedUser() {
-    Date now = new Date();
+    Date nowPlusOneDay = new Date(new Date().getTime() + TimeUnit.DAYS.toMillis(1));
     List<OrderDateEntry> osdes = em.createQuery(
-        "from OrderDateEntry osde join fetch osde.sightEntry ose join fetch ose.sightEvent s join fetch ose.order o where osde.deleted=false and o.user=:user and o.status=:status and osde.date<:now order by osde.date asc",
+        "from OrderDateEntry osde join fetch osde.sightEntry ose join fetch ose.sightEvent s join fetch ose.order o where osde.deleted=false and o.user=:user and o.status=:status and osde.date<:date order by osde.date asc",
         OrderDateEntry.class)
         .setParameter("user", getLoggedUser())
         .setParameter("status", Order.Status.CONFIRMED)
-        .setParameter("now", now)
+        .setParameter("date", nowPlusOneDay)
         .getResultList();
     osdes.forEach(osde -> osde.getEntries().size());
     return osdes;
