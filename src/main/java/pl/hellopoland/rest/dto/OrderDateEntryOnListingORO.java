@@ -11,6 +11,7 @@ public class OrderDateEntryOnListingORO {
   public String date;
   public boolean wholeDay;
   public List<OrderEntryOnListingORO> entries;
+  public String orderNumber;
 
   public OrderDateEntryOnListingORO(OrderDateEntry ode) {
     this.id = ode.getId();
@@ -19,5 +20,7 @@ public class OrderDateEntryOnListingORO {
     this.wholeDay = ode.getSightEntry().isWholeDay();
     this.entries =
         ode.getEntries().stream().map(OrderEntryOnListingORO::new).collect(Collectors.toList());
+    this.orderNumber = ode.getSightEntry().getOrder().getHash();
   }
+
 }

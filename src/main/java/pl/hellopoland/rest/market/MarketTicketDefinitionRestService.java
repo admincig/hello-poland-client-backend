@@ -25,7 +25,7 @@ public class MarketTicketDefinitionRestService {
 
   @GET
   public List<OrderDateEntryOnListingORO> tickets() {
-    return service.getTicketGroupsForLoggedUser();
+    return service.getActiveTicketGroupsForLoggedUser();
   }
 
   @GET
@@ -38,6 +38,12 @@ public class MarketTicketDefinitionRestService {
   @Path("/{id}")
   public void deleteTicket(@PathParam("id") Long id) {
     service.deleteTicketGroup(id);
+  }
+
+  @GET
+  @Path("/archive")
+  public List<OrderDateEntryOnListingORO> archivedTickets() {
+    return service.getArchivedTicketGroupsForLoggedUser();
   }
 
 }

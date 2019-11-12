@@ -39,8 +39,15 @@ public class OrderServiceMarketAPI {
   }
 
   @RolesAllowed("user")
-  public List<OrderDateEntryOnListingORO> getTicketGroupsForLoggedUser() {
-    List<OrderDateEntry> bos = service.getOrderSightDateEntriesForLoggedUser();
+  public List<OrderDateEntryOnListingORO> getActiveTicketGroupsForLoggedUser() {
+    List<OrderDateEntry> bos = service.getOrderSightDateEntriesInTheFutureForLoggedUser();
+    var dtos = bos.stream().map(OrderDateEntryOnListingORO::new).collect(Collectors.toList());
+    return dtos;
+  }
+
+  @RolesAllowed("user")
+  public List<OrderDateEntryOnListingORO> getArchivedTicketGroupsForLoggedUser() {
+    List<OrderDateEntry> bos = service.getOrderSightDateEntriesInThePastForLoggedUser();
     var dtos = bos.stream().map(OrderDateEntryOnListingORO::new).collect(Collectors.toList());
     return dtos;
   }
