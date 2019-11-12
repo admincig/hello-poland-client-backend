@@ -367,7 +367,7 @@ public class OrderService extends ServiceSuperclass {
   }
 
   public List<OrderDateEntry> getOrderSightDateEntriesInTheFutureForLoggedUser() {
-    Date nowPlusOneDay = new Date(new Date().getTime() + TimeUnit.DAYS.toMillis(1));
+    Date nowPlusOneDay = new Date(new Date().getTime() - TimeUnit.DAYS.toMillis(1));
     List<OrderDateEntry> osdes = em.createQuery(
         "from OrderDateEntry osde join fetch osde.sightEntry ose join fetch ose.sightEvent s join fetch ose.order o where osde.deleted=false and o.user=:user and o.status=:status and osde.date>=:date order by osde.date asc",
         OrderDateEntry.class)
@@ -380,7 +380,7 @@ public class OrderService extends ServiceSuperclass {
   }
 
   public List<OrderDateEntry> getOrderSightDateEntriesInThePastForLoggedUser() {
-    Date nowPlusOneDay = new Date(new Date().getTime() + TimeUnit.DAYS.toMillis(1));
+    Date nowPlusOneDay = new Date(new Date().getTime() - TimeUnit.DAYS.toMillis(1));
     List<OrderDateEntry> osdes = em.createQuery(
         "from OrderDateEntry osde join fetch osde.sightEntry ose join fetch ose.sightEvent s join fetch ose.order o where osde.deleted=false and o.user=:user and o.status=:status and osde.date<:date order by osde.date asc",
         OrderDateEntry.class)
