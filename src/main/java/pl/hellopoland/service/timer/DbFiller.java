@@ -605,6 +605,7 @@ public class DbFiller extends ServiceSuperclass {
     dto.endDate = eDate;
     dto.sightEventId = sightEventId;
     dto.ticketDefinitions = Arrays.asList(ticketDefinitions);
+    dto.wholeDay = true;
     tpdService.add(dto, partner);
   }
 
