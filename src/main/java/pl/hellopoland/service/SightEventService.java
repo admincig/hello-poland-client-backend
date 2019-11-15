@@ -434,7 +434,7 @@ public class SightEventService extends ServiceSuperclass {
     HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
     AvailableTicketNumberAssociationDTO associationDTO =
         hpt.checkAvailabilityOfTicketsForSightEvent(get(sightEventId), fromDate, toDate);
-
+    associationDTO.ticketPoolDefinitions.forEach(tpd -> tpd.startDate = fromDate);
     var tdExternalIds = new ArrayList<Long>();
 
     var tpdDTOs = associationDTO.ticketPoolDefinitions;
