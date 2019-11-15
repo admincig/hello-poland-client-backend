@@ -9,6 +9,8 @@ import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -182,7 +184,9 @@ public class OrderService extends ServiceSuperclass {
       }
       wholeDayPoolIds.forEach(id -> {
         for (var ticket : tickets) {
-          if (id.equals(ticket.getPoolId())) {
+          if (id.equals(ticket.getPoolId())
+              && !LocalDate.ofInstant(ticket.getDate().toInstant(), ZoneId.systemDefault())
+                  .isBefore(LocalDate.now())) {
             expiredTickets.remove(ticket);
             expired.remove(ticket.getId());
           }
