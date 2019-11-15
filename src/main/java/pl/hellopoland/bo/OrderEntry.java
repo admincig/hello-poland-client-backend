@@ -1,6 +1,7 @@
 package pl.hellopoland.bo;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -126,10 +127,17 @@ public class OrderEntry extends ModelSuperclass {
       return false;
     }
     if (this.dateEntry.getDate().compareTo(dto.date) != 0) {
-      System.out.println("this.getDateEntry.getDate() != dto.date");
-      System.out.println("this.getDateEntry.getDate= " + this.dateEntry.getDate());
-      System.out.println("dto.date= " + dto.date);
-      return false;
+      Date dayOnly = this.dateEntry.getDate();
+      dayOnly.setHours(0);
+      dayOnly.setMinutes(0);
+      dayOnly.setSeconds(0);
+
+      if (!dto.wholeDay || dayOnly.compareTo(dto.date) != 0) {
+        System.out.println("this.getDateEntry.getDate() != dto.date");
+        System.out.println("this.getDateEntry.getDate= " + this.dateEntry.getDate());
+        System.out.println("dto.date= " + dto.date);
+        return false;
+      }
     }
     if (!this.unitPrice.equals(dto.price)) {
       System.out.println("this.unitPrice != dto.price");
