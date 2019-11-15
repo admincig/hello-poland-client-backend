@@ -80,7 +80,9 @@ public class OrderService extends ServiceSuperclass {
     o.setUser(getLoggedUser());
     var details = iro.details;
     details.setUserLogged(getLoggedUser() != null);
-    if (details.getCountry() == null) {
+    try {
+      details.setCountry(Country.valueOf(details.getCountry()).name());
+    } catch (IllegalArgumentException e) {
       details.setCountry(Country.PL.name());
     }
     o.setDetails(details);
