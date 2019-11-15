@@ -113,9 +113,36 @@ public class OrderEntry extends ModelSuperclass {
   }
 
   public boolean matches(TicketDTO dto) {
-    return this.externalDefinitionId.equals(dto.ticketDefinitionId)
-        && this.poolId.equals(dto.tickerPoolDefinitionId)
-        && this.dateEntry.getDate().compareTo(dto.date) == 0 && this.unitPrice.equals(dto.price)
-        && this.name.equals(dto.name);
+    if (!this.externalDefinitionId.equals(dto.ticketDefinitionId)) {
+      System.out.println("this.externalDefinitionId != dto.ticketDefinitionId");
+      System.out.println("this.externalDefinitionId= " + this.externalDefinitionId);
+      System.out.println("dto.ticketDefinitionId= " + dto.ticketDefinitionId);
+      return false;
+    }
+    if (!this.poolId.equals(dto.tickerPoolDefinitionId)) {
+      System.out.println("this.poolId != dto.tickerPoolDefinitionId");
+      System.out.println("this.poolId= " + this.poolId);
+      System.out.println("dto.tickerPoolDefinitionId= " + dto.tickerPoolDefinitionId);
+      return false;
+    }
+    if (this.dateEntry.getDate().compareTo(dto.date) != 0) {
+      System.out.println("this.getDateEntry.getDate() != dto.date");
+      System.out.println("this.getDateEntry.getDate= " + this.dateEntry.getDate());
+      System.out.println("dto.date= " + dto.date);
+      return false;
+    }
+    if (!this.unitPrice.equals(dto.price)) {
+      System.out.println("this.unitPrice != dto.price");
+      System.out.println("this.unitPrice= " + this.unitPrice);
+      System.out.println("dto.price= " + dto.price);
+      return false;
+    }
+    if (!this.name.equals(dto.name)) {
+      System.out.println("this.name != dto.name");
+      System.out.println("this.name= " + this.name);
+      System.out.println("dto.name= " + dto.name);
+      return false;
+    }
+    return true;
   }
 }
