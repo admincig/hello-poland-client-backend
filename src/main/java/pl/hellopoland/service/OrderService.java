@@ -185,7 +185,8 @@ public class OrderService extends ServiceSuperclass {
       wholeDayPoolIds.forEach(id -> {
         for (var ticket : tickets) {
           if (id.equals(ticket.getPoolId())
-              && !LocalDate.ofInstant(ticket.getDate().toInstant(), ZoneId.systemDefault())
+              && !LocalDate
+                  .ofInstant(expired.get(ticket.getId()).date.toInstant(), ZoneId.systemDefault())
                   .isBefore(LocalDate.now())) {
             expiredTickets.remove(ticket);
             expired.remove(ticket.getId());
