@@ -301,6 +301,10 @@ public class SightEventService extends ServiceSuperclass {
   public SightEvent removeImageFromGallery(Long id, Long imgId) {
     SightEvent bo = getForLoggedUser(id);
     ImageCollector img = iService.get(imgId);
+    if (!bo.getImages().contains(img)) {
+      throw new ConflictingException(
+          "Image [id:" + imgId + " is not in gallery of sightevent[id:" + id + "].");
+    }
     bo.removeImage(img);
     return bo;
   }

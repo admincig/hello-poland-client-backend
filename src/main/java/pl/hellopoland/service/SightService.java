@@ -224,6 +224,10 @@ public class SightService extends ServiceSuperclass {
   public Sight removeImageFromGallery(Long id, Long imgId) {
     Sight bo = getActiveForLoggedPartner(id);
     ImageCollector img = imageService.get(imgId);
+    if (!bo.getImages().contains(img)) {
+      throw new ConflictingException(
+          "Image [id:" + imgId + " is not in gallery of sightevent[id:" + id + "].");
+    }
     bo.removeImage(img);
     return bo;
   }
