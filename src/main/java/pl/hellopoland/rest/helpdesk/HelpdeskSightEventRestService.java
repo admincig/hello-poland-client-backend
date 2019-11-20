@@ -163,6 +163,13 @@ public class HelpdeskSightEventRestService {
     return service.uploadMainImage(id, icon);
   }
 
+  @POST
+  @Path("/{id}/images")
+  @Consumes({"image/jpeg", "image/jpg"})
+  public SightEventDTO uploadImage(@PathParam("id") Long id, byte[] img) {
+    return service.uploadImage(id, img);
+  }
+
   @DELETE
   @Path("/{id}/images/{imgId}")
   public SightEventDTO deleteImage(@PathParam("id") Long id, @PathParam("imgId") Long imgId) {

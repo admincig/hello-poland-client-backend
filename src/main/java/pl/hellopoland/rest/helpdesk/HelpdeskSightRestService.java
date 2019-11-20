@@ -16,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import pl.hellopoland.config.SightPagedCollectionConfig;
 import pl.hellopoland.dto.SightDTO;
+import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.rest.RestService;
 import pl.hellopoland.rest.dto.PagedCollection;
@@ -95,6 +96,13 @@ public class HelpdeskSightRestService {
   @Consumes({"image/jpeg", "image/jpg"})
   public SightDTO uploadIcon(@PathParam("id") Long id, byte[] icon) {
     return service.uploadMainImage(id, icon);
+  }
+
+  @POST
+  @Path("/{id}/images")
+  @Consumes({"image/jpeg", "image/jpg"})
+  public SightEventDTO uploadImage(@PathParam("id") Long id, byte[] img) {
+    return service.uploadImage(id, img);
   }
 
   @DELETE

@@ -93,6 +93,12 @@ public class SightServiceHelpdeskAPI {
   }
 
   @RolesAllowed("admin")
+  public SightDTO uploadImage(Long id, byte[] icon) {
+    Sight bo = service.addImageToSightGallery(id, icon);
+    return DtoMapper.getFullDTO(bo);
+  }
+
+  @RolesAllowed("admin")
   public SightDTO deleteImage(Long id, Long imageId) {
     Sight bo = service.removeImageFromGallery(id, imageId);
     var dto = DtoMapper.getFullDTO(bo);
