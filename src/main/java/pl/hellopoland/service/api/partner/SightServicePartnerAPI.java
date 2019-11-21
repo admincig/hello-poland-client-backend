@@ -88,13 +88,13 @@ public class SightServicePartnerAPI {
 
   @RolesAllowed("partner")
   public SightDTO uploadImage(Long id, byte[] icon) {
-    Sight bo = service.addImageToSightGallery(id, icon);
+    Sight bo = service.addImageToSightGalleryForLoggedUser(id, icon);
     return DtoMapper.getFullDTO(bo);
   }
 
   @RolesAllowed("partner")
   public SightDTO removeImageFromGallery(Long id, Long imgId) {
-    Sight bo = service.removeImageFromGallery(id, imgId);
+    Sight bo = service.removeImageFromGalleryForLoggedUser(id, imgId);
     return DtoMapper.getFullDTO(bo);
   }
 

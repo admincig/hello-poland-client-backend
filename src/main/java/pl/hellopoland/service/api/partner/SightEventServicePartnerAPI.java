@@ -100,7 +100,7 @@ public class SightEventServicePartnerAPI {
 
   @RolesAllowed("partner")
   public SightEventDTO uploadImage(Long id, byte[] img) {
-    SightEvent bo = service.addImageToSightEventGallery(id, img);
+    SightEvent bo = service.addImageToSightEventGalleryForLoggedUser(id, img);
     var dto = DtoMapper.getFullDTO(bo);
     service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), true);
     return dto;
@@ -108,7 +108,7 @@ public class SightEventServicePartnerAPI {
 
   @RolesAllowed("partner")
   public SightEventDTO removeImageFromGallery(Long id, Long imgId) {
-    SightEvent bo = service.removeImageFromGallery(id, imgId);
+    SightEvent bo = service.removeImageFromGalleryForLoggedUser(id, imgId);
     return DtoMapper.getFullDTO(bo);
   }
 

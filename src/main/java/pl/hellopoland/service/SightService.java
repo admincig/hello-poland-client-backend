@@ -215,6 +215,13 @@ public class SightService extends ServiceSuperclass {
   }
 
   public Sight addImageToSightGallery(Long id, byte[] img) {
+    Sight bo = get(id);
+    bo.addImage(
+        imageService.validateAndStoreImageCollector(new ByteArrayInputStream(img), "jpeg", null));
+    return bo;
+  }
+
+  public Sight addImageToSightGalleryForLoggedUser(Long id, byte[] img) {
     Sight bo = getActiveForLoggedPartner(id);
     bo.addImage(
         imageService.validateAndStoreImageCollector(new ByteArrayInputStream(img), "jpeg", null));
@@ -222,6 +229,17 @@ public class SightService extends ServiceSuperclass {
   }
 
   public Sight removeImageFromGallery(Long id, Long imgId) {
+    Sight bo = get(id);
+    ImageCollector img = imageService.get(imgId);
+    if (!bo.getImages().contains(img)) {
+      throw new ConflictingException(
+          "Image [id:" + imgId + " is not in gallery of sightevent[id:" + id + "].");
+    }
+    bo.removeImage(img);
+    return bo;
+  }
+
+  public Sight removeImageFromGalleryForLoggedUser(Long id, Long imgId) {
     Sight bo = getActiveForLoggedPartner(id);
     ImageCollector img = imageService.get(imgId);
     if (!bo.getImages().contains(img)) {
