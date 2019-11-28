@@ -22,11 +22,11 @@ public class MarketMailingListRestService {
   MailingListServiceMarketAPI service;
 
   @POST
-  @Path("/list/{email}")
+  @Path("/subscribe/{email}")
   public Response addToMailingList(@PathParam("email") String email) {
     String addedMail = service.addToMailingList(email);
     return Response
-        .ok(Json.createObjectBuilder().add("addedEmail", addedMail))
+        .ok(Json.createObjectBuilder().add("addedEmail", addedMail).build())
         .build();
   }
 

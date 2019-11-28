@@ -13,11 +13,8 @@ public class MailingListServiceMarketAPI {
 
   @PermitAll
   public String addToMailingList(String email) {
-    service.createContact(email);
-    String contactAddedToList = service.addContactToMailingList(email);
+    service.getOrCreateContact(email);
+    String contactAddedToList = service.addContactToList(email);
     return contactAddedToList;
-
-    // service.add to contactList();
-    // return contact
   }
 }
