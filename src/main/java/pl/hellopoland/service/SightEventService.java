@@ -292,6 +292,13 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public SightEvent addImageToSightEventGallery(Long id, byte[] img) {
+    SightEvent bo = get(id);
+    bo.addImage(
+        iService.validateAndStoreImageCollector(new ByteArrayInputStream(img), "jpeg", null));
+    return bo;
+  }
+
+  public SightEvent addImageToSightEventGalleryForLoggedUser(Long id, byte[] img) {
     SightEvent bo = getForLoggedUser(id);
     bo.addImage(
         iService.validateAndStoreImageCollector(new ByteArrayInputStream(img), "jpeg", null));
@@ -299,8 +306,23 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public SightEvent removeImageFromGallery(Long id, Long imgId) {
+    SightEvent bo = get(id);
+    ImageCollector img = iService.get(imgId);
+    if (!bo.getImages().contains(img)) {
+      throw new ConflictingException(
+          "Image [id:" + imgId + " is not in gallery of sightevent[id:" + id + "].");
+    }
+    bo.removeImage(img);
+    return bo;
+  }
+
+  public SightEvent removeImageFromGalleryForLoggedUser(Long id, Long imgId) {
     SightEvent bo = getForLoggedUser(id);
     ImageCollector img = iService.get(imgId);
+    if (!bo.getImages().contains(img)) {
+      throw new ConflictingException(
+          "Image [id:" + imgId + " is not in gallery of sightevent[id:" + id + "].");
+    }
     bo.removeImage(img);
     return bo;
   }

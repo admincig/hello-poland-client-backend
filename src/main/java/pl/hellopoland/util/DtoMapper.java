@@ -274,6 +274,7 @@ public class DtoMapper {
       return null;
     }
     ImageDTO dto = new ImageDTO();
+    dto.id = bo.getId();
     dto.original = bo.getOrginal().getDownloadUrl();
     if (bo.getOrginalWebp() != null) {
       dto.originalWebp = bo.getOrginalWebp().getDownloadUrl();
