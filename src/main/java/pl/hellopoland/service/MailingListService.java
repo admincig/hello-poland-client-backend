@@ -30,12 +30,6 @@ public class MailingListService extends ServiceSuperclass {
     apiKey.setApiKey(sendInBlueKey);
   }
 
-  // public void lol() {
-  // ApiClient defaultClient = Configuration.getDefaultApiClient();
-  // ApiKeyAuth apiKey = (ApiKeyAuth) defaultClient.getAuthentication("api-key");
-  // apiKey.setApiKey(sendInBlueKey);
-  // }
-
   public String getOrCreateContact(String email) {
     GetExtendedContactDetails details = getContact(email);
     if (details == null) {
@@ -60,7 +54,7 @@ public class MailingListService extends ServiceSuperclass {
     try {
       CreateModel result = apiInstance.createContact(createContact);
       logger.log(Logger.Level.INFO, "Created new contact for mailing list. [" + email + "].");
-      return result.getId(); // jeżeli jest id to znaczy, że stworzono
+      return result.getId();
     } catch (ApiException e) {
       logger.log(Logger.Level.WARNING, e.getResponseBody());
       throw new ConflictingException("Could not create contact for this email. [" + email + "].");
@@ -74,7 +68,7 @@ public class MailingListService extends ServiceSuperclass {
     try {
       PostContactInfo result = apiInstance.addContactToList(sendInBlueListId, contactEmails);
       logger.log(Logger.Level.INFO, "Added contact to mailing list. [" + email + "].");
-      return result.getContacts().getSuccess().get(0); // jeżeli wysłano jeden email
+      return result.getContacts().getSuccess().get(0);
     } catch (ApiException e) {
       logger.log(Logger.Level.WARNING, e.getResponseBody());
       throw new ConflictingException("Contact email already on mailing list. [" + email + "].");
