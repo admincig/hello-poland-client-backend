@@ -177,6 +177,56 @@ public class SightEventServiceMarketAPI {
     return toDateEndDay;
   }
 
+  @PermitAll
+  public PagedCollection getPersonalized(SightEventPagedCollectionConfig config, Integer count,
+      LanguageVersion languageVersion) {
+    if (config.getExcludedIds() == null || config.getExcludedIds().isEmpty()) {
+      throw new ConflictingException(
+          "Cannot generate personalized Sight Events. Fill 'sameCategorySightEventIds' array in config.");
+    }
+    config.setPageSize(count);
+    config.onlyActive();
+    config.onlyPublished();
+    config.onlyAvailable();
+    PagedEntityCollection<SightEvent> pc = service.getList(config, languageVersion);
+    pc.items = pc.items.stream().filter(se -> se.isAccessible()).collect(Collectors.toList());
+
+    HelloTicket hptClient = new HelloTicket(service.getPortal("Hello Ticket Cloud").getUrl());
+    List<SightEvent> ses = hptClient.getSightEventsInDateRange(new ArrayList<SightEvent>(pc.items),
+        new Date(), null);
+    List<SightEventDTO> dtos = ses.stream().map(DtoMapper::getDTO)
+        .collect(Collectors.toList());
+
+    int missingAmount = count - pc.items.size();
+    if (missingAmount > 0) {
+      dtos.addAll(fetchRandomOfNumberAndWithout(config, languageVersion, dtos, missingAmount));
+    }
+    return new PagedCollection(dtos, pc.config);
+  }
+
+  public List<SightEventDTO> fetchRandomOfNumberAndWithout(SightEventPagedCollectionConfig config,
+      LanguageVersion languageVersion,
+      List<SightEventDTO> excluded,
+      Integer count) {
+    SightEventPagedCollectionConfig missingSightsConfig = prepareConfigForRandom(count);
+    // excluding all ids
+    Set<Long> alreadyExcluded = config.getExcludedIds();
+    Set<Long> excludedIds = excluded.stream().map(dto -> dto.id).collect(Collectors.toSet());
+    excludedIds.addAll(alreadyExcluded);
+    missingSightsConfig.setExcludedIds(excludedIds);
+
+    PagedEntityCollection<SightEvent> missingPc =
+        service.getList(missingSightsConfig, languageVersion);
+
+    HelloTicket hptClient = new HelloTicket(service.getPortal("Hello Ticket Cloud").getUrl());
+    List<SightEvent> ses =
+        hptClient.getSightEventsInDateRange(new ArrayList<SightEvent>(missingPc.items),
+            new Date(), null);
+    List<SightEventDTO> dtos = ses.stream().map(DtoMapper::getDTO)
+        .collect(Collectors.toList());
+    return dtos;
+  }
+
   @RolesAllowed("user")
   public SightEventDTO addFavourite(Long id) {
     SightEvent bo = service.get(id);

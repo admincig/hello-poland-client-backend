@@ -13,11 +13,13 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
   private boolean fetchCategories;
   private boolean fetchTags;
   private boolean fetchUsers;
+  private Set<Long> excludedIds;
 
   @Override
   public String joins() {
     return "left join fetch e.mainImage mi join fetch e.partner p join fetch e.sight s"
-        + (fetchUsers ? " inner join e.users u" : "");
+        + (fetchUsers ? " inner join e.users u" : "")
+        + (fetchCategories ? " inner join SightEventCategory sec on sec.sightEvent.id=e.id" : "");
   }
 
   public void setSearchQuery(String searchQuery) {
@@ -85,6 +87,15 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
     }
   }
 
+  public void setSameCategorySightEventIds(Set<Long> sameCategorySightEventIds) {
+    setFetchCategories(true);
+    setExcludedIds(sameCategorySightEventIds);
+    if (sameCategorySightEventIds != null && !sameCategorySightEventIds.isEmpty()) {
+      addCondition("sameCategorySightEventsIds", sameCategorySightEventIds,
+          "sec.category.id in (select distinct category.id from SightEventCategory where sightEvent.id in (:sameCategorySightEventsIds))");
+    }
+  }
+
   public void setTagsIds(List<Long> tagsIds) {
     if (tagsIds != null && !tagsIds.isEmpty()) {
       addCondition("ids", tagsIds,
@@ -117,7 +128,12 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
   }
 
   public void setExcludedIds(Set<Long> ids) {
+    this.excludedIds = ids;
     addCondition("ids", ids, "e.id not in (:ids)");
+  }
+
+  public Set<Long> getExcludedIds() {
+    return this.excludedIds;
   }
 
   public void setFetchTags(boolean fetchTags) {

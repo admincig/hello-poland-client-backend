@@ -130,6 +130,16 @@ public class MarketSightEventRestService {
     return service.getRecommended(count, lang);
   }
 
+  @POST
+  @Path("/personalized")
+  public PagedCollection personalized(
+      SightEventPagedCollectionConfig config,
+      @HeaderParam("Content-Language") String contentLanguage,
+      @QueryParam("count") @DefaultValue("6") Integer count) {
+    LanguageVersion lang = RestService.parseLang(contentLanguage);
+    return service.getPersonalized(config, count, lang);
+  }
+
   @PATCH
   @Path("/{id}/favourite")
   public SightEventDTO addToFavourite(@PathParam("id") Long id) {
