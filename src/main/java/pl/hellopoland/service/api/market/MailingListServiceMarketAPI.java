@@ -15,6 +15,7 @@ public class MailingListServiceMarketAPI {
   public String addToMailingList(String email) {
     service.getOrCreateContact(email);
     String contactAddedToList = service.addContactToList(email);
+    service.sendConfirmationMail(email);
     return contactAddedToList;
   }
 }
