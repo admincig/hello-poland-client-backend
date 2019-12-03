@@ -41,7 +41,8 @@ public class AnalyticsService extends ServiceSuperclass {
     final File csvFile = fileDescriptorService.createEmptyFileOnDisc(
         PATH + "orders_" + RandomStringUtils.randomAlphanumeric(10) + ".csv");
     // csv file header:
-    writeCsvRow(csvFile.toPath(), "DATA ZAMÓWIENIA", "ID PARTNERA HP", "ID PARTNERA P24",
+    writeCsvRow(csvFile.toPath(), "HASH ZAMÓWIENIA", "DATA ZAMÓWIENIA", "ID PARTNERA HP",
+        "ID PARTNERA P24",
         "NAZWA PARTNERA", "AFILIACJA", "WARTOŚĆ", "PROWIZJA", "WALUTA", "NR TRANSAKCJI P24",
         "TYTUŁ PRZELEWU P24", "NAZWA UŻUTKOWNIKA", "TELEON", "ADRES EMAIL", "PLATFORMA",
         "ZALOGOWANY", "NAZWA OFERTY", "DATA OFERTY", "ILOŚĆ", "NAZWA BILETÓW");
@@ -63,15 +64,26 @@ public class AnalyticsService extends ServiceSuperclass {
       BigDecimal commissionVal =
           total.multiply(commission).divide(hundred).setScale(2, RoundingMode.HALF_EVEN);
 
-      writeCsvRow(csvFile.toPath(), DATE_FORMATER.format(order.getDate()),
-          String.valueOf(partner.getId()), String.valueOf(partner.getP24Id()), partner.getName(),
+      writeCsvRow(csvFile.toPath(),
+          order.getHash(),
+          DATE_FORMATER.format(order.getDate()),
+          String.valueOf(partner.getId()),
+          String.valueOf(partner.getP24Id()),
+          partner.getName(),
           oe.getPartnerAffiliateCode() != null ? "afiliacja" : "",
-          String.valueOf(total).replace(".", ","), String.valueOf(commissionVal).replace(".", ","),
-          order.getP24Currency(), order.getP24OrderId(), order.getP24Statement(),
-          oDetails.getFirstName() + " " + oDetails.getLastName(), oDetails.getPhone(),
-          oDetails.getEmail(), platform != null ? platform.name() : Platform.UNKNOWN.name(),
-          String.valueOf(oDetails.isUserLogged()), sightEvent.getName(),
-          DATE_FORMATER.format(dateEntry.getDate()), String.valueOf(oe.getQuantity()),
+          String.valueOf(total).replace(".", ","),
+          String.valueOf(commissionVal).replace(".", ","),
+          order.getP24Currency(),
+          order.getP24OrderId(),
+          order.getP24Statement(),
+          oDetails.getFirstName() + " " + oDetails.getLastName(),
+          oDetails.getPhone(),
+          oDetails.getEmail(),
+          platform != null ? platform.name() : Platform.UNKNOWN.name(),
+          String.valueOf(oDetails.isUserLogged()),
+          sightEvent.getName(),
+          DATE_FORMATER.format(dateEntry.getDate()),
+          String.valueOf(oe.getQuantity()),
           oe.getName());
     }
     return csvFile;
