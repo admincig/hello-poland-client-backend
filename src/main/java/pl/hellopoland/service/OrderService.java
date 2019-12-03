@@ -530,8 +530,8 @@ public class OrderService extends ServiceSuperclass {
     return tQuery.getResultList();
   }
 
-  public EmailSendingReportDTO sendTicketCopy(String p24Statement) {
-    var order = findByP24Statement(p24Statement);
+  public EmailSendingReportDTO sendTicketCopy(String hash) {
+    var order = findByHash(hash);
     EmailSendingReportDTO report = sendTicketsCopyByExternalAPI(order);
     String clientEmail = order.getDetails().getEmail();
     if (report.validUnsentAddresses != null && report.validUnsentAddresses.length > 0) {
@@ -545,12 +545,6 @@ public class OrderService extends ServiceSuperclass {
               "Wystąpił błąd podczas wysyłania kopii biletów do " + clientEmail));
     }
     return report;
-  }
-
-  private Order findByP24Statement(String p24Statement) {
-    return em.createQuery("from Order where LOWER(p24Statement) = :p24Statement", Order.class)
-        .setParameter("p24Statement", p24Statement.toLowerCase()).getResultStream().findFirst()
-        .orElseThrow(() -> new ResourceNotFoundException());
   }
 
   private EmailSendingReportDTO sendTicketsCopyByExternalAPI(Order order) {

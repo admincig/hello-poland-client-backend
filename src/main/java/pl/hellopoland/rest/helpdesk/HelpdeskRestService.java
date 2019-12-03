@@ -38,9 +38,9 @@ public class HelpdeskRestService {
   }
 
   @GET
-  @Path("/bookings/{p24Statement}/sendTicketCopy")
-  public Response sendTicketCopy(@PathParam("p24Statement") String p24Statement) {
-    service.sendTicketCopy(p24Statement);
+  @Path("/bookings/{hash}/sendTicketCopy")
+  public Response sendTicketCopy(@PathParam("hash") String hash) {
+    service.sendTicketCopy(hash);
     return Response.ok().build();
   }
 
