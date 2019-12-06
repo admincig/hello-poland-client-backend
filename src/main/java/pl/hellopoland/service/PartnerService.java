@@ -130,6 +130,9 @@ public class PartnerService extends ServiceSuperclass {
 
   public Partner createLanguageVersion(MarketPartnerDTO dto, LanguageVersion language) {
     Partner bo = get(dto.id);
+    if (bo.getAddress() == null) {
+      bo.setAddress(new Address());
+    }
     translationService.createEntityLanguageVersion(bo.getAddress(), dto.location, language);
     bo = em.merge(bo);
     return translationService.createEntityLanguageVersion(bo, dto, language);
@@ -137,6 +140,9 @@ public class PartnerService extends ServiceSuperclass {
 
   public Partner createLanguageVersion(PartnerDTO dto, LanguageVersion language) {
     Partner bo = get(dto.id);
+    if (bo.getAddress() == null) {
+      bo.setAddress(new Address());
+    }
     translationService.createEntityLanguageVersion(bo.getAddress(), dto.location, language);
     bo = em.merge(bo);
     return translationService.createEntityLanguageVersion(bo, dto, language);
