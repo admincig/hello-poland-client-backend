@@ -41,7 +41,7 @@ public class AnalyticsService extends ServiceSuperclass {
     final File csvFile = fileDescriptorService.createEmptyFileOnDisc(
         PATH + "orders_" + RandomStringUtils.randomAlphanumeric(10) + ".csv");
     // csv file header:
-    writeCsvRow(csvFile.toPath(), "HASH ZAMÓWIENIA", "DATA ZAMÓWIENIA", "ID PARTNERA HP",
+    writeCsvRow(csvFile.toPath(), "NR ZAMÓWIENIA", "DATA ZAMÓWIENIA", "ID PARTNERA HP",
         "ID PARTNERA P24",
         "NAZWA PARTNERA", "AFILIACJA", "WARTOŚĆ", "PROWIZJA", "WALUTA", "NR TRANSAKCJI P24",
         "TYTUŁ PRZELEWU P24", "NAZWA UŻUTKOWNIKA", "TELEON", "ADRES EMAIL", "PLATFORMA",
