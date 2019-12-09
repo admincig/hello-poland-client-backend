@@ -602,7 +602,9 @@ public class DtoMapper {
     bo.setAffiliateCode(dto.affiliateCode);
     bo.setBankAccount(dto.bankAccount);
     bo.setBlocked(dto.blocked);
-    bo.setBusinessType(BusinessType.getBusinessType(dto.businessType));
+    if (dto.businessType != null) {
+      bo.setBusinessType(BusinessType.getBusinessType(dto.businessType));
+    }
     bo.setCommission(dto.commission);
     // bo.setContactPerson(contactPerson);
     // bo.setCorrespondenceAddress(correspondenceAddress);
