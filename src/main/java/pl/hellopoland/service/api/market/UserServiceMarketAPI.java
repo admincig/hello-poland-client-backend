@@ -20,6 +20,8 @@ public class UserServiceMarketAPI {
 
   @Inject
   UserService service;
+  @Inject
+  MailingListServiceMarketAPI mailingListAPI;
 
   @RolesAllowed("user")
   public UserORO me() {
@@ -35,10 +37,15 @@ public class UserServiceMarketAPI {
       staticLogger.log(Logger.Level.WARNING, "tosAgreement is required");
       throw new ConflictingException("tosAgreement is required");
     }
+    User user = null;
     try {
-      service.create(userDTO.email, userDTO.password, userDTO.tosAgreement);
+      user = service.create(userDTO.email, userDTO.password, userDTO.tosAgreement);
     } catch (EJBTransactionRolledbackException e) {
       staticLogger.log(Logger.Level.WARNING, "User with email already exists:" + userDTO.email);
+    }
+
+    if (userDTO.addToMailingList) {
+      mailingListAPI.addToMailingList(user.getEmail());
     }
   }
 

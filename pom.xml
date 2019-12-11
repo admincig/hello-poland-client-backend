@@ -48,7 +48,7 @@
 		<dependency>
 			<groupId>pl.hellopoland</groupId>
 			<artifactId>hellopoland-dto</artifactId>
-			<version>1.1.10</version>
+			<version>1.1.11</version>
 		</dependency>
 		<dependency>
 			<groupId>pl.fream.commons</groupId>
@@ -93,6 +93,14 @@
 			<artifactId>postgresql</artifactId>
 			<version>42.2.8</version>
 			<scope>runtime</scope>
+		</dependency>
+
+		<!-- send in blue -->
+		<dependency>
+			<groupId>com.sendinblue</groupId>
+			<artifactId>sib-api-v3-sdk</artifactId>
+			<version>3.0.1</version>
+			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 
