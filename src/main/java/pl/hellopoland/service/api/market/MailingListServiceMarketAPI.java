@@ -11,8 +11,9 @@ import pl.hellopoland.service.MailingListService;
 @Stateless
 public class MailingListServiceMarketAPI {
 
-  @Inject
-  Logger logger;
+  private static final Logger logger =
+      System.getLogger(MailingListServiceMarketAPI.class.getName());
+
   @Inject
   MailingListService service;
 
