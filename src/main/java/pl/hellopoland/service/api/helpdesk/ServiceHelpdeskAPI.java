@@ -31,8 +31,8 @@ public class ServiceHelpdeskAPI {
   }
 
   @RolesAllowed("admin")
-  public EmailSendingReportDTO sendTicketCopy(String P24Statement) {
-    return orderService.sendTicketCopy(P24Statement);
+  public EmailSendingReportDTO sendTicketCopy(String hash) {
+    return orderService.sendTicketCopy(hash);
   }
 
   @RolesAllowed("admin")
