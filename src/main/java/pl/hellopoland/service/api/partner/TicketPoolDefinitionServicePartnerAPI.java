@@ -27,4 +27,9 @@ public class TicketPoolDefinitionServicePartnerAPI {
     service.delete(id);
   }
 
+  @RolesAllowed("partner")
+  public TicketPoolDefinitionDTO update(TicketPoolDefinitionDTO dto) {
+    return service.update(dto);
+  }
+
 }

@@ -632,4 +632,23 @@ public class HelloTicket {
     }
   }
 
+  public TicketPoolDefinitionDTO updateTicketPoolDefinition(TicketPoolDefinitionDTO dto,
+      String partnerAuthToken) {
+    try {
+      Jsonb jsonb = JsonbConfig.getInstance();
+      JsonStructure json =
+          put("/v1/ticket-pool-definitions/" + dto.id, jsonb.toJson(dto), partnerAuthToken);
+      return jsonb.fromJson(json.toString(), TicketPoolDefinitionDTO.class);
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      if (e.getMessage() != null && e.getMessage().contains("400")) {
+        throw new BadRequestException("TicketPoolDefinition must have tickets definitions.");
+      }
+      if (e.getMessage() != null && e.getMessage().contains("409")) {
+        throw new ConflictingException("Bad availableTicketsNumber limit combination.");
+      }
+      return null;
+    }
+  }
+
 }
