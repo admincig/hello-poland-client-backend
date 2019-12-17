@@ -11,6 +11,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
 import javax.ws.rs.InternalServerErrorException;
+import javax.ws.rs.NotFoundException;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.User;
@@ -158,6 +159,12 @@ public class UserService extends ServiceSuperclass {
     }
   }
 
+  public User get(Long id) {
+    return em.createQuery("from User where id=:id and deleted=false", User.class)
+        .setParameter("id", id).getResultStream().findFirst()
+        .orElseThrow(() -> new NotFoundException());
+  }
+
   public User findOneUndeletedByEmail(String email) {
     return em.createQuery("from User where lower(email) = :email and deleted=false", User.class)
         .setParameter("email", email.toLowerCase()).getSingleResult();
@@ -184,6 +191,16 @@ public class UserService extends ServiceSuperclass {
     } else {
       throw new ConflictingException("Incorrect old password.");
     }
+  }
+
+  public void updatePasswordForUser(User user, String password) {
+    user.setPassword(passwordEncoder.encode(password));
+    Portal hpt = getPortal("Hello Ticket Cloud");
+    HelloTicket ht = new HelloTicket(hpt.getUrl());
+
+    var dto = new UserAuthDTO();
+    dto.password = password;
+    ht.changePartnerPassword(dto, user.getPartner().getHptToken());
   }
 
   public void changePasswordForUsher(long usherId, UserAuthDTO userAuthDTO) {
