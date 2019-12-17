@@ -200,7 +200,9 @@ public class UserService extends ServiceSuperclass {
 
     var dto = new UserAuthDTO();
     dto.password = password;
-    ht.changePartnerPassword(dto, user.getPartner().getHptToken());
+    if (user.getPartner() != null) {
+      ht.changePartnerPassword(dto, user.getPartner().getHptToken());
+    }
   }
 
   public void changePasswordForUsher(long usherId, UserAuthDTO userAuthDTO) {
