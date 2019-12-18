@@ -91,11 +91,11 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     return hpt.checkAvailableDates(hptId, date, halfYearLater);
   }
 
-  public TicketPoolDefinitionDTO update(TicketPoolDefinitionDTO dto) {
+  public List<TicketPoolDefinitionDTO> update(TicketPoolDefinitionDTO dto) {
     return update(dto, getLoggedPartner());
   }
 
-  private TicketPoolDefinitionDTO update(TicketPoolDefinitionDTO dto, Partner partner) {
+  private List<TicketPoolDefinitionDTO> update(TicketPoolDefinitionDTO dto, Partner partner) {
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     TicketPoolDefinitionDTO tpd = hpt.getTicketPoolDefinition(partner.getHptToken(), dto.id);

@@ -63,4 +63,15 @@ public class TicketDefinitionService extends ServiceSuperclass {
     return hpt.addTicketDefinition(dto, partner.getHptToken());
   }
 
+  public TicketDefinitionDTO update(TicketDefinitionDTO dto, Partner partner) {
+    if (dto.price < 0) {
+      throw new BadRequestException("The ticket price must be greater than 0");
+    }
+    partner = partner == null ? partnerService.findByUserEmail(ctx.getCallerPrincipal().getName())
+        : partner;
+    Portal portal = getPortal("Hello Ticket Cloud");
+    HelloTicket hpt = new HelloTicket(portal.getUrl());
+    return hpt.updateTicketDefinition(dto, partner.getHptToken());
+  }
+
 }
