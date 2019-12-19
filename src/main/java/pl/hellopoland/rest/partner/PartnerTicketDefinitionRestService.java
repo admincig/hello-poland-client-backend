@@ -1,5 +1,6 @@
 package pl.hellopoland.rest.partner;
 
+import java.util.List;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -35,7 +36,7 @@ public class PartnerTicketDefinitionRestService {
 
   @PUT
   @Path("/{id}")
-  public TicketDefinitionDTO update(@PathParam("id") Long id, TicketDefinitionDTO dto) {
+  public List<TicketDefinitionDTO> update(@PathParam("id") Long id, TicketDefinitionDTO dto) {
     dto.id = id;
     return service.update(dto);
   }
