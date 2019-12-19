@@ -31,7 +31,7 @@ public class TicketDefinitionServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
-  public TicketDefinitionDTO update(TicketDefinitionDTO dto) {
+  public List<TicketDefinitionDTO> update(TicketDefinitionDTO dto) {
     return service.update(dto, null);
   }
 

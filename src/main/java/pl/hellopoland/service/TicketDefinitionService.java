@@ -63,7 +63,7 @@ public class TicketDefinitionService extends ServiceSuperclass {
     return hpt.addTicketDefinition(dto, partner.getHptToken());
   }
 
-  public TicketDefinitionDTO update(TicketDefinitionDTO dto, Partner partner) {
+  public List<TicketDefinitionDTO> update(TicketDefinitionDTO dto, Partner partner) {
     if (dto.price < 0) {
       throw new BadRequestException("The ticket price must be greater than 0");
     }
