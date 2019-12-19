@@ -656,13 +656,17 @@ public class HelloTicket {
     }
   }
 
-  public TicketDefinitionDTO updateTicketDefinition(TicketDefinitionDTO dto,
+  private class ListOfTicketDefinitionDTOs extends ArrayList<TicketDefinitionDTO> {
+    private static final long serialVersionUID = 6554050835860859011L;
+  }
+
+  public List<TicketDefinitionDTO> updateTicketDefinition(TicketDefinitionDTO dto,
       String partnerAuthToken) {
     try {
       Jsonb jsonb = JsonbConfig.getInstance();
       JsonStructure json =
           put("/v1/ticket-definitions/" + dto.id, jsonb.toJson(dto), partnerAuthToken);
-      return jsonb.fromJson(json.toString(), TicketDefinitionDTO.class);
+      return jsonb.fromJson(json.toString(), ListOfTicketDefinitionDTOs.class);
     } catch (Exception e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
       if (e.getMessage() != null && e.getMessage().contains("400")) {
