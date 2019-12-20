@@ -360,7 +360,8 @@ public class SightEventService extends ServiceSuperclass {
         List<TicketPoolDefinitionDTO> poolDefinitionsDtos =
             downloadHptTpds(partner, showDeletedTPD);
         List<Long> ticketsExternalIds = poolDefinitionsDtos.stream()
-            .flatMap(p -> p.ticketDefinitions.stream()).map(td -> td.id)
+            .flatMap(p -> p.ticketDefinitions.stream())
+            .map(td -> td.id)
             .collect(toList());
         ticketsGroupedByExternalId.putAll(getTds(ticketsExternalIds));
 
