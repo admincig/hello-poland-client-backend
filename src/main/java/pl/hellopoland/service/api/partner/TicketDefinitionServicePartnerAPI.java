@@ -35,4 +35,9 @@ public class TicketDefinitionServicePartnerAPI {
     return service.update(dto, null);
   }
 
+  @RolesAllowed("partner")
+  public void delete(Long id) {
+    service.delete(id, null);
+  }
+
 }

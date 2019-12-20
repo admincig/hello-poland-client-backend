@@ -74,4 +74,12 @@ public class TicketDefinitionService extends ServiceSuperclass {
     return hpt.updateTicketDefinition(dto, partner.getHptToken());
   }
 
+  public void delete(Long id, Partner partner) {
+    partner = partner == null ? partnerService.findByUserEmail(ctx.getCallerPrincipal().getName())
+        : partner;
+    Portal portal = getPortal("Hello Ticket Cloud");
+    HelloTicket hpt = new HelloTicket(portal.getUrl());
+    hpt.deleteTicketDefinition(partner.getHptToken(), id);
+  }
+
 }

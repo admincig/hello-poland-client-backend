@@ -231,6 +231,15 @@ public class HelloTicket {
     }
   }
 
+  public void deleteTicketDefinition(String hptToken, Long id) {
+    try {
+      delete("/v1/ticket-definitions/" + id, hptToken);
+    } catch (Exception e) {
+      throw new ConflictingException(
+          "Cannot delete TicketDefinition [id=" + id + "] from external system.");
+    }
+  }
+
   public List<TicketDefinitionDTO> getTicketDefinitions(String partnerAuthToken) {
     try {
       final Jsonb jsonb = JsonbConfig.getInstance();
