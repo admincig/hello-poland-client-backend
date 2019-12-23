@@ -641,7 +641,7 @@ public class HelloTicket {
     }
   }
 
-  private class ListOfTicketPoolDefinitionDTOs extends ArrayList<TicketPoolDefinitionDTO> {
+  public static class ListOfTicketPoolDefinitionDTOs extends ArrayList<TicketPoolDefinitionDTO> {
     private static final long serialVersionUID = 6554050835860859011L;
   }
 
@@ -665,7 +665,7 @@ public class HelloTicket {
     }
   }
 
-  private class ListOfTicketDefinitionDTOs extends ArrayList<TicketDefinitionDTO> {
+  public static class ListOfTicketDefinitionDTOs extends ArrayList<TicketDefinitionDTO> {
     private static final long serialVersionUID = 6554050835860859011L;
   }
 
