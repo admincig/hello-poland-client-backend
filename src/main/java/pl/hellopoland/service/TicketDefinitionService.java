@@ -73,27 +73,34 @@ public class TicketDefinitionService extends ServiceSuperclass {
     TicketDefinition td = findByPartner(dto.id, partner);
     td.setName(dto.name);
     td.setPrice(dto.price);
-    
+
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     return hpt.updateTicketDefinition(dto, partner.getHptToken());
   }
 
   private TicketDefinition findByPartner(Long id, Partner partner) {
-	  return em.createQuery("from TicketDefinition where id = :id and sightEvent.partner=:partner", 
-			  TicketDefinition.class)
-			  .setParameter("id", id)
-			  .setParameter("partner", partner)
-			  .getSingleResult();
-}
+    return em.createQuery("from TicketDefinition where id = :id and sightEvent.partner=:partner",
+        TicketDefinition.class)
+        .setParameter("id", id)
+        .setParameter("partner", partner)
+        .getSingleResult();
+  }
 
 
-public void delete(Long id, Partner partner) {
+  public void delete(Long id, Partner partner) {
     partner = partner == null ? partnerService.findByUserEmail(ctx.getCallerPrincipal().getName())
         : partner;
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     hpt.deleteTicketDefinition(partner.getHptToken(), id);
+  }
+
+
+  public TicketDefinitionDTO getTicketDefinitionForLoggedUser(Long id) {
+    Portal portal = getPortal("Hello Ticket Cloud");
+    HelloTicket hpt = new HelloTicket(portal.getUrl());
+    return hpt.getTicketDefinition(id, getLoggedPartner().getHptToken());
   }
 
 }

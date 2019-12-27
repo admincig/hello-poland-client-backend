@@ -40,4 +40,9 @@ public class TicketDefinitionServicePartnerAPI {
     service.delete(id, null);
   }
 
+  @RolesAllowed("partner")
+  public TicketDefinitionDTO get(Long id) {
+    return service.getTicketDefinitionForLoggedUser(id);
+  }
+
 }

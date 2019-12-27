@@ -35,6 +35,12 @@ public class PartnerTicketDefinitionRestService {
     return service.getList();
   }
 
+  @GET
+  @Path("/{id}")
+  public TicketDefinitionDTO get(@PathParam("id") Long id) {
+    return service.get(id);
+  }
+
   @PUT
   @Path("/{id}")
   public List<TicketDefinitionDTO> update(@PathParam("id") Long id, TicketDefinitionDTO dto) {

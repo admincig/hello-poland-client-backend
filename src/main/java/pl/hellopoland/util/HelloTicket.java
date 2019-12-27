@@ -257,6 +257,17 @@ public class HelloTicket {
     }
   }
 
+  public TicketDefinitionDTO getTicketDefinition(Long id, String partnerAuthToken) {
+    try {
+      final Jsonb jsonb = JsonbConfig.getInstance();
+      JsonStructure json = get("/v1/ticket-definitions/" + id, partnerAuthToken);
+      return jsonb.fromJson(json.toString(), TicketDefinitionDTO.class);
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      return null;
+    }
+  }
+
   public AvailableTicketNumberAssociationDTO checkAvailabilityOfTicketsForSightEvent(
       SightEvent sightEvent, Date fromDate, Date toDate) {
     if (fromDate == null) {
