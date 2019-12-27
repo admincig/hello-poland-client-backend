@@ -14,6 +14,15 @@ import pl.hellopoland.exception.notfound.AccessDeniedException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.util.HelloTicket;
 
+/**
+ * <h3>Klasa wymaga refactoru:</h3>
+ * <ul>
+ * <li>nazwa klasy
+ * <li>ograniczenie liczby odpowiedzialności
+ * <li>metody korzystają z getLoggedUsera
+ * <li>odhardkodować łączności do HPT
+ * </ul>
+ */
 @Stateless
 public class TicketPoolDefinitionService extends ServiceSuperclass {
 
@@ -103,6 +112,12 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
       throw new AccessDeniedException();
     }
     return hpt.updateTicketPoolDefinition(dto, partner.getHptToken());
+  }
+
+  public List<TicketPoolDefinitionDTO> list() {
+    Portal portal = getPortal("Hello Ticket Cloud");
+    HelloTicket hpt = new HelloTicket(portal.getUrl());
+    return hpt.getTicketPoolDefinitions(getLoggedPartner().getHptToken());
   }
 
 }

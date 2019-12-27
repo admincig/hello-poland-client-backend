@@ -24,6 +24,11 @@ public class PartnerTicketPoolDefinitionRestService {
   @Inject
   TicketPoolDefinitionServicePartnerAPI service;
 
+  @GET
+  public List<TicketPoolDefinitionDTO> list() {
+    return service.list();
+  }
+
   @POST
   public TicketPoolDefinitionDTO add(TicketPoolDefinitionDTO dto) {
     return service.add(dto);
