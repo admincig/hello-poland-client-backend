@@ -74,6 +74,7 @@ public class TicketDefinitionService extends ServiceSuperclass {
     td.setName(dto.name);
     td.setPrice(dto.price);
 
+    dto.id = td.getExternalId();
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     return hpt.updateTicketDefinition(dto, partner.getHptToken());
