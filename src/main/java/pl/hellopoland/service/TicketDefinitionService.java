@@ -46,6 +46,16 @@ public class TicketDefinitionService extends ServiceSuperclass {
         .setParameter("ids", externalIds).getResultList();
   }
 
+  private TicketDefinition findByExternalIdAndPartner(Long externalId, Partner partner) {
+    return em
+        .createQuery(
+            "from TicketDefinition where externalId = :externalId and sightEvent.partner=:partner",
+            TicketDefinition.class)
+        .setParameter("externalId", externalId)
+        .setParameter("partner", partner)
+        .getSingleResult();
+  }
+
   public List<TicketDefinitionDTO> getTicketDefinitionsForLoggedUser() {
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
@@ -70,24 +80,13 @@ public class TicketDefinitionService extends ServiceSuperclass {
     partner = partner == null ? partnerService.findByUserEmail(ctx.getCallerPrincipal().getName())
         : partner;
 
-    TicketDefinition td = findByPartner(dto.id, partner);
+    TicketDefinition td = findByExternalIdAndPartner(dto.id, partner);
     td.setName(dto.name);
     td.setPrice(dto.price);
-
-    dto.id = td.getExternalId();
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     return hpt.updateTicketDefinition(dto, partner.getHptToken());
   }
-
-  private TicketDefinition findByPartner(Long id, Partner partner) {
-    return em.createQuery("from TicketDefinition where id = :id and sightEvent.partner=:partner",
-        TicketDefinition.class)
-        .setParameter("id", id)
-        .setParameter("partner", partner)
-        .getSingleResult();
-  }
-
 
   public void delete(Long id, Partner partner) {
     partner = partner == null ? partnerService.findByUserEmail(ctx.getCallerPrincipal().getName())
@@ -96,7 +95,6 @@ public class TicketDefinitionService extends ServiceSuperclass {
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     hpt.deleteTicketDefinition(partner.getHptToken(), id);
   }
-
 
   public TicketDefinitionDTO getTicketDefinitionForLoggedUser(Long id) {
     Portal portal = getPortal("Hello Ticket Cloud");
