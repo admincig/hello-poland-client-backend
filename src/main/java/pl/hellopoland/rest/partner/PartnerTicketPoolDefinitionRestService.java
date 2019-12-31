@@ -1,11 +1,13 @@
 package pl.hellopoland.rest.partner;
 
+import java.util.List;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -22,9 +24,22 @@ public class PartnerTicketPoolDefinitionRestService {
   @Inject
   TicketPoolDefinitionServicePartnerAPI service;
 
+  @GET
+  public List<TicketPoolDefinitionDTO> list() {
+    return service.list();
+  }
+
   @POST
   public TicketPoolDefinitionDTO add(TicketPoolDefinitionDTO dto) {
     return service.add(dto);
+  }
+
+  @PUT
+  @Path("/{id}")
+  public List<TicketPoolDefinitionDTO> update(@PathParam("id") Long id,
+      TicketPoolDefinitionDTO dto) {
+    dto.id = id;
+    return service.update(dto);
   }
 
   @GET

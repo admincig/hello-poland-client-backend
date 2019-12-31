@@ -360,7 +360,8 @@ public class SightEventService extends ServiceSuperclass {
         List<TicketPoolDefinitionDTO> poolDefinitionsDtos =
             downloadHptTpds(partner, showDeletedTPD);
         List<Long> ticketsExternalIds = poolDefinitionsDtos.stream()
-            .flatMap(p -> p.ticketDefinitions.stream()).map(td -> td.id)
+            .flatMap(p -> p.ticketDefinitions.stream())
+            .map(td -> td.id)
             .collect(toList());
         ticketsGroupedByExternalId.putAll(getTds(ticketsExternalIds));
 
@@ -381,7 +382,6 @@ public class SightEventService extends ServiceSuperclass {
             poolDef.sightEventId = sightEventDto.id;
             for (var t : poolDef.ticketDefinitions) {
               t.id = ticketsGroupedByExternalId.get(t.id).stream()
-                  .filter(tBo -> tBo.getPoolId().equals(poolDef.id))
                   .findFirst()
                   .get()
                   .getId();
@@ -408,11 +408,13 @@ public class SightEventService extends ServiceSuperclass {
     Stream<TicketPoolDefinitionDTO> poolDefinitions =
         hpt.getTicketPoolDefinitions(partner.getHptToken()).stream();
     if (!showDeletedAndOverdued) {
-      poolDefinitions = poolDefinitions.filter(tpd -> !tpd.deleted).filter(tpd -> {
-        return !tpd.isCyclic
-            || tpd.frequencyData.endDate == null
-            || tpd.frequencyData.endDate.after(new Date());
-      });
+      poolDefinitions = poolDefinitions
+          .filter(tpd -> !tpd.deleted)
+          .filter(tpd -> {
+            return !tpd.isCyclic
+                || tpd.frequencyData.endDate == null
+                || tpd.frequencyData.endDate.after(new Date());
+          });
     }
     return poolDefinitions.collect(toList());
   }
@@ -451,6 +453,7 @@ public class SightEventService extends ServiceSuperclass {
     return grouped;
   }
 
+  @SuppressWarnings("deprecation")
   public AvailableTicketNumberAssociationDTO checkAvailability(Long sightEventId, Date fromDate,
       Date toDate) {
     HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());

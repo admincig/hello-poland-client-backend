@@ -30,4 +30,19 @@ public class TicketDefinitionServicePartnerAPI {
     return new PagedCollection(service.getTicketDefinitionsForLoggedUser(), null);
   }
 
+  @RolesAllowed("partner")
+  public List<TicketDefinitionDTO> update(TicketDefinitionDTO dto) {
+    return service.update(dto, null);
+  }
+
+  @RolesAllowed("partner")
+  public void delete(Long id) {
+    service.delete(id, null);
+  }
+
+  @RolesAllowed("partner")
+  public TicketDefinitionDTO get(Long id) {
+    return service.getTicketDefinitionForLoggedUser(id);
+  }
+
 }

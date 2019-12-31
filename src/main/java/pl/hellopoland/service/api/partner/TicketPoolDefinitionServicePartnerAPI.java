@@ -1,5 +1,6 @@
 package pl.hellopoland.service.api.partner;
 
+import java.util.List;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -25,6 +26,16 @@ public class TicketPoolDefinitionServicePartnerAPI {
   @RolesAllowed("partner")
   public void delete(Long id) {
     service.delete(id);
+  }
+
+  @RolesAllowed("partner")
+  public List<TicketPoolDefinitionDTO> update(TicketPoolDefinitionDTO dto) {
+    return service.update(dto);
+  }
+
+  @RolesAllowed("partner")
+  public List<TicketPoolDefinitionDTO> list() {
+    return service.list();
   }
 
 }

@@ -231,6 +231,15 @@ public class HelloTicket {
     }
   }
 
+  public void deleteTicketDefinition(String hptToken, Long id) {
+    try {
+      delete("/v1/ticket-definitions/" + id, hptToken);
+    } catch (Exception e) {
+      throw new ConflictingException(
+          "Cannot delete TicketDefinition [id=" + id + "] from external system.");
+    }
+  }
+
   public List<TicketDefinitionDTO> getTicketDefinitions(String partnerAuthToken) {
     try {
       final Jsonb jsonb = JsonbConfig.getInstance();
@@ -242,6 +251,17 @@ public class HelloTicket {
         dtos.add(dto);
       });
       return dtos;
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      return null;
+    }
+  }
+
+  public TicketDefinitionDTO getTicketDefinition(Long id, String partnerAuthToken) {
+    try {
+      final Jsonb jsonb = JsonbConfig.getInstance();
+      JsonStructure json = get("/v1/ticket-definitions/" + id, partnerAuthToken);
+      return jsonb.fromJson(json.toString(), TicketDefinitionDTO.class);
     } catch (Exception e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
       return null;
@@ -629,6 +649,53 @@ public class HelloTicket {
     } catch (JsonbException | IOException e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
       throw new ConflictingException(e.getLocalizedMessage());
+    }
+  }
+
+  public static class ListOfTicketPoolDefinitionDTOs extends ArrayList<TicketPoolDefinitionDTO> {
+    private static final long serialVersionUID = 6554050835860859011L;
+  }
+
+  public List<TicketPoolDefinitionDTO> updateTicketPoolDefinition(TicketPoolDefinitionDTO dto,
+      String partnerAuthToken) {
+    try {
+      Jsonb jsonb = JsonbConfig.getInstance();
+      JsonStructure json =
+          put("/v1/ticket-pool-definitions/" + dto.id, jsonb.toJson(dto), partnerAuthToken);
+
+      return jsonb.fromJson(json.toString(), ListOfTicketPoolDefinitionDTOs.class);
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      if (e.getMessage() != null && e.getMessage().contains("400")) {
+        throw new BadRequestException("TicketPoolDefinition must have tickets definitions.");
+      }
+      if (e.getMessage() != null && e.getMessage().contains("409")) {
+        throw new ConflictingException("Bad availableTicketsNumber limit combination.");
+      }
+      return null;
+    }
+  }
+
+  public static class ListOfTicketDefinitionDTOs extends ArrayList<TicketDefinitionDTO> {
+    private static final long serialVersionUID = 6554050835860859011L;
+  }
+
+  public List<TicketDefinitionDTO> updateTicketDefinition(TicketDefinitionDTO dto,
+      String partnerAuthToken) {
+    try {
+      Jsonb jsonb = JsonbConfig.getInstance();
+      JsonStructure json =
+          put("/v1/ticket-definitions/" + dto.id, jsonb.toJson(dto), partnerAuthToken);
+      return jsonb.fromJson(json.toString(), ListOfTicketDefinitionDTOs.class);
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      if (e.getMessage() != null && e.getMessage().contains("400")) {
+        throw new BadRequestException("TicketPoolDefinition must have tickets definitions.");
+      }
+      if (e.getMessage() != null && e.getMessage().contains("409")) {
+        throw new ConflictingException("Bad availableTicketsNumber limit combination.");
+      }
+      return null;
     }
   }
 

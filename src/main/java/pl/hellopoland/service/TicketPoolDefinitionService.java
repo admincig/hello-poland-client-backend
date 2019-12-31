@@ -14,6 +14,15 @@ import pl.hellopoland.exception.notfound.AccessDeniedException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.util.HelloTicket;
 
+/**
+ * <h3>Klasa wymaga refactoru:</h3>
+ * <ul>
+ * <li>nazwa klasy
+ * <li>ograniczenie liczby odpowiedzialności
+ * <li>metody korzystają z getLoggedUsera
+ * <li>odhardkodować łączności do HPT
+ * </ul>
+ */
 @Stateless
 public class TicketPoolDefinitionService extends ServiceSuperclass {
 
@@ -89,6 +98,26 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
   public List<LocalDate> getStartDates(Long hptId, LocalDate date, LocalDate halfYearLater) {
     HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
     return hpt.checkAvailableDates(hptId, date, halfYearLater);
+  }
+
+  public List<TicketPoolDefinitionDTO> update(TicketPoolDefinitionDTO dto) {
+    return update(dto, getLoggedPartner());
+  }
+
+  private List<TicketPoolDefinitionDTO> update(TicketPoolDefinitionDTO dto, Partner partner) {
+    Portal portal = getPortal("Hello Ticket Cloud");
+    HelloTicket hpt = new HelloTicket(portal.getUrl());
+    TicketPoolDefinitionDTO tpd = hpt.getTicketPoolDefinition(partner.getHptToken(), dto.id);
+    if (tpd == null) {
+      throw new AccessDeniedException();
+    }
+    return hpt.updateTicketPoolDefinition(dto, partner.getHptToken());
+  }
+
+  public List<TicketPoolDefinitionDTO> list() {
+    Portal portal = getPortal("Hello Ticket Cloud");
+    HelloTicket hpt = new HelloTicket(portal.getUrl());
+    return hpt.getTicketPoolDefinitions(getLoggedPartner().getHptToken());
   }
 
 }

@@ -46,6 +46,16 @@ public class TicketDefinitionService extends ServiceSuperclass {
         .setParameter("ids", externalIds).getResultList();
   }
 
+  private TicketDefinition findByExternalIdAndPartner(Long externalId, Partner partner) {
+    return em
+        .createQuery(
+            "from TicketDefinition where externalId = :externalId and sightEvent.partner=:partner",
+            TicketDefinition.class)
+        .setParameter("externalId", externalId)
+        .setParameter("partner", partner)
+        .getSingleResult();
+  }
+
   public List<TicketDefinitionDTO> getTicketDefinitionsForLoggedUser() {
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
@@ -61,6 +71,35 @@ public class TicketDefinitionService extends ServiceSuperclass {
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     return hpt.addTicketDefinition(dto, partner.getHptToken());
+  }
+
+  public List<TicketDefinitionDTO> update(TicketDefinitionDTO dto, Partner partner) {
+    if (dto.price < 0) {
+      throw new BadRequestException("The ticket price must be greater than 0");
+    }
+    partner = partner == null ? partnerService.findByUserEmail(ctx.getCallerPrincipal().getName())
+        : partner;
+
+    TicketDefinition td = findByExternalIdAndPartner(dto.id, partner);
+    td.setName(dto.name);
+    td.setPrice(dto.price);
+    Portal portal = getPortal("Hello Ticket Cloud");
+    HelloTicket hpt = new HelloTicket(portal.getUrl());
+    return hpt.updateTicketDefinition(dto, partner.getHptToken());
+  }
+
+  public void delete(Long id, Partner partner) {
+    partner = partner == null ? partnerService.findByUserEmail(ctx.getCallerPrincipal().getName())
+        : partner;
+    Portal portal = getPortal("Hello Ticket Cloud");
+    HelloTicket hpt = new HelloTicket(portal.getUrl());
+    hpt.deleteTicketDefinition(partner.getHptToken(), id);
+  }
+
+  public TicketDefinitionDTO getTicketDefinitionForLoggedUser(Long id) {
+    Portal portal = getPortal("Hello Ticket Cloud");
+    HelloTicket hpt = new HelloTicket(portal.getUrl());
+    return hpt.getTicketDefinition(id, getLoggedPartner().getHptToken());
   }
 
 }
