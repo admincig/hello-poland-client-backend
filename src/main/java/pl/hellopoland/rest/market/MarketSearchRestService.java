@@ -50,7 +50,8 @@ public class MarketSearchRestService {
 
   @GET
   @Path("/filters")
-  public FilterDTO filters() {
-    return service.filters();
+  public FilterDTO filters(
+      @HeaderParam("Content-Language") String contentLanguage) {
+    return service.filters(RestService.parseLang(contentLanguage));
   }
 }
