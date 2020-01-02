@@ -72,7 +72,7 @@ public class RestService {
 
   public static LanguageVersion parseLang(String contentLanguage) {
     if (StringUtils.isBlank(contentLanguage)) {
-      throw new ConflictingException("Language is required");
+      return LanguageVersion.PL_PL;
     }
     return Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(contentLanguage))
         .orElseThrow(() -> new ConflictingException("Unsupported language: " + contentLanguage));
