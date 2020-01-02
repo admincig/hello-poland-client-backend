@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -150,14 +151,17 @@ public class SearchServiceMarketAPI {
   }
 
   @PermitAll
-  public FilterDTO filters() {
+  public FilterDTO filters(LanguageVersion languageVersion) {
     FilterDTO filter = new FilterDTO();
     filter.prices = predefinedPriceFilters;
     filter.city = seService.getCitiesForPublicEvents();
-    filter.categories = catService.pagedList(new CategoryPagedCollectionConfig()).items.stream()
-        .map(DtoMapper::getDTO).collect(toList());
-    filter.tags = tagService.pagedList(new TagPagedCollectionConfig()).items.stream()
-        .map(DtoMapper::getDTO).collect(toList());
+    Collection<Category> categories =
+        catService.pagedList(new CategoryPagedCollectionConfig()).items;
+    categories = tService.translateEntities(categories, languageVersion);
+    filter.categories = categories.stream().map(DtoMapper::getDTO).collect(toList());
+    Collection<Tag> tags = tagService.pagedList(new TagPagedCollectionConfig()).items;
+    tags = tService.translateEntities(tags, languageVersion);
+    filter.tags = tags.stream().map(DtoMapper::getDTO).collect(toList());
     return filter;
   }
 
