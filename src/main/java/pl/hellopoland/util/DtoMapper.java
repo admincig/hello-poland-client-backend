@@ -127,11 +127,15 @@ public class DtoMapper {
     SightDTO dto = getDTO(bo);
     dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
         .map(lang -> lang.getLanuage()).collect(Collectors.toSet());
+    dto.images = new ArrayList<>();
+    if (dto.mainImage != null) {
+      dto.images.add(dto.mainImage);
+    }
+    if (bo.getImages() != null) {
+      dto.images.addAll(bo.getImages().stream().map(DtoMapper::getDTO).collect(toList()));
+    }
     if (bo.getSightEvents() != null) {
       dto.sightEvents = bo.getSightEvents().stream().map(DtoMapper::getFullDTO).collect(toList());
-    }
-    if (bo.getImages() != null && !bo.getImages().isEmpty()) {
-      dto.images = bo.getImages().stream().map(DtoMapper::getDTO).collect(toList());
     }
     if (bo.getOpeningHours() != null && !bo.getOpeningHours().isEmpty()) {
       dto.openingHours = bo.getOpeningHours().stream().map(DtoMapper::getDTO).collect(toList());
@@ -183,12 +187,13 @@ public class DtoMapper {
     SightEventDTO dto = getDTO(bo);
     dto.availableLanguageVersions = bo.getAvailableLanguageVersions().stream()
         .map(lang -> lang.getLanuage()).collect(Collectors.toSet());
-    if (bo.getImages() != null && !bo.getImages().isEmpty()) {
-      dto.images = bo.getImages().stream().map(DtoMapper::getDTO).collect(toList());
+    dto.images = new ArrayList<>();
+    if (dto.mainImage != null) {
+      dto.images.add(dto.mainImage);
     }
-    // if (bo.getTickets() != null && !bo.getTickets().isEmpty()) {
-    // dto.ticketDefinitions = bo.getTickets().stream().map(DtoMapper::getDTO).collect(toList());
-    // }
+    if (bo.getImages() != null) {
+      dto.images.addAll(bo.getImages().stream().map(DtoMapper::getDTO).collect(toList()));
+    }
     if (bo.getOpeningHours() != null && !bo.getOpeningHours().isEmpty()) {
       dto.openingHours = bo.getOpeningHours().stream().map(DtoMapper::getDTO)
           .collect(toList());
