@@ -4,8 +4,6 @@ package pl.hellopoland.security.password;
 import java.security.SecureRandom;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 
 /**
  * Implementation of PasswordEncoder that uses the BCrypt strong hashing function. Clients can
@@ -47,7 +45,7 @@ public class PasswordEncoder {
     this.random = random;
   }
 
-  public String encode(@NotNull @Min(3) CharSequence rawPassword) {
+  public String encode(CharSequence rawPassword) {
     String salt;
     if (strength > 0) {
       if (random != null) {
