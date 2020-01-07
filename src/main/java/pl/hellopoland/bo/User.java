@@ -67,7 +67,7 @@ public class User extends ModelSuperclass {
   }
 
   public void changePassword(String password) {
-    if (password == null || password.length() < 5) {
+    if (password == null || password.length() < 3) {
       throw new ConflictingException("New password cannot be empty or have less than 3 characters");
     }
     this.password = new PasswordEncoder().encode(password);
