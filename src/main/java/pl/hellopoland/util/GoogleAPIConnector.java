@@ -2,6 +2,7 @@ package pl.hellopoland.util;
 
 import java.lang.System.Logger;
 import java.util.List;
+import org.apache.commons.lang3.RandomStringUtils;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -42,7 +43,7 @@ public class GoogleAPIConnector {
       String lastName = (String) payload.get("family_name");
       user.setDetails(new UserDetails(firstName, lastName));
       user.setPicture((String) payload.get("picture"));
-      user.setPassword("");
+      user.changePassword(RandomStringUtils.randomAlphanumeric(10));
 
 
 

@@ -15,6 +15,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
+import pl.hellopoland.exception.conflict.ConflictingException;
+import pl.hellopoland.security.password.PasswordEncoder;
 
 @Entity
 @Table(name = "users",
@@ -64,8 +66,11 @@ public class User extends ModelSuperclass {
     return password;
   }
 
-  public void setPassword(String password) {
-    this.password = password;
+  public void changePassword(String password) {
+    if (password == null || password.length() < 5) {
+      throw new ConflictingException("New password cannot be empty or have less than 3 characters");
+    }
+    this.password = new PasswordEncoder().encode(password);
   }
 
   public String getPicture() {
