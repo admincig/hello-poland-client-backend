@@ -48,10 +48,6 @@ public class PasswordEncoder {
   }
 
   public String encode(@NotNull @Min(3) CharSequence rawPassword) {
-    // if (rawPassword == null || rawPassword.length() < 5) {
-    // throw new ConflictingException("New password cannot be empty or have less than 5
-    // characters");
-    // }
     String salt;
     if (strength > 0) {
       if (random != null) {
