@@ -236,7 +236,7 @@ public class HelloTicket {
       delete("/v1/ticket-definitions/" + id, hptToken);
     } catch (Exception e) {
       throw new ConflictingException(
-          "Cannot delete TicketDefinition [id=" + id + "] from external system.", e);
+          "Błąd usuwania TicketDefintion: " + e.getMessage(), e);
     }
   }
 

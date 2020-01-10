@@ -84,17 +84,15 @@ public class TicketDefinitionService extends ServiceSuperclass {
   }
 
   public void delete(Long id, Partner partner) {
-    TicketDefinition td = findByExternalIdAndPartner(id, partner);
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
-    hpt.deleteTicketDefinition(partner.getHptToken(), td.getExternalId());
+    hpt.deleteTicketDefinition(partner.getHptToken(), id);
   }
 
   public TicketDefinitionDTO getTicketDefinition(Long id, Partner partner) {
-    TicketDefinition td = findByExternalIdAndPartner(id, partner);
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
-    return hpt.getTicketDefinition(td.getExternalId(), partner.getHptToken());
+    return hpt.getTicketDefinition(id, partner.getHptToken());
   }
 
 }
