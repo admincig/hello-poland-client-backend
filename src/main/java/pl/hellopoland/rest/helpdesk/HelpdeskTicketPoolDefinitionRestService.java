@@ -12,7 +12,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
-import pl.hellopoland.service.api.partner.TicketPoolDefinitionServicePartnerAPI;
+import pl.hellopoland.service.api.helpdesk.TicketPoolDefinitionServiceHelpdeskAPI;
 
 @Path("/helpdesk/ticket-pool-definitions")
 @RequestScoped
@@ -21,7 +21,7 @@ import pl.hellopoland.service.api.partner.TicketPoolDefinitionServicePartnerAPI;
 public class HelpdeskTicketPoolDefinitionRestService {
 
   @Inject
-  TicketPoolDefinitionServicePartnerAPI service;
+  TicketPoolDefinitionServiceHelpdeskAPI service;
 
   @GET
   public List<TicketPoolDefinitionDTO> list() {

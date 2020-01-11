@@ -13,7 +13,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.rest.dto.PagedCollection;
-import pl.hellopoland.service.api.partner.TicketDefinitionServicePartnerAPI;
+import pl.hellopoland.service.api.helpdesk.TicketDefinitionServiceHelpdeskAPI;
 
 @Path("/helpdesk/ticket-definitions")
 @RequestScoped
@@ -22,7 +22,7 @@ import pl.hellopoland.service.api.partner.TicketDefinitionServicePartnerAPI;
 public class HelpdeskTicketDefinitionRestService {
 
   @Inject
-  TicketDefinitionServicePartnerAPI service;
+  TicketDefinitionServiceHelpdeskAPI service;
 
   @GET
   public PagedCollection ticketDefinitions() {
