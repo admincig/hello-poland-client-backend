@@ -35,7 +35,6 @@ import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.SightEventCategory;
 import pl.hellopoland.bo.SightEventTag;
-import pl.hellopoland.bo.TicketDefinition;
 import pl.hellopoland.bo.Translation;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.AvailableTicketNumberAssociationDTO;
@@ -352,54 +351,41 @@ public class SightEventService extends ServiceSuperclass {
   public void fetchTicketPoolDefinitions(Collection<SightEvent> bos,
       List<SightEventDTO> dtos, boolean showDeletedTPD) {
     if (hasAnyHptCloudEvent(bos)) {
-      Map<Partner, List<Pair<Long, SightEventDTO>>> sightEventsWithHptIdsGroupedByPartner =
-          groupDtosWithHptIdByPartner(bos, dtos);
-      Map<Long, List<TicketDefinition>> ticketsGroupedByExternalId = new HashMap<>();
-      for (var entry : sightEventsWithHptIdsGroupedByPartner.entrySet()) {
-        Partner partner = entry.getKey();
-        List<TicketPoolDefinitionDTO> poolDefinitionsDtos =
-            downloadHptTpds(partner, showDeletedTPD);
-        List<Long> ticketsExternalIds = poolDefinitionsDtos.stream()
-            .flatMap(p -> p.ticketDefinitions.stream())
-            .map(td -> td.id)
-            .collect(toList());
-        ticketsGroupedByExternalId.putAll(getTds(ticketsExternalIds));
 
-        Map<Long, List<TicketPoolDefinitionDTO>> poolDefinitionsGroupedBySightEventId =
-            poolDefinitionsDtos.stream()
-                .collect(groupingBy(pool -> pool.sightEventId));
-        // assign tpds to sightevents
-        for (Pair<Long, SightEventDTO> pair : entry.getValue()) {
-          pair.getRight().ticketPoolDefinitions =
-              poolDefinitionsGroupedBySightEventId.get(pair.getLeft());
+      var partnersToSightEventsWithHptId = groupDtosWithHptIdByPartner(bos, dtos);
+
+      for (var partnerToSightEventsWithHptId : partnersToSightEventsWithHptId.entrySet()) {
+        Partner partner = partnerToSightEventsWithHptId.getKey();
+        List<TicketPoolDefinitionDTO> tpds = downloadHptTpds(partner, showDeletedTPD);
+        var tpdsGroupedBySightEventId = tpds.stream()
+            .collect(groupingBy(pool -> pool.sightEventId));
+
+        for (var hptIdToSightEvent : partnerToSightEventsWithHptId.getValue()) {
+          hptIdToSightEvent.getRight().ticketPoolDefinitions =
+              tpdsGroupedBySightEventId.get(hptIdToSightEvent.getLeft());
         }
       }
 
       for (var sightEventDto : dtos) {
-        if (sightEventDto.ticketPoolDefinitions != null) {
-          int minPrice = Integer.MAX_VALUE;
-          for (var poolDef : sightEventDto.ticketPoolDefinitions) {
-            poolDef.sightEventId = sightEventDto.id;
-            for (var t : poolDef.ticketDefinitions) {
-              t.id = ticketsGroupedByExternalId.get(t.id).stream()
-                  .findFirst()
-                  .get()
-                  .getId();
-              minPrice = Math.min(minPrice, t.price);
-            }
-          }
-          sightEventDto.minPrice = minPrice;
-        }
+        sightEventDto.minPrice = findMinPrice(sightEventDto);
       }
     } else {
       // TODO other portals
     }
   }
 
-  private Map<Long, List<TicketDefinition>> getTds(List<Long> ids) {
-    Stream<TicketDefinition> ticketBos =
-        ticketService.getTicketsByExternalIds(ids).stream();
-    return ticketBos.collect(groupingBy(TicketDefinition::getExternalId));
+  private Integer findMinPrice(SightEventDTO sightEventDto) {
+    Integer minPrice = null;
+    if (sightEventDto.ticketPoolDefinitions != null) {
+      minPrice = Integer.MAX_VALUE;
+      for (var poolDef : sightEventDto.ticketPoolDefinitions) {
+        poolDef.sightEventId = sightEventDto.id;
+        for (var t : poolDef.ticketDefinitions) {
+          minPrice = Math.min(minPrice, t.price);
+        }
+      }
+    }
+    return minPrice;
   }
 
   private List<TicketPoolDefinitionDTO> downloadHptTpds(Partner partner,
