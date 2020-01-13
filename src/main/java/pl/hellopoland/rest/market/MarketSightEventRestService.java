@@ -63,20 +63,6 @@ public class MarketSightEventRestService {
     return service.getPromoted(config, RestService.parseLang(contentLanguage));
   }
 
-  @GET
-  @Path("/search")
-  public PagedCollection search(@QueryParam("searchQuery") String searchQuery,
-      @QueryParam("city") String city, @QueryParam("fromDate") @DateFormat Date fromDate,
-      @QueryParam("toDate") @DateFormat Date toDate,
-      @HeaderParam("Accept-Language") String acceptLanguage,
-      @HeaderParam("Content-Language") String contentLanguage) {
-    var config = new SightEventPagedCollectionConfig();
-    config.setSearchQuery(searchQuery);
-    config.setCity(city);
-    return service.getList(config, fromDate, toDate,
-        contentLanguage != null ? contentLanguage : acceptLanguage);
-  }
-
   @POST
   @Path("/search")
   public PagedCollection search(SightEventPagedCollectionConfig config,

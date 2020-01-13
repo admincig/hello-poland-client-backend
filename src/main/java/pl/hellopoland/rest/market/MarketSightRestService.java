@@ -78,19 +78,6 @@ public class MarketSightRestService {
     return service.favourites(config, contentLanguage != null ? contentLanguage : acceptLanguage);
   }
 
-  @GET
-  @Path("/search")
-  public PagedCollection search(@QueryParam("searchQuery") String searchQuery,
-      @QueryParam("city") String city, @HeaderParam("Accept-Language") String acceptLanguage,
-      @HeaderParam("Content-Language") String contentLanguage) {
-    var config = new SightPagedCollectionConfig();
-    config.onlyActive();
-    config.onlyPublished();
-    config.setSearchQuery(searchQuery);
-    config.setCity(city);
-    return service.getList(config, contentLanguage != null ? contentLanguage : acceptLanguage);
-  }
-
   @POST
   @Path("/search")
   public PagedCollection search(SightPagedCollectionConfig config, @QueryParam("city") String city,
