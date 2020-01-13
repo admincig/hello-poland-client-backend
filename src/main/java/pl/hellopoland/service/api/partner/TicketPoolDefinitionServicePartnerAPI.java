@@ -33,9 +33,4 @@ public class TicketPoolDefinitionServicePartnerAPI {
     return service.update(dto);
   }
 
-  @RolesAllowed("partner")
-  public List<TicketPoolDefinitionDTO> list() {
-    return service.list();
-  }
-
 }
