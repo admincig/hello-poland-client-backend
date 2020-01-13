@@ -16,29 +16,29 @@ public class TicketDefinitionServiceHelpdeskAPI {
   TicketDefinitionService service;
 
   @RolesAllowed("admin")
-  public List<TicketDefinitionDTO> getTicketDefinitionsForLoggedUser() {
-    return service.getTicketDefinitions(service.getLoggedPartner());
+  public List<TicketDefinitionDTO> getTicketDefinitions() {
+    return service.getTicketDefinitions(service.getLoggedUser());
   }
 
   @RolesAllowed("admin")
   public PagedCollection getList() {
-    return new PagedCollection(getTicketDefinitionsForLoggedUser(), null);
+    return new PagedCollection(getTicketDefinitions(), null);
   }
 
   @RolesAllowed("admin")
   public List<TicketDefinitionDTO> update(TicketDefinitionDTO dto) {
     TicketDefinition td = service.findByExternalId(dto.id);
-    return service.update(td, dto, service.getLoggedPartner());
+    return service.update(td, dto, service.getLoggedUser());
   }
 
   @RolesAllowed("admin")
   public void delete(Long id) {
-    service.delete(id, service.getLoggedPartner());
+    service.delete(id, service.getLoggedUser());
   }
 
   @RolesAllowed("admin")
   public TicketDefinitionDTO get(Long id) {
-    return service.getTicketDefinition(id, service.getLoggedPartner());
+    return service.getTicketDefinition(id, service.getLoggedUser());
   }
 
 }

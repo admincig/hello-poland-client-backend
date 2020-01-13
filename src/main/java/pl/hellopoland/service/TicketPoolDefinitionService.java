@@ -52,7 +52,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     dto.sightEventId = sightEventId;
     if (dto.ticketDefinitions != null) {
       dto.ticketDefinitions.forEach(td -> {
-        TicketDefinition tBo = ticketService.create(td, sightEventId, partner);
+        TicketDefinition tBo = ticketService.create(td, sightEventId);
         td.id = tBo.getId();
       });
     }

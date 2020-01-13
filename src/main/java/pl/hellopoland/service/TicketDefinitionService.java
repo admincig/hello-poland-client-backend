@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import pl.hellopoland.bo.HptSubject;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.SightEvent;
@@ -21,12 +22,9 @@ public class TicketDefinitionService extends ServiceSuperclass {
   @Inject
   SightEventService sightEventService;
 
-  public TicketDefinition create(TicketDefinitionDTO dto, Long sightEventId, Partner partner) {
+  public TicketDefinition create(TicketDefinitionDTO dto, Long sightEventId) {
     if (dto.price < 0) {
       throw new BadRequestException("The ticket price must be greater than 0");
-    }
-    if (partner == null) {
-      partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
     }
     TicketDefinition bo = new TicketDefinition();
     DtoMapper.copy(dto, bo);
@@ -65,23 +63,23 @@ public class TicketDefinitionService extends ServiceSuperclass {
         .getSingleResult();
   }
 
-  public List<TicketDefinitionDTO> getTicketDefinitions(Partner partner) {
+  public List<TicketDefinitionDTO> getTicketDefinitions(HptSubject hptSubject) {
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
-    return hpt.getTicketDefinitions(partner.getHptToken());
+    return hpt.getTicketDefinitions(hptSubject.getHptToken());
   }
 
-  public TicketDefinitionDTO add(TicketDefinitionDTO dto, Partner partner) {
+  public TicketDefinitionDTO add(TicketDefinitionDTO dto, HptSubject hptSubject) {
     if (dto.price < 0) {
       throw new BadRequestException("The ticket price must be greater than 0");
     }
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
-    return hpt.addTicketDefinition(dto, partner.getHptToken());
+    return hpt.addTicketDefinition(dto, hptSubject.getHptToken());
   }
 
   public List<TicketDefinitionDTO> update(TicketDefinition td, TicketDefinitionDTO dto,
-      Partner partner) {
+      HptSubject hptSubject) {
     if (dto.price < 0) {
       throw new BadRequestException("The ticket price must be greater than 0");
     }
@@ -89,19 +87,19 @@ public class TicketDefinitionService extends ServiceSuperclass {
     td.setPrice(dto.price);
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
-    return hpt.updateTicketDefinition(dto, partner.getHptToken());
+    return hpt.updateTicketDefinition(dto, hptSubject.getHptToken());
   }
 
-  public void delete(Long id, Partner partner) {
+  public void delete(Long id, HptSubject hptSubject) {
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
-    hpt.deleteTicketDefinition(partner.getHptToken(), id);
+    hpt.deleteTicketDefinition(hptSubject.getHptToken(), id);
   }
 
-  public TicketDefinitionDTO getTicketDefinition(Long id, Partner partner) {
+  public TicketDefinitionDTO getTicketDefinition(Long id, HptSubject hptSubject) {
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
-    return hpt.getTicketDefinition(id, partner.getHptToken());
+    return hpt.getTicketDefinition(id, hptSubject.getHptToken());
   }
 
 }

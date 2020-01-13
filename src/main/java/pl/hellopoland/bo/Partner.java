@@ -26,7 +26,7 @@ import pl.hellopoland.soap.p24.enums.Trade;
 import pl.hellopoland.util.Translated;
 
 @Entity
-public class Partner extends ModelSuperclass implements Translated {
+public class Partner extends ModelSuperclass implements Translated, HptSubject {
 
   private static final long serialVersionUID = 6118414827783500940L;
 
@@ -167,6 +167,7 @@ public class Partner extends ModelSuperclass implements Translated {
     this.sight = sight;
   }
 
+  @Override
   public String getHptToken() {
     return hptToken;
   }
