@@ -46,13 +46,22 @@ public class TicketDefinitionService extends ServiceSuperclass {
         .setParameter("ids", externalIds).getResultList();
   }
 
-  private TicketDefinition findByExternalIdAndPartner(Long externalId, Partner partner) {
+  public TicketDefinition findByExternalIdAndPartner(Long externalId, Partner partner) {
     return em
         .createQuery(
             "from TicketDefinition where externalId = :externalId and sightEvent.partner=:partner",
             TicketDefinition.class)
         .setParameter("externalId", externalId)
         .setParameter("partner", partner)
+        .getSingleResult();
+  }
+
+  public TicketDefinition findByExternalId(Long externalId) {
+    return em
+        .createQuery(
+            "from TicketDefinition where externalId = :externalId",
+            TicketDefinition.class)
+        .setParameter("externalId", externalId)
         .getSingleResult();
   }
 
@@ -71,11 +80,11 @@ public class TicketDefinitionService extends ServiceSuperclass {
     return hpt.addTicketDefinition(dto, partner.getHptToken());
   }
 
-  public List<TicketDefinitionDTO> update(TicketDefinitionDTO dto, Partner partner) {
+  public List<TicketDefinitionDTO> update(TicketDefinition td, TicketDefinitionDTO dto,
+      Partner partner) {
     if (dto.price < 0) {
       throw new BadRequestException("The ticket price must be greater than 0");
     }
-    TicketDefinition td = findByExternalIdAndPartner(dto.id, partner);
     td.setName(dto.name);
     td.setPrice(dto.price);
     Portal portal = getPortal("Hello Ticket Cloud");
