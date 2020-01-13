@@ -90,15 +90,6 @@ public class PartnerSightEventRestService {
     return service.changeDefaultLanguage(id, lang);
   }
 
-  @POST
-  @Path("/search")
-  @Deprecated
-  public PagedCollection search(SightEventPagedCollectionConfig config,
-      @HeaderParam("Accept-Language") String acceptLanguage,
-      @HeaderParam("Content-Language") String contentLanguage) {
-    return service.getList(config, contentLanguage != null ? contentLanguage : acceptLanguage);
-  }
-
   @GET
   @Path("/{id}")
   public SightEventDTO get(@PathParam("id") Long id,
