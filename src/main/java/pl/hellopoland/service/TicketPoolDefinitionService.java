@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.SightEvent;
-import pl.hellopoland.bo.TicketDefinition;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.AccessDeniedException;
@@ -50,12 +49,6 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     dto = hpt.addTicketPoolDefinition(dto, partner.getHptToken());
     dto.sightEventId = sightEventId;
-    if (dto.ticketDefinitions != null) {
-      dto.ticketDefinitions.forEach(td -> {
-        TicketDefinition tBo = ticketService.create(td, sightEventId);
-        td.id = tBo.getId();
-      });
-    }
     return dto;
   }
 

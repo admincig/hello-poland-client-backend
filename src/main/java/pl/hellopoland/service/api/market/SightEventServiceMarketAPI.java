@@ -107,7 +107,7 @@ public class SightEventServiceMarketAPI {
       dto = DtoMapper.getFullDTO(bo);
       dto.partnerAffiliateCode = null;
       dto.language = language.getLanuage();
-      service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), false);
+      service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), false, true);
       if (service.isAvailable(dto, null, null)) {
         dto.similar = getSimilar(bo, language);
       }

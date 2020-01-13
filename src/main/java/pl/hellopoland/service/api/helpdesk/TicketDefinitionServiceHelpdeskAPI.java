@@ -4,7 +4,6 @@ import java.util.List;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import pl.hellopoland.bo.TicketDefinition;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.TicketDefinitionService;
@@ -27,8 +26,7 @@ public class TicketDefinitionServiceHelpdeskAPI {
 
   @RolesAllowed("admin")
   public List<TicketDefinitionDTO> update(TicketDefinitionDTO dto) {
-    TicketDefinition td = service.findByExternalId(dto.id);
-    return service.update(td, dto, service.getLoggedUser());
+    return service.update(dto, service.getLoggedUser());
   }
 
   @RolesAllowed("admin")

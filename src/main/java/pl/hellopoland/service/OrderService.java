@@ -1,8 +1,6 @@
 package pl.hellopoland.service;
 
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.math.BigDecimal;
@@ -14,12 +12,14 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -40,10 +40,10 @@ import pl.hellopoland.bo.PassageCart;
 import pl.hellopoland.bo.PassageCartEntry;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.SightEvent;
-import pl.hellopoland.bo.TicketDefinition;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole.Role;
 import pl.hellopoland.dto.EmailSendingReportDTO;
+import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.email.EmailSendingException;
@@ -60,9 +60,10 @@ public class OrderService extends ServiceSuperclass {
 
   @Inject
   UserService uService;
-
   @Inject
   AgreementService aService;
+  @Inject
+  SightEventService seService;
 
   public PassageCart create(OrderIRO iro) {
     throwIfExpiredTickets(iro);
@@ -87,31 +88,27 @@ public class OrderService extends ServiceSuperclass {
     }
     o.setDetails(details);
     em.persist(o);
-    Set<Long> ticketsIds =
+    Set<Long> atnaIds =
         iro.entries.stream().filter(oe -> oe.quantity != null && oe.quantity.compareTo(0) > 0)
             .collect(groupingBy(oeIRO -> oeIRO.id)).keySet();
-    List<TicketDefinition> tickets = em.createQuery(
-        "from TicketDefinition t join fetch t.sightEvent s where t.id in (:ids) order by s.id asc",
-        TicketDefinition.class).setParameter("ids", ticketsIds).getResultList();
-    if (tickets.size() < ticketsIds.size()) {
-      throw new ResourceNotFoundException();
-    }
-    Map<Long, TicketDefinition> ticketIdToObject =
-        tickets.stream().collect(toMap(TicketDefinition::getId, t -> t));
-    Map<SightEvent, List<TicketDefinition>> ticketsGroupedBySight =
-        tickets.stream().collect(groupingBy(TicketDefinition::getSightEvent));
-    for (Map.Entry<SightEvent, List<TicketDefinition>> entry : ticketsGroupedBySight.entrySet()) {
+    HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
+    List<TicketDefinitionDTO> tds = hpt.getTicketDefinitions(atnaIds);
+    Map<Long, List<TicketDefinitionDTO>> ticketsGroupedBySight =
+        tds.stream().collect(Collectors.groupingBy(td -> td.sightEventId));
+    for (Map.Entry<Long, List<TicketDefinitionDTO>> entry : ticketsGroupedBySight.entrySet()) {
       OrderSightEntry ose = new OrderSightEntry();
       ose.setOrder(o);
-      var sightEvent = entry.getKey();
+      SightEvent sightEvent = seService.getByHptId(entry.getKey());
       ose.setSightEvent(sightEvent);
       em.persist(ose);
       ose.setAgreements(new ArrayList<>(sightEvent.getAgreements()));
       em.flush();
-      List<Long> ticketsOfSight =
-          entry.getValue().stream().map(TicketDefinition::getId).collect(toList());
+      Map<Long, TicketDefinitionDTO> ticketIdToObject =
+          entry.getValue().stream()
+              .collect(Collectors.toMap(td -> td.id, td -> td));
+      Set<Long> ticketIdsOfSight = ticketIdToObject.keySet();
       Map<Date, List<OrderEntryIRO>> inSightGroupedByDate =
-          iro.entries.stream().filter(oeIRO -> ticketsOfSight.contains(oeIRO.id))
+          iro.entries.stream().filter(oeIRO -> ticketIdsOfSight.contains(oeIRO.id))
               .collect(groupingBy(oeIRO -> oeIRO.date));
       for (Map.Entry<Date, List<OrderEntryIRO>> inSightOnDate : inSightGroupedByDate.entrySet()) {
         if (!inSightOnDate.getValue().isEmpty()) {
@@ -120,14 +117,14 @@ public class OrderService extends ServiceSuperclass {
           dateEntry.setSightEntry(ose);
           em.persist(dateEntry);
           for (OrderEntryIRO oeIRO : inSightOnDate.getValue()) {
-            TicketDefinition ticket = ticketIdToObject.get(oeIRO.id);
+            TicketDefinitionDTO ticket = ticketIdToObject.get(oeIRO.id);
             OrderEntry oe = new OrderEntry();
-            oe.setName(ticket.getName());
+            oe.setName(ticket.name);
             oe.setQuantity(oeIRO.quantity);
-            oe.setUnitPrice(ticket.getPrice());
+            oe.setUnitPrice(ticket.price);
             oe.setDateEntry(dateEntry);
-            oe.setExternalDefinitionId(ticket.getExternalId());
-            oe.setPoolId(ticket.getPoolId());
+            oe.setExternalDefinitionId(ticket.id);
+            oe.setPoolId(ticket.poolId);
             if (oeIRO.partnerAffiliateCode != null
                 && !oeIRO.partnerAffiliateCode.equals(sightEvent.getPartner().getAffiliateCode())) {
               logger.log(Level.ERROR,
@@ -154,55 +151,39 @@ public class OrderService extends ServiceSuperclass {
   }
 
   private void throwIfExpiredTickets(OrderIRO iro) {
-    var expired = new HashMap<Long, OrderEntryIRO>();
+    var expiredIds = new HashMap<Long, OrderEntryIRO>();
     iro.entries.forEach(entry -> {
       if (entry.date.before(new Date())) {
-        expired.put(entry.id, entry);
+        expiredIds.put(entry.id, entry);
       }
     });
-    List<TicketDefinition> expiredTickets = new ArrayList<>();
-    if (expired.size() > 0) {
-      List<TicketDefinition> tickets = em.createQuery(
-          "from TicketDefinition t join fetch t.sightEvent s where t.id in (:ids) order by s.id asc",
-          TicketDefinition.class).setParameter("ids", expired.keySet()).getResultList();
-      if (tickets.size() < expired.size()) {
-        throw new ResourceNotFoundException();
-      }
-      expiredTickets.addAll(tickets);
-      var wholeDayPoolIds = new ArrayList<Long>();
-      Map<Portal, List<TicketDefinition>> groupedByPortal =
-          tickets.stream().filter(t -> t.getSightEvent().getPortal() != null)
-              .collect(groupingBy(ose -> ose.getSightEvent().getPortal()));
-      for (var entry : groupedByPortal.entrySet()) {
-        Portal portal = entry.getKey();
-        switch (portal.getType()) {
-          case HELLOTICKET_CLOUD_1:
-            HelloTicket hpt = new HelloTicket(portal.getUrl());
-            List<TicketPoolDefinitionDTO> resp = hpt.getWholeDay(entry.getValue().stream()
-                .map(TicketDefinition::getPoolId).collect(Collectors.toList()));
-            resp.forEach(tpd -> wholeDayPoolIds.add(tpd.id));
-            break;
-        }
-      }
-      wholeDayPoolIds.forEach(id -> {
-        for (var ticket : tickets) {
-          if (id.equals(ticket.getPoolId())
+    List<TicketDefinitionDTO> expiredTickets = Collections.emptyList();
+    if (expiredIds.size() > 0) {
+      HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
+      expiredTickets = hpt.getTicketDefinitions(expiredIds.keySet());
+      List<TicketPoolDefinitionDTO> wholeDayPools = hpt.getWholeDay(expiredTickets.stream()
+          .map(td -> td.poolId)
+          .collect(Collectors.toList()));
+      for (var pool : wholeDayPools) {
+        for (var iter = expiredTickets.iterator(); iter.hasNext();) {
+          TicketDefinitionDTO ticket = iter.next();
+          if (Objects.equals(pool.id, ticket.poolId)
               && !LocalDate
-                  .ofInstant(expired.get(ticket.getId()).date.toInstant(), ZoneId.systemDefault())
+                  .ofInstant(expiredIds.get(ticket.id).date.toInstant(), ZoneId.systemDefault())
                   .isBefore(LocalDate.now())) {
-            expiredTickets.remove(ticket);
-            expired.remove(ticket.getId());
+            expiredIds.remove(ticket.id);
+            iter.remove();
           }
         }
-      });
+      }
     }
-    if (expired.size() > 0) {
+    if (expiredIds.size() > 0) {
       var format = new SimpleDateFormat("YYYY-MM-dd HH:mm");
       var errMsg = new StringBuilder(
           "W swoim koszyku masz bilety na oferty, które już minęły. Przeterminowane bilety:");
       expiredTickets.forEach(t -> errMsg
-          .append("\n" + t.getName() + ", data: " + format.format(expired.get(t.getId()).date)
-              + ", oferta: " + t.getSightEvent().getName() + ";"));
+          .append("\n" + t.name + ", data: " + format.format(expiredIds.get(t.id).date)
+              + ", oferta: " + t.sightEventId + ";"));
       System.out.println(errMsg.toString());
       throw new ConflictingException(errMsg.toString());
     }
