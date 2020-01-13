@@ -185,7 +185,7 @@ public class SightService extends ServiceSuperclass {
     }
     final var bo2 = translationService.updateEntityLanguageVersion(get(dto.id), dto,
         language);
-    recreateSearchIndex(bo2);
+    recreateSearchIndex(em.merge(bo));
     return bo2;
   }
 
@@ -329,12 +329,10 @@ public class SightService extends ServiceSuperclass {
   }
 
   public void recreateSearchIndex(Sight s) {
-    {
-      Set<String> words = s.getAvailableLanguageVersions().stream()
-          .flatMap(
-              lv -> translationService.getTranslations(s, lv).stream().map(Translation::getValue))
-          .collect(Collectors.toSet());
-      s.recreateSearchIndex(words);
-    }
+    Set<String> words = s.getAvailableLanguageVersions().stream()
+        .flatMap(
+            lv -> translationService.getTranslations(s, lv).stream().map(Translation::getValue))
+        .collect(Collectors.toSet());
+    s.recreateSearchIndex(words);
   }
 }

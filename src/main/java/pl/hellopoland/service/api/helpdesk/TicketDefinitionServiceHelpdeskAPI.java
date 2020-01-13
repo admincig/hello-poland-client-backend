@@ -1,46 +1,40 @@
-package pl.hellopoland.service.api.partner;
+package pl.hellopoland.service.api.helpdesk;
 
 import java.util.List;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import pl.hellopoland.bo.Partner;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.TicketDefinitionService;
 
 @Stateless
-public class TicketDefinitionServicePartnerAPI {
+public class TicketDefinitionServiceHelpdeskAPI {
 
   @Inject
   TicketDefinitionService service;
 
-  @RolesAllowed("partner")
-  public TicketDefinitionDTO add(TicketDefinitionDTO dto, Partner partner) {
-    return service.add(dto, service.getLoggedPartner());
-  }
-
-  @RolesAllowed("partner")
+  @RolesAllowed("admin")
   public List<TicketDefinitionDTO> getTicketDefinitionsForLoggedUser() {
     return service.getTicketDefinitions(service.getLoggedPartner());
   }
 
-  @RolesAllowed("partner")
+  @RolesAllowed("admin")
   public PagedCollection getList() {
     return new PagedCollection(getTicketDefinitionsForLoggedUser(), null);
   }
 
-  @RolesAllowed("partner")
+  @RolesAllowed("admin")
   public List<TicketDefinitionDTO> update(TicketDefinitionDTO dto) {
     return service.update(dto, service.getLoggedPartner());
   }
 
-  @RolesAllowed("partner")
+  @RolesAllowed("admin")
   public void delete(Long id) {
     service.delete(id, service.getLoggedPartner());
   }
 
-  @RolesAllowed("partner")
+  @RolesAllowed("admin")
   public TicketDefinitionDTO get(Long id) {
     return service.getTicketDefinition(id, service.getLoggedPartner());
   }
