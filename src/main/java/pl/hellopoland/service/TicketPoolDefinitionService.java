@@ -1,5 +1,6 @@
 package pl.hellopoland.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -8,6 +9,7 @@ import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.TicketDefinition;
+import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.AccessDeniedException;
@@ -105,6 +107,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
   }
 
   private List<TicketPoolDefinitionDTO> update(TicketPoolDefinitionDTO dto, Partner partner) {
+    validateTicketDiscount(dto);
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     TicketPoolDefinitionDTO tpd = hpt.getTicketPoolDefinition(partner.getHptToken(), dto.id);
@@ -112,6 +115,19 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
       throw new AccessDeniedException();
     }
     return hpt.updateTicketPoolDefinition(dto, partner.getHptToken());
+  }
+
+  // TODO
+  private void validateTicketDiscount(TicketPoolDefinitionDTO poolDef) {
+    SightEvent se = sightEventService.get(poolDef.sightEventId);
+    BigDecimal commission = se.getPartner().getCommission();
+
+    for (TicketDefinitionDTO ticketDef : poolDef.ticketDefinitions) {
+      // cena po rabacie >= prowizja
+
+
+
+    }
   }
 
   public List<TicketPoolDefinitionDTO> list() {
