@@ -117,16 +117,20 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     return hpt.updateTicketPoolDefinition(dto, partner.getHptToken());
   }
 
-  // TODO
   private void validateTicketDiscount(TicketPoolDefinitionDTO poolDef) {
     SightEvent se = sightEventService.get(poolDef.sightEventId);
     BigDecimal commission = se.getPartner().getCommission();
 
+    Integer priceAfterDiscount = null;
+    BigDecimal padDecimal = null;
     for (TicketDefinitionDTO ticketDef : poolDef.ticketDefinitions) {
-      // cena po rabacie >= prowizja
+      priceAfterDiscount =
+          ticketDef.price - ticketDef.discountHplPart - ticketDef.discountPartnerPart;
+      padDecimal = new BigDecimal(priceAfterDiscount / 100);
 
-
-
+      if (padDecimal.compareTo(commission) < 0) {
+        throw new ConflictingException("Price after discount cannot be less than commission");
+      }
     }
   }
 
