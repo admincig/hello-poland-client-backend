@@ -22,7 +22,7 @@ public class TicketDefinitionServicePartnerAPI {
 
   @RolesAllowed("partner")
   public List<TicketDefinitionDTO> getTicketDefinitionsForLoggedUser() {
-    return service.getTicketDefinitions(service.getLoggedPartner());
+    return service.getTicketDefinitions(null, service.getLoggedPartner());
   }
 
   @RolesAllowed("partner")
