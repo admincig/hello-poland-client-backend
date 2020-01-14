@@ -110,7 +110,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
   public List<TicketPoolDefinitionDTO> list() {
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
-    return hpt.getTicketPoolDefinitions(getLoggedPartner().getHptToken());
+    return hpt.getTicketPoolDefinitions(getLoggedPartner().getHptToken(), null);
   }
 
 }

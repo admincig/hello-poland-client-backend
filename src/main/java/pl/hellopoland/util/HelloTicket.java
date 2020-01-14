@@ -177,10 +177,17 @@ public class HelloTicket {
     return null;
   }
 
-  public List<TicketPoolDefinitionDTO> getTicketPoolDefinitions(String partnerAuthToken) {
+  public List<TicketPoolDefinitionDTO> getTicketPoolDefinitions(String authToken,
+      List<Long> sightEventIds) {
     try {
+      String url = "/v1/ticket-pool-definitions";
+      if (sightEventIds != null) {
+        url += "?sightEventIds=";
+        url += sightEventIds.stream().map(Objects::toString)
+            .collect(Collectors.joining("&sightEventIds="));
+      }
       final Jsonb jsonb = JsonbConfig.getInstance();
-      JsonStructure json = get("/v1/ticket-pool-definitions", partnerAuthToken);
+      JsonStructure json = get(url, authToken);
       JsonArray jsonArray = (JsonArray) json;
       List<TicketPoolDefinitionDTO> dtos = new ArrayList<>();
       jsonArray.forEach(p -> {

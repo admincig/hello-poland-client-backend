@@ -1,18 +1,13 @@
 package pl.hellopoland.service.vo;
 
+import java.util.List;
 import pl.hellopoland.bo.HptSubject;
 
 public class HptTpdsDownloadConfigurator {
 
-  public HptTpdsDownloadConfigurator(HptSubject subject, boolean showDeletedAndOverdued,
-      boolean replaceTdIdsWithAtnaIds) {
-    this.subject = subject;
-    this.showDeletedAndOverdued = showDeletedAndOverdued;
-    this.replaceTdIdsWithAtnaIds = replaceTdIdsWithAtnaIds;
-  }
-
-  public final HptSubject subject;
-  public final boolean showDeletedAndOverdued;
-  public final boolean replaceTdIdsWithAtnaIds;
+  public List<Long> sightEventIds;
+  public HptSubject subject;
+  public boolean showDeletedAndOverdued;
+  public boolean replaceTdIdsWithAtnaIds;
 
 }

@@ -347,9 +347,14 @@ public class SightEventService extends ServiceSuperclass {
       var partnersToSightEventsWithHptId = groupDtosWithHptIdByPartner(bos, dtos);
 
       for (var partnerToSightEventsWithHptId : partnersToSightEventsWithHptId.entrySet()) {
-        Partner partner = partnerToSightEventsWithHptId.getKey();
-        HptTpdsDownloadConfigurator configurator =
-            new HptTpdsDownloadConfigurator(partner, showDeletedTPD, replaceTdIdsWithAtnaIds);
+        HptTpdsDownloadConfigurator configurator = new HptTpdsDownloadConfigurator();
+        configurator.replaceTdIdsWithAtnaIds = replaceTdIdsWithAtnaIds;
+        configurator.showDeletedAndOverdued = showDeletedTPD;
+        configurator.subject = partnerToSightEventsWithHptId.getKey();
+        configurator.sightEventIds = partnerToSightEventsWithHptId.getValue()
+            .stream()
+            .map(Pair::getKey)
+            .collect(Collectors.toList());
 
         List<TicketPoolDefinitionDTO> tpds = downloadHptTpds(configurator);
         var tpdsGroupedBySightEventId = tpds.stream()
@@ -365,6 +370,7 @@ public class SightEventService extends ServiceSuperclass {
         sightEventDto.minPrice = findMinPrice(sightEventDto);
       }
     }
+
   }
 
   private Integer findMinPrice(SightEventDTO sightEventDto) {
@@ -384,7 +390,8 @@ public class SightEventService extends ServiceSuperclass {
   private List<TicketPoolDefinitionDTO> downloadHptTpds(HptTpdsDownloadConfigurator configurator) {
     HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
     List<TicketPoolDefinitionDTO> poolDefinitions =
-        hpt.getTicketPoolDefinitions(configurator.subject.getHptToken());
+        hpt.getTicketPoolDefinitions(configurator.subject.getHptToken(),
+            configurator.sightEventIds);
 
     if (!configurator.showDeletedAndOverdued) {
       poolDefinitions = poolDefinitions
