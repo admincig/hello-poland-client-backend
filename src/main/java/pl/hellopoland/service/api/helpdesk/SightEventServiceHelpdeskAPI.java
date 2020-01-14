@@ -81,7 +81,7 @@ public class SightEventServiceHelpdeskAPI {
         .collect(Collectors.toSet());
     tService.translateEntities(categories, language);
     SightEventDTO dto = DtoMapper.getFullDTO(bo);
-    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), false);
+    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), false, false);
     return dto;
   }
 
@@ -148,7 +148,7 @@ public class SightEventServiceHelpdeskAPI {
     var bo = service.get(id);
     bo = service.uploadPdf(bo, pdf);
     var dto = DtoMapper.getFullDTO(bo);
-    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), true);
+    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), true, false);
     return dto;
   }
 
@@ -163,7 +163,7 @@ public class SightEventServiceHelpdeskAPI {
     var bo = service.get(id);
     bo = service.uploadMainImage(bo, icon);
     var dto = DtoMapper.getFullDTO(bo);
-    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), true);
+    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), true, false);
     return dto;
   }
 
@@ -171,7 +171,7 @@ public class SightEventServiceHelpdeskAPI {
   public SightEventDTO uploadImage(Long id, byte[] img) {
     SightEvent bo = service.addImageToSightEventGallery(id, img);
     var dto = DtoMapper.getFullDTO(bo);
-    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), true);
+    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), true, false);
     return dto;
   }
 

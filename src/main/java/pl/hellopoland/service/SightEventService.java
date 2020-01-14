@@ -21,6 +21,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -46,6 +47,7 @@ import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.AccessDeniedException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
+import pl.hellopoland.service.vo.HptTpdsDownloadConfigurator;
 import pl.hellopoland.util.BeanUtils;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
@@ -55,35 +57,25 @@ import pl.hellopoland.util.Triplet;
 @LocalBean
 @Stateless
 public class SightEventService extends ServiceSuperclass {
+
   @Inject
   UserService userService;
-
   @Inject
-  private ImageService iService;
-
+  ImageService iService;
   @Inject
-  private SightService sightService;
-
+  SightService sightService;
   @Inject
-  private PartnerService partnerService;
-
+  PartnerService partnerService;
   @Inject
-  private TicketDefinitionService ticketService;
-
+  OpeningHoursService oHoursService;
   @Inject
-  private OpeningHoursService oHoursService;
-
+  FileDescriptorService fdService;
   @Inject
-  private FileDescriptorService fdService;
-
+  TranslationService translationService;
   @Inject
-  private TranslationService translationService;
-
+  CategoryService catService;
   @Inject
-  private CategoryService catService;
-
-  @Inject
-  private TagService tagService;
+  TagService tagService;
 
   public List<SightEvent> getAllActiveAndPublishedAndNotBlocked() {
     return em.createQuery(
@@ -349,14 +341,22 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public void fetchTicketPoolDefinitions(Collection<SightEvent> bos,
-      List<SightEventDTO> dtos, boolean showDeletedTPD) {
+      List<SightEventDTO> dtos, boolean showDeletedTPD, boolean replaceTdIdsWithAtnaIds) {
     if (hasAnyHptCloudEvent(bos)) {
 
       var partnersToSightEventsWithHptId = groupDtosWithHptIdByPartner(bos, dtos);
 
       for (var partnerToSightEventsWithHptId : partnersToSightEventsWithHptId.entrySet()) {
-        Partner partner = partnerToSightEventsWithHptId.getKey();
-        List<TicketPoolDefinitionDTO> tpds = downloadHptTpds(partner, showDeletedTPD);
+        HptTpdsDownloadConfigurator configurator = new HptTpdsDownloadConfigurator();
+        configurator.replaceTdIdsWithAtnaIds = replaceTdIdsWithAtnaIds;
+        configurator.showDeletedAndOverdued = showDeletedTPD;
+        configurator.subject = partnerToSightEventsWithHptId.getKey();
+        configurator.sightEventIds = partnerToSightEventsWithHptId.getValue()
+            .stream()
+            .map(Pair::getKey)
+            .collect(Collectors.toList());
+
+        List<TicketPoolDefinitionDTO> tpds = downloadHptTpds(configurator);
         var tpdsGroupedBySightEventId = tpds.stream()
             .collect(groupingBy(pool -> pool.sightEventId));
 
@@ -369,9 +369,8 @@ public class SightEventService extends ServiceSuperclass {
       for (var sightEventDto : dtos) {
         sightEventDto.minPrice = findMinPrice(sightEventDto);
       }
-    } else {
-      // TODO other portals
     }
+
   }
 
   private Integer findMinPrice(SightEventDTO sightEventDto) {
@@ -388,21 +387,30 @@ public class SightEventService extends ServiceSuperclass {
     return minPrice;
   }
 
-  private List<TicketPoolDefinitionDTO> downloadHptTpds(Partner partner,
-      boolean showDeletedAndOverdued) {
+  private List<TicketPoolDefinitionDTO> downloadHptTpds(HptTpdsDownloadConfigurator configurator) {
     HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
-    Stream<TicketPoolDefinitionDTO> poolDefinitions =
-        hpt.getTicketPoolDefinitions(partner.getHptToken()).stream();
-    if (!showDeletedAndOverdued) {
+    List<TicketPoolDefinitionDTO> poolDefinitions =
+        hpt.getTicketPoolDefinitions(configurator.subject.getHptToken(),
+            configurator.sightEventIds);
+
+    if (!configurator.showDeletedAndOverdued) {
       poolDefinitions = poolDefinitions
+          .stream()
           .filter(tpd -> !tpd.deleted)
           .filter(tpd -> {
             return !tpd.isCyclic
                 || tpd.frequencyData.endDate == null
                 || tpd.frequencyData.endDate.after(new Date());
-          });
+          }).collect(Collectors.toList());
     }
-    return poolDefinitions.collect(toList());
+
+    if (configurator.replaceTdIdsWithAtnaIds) {
+      poolDefinitions.forEach(pd -> {
+        pd.ticketDefinitions.forEach(td -> td.id = td.atnaId);
+      });
+    }
+
+    return poolDefinitions;
   }
 
   private Map<Partner, List<Pair<Long, SightEventDTO>>> groupDtosWithHptIdByPartner(
@@ -446,52 +454,17 @@ public class SightEventService extends ServiceSuperclass {
     AvailableTicketNumberAssociationDTO associationDTO =
         hpt.checkAvailabilityOfTicketsForSightEvent(get(sightEventId), fromDate, toDate);
     associationDTO.ticketPoolDefinitions.forEach(tpd -> {
+      tpd.ticketDefinitions.forEach(td -> td.id = td.atnaId);
       tpd.startDate.setYear(fromDate.getYear());
       tpd.startDate.setMonth(fromDate.getMonth());
       tpd.startDate.setDate(fromDate.getDate());
     });
-    var tdExternalIds = new ArrayList<Long>();
-
-    var tpdDTOs = associationDTO.ticketPoolDefinitions;
-    if (tpdDTOs != null && !tpdDTOs.isEmpty()) {
-      tpdDTOs.forEach(tpd -> tpd.ticketDefinitions.forEach(td -> tdExternalIds.add(td.id)));
+    if (associationDTO.ticketPools != null) {
+      associationDTO.ticketPools.forEach(tp -> {
+        tp.ticketDefinitions.forEach(td -> td.id = td.atnaId);
+      });
     }
 
-    var tpDTOs = associationDTO.ticketPools;
-    if (tpDTOs != null && !tpDTOs.isEmpty()) {
-      tpDTOs.forEach(tp -> tp.ticketDefinitions.forEach(td -> tdExternalIds.add(td.id)));
-    }
-
-    var tdOBs = ticketService.getTicketsByExternalIds(tdExternalIds).stream().distinct()
-        .collect(toList());
-
-    if (tpdDTOs != null && !tpdDTOs.isEmpty()) {
-      for (var tpdDto : tpdDTOs) {
-        var tdDtos = tpdDto.ticketDefinitions;
-        for (var tdDto : tdDtos) {
-          for (var tdBo : tdOBs) {
-            if (tdBo.getExternalId().equals(tdDto.id) && tdBo.getPoolId().equals(tpdDto.id)) {
-              tdDto.id = tdBo.getId();
-              break;
-            }
-          }
-        }
-      }
-    }
-    if (tpDTOs != null && !tpDTOs.isEmpty()) {
-      for (var tpDto : tpDTOs) {
-        var tdDtos = tpDto.ticketDefinitions;
-        for (var tdDto : tdDtos) {
-          for (var tdBo : tdOBs) {
-            if (tdBo.getExternalId().equals(tdDto.id)
-                && tdBo.getPoolId().equals(tpDto.ticketPoolDefinitionId)) {
-              tdDto.id = tdBo.getId();
-              break;
-            }
-          }
-        }
-      }
-    }
     return associationDTO;
   }
 
@@ -673,6 +646,14 @@ public class SightEventService extends ServiceSuperclass {
           .collect(toSet());
       se.recreateSearchIndex(words);
     }
+  }
+
+  public SightEvent getByHptId(Long hptId) {
+    SightEvent se = em.createQuery("from SightEvent where hptId=:hptId", SightEvent.class)
+        .setParameter("hptId", hptId).getSingleResult();
+    se.fetchCollections();
+    se.setFavourite(se.getUsers().contains(userService.getLoggedUser()));
+    return se;
   }
 
 }

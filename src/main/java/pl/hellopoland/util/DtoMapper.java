@@ -27,7 +27,6 @@ import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.SightEventCategory;
 import pl.hellopoland.bo.SightEventTag;
 import pl.hellopoland.bo.Tag;
-import pl.hellopoland.bo.TicketDefinition;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole;
 import pl.hellopoland.dto.AgreementDTO;
@@ -47,7 +46,6 @@ import pl.hellopoland.dto.RoleDTO;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TagDTO;
-import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.soap.p24.enums.BusinessType;
@@ -264,16 +262,6 @@ public class DtoMapper {
     return null;
   }
 
-  public static TicketDefinitionDTO getDTO(TicketDefinition bo) {
-    TicketDefinitionDTO dto = new TicketDefinitionDTO();
-    dto.id = bo.getId();
-    dto.name = bo.getName();
-    dto.price = bo.getPrice();
-    // dto.sightEventId = bo.getSightEvent().getId();
-    dto.availableTicketsNumber = bo.getAvailableTicketsNumber();
-    return dto;
-  }
-
   public static ImageDTO getDTO(ImageCollector bo) {
     if (bo == null) {
       return null;
@@ -374,15 +362,6 @@ public class DtoMapper {
     }
     copyLocation(source.location, target);
   }
-
-  public static void copy(TicketDefinitionDTO source, TicketDefinition target) {
-    target.setExternalId(source.id);
-    target.setName(source.name);
-    target.setPoolId(source.poolId);
-    target.setPrice(source.price);
-    target.setAvailableTicketsNumber(source.availableTicketsNumber);
-  }
-
 
   public static P24PassageCartDTO getDTO(PassageCart p24PassageCart) {
     var dto = new P24PassageCartDTO();

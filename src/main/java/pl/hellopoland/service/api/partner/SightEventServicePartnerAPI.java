@@ -79,7 +79,7 @@ public class SightEventServicePartnerAPI {
     if (language != null) {
       dtos.forEach(dto -> dto.language = language.getLanuage());
     }
-    service.fetchTicketPoolDefinitions(bos.items, dtos, true);
+    service.fetchTicketPoolDefinitions(bos.items, dtos, true, false);
     return new PagedCollection(dtos, bos.config);
   }
 
@@ -94,7 +94,7 @@ public class SightEventServicePartnerAPI {
   public SightEventDTO uploadMainImage(Long id, byte[] icon) {
     SightEvent bo = service.uploadMainImageForLoggedUser(id, icon);
     var dto = DtoMapper.getFullDTO(bo);
-    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), true);
+    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), true, false);
     return dto;
   }
 
@@ -102,7 +102,7 @@ public class SightEventServicePartnerAPI {
   public SightEventDTO uploadImage(Long id, byte[] img) {
     SightEvent bo = service.addImageToSightEventGalleryForLoggedUser(id, img);
     var dto = DtoMapper.getFullDTO(bo);
-    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), true);
+    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), true, false);
     return dto;
   }
 
@@ -116,7 +116,7 @@ public class SightEventServicePartnerAPI {
   public SightEventDTO uploadPdf(Long id, byte[] pdf) {
     SightEvent bo = service.uploadPdfForLoggedUser(id, pdf);
     var dto = DtoMapper.getFullDTO(bo);
-    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), true);
+    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), true, false);
     return dto;
   }
 

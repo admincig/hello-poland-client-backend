@@ -55,8 +55,6 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
       inverseJoinColumns = {
           @JoinColumn(name = "imagecollector_id", referencedColumnName = "id", unique = true)})
   private Collection<ImageCollector> images = new ArrayList<>();
-  @OneToMany(mappedBy = "sightEvent")
-  private Collection<TicketDefinition> tickets = new ArrayList<>();
   @ManyToMany
   private Set<Agreement> agreements = new HashSet<>();
   @Multilingual
@@ -127,14 +125,6 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
   @Override
   public void setMainImage(ImageCollector mainImage) {
     this.mainImage = mainImage;
-  }
-
-  public Collection<TicketDefinition> getTickets() {
-    return tickets;
-  }
-
-  public void setTickets(Collection<TicketDefinition> tickets) {
-    this.tickets = tickets;
   }
 
   public Collection<Agreement> getAgreements() {
@@ -452,7 +442,6 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
     Optional.ofNullable(this.getOpeningHours()).ifPresent(Collection::size);
     Optional.ofNullable(this.getCategories()).ifPresent(Collection::size);
     Optional.ofNullable(this.getTags()).ifPresent(Collection::size);
-    Optional.ofNullable(this.getTickets()).ifPresent(Collection::size);
   }
 
   public void recreateSearchIndex(Set<String> words) {

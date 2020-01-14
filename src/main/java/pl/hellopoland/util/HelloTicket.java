@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.json.JsonArray;
 import javax.json.JsonException;
@@ -176,10 +177,17 @@ public class HelloTicket {
     return null;
   }
 
-  public List<TicketPoolDefinitionDTO> getTicketPoolDefinitions(String partnerAuthToken) {
+  public List<TicketPoolDefinitionDTO> getTicketPoolDefinitions(String authToken,
+      List<Long> sightEventIds) {
     try {
+      String url = "/v1/ticket-pool-definitions";
+      if (sightEventIds != null) {
+        url += "?sightEventIds=";
+        url += sightEventIds.stream().map(Objects::toString)
+            .collect(Collectors.joining("&sightEventIds="));
+      }
       final Jsonb jsonb = JsonbConfig.getInstance();
-      JsonStructure json = get("/v1/ticket-pool-definitions", partnerAuthToken);
+      JsonStructure json = get(url, authToken);
       JsonArray jsonArray = (JsonArray) json;
       List<TicketPoolDefinitionDTO> dtos = new ArrayList<>();
       jsonArray.forEach(p -> {
@@ -623,7 +631,9 @@ public class HelloTicket {
     conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
     logger.log(System.Logger.Level.INFO, "Sending GET request to url: " + url);
     conn.setRequestMethod("GET");
-    conn.setRequestProperty("Authorization", "Bearer " + authToken);
+    if (authToken != null) {
+      conn.setRequestProperty("Authorization", "Bearer " + authToken);
+    }
     conn.setDoOutput(true);
     conn.connect();
     var respCode = conn.getResponseCode();
@@ -669,10 +679,11 @@ public class HelloTicket {
       if (e.getMessage() != null && e.getMessage().contains("400")) {
         throw new BadRequestException("TicketPoolDefinition must have tickets definitions.");
       }
-      if (e.getMessage() != null && e.getMessage().contains("409")) {
-        throw new ConflictingException("Bad availableTicketsNumber limit combination.");
+      if (e.getMessage() != null
+          && (e.getMessage().contains("409"))) {
+        throw new ConflictingException("Bad availableTicketsNumber limit combination.", e);
       }
-      return null;
+      throw new ConflictingException(e.getMessage(), e);
     }
   }
 
@@ -695,6 +706,28 @@ public class HelloTicket {
       if (e.getMessage() != null && e.getMessage().contains("409")) {
         throw new ConflictingException("Bad availableTicketsNumber limit combination.");
       }
+      return null;
+    }
+  }
+
+  public List<TicketDefinitionDTO> getTicketDefinitions(Set<Long> atnaIds) {
+    String url = "/v1/ticket-definitions";
+    if (atnaIds != null) {
+      url += "?atnaIds=";
+      url += atnaIds.stream().map(Objects::toString).collect(Collectors.joining("&atnaIds="));
+    }
+    try {
+      final Jsonb jsonb = JsonbConfig.getInstance();
+      JsonStructure json = get(url, null);
+      JsonArray jsonArray = (JsonArray) json;
+      List<TicketDefinitionDTO> dtos = new ArrayList<>();
+      jsonArray.forEach(p -> {
+        var dto = jsonb.fromJson(p.toString(), TicketDefinitionDTO.class);
+        dtos.add(dto);
+      });
+      return dtos;
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.WARNING, "Failed", e);
       return null;
     }
   }

@@ -5,7 +5,6 @@ import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.Partner;
-import pl.hellopoland.bo.TicketDefinition;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.TicketDefinitionService;
@@ -34,8 +33,7 @@ public class TicketDefinitionServicePartnerAPI {
   @RolesAllowed("partner")
   public List<TicketDefinitionDTO> update(TicketDefinitionDTO dto) {
     Partner partner = service.getLoggedPartner();
-    TicketDefinition td = service.findByExternalIdAndPartner(dto.id, partner);
-    return service.update(td, dto, partner);
+    return service.update(dto, partner);
   }
 
   @RolesAllowed("partner")

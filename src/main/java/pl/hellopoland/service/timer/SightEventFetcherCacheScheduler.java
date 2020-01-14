@@ -32,7 +32,7 @@ public class SightEventFetcherCacheScheduler {
   // @Schedule(minute = "*/2", hour = "*", persistent = false)
   private void populateCache() {
     partnerService.getAll().forEach(partner -> {
-      var tpds = hptClient.getTicketPoolDefinitions(partner.getHptToken());
+      var tpds = hptClient.getTicketPoolDefinitions(partner.getHptToken(), null);
       cache.put(partner.getId(), tpds);
     });
   }
