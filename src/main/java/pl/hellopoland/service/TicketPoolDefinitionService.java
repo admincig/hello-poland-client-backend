@@ -4,9 +4,12 @@ import java.time.LocalDate;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import pl.hellopoland.bo.HptSubject;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.bo.User;
+import pl.hellopoland.bo.UserRole.Role;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.AccessDeniedException;
@@ -94,23 +97,35 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
   }
 
   public List<TicketPoolDefinitionDTO> update(TicketPoolDefinitionDTO dto) {
-    return update(dto, getLoggedPartner());
+    User logged = getLoggedUser();
+    if (logged.hasRole(Role.ADMIN)) {
+      return update(dto, logged);
+    } else {
+      return update(dto, logged.getPartner());
+    }
   }
 
-  private List<TicketPoolDefinitionDTO> update(TicketPoolDefinitionDTO dto, Partner partner) {
+  private List<TicketPoolDefinitionDTO> update(TicketPoolDefinitionDTO dto, HptSubject subject) {
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
-    TicketPoolDefinitionDTO tpd = hpt.getTicketPoolDefinition(partner.getHptToken(), dto.id);
+    TicketPoolDefinitionDTO tpd = hpt.getTicketPoolDefinition(subject.getHptToken(), dto.id);
     if (tpd == null) {
       throw new AccessDeniedException();
     }
-    return hpt.updateTicketPoolDefinition(dto, partner.getHptToken());
+    return hpt.updateTicketPoolDefinition(dto, subject.getHptToken());
   }
 
   public List<TicketPoolDefinitionDTO> list() {
+    HptSubject subject = null;
+    User logged = getLoggedUser();
+    if (logged.hasRole(Role.ADMIN)) {
+      subject = logged;
+    } else {
+      subject = logged.getPartner();
+    }
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
-    return hpt.getTicketPoolDefinitions(getLoggedPartner().getHptToken(), null);
+    return hpt.getTicketPoolDefinitions(subject.getHptToken(), null);
   }
 
 }

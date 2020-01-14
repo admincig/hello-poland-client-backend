@@ -679,10 +679,11 @@ public class HelloTicket {
       if (e.getMessage() != null && e.getMessage().contains("400")) {
         throw new BadRequestException("TicketPoolDefinition must have tickets definitions.");
       }
-      if (e.getMessage() != null && e.getMessage().contains("409")) {
-        throw new ConflictingException("Bad availableTicketsNumber limit combination.");
+      if (e.getMessage() != null
+          && (e.getMessage().contains("409"))) {
+        throw new ConflictingException("Bad availableTicketsNumber limit combination.", e);
       }
-      return null;
+      throw new ConflictingException(e.getMessage(), e);
     }
   }
 
