@@ -21,6 +21,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -382,27 +383,27 @@ public class SightEventService extends ServiceSuperclass {
 
   private List<TicketPoolDefinitionDTO> downloadHptTpds(HptTpdsDownloadConfigurator configurator) {
     HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
-    Stream<TicketPoolDefinitionDTO> poolDefinitions =
-        hpt.getTicketPoolDefinitions(configurator.subject.getHptToken()).stream();
+    List<TicketPoolDefinitionDTO> poolDefinitions =
+        hpt.getTicketPoolDefinitions(configurator.subject.getHptToken());
 
     if (!configurator.showDeletedAndOverdued) {
       poolDefinitions = poolDefinitions
+          .stream()
           .filter(tpd -> !tpd.deleted)
           .filter(tpd -> {
             return !tpd.isCyclic
                 || tpd.frequencyData.endDate == null
                 || tpd.frequencyData.endDate.after(new Date());
-          });
+          }).collect(Collectors.toList());
     }
 
     if (configurator.replaceTdIdsWithAtnaIds) {
-      poolDefinitions.map(pd -> {
+      poolDefinitions.forEach(pd -> {
         pd.ticketDefinitions.forEach(td -> td.id = td.atnaId);
-        return pd;
       });
     }
 
-    return poolDefinitions.collect(toList());
+    return poolDefinitions;
   }
 
   private Map<Partner, List<Pair<Long, SightEventDTO>>> groupDtosWithHptIdByPartner(
