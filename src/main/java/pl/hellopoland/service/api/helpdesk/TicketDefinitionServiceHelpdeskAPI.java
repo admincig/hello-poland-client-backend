@@ -19,19 +19,15 @@ public class TicketDefinitionServiceHelpdeskAPI {
   PartnerService partnerService;
 
   @RolesAllowed("admin")
-  public List<TicketDefinitionDTO> getTicketDefinitions() {
-    List<TicketDefinitionDTO> tds = service.getTicketDefinitions(service.getLoggedUser());
+  public PagedCollection getList(Long partnerId) {
+    List<TicketDefinitionDTO> tds =
+        service.getTicketDefinitions(partnerId, service.getLoggedUser());
     List<Long> partnerHptIds = tds.stream().map(td -> td.partnerId).collect(Collectors.toList());
     var partners = partnerService.findByHptIds(partnerHptIds);
     tds.forEach(td -> {
       td.partnerId = partners.get(td.partnerId).getId();
     });
-    return tds;
-  }
-
-  @RolesAllowed("admin")
-  public PagedCollection getList() {
-    return new PagedCollection(getTicketDefinitions(), null);
+    return new PagedCollection(tds, null);
   }
 
   @RolesAllowed("admin")

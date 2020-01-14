@@ -2,6 +2,7 @@ package pl.hellopoland.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.HptSubject;
@@ -32,6 +33,8 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
   SightEventService sightEventService;
   @Inject
   TicketDefinitionService ticketService;
+  @Inject
+  PartnerService partnerService;
 
   public TicketPoolDefinitionDTO add(TicketPoolDefinitionDTO dto) {
     return add(dto, getLoggedPartner());
@@ -115,7 +118,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     return hpt.updateTicketPoolDefinition(dto, subject.getHptToken());
   }
 
-  public List<TicketPoolDefinitionDTO> list() {
+  public List<TicketPoolDefinitionDTO> list(Long partnerId) {
     HptSubject subject = null;
     User logged = getLoggedUser();
     if (logged.hasRole(Role.ADMIN)) {
@@ -125,7 +128,13 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     }
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
-    return hpt.getTicketPoolDefinitions(subject.getHptToken(), null);
+    List<TicketPoolDefinitionDTO> tpds = hpt.getTicketPoolDefinitions(subject.getHptToken(), null);
+    if (partnerId != null) {
+      Partner partner = partnerService.get(partnerId);
+      tpds = tpds.stream().filter(tpd -> tpd.partnerId.equals(partner.getHptId()))
+          .collect(Collectors.toList());
+    }
+    return tpds;
   }
 
 }

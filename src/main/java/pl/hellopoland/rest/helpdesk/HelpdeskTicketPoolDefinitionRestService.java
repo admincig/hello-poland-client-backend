@@ -10,6 +10,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.service.api.helpdesk.TicketPoolDefinitionServiceHelpdeskAPI;
@@ -24,8 +25,8 @@ public class HelpdeskTicketPoolDefinitionRestService {
   TicketPoolDefinitionServiceHelpdeskAPI service;
 
   @GET
-  public List<TicketPoolDefinitionDTO> list() {
-    return service.list();
+  public List<TicketPoolDefinitionDTO> list(@QueryParam("partnerId") Long partnerId) {
+    return service.list(partnerId);
   }
 
   @PUT

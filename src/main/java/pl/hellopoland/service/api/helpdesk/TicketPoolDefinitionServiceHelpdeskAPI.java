@@ -38,8 +38,8 @@ public class TicketPoolDefinitionServiceHelpdeskAPI {
   }
 
   @RolesAllowed("admin")
-  public List<TicketPoolDefinitionDTO> list() {
-    List<TicketPoolDefinitionDTO> tpds = service.list();
+  public List<TicketPoolDefinitionDTO> list(Long partnerId) {
+    List<TicketPoolDefinitionDTO> tpds = service.list(partnerId);
     List<Long> partnerHptIds = tpds.stream().map(tpd -> tpd.partnerId).collect(Collectors.toList());
     var partners = partnerService.findByHptIds(partnerHptIds);
     tpds.forEach(tpd -> {

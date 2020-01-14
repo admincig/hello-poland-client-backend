@@ -1,9 +1,11 @@
 package pl.hellopoland.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.HptSubject;
+import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.exception.badrequest.BadRequestException;
@@ -17,10 +19,16 @@ public class TicketDefinitionService extends ServiceSuperclass {
   @Inject
   SightEventService sightEventService;
 
-  public List<TicketDefinitionDTO> getTicketDefinitions(HptSubject hptSubject) {
+  public List<TicketDefinitionDTO> getTicketDefinitions(Long partnerId, HptSubject hptSubject) {
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
-    return hpt.getTicketDefinitions(hptSubject.getHptToken());
+    List<TicketDefinitionDTO> tds = hpt.getTicketDefinitions(hptSubject.getHptToken());
+    if (partnerId != null) {
+      Partner partner = partnerService.get(partnerId);
+      tds = tds.stream().filter(td -> td.partnerId.equals(partner.getHptId()))
+          .collect(Collectors.toList());
+    }
+    return tds;
   }
 
   public TicketDefinitionDTO add(TicketDefinitionDTO dto, HptSubject hptSubject) {
