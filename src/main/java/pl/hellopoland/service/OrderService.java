@@ -169,9 +169,9 @@ public class OrderService extends ServiceSuperclass {
           TicketDefinitionDTO ticket = iter.next();
           if (Objects.equals(pool.id, ticket.poolId)
               && !LocalDate
-                  .ofInstant(expiredIds.get(ticket.id).date.toInstant(), ZoneId.systemDefault())
+                  .ofInstant(expiredIds.get(ticket.atnaId).date.toInstant(), ZoneId.systemDefault())
                   .isBefore(LocalDate.now())) {
-            expiredIds.remove(ticket.id);
+            expiredIds.remove(ticket.atnaId);
             iter.remove();
           }
         }
