@@ -83,15 +83,29 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
   }
 
   public TicketPoolDefinitionDTO get(Long id) {
+    HptSubject subject = null;
+    User logged = getLoggedUser();
+    if (logged.hasRole(Role.ADMIN)) {
+      subject = logged;
+    } else {
+      subject = logged.getPartner();
+    }
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
-    return hpt.getTicketPoolDefinition(getLoggedPartner().getHptToken(), id);
+    return hpt.getTicketPoolDefinition(subject.getHptToken(), id);
   }
 
   public void delete(Long id) {
+    HptSubject subject = null;
+    User logged = getLoggedUser();
+    if (logged.hasRole(Role.ADMIN)) {
+      subject = logged;
+    } else {
+      subject = logged.getPartner();
+    }
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
-    hpt.deleteTicketPoolDefinition(getLoggedPartner().getHptToken(), id);
+    hpt.deleteTicketPoolDefinition(subject.getHptToken(), id);
   }
 
   public List<LocalDate> getStartDates(Long hptId, LocalDate date, LocalDate halfYearLater) {
