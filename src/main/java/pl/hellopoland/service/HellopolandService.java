@@ -153,6 +153,7 @@ public class HellopolandService extends ServiceSuperclass {
     try {
       var hptPartner = ht.addPartner(partner, hptToken);
       partnerBO.setHptToken(hptPartner.token);
+      partnerBO.setHptId(hptPartner.id);
     } catch (Exception e) {
       throw new ConflictingException("Nie udało się stworzyć partnera w zewnętrznym systemie", e);
     }
