@@ -42,6 +42,8 @@ public class Partner extends ModelSuperclass implements Translated, HptSubject {
   @Column(nullable = false)
   private String hptToken;
 
+  private Long hptId;
+
   @OneToMany(mappedBy = "partner")
   private List<User> users;
 
@@ -134,6 +136,14 @@ public class Partner extends ModelSuperclass implements Translated, HptSubject {
   private Set<LanguageVersion> availableLanguageVersions;
 
   private boolean blocked;
+
+  public Long getHptId() {
+    return hptId;
+  }
+
+  public void setHptId(Long hptId) {
+    this.hptId = hptId;
+  }
 
   public Integer getP24Id() {
     return p24Id;

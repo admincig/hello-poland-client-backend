@@ -1,7 +1,9 @@
 package pl.hellopoland.service;
 
 import java.io.ByteArrayInputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.ejb.LocalBean;
@@ -40,6 +42,16 @@ public class PartnerService extends ServiceSuperclass {
   public Partner findByToken(String token) {
     return em.createQuery("select partner from Partner partner where partner.hptToken=:token",
         Partner.class).setParameter("token", token).getSingleResult();
+  }
+
+  public Map<Long, Partner> findByHptIds(List<Long> hptIds) {
+    Map<Long, Partner> map = new HashMap<>();
+    List<Partner> result =
+        em.createQuery("from Partner where hptId in (:hptIds) order by id asc", Partner.class)
+            .setParameter("hptIds", hptIds)
+            .getResultList();
+    result.forEach(res -> map.put(res.getHptId(), res));
+    return map;
   }
 
   public List<Partner> getAll() {

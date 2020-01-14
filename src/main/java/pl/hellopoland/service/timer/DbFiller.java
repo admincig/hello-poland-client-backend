@@ -214,6 +214,7 @@ public class DbFiller extends ServiceSuperclass {
     partner.setAffiliateCode(affiliateCode);
     partner.setDescription("pl desc");
     User user = createUser(null, email, password, null, partner, roles);
+    partner.setHptId(partner.getId());
     MarketPartnerDTO dto = new MarketPartnerDTO();
     dto.description = "pl desc";
     translationService.createEntityLanguageVersion(partner, dto, LanguageVersion.PL_PL);
