@@ -105,7 +105,7 @@ public class OrderService extends ServiceSuperclass {
       em.flush();
       Map<Long, TicketDefinitionDTO> ticketIdToObject =
           entry.getValue().stream()
-              .collect(Collectors.toMap(td -> td.id, td -> td));
+              .collect(Collectors.toMap(td -> td.atnaId, td -> td));
       Set<Long> ticketIdsOfSight = ticketIdToObject.keySet();
       Map<Date, List<OrderEntryIRO>> inSightGroupedByDate =
           iro.entries.stream().filter(oeIRO -> ticketIdsOfSight.contains(oeIRO.id))
