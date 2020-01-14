@@ -454,10 +454,17 @@ public class SightEventService extends ServiceSuperclass {
     AvailableTicketNumberAssociationDTO associationDTO =
         hpt.checkAvailabilityOfTicketsForSightEvent(get(sightEventId), fromDate, toDate);
     associationDTO.ticketPoolDefinitions.forEach(tpd -> {
+      tpd.ticketDefinitions.forEach(td -> td.id = td.atnaId);
       tpd.startDate.setYear(fromDate.getYear());
       tpd.startDate.setMonth(fromDate.getMonth());
       tpd.startDate.setDate(fromDate.getDate());
     });
+    if (associationDTO.ticketPools != null) {
+      associationDTO.ticketPools.forEach(tp -> {
+        tp.ticketDefinitions.forEach(td -> td.id = td.atnaId);
+      });
+    }
+
     return associationDTO;
   }
 
