@@ -396,8 +396,9 @@ public class SightEventService extends ServiceSuperclass {
     }
 
     if (configurator.replaceTdIdsWithAtnaIds) {
-      poolDefinitions.forEach(pd -> {
+      poolDefinitions.map(pd -> {
         pd.ticketDefinitions.forEach(td -> td.id = td.atnaId);
+        return pd;
       });
     }
 
