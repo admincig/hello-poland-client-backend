@@ -182,7 +182,7 @@ public class OrderService extends ServiceSuperclass {
       var errMsg = new StringBuilder(
           "W swoim koszyku masz bilety na oferty, które już minęły. Przeterminowane bilety:");
       expiredTickets.forEach(t -> errMsg
-          .append("\n" + t.name + ", data: " + format.format(expiredIds.get(t.id).date)
+          .append("\n" + t.name + ", data: " + format.format(expiredIds.get(t.atnaId).date)
               + ", oferta: " + t.sightEventId + ";"));
       System.out.println(errMsg.toString());
       throw new ConflictingException(errMsg.toString());
