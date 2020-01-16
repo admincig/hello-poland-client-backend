@@ -20,21 +20,17 @@ import pl.hellopoland.bo.SightEventCategory;
 import pl.hellopoland.bo.SightEventTag;
 import pl.hellopoland.bo.Tag;
 import pl.hellopoland.config.CategoryPagedCollectionConfig;
-import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.config.TagPagedCollectionConfig;
 import pl.hellopoland.dto.FilterDTO;
 import pl.hellopoland.dto.FilterPriceEntryDTO;
 import pl.hellopoland.dto.SearchResultDTO;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.enums.LanguageVersion;
-import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.service.CategoryService;
 import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.service.TagService;
 import pl.hellopoland.service.TranslationService;
 import pl.hellopoland.util.DtoMapper;
-import pl.hellopoland.util.HelloTicket;
-import pl.hellopoland.util.PagedEntityCollection;
 
 @Stateless
 public class SearchServiceMarketAPI {
@@ -63,8 +59,9 @@ public class SearchServiceMarketAPI {
   public SearchResultDTO search(LanguageVersion languageVersion, String query, Long[] categoryIds,
       Long[] tagIds, String city, Date fromDate, Date toDate, Integer minPrice, Integer maxPrice) {
 
-    List<SightEvent> ses = getSightEvents(languageVersion, query, categoryIds, tagIds, city,
-        fromDate, toDate, minPrice, maxPrice);
+    List<SightEvent> ses =
+        seService.getList(languageVersion, query, categoryIds, tagIds, city,
+            fromDate, toDate, minPrice, maxPrice, null);
 
     Map<Sight, List<SightEvent>> ss =
         ses.stream().collect(groupingBy(SightEvent::getSight));
@@ -104,50 +101,6 @@ public class SearchServiceMarketAPI {
       return dto;
     }).collect(toList());
     return oro;
-  }
-
-  private List<SightEvent> getSightEvents(LanguageVersion languageVersion,
-      String query, Long[] categoryIds, Long[] tagIds, String city, Date fromDate, Date toDate,
-      Integer minPrice,
-      Integer maxPrice) {
-    SightEventPagedCollectionConfig seConfig = new SightEventPagedCollectionConfig();
-    if (fromDate != null && toDate != null && toDate.before(fromDate)) {
-      throw new ConflictingException("toDate[" + toDate + "] is before fromDate[" + fromDate + "]");
-    }
-    if (minPrice != null && maxPrice != null && minPrice > maxPrice) {
-      throw new ConflictingException(
-          "minPrice[" + minPrice + "] is lesser then maxPrice[" + maxPrice + "]");
-    }
-    seConfig.onlyAvailable();
-    seConfig.onlyActive();
-    seConfig.onlyPublished();
-    seConfig.setOrderColumn("random()");
-    seConfig.setCategoriesIdsArray(categoryIds);
-    seConfig.setTagsIdsArray(tagIds);
-    seConfig.setSearchQuery(query);
-    seConfig.setCity(city);
-    seConfig.setFetchCategories(true);
-    seConfig.setFetchTags(true);
-    PagedEntityCollection<SightEvent> sesPagedList = seService.getList(seConfig, languageVersion);
-    List<SightEvent> ses =
-        sesPagedList.items.stream().filter(SightEvent::isAccessible).collect(toList());
-    if (!ses.isEmpty()) {
-      if (fromDate == null) {
-        fromDate = new Date();
-      }
-      HelloTicket hptClient = new HelloTicket(seService.getPortal("Hello Ticket Cloud").getUrl());
-      ses = hptClient.getSightEventsInDateRange(new ArrayList<SightEvent>(ses),
-          fromDate, toDate);
-      if (minPrice != null) {
-        ses = ses.stream().filter(se -> se.getMinPrice() >= minPrice)
-            .collect(toList());
-      }
-      if (maxPrice != null) {
-        ses = ses.stream().filter(se -> se.getMinPrice() <= maxPrice)
-            .collect(toList());
-      }
-    }
-    return ses;
   }
 
   @PermitAll

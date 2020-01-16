@@ -244,15 +244,13 @@ public class SightEventServiceMarketAPI {
   }
 
   @RolesAllowed("user")
-  public PagedCollection favourites(SightEventPagedCollectionConfig config, Date fromDate,
-      Date toDate,
-      String contentLanguageSymbol) {
-    if (userService.getLoggedUser() != null) {
-      config.onlyFavourite(userService.getLoggedUser().getId());
-    }
-    return getList(config, fromDate, toDate, contentLanguageSymbol);
+  public PagedCollection favourites(Date fromDate, Date toDate, LanguageVersion language) {
+    Long favouriteOwnerId = userService.getLoggedUser().getId();
+    List<SightEvent> list =
+        service.getList(language, null, null, null, null, fromDate, toDate, null, null,
+            favouriteOwnerId);
+    return new PagedCollection(list, null);
   }
-
 
   @PermitAll
   public AvailableDatesORO checkAvailableDates(Long id, LocalDate date) {

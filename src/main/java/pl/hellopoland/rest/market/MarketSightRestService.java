@@ -8,7 +8,6 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PATCH;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -76,17 +75,6 @@ public class MarketSightRestService {
     config.onlyActive();
     config.onlyPublished();
     return service.favourites(config, contentLanguage != null ? contentLanguage : acceptLanguage);
-  }
-
-  @POST
-  @Path("/search")
-  public PagedCollection search(SightPagedCollectionConfig config, @QueryParam("city") String city,
-      @HeaderParam("Accept-Language") String acceptLanguage,
-      @HeaderParam("Content-Language") String contentLanguage) {
-    config.onlyActive();
-    config.onlyPublished();
-    config.setCity(city);
-    return service.getList(config, contentLanguage != null ? contentLanguage : acceptLanguage);
   }
 
   @GET

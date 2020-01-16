@@ -63,18 +63,6 @@ public class MarketSightEventRestService {
     return service.getPromoted(config, RestService.parseLang(contentLanguage));
   }
 
-  @POST
-  @Path("/search")
-  public PagedCollection search(SightEventPagedCollectionConfig config,
-      @QueryParam("fromDate") @DateFormat Date fromDate,
-      @QueryParam("toDate") @DateFormat Date toDate, @QueryParam("city") String city,
-      @HeaderParam("Accept-Language") String acceptLanguage,
-      @HeaderParam("Content-Language") String contentLanguage) {
-    config.setCity(city);
-    return service.getList(config, fromDate, toDate,
-        contentLanguage != null ? contentLanguage : acceptLanguage);
-  }
-
   @GET
   @Path("/{id}")
   public SightEventDTO get(@PathParam("id") Long id,
@@ -145,11 +133,9 @@ public class MarketSightEventRestService {
       @QueryParam("fromDate") @DateFormat Date fromDate,
       @QueryParam("toDate") @DateFormat Date toDate,
       @HeaderParam("Content-Language") String contentLanguage) {
-    var config = new SightEventPagedCollectionConfig();
-    config.onlyActive();
-    config.onlyPublished();
-    return service.favourites(config, fromDate, toDate,
-        contentLanguage != null ? contentLanguage : acceptLanguage);
+    LanguageVersion lang =
+        RestService.parseLang(contentLanguage != null ? contentLanguage : acceptLanguage);
+    return service.favourites(fromDate, toDate, lang);
   }
 
 }

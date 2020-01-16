@@ -114,6 +114,53 @@ public class SightEventService extends ServiceSuperclass {
     return new PagedEntityCollection<>(sightEvents, config);
   }
 
+  public List<SightEvent> getList(LanguageVersion languageVersion,
+      String query, Long[] categoryIds, Long[] tagIds, String city, Date fromDate, Date toDate,
+      Integer minPrice, Integer maxPrice, Long favouriteOwnerId) {
+
+    SightEventPagedCollectionConfig seConfig = new SightEventPagedCollectionConfig();
+    if (fromDate != null && toDate != null && toDate.before(fromDate)) {
+      throw new ConflictingException("toDate[" + toDate + "] is before fromDate[" + fromDate + "]");
+    }
+    if (minPrice != null && maxPrice != null && minPrice > maxPrice) {
+      throw new ConflictingException(
+          "minPrice[" + minPrice + "] is lesser then maxPrice[" + maxPrice + "]");
+    }
+    seConfig.onlyAvailable();
+    seConfig.onlyActive();
+    seConfig.onlyPublished();
+    seConfig.setOrderColumn("random()");
+    seConfig.setCategoriesIdsArray(categoryIds);
+    seConfig.setTagsIdsArray(tagIds);
+    seConfig.setSearchQuery(query);
+    seConfig.setCity(city);
+    seConfig.setFetchCategories(true);
+    seConfig.setFetchTags(true);
+    if (favouriteOwnerId != null) {
+      seConfig.onlyFavourite(favouriteOwnerId);
+    }
+    PagedEntityCollection<SightEvent> sesPagedList = getList(seConfig, languageVersion);
+    List<SightEvent> ses =
+        sesPagedList.items.stream().filter(SightEvent::isAccessible).collect(toList());
+    if (!ses.isEmpty()) {
+      if (fromDate == null) {
+        fromDate = new Date();
+      }
+      HelloTicket hptClient = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
+      ses = hptClient.getSightEventsInDateRange(new ArrayList<SightEvent>(ses),
+          fromDate, toDate);
+      if (minPrice != null) {
+        ses = ses.stream().filter(se -> se.getMinPrice() >= minPrice)
+            .collect(toList());
+      }
+      if (maxPrice != null) {
+        ses = ses.stream().filter(se -> se.getMinPrice() <= maxPrice)
+            .collect(toList());
+      }
+    }
+    return ses;
+  }
+
   private Comparator<SightEvent> sightEventPromotionComparator() {
     return Comparator.nullsLast(Comparator.comparing(SightEvent::getPromotion,
         Comparator.nullsLast(Comparator.naturalOrder())));
