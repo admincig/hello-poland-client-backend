@@ -36,11 +36,12 @@ import pl.hellopoland.service.api.market.SightEventServiceMarketAPI;
 public class MarketSightEventRestService {
 
   @Inject
-  SightEventServiceMarketAPI service;
+  private SightEventServiceMarketAPI service;
 
   @Inject
   private FilterMarketAPI filterService;
 
+  // listings
   @GET
   public PagedCollection<SightEventDTO> list(@QueryParam("city") String city,
       @QueryParam("fromDate") @DateFormat Date fromDate,
@@ -77,52 +78,6 @@ public class MarketSightEventRestService {
   }
 
   @GET
-  @Path("/promoted")
-  public PagedCollection<SightEventDTO> promoted(
-      @HeaderParam("Content-Language") String contentLanguage) {
-    LanguageVersion lang = RestService.parseLang(contentLanguage);
-
-    var config = new SightEventPagedCollectionConfig();
-    config.setLanguage(lang);
-    config.setPromotion(1, 2, 3);
-    config.setOrderColumn("e.promotion, id");
-    config.setDateFrom(new Date());
-    return service.getList(config);
-  }
-
-  @GET
-  @Path("/{id}")
-  public SightEventDTO get(@PathParam("id") Long id,
-      @HeaderParam("Accept-Language") String acceptLanguage,
-      @HeaderParam("Content-Language") String contentLanguage) {
-    return service.get(id, contentLanguage != null ? contentLanguage : acceptLanguage);
-  }
-
-  @GET
-  @Path("/filters")
-  public FiltersContainerDTO getFilters() {
-    return filterService.getForSightEvents();
-  }
-
-  @GET
-  @Path("/{id}/available-tickets")
-  public AvailableTicketNumberAssociationORO checkAvailability(@PathParam("id") Long id,
-      @QueryParam("date") @DateFormat final Date date) {
-    return service.checkAvailability(id, date, null);
-  }
-
-  @GET
-  @Path("/{id}/available-dates")
-  public AvailableDatesORO checkAvailableDates(@PathParam("id") Long id,
-      @QueryParam("date") String dateString) {
-    LocalDate date = null;
-    if (dateString != null) {
-      date = LocalDate.parse(dateString);
-    }
-    return service.checkAvailableDates(id, date);
-  }
-
-  @GET
   @Path("/recommended")
   public PagedCollection<SightEventDTO> recommended(
       @HeaderParam("Content-Language") String contentLanguage,
@@ -148,6 +103,48 @@ public class MarketSightEventRestService {
     return service.getPersonalized(config);
   }
 
+  @GET
+  @Path("/promoted")
+  public PagedCollection<SightEventDTO> promoted(
+      @HeaderParam("Content-Language") String contentLanguage) {
+    LanguageVersion lang = RestService.parseLang(contentLanguage);
+
+    var config = new SightEventPagedCollectionConfig();
+    config.setLanguage(lang);
+    config.setPromotion(1, 2, 3);
+    config.setOrderColumn("e.promotion, id");
+    config.setDateFrom(new Date());
+    return service.getList(config);
+  }
+
+
+  // single
+  @GET
+  @Path("/{id}")
+  public SightEventDTO get(@PathParam("id") Long id,
+      @HeaderParam("Accept-Language") String acceptLanguage,
+      @HeaderParam("Content-Language") String contentLanguage) {
+    return service.get(id, contentLanguage != null ? contentLanguage : acceptLanguage);
+  }
+
+  @GET
+  @Path("/{id}/available-tickets")
+  public AvailableTicketNumberAssociationORO checkAvailability(@PathParam("id") Long id,
+      @QueryParam("date") @DateFormat final Date date) {
+    return service.checkAvailability(id, date, null);
+  }
+
+  @GET
+  @Path("/{id}/available-dates")
+  public AvailableDatesORO checkAvailableDates(@PathParam("id") Long id,
+      @QueryParam("date") String dateString) {
+    LocalDate date = null;
+    if (dateString != null) {
+      date = LocalDate.parse(dateString);
+    }
+    return service.checkAvailableDates(id, date);
+  }
+
   @PATCH
   @Path("/{id}/favourite")
   public SightEventDTO addToFavourite(@PathParam("id") Long id) {
@@ -160,6 +157,14 @@ public class MarketSightEventRestService {
   public Response removeFavourite(@PathParam("id") Long id) {
     service.removeFavourite(id);
     return Response.ok().build();
+  }
+
+
+  // misc
+  @GET
+  @Path("/filters")
+  public FiltersContainerDTO getFilters() {
+    return filterService.getForSightEvents();
   }
 
 }
