@@ -54,7 +54,7 @@ public class MarketSightEventRestService {
     var config = new SightEventPagedCollectionConfig();
     config.setCity(city);
     config.setDateFrom(fromDate);
-    config.setDateTo(fromDate);
+    config.setDateTo(toDate);
     config.setLanguage(lang);
     return service.getList(config);
   }
@@ -71,7 +71,7 @@ public class MarketSightEventRestService {
 
     var config = new SightEventPagedCollectionConfig();
     config.setDateFrom(fromDate);
-    config.setDateTo(fromDate);
+    config.setDateTo(toDate);
     config.setLanguage(lang);
     config.setLoggedUserFavourites();
     return service.getList(config);
