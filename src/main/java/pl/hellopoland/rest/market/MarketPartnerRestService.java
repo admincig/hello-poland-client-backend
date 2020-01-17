@@ -24,7 +24,7 @@ public class MarketPartnerRestService {
   PartnerServiceMarketAPI service;
 
   @GET
-  public PagedCollection list(
+  public PagedCollection<MarketPartnerDTO> list(
       @HeaderParam("Content-Language") String contentLanguage) {
     return service.list(RestService.parseLang(contentLanguage));
   }

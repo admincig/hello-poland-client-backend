@@ -70,18 +70,8 @@ public class SearchServiceMarketAPI {
     oro.sights = ss.entrySet().stream().map(entry -> {
       Sight s = tService.translateEntity(entry.getKey(), languageVersion);
       List<SightEvent> se = entry.getValue();
-      List<Category> categories = se.stream()
-          .filter(event -> event.getCategories() != null)
-          .flatMap(event -> event.getCategories().stream())
-          .map(SightEventCategory::getCategory)
-          .distinct()
-          .collect(toList());
-      List<Tag> tags = se.stream()
-          .filter(event -> event.getTags() != null)
-          .flatMap(event -> event.getTags().stream())
-          .map(SightEventTag::getTag)
-          .distinct()
-          .collect(toList());
+      List<Category> categories = getCategories(se);
+      List<Tag> tags = getTags(se);
 
       SightDTO dto = DtoMapper.getDTO(s);
       dto.sightEvents = se.stream()
@@ -101,6 +91,25 @@ public class SearchServiceMarketAPI {
       return dto;
     }).collect(toList());
     return oro;
+  }
+
+  private List<Tag> getTags(List<SightEvent> ses) {
+    return ses.stream()
+        .filter(event -> event.getTags() != null)
+        .flatMap(event -> event.getTags().stream())
+        .map(SightEventTag::getTag)
+        .distinct()
+        .collect(toList());
+  }
+
+  private List<Category> getCategories(List<SightEvent> ses) {
+    List<Category> categories = ses.stream()
+        .filter(event -> event.getCategories() != null)
+        .flatMap(event -> event.getCategories().stream())
+        .map(SightEventCategory::getCategory)
+        .distinct()
+        .collect(toList());
+    return categories;
   }
 
   @PermitAll

@@ -44,7 +44,8 @@ public class SightServiceMarketAPI {
   private TranslationService translationService;
 
   @PermitAll
-  public PagedCollection getList(SightPagedCollectionConfig config, String contentLanguageSymbol) {
+  public PagedCollection<SightDTO> getList(SightPagedCollectionConfig config,
+      String contentLanguageSymbol) {
     LanguageVersion language = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
     config.setOrderColumn("e.name");
     config.setOrderDirection("asc");
@@ -57,7 +58,7 @@ public class SightServiceMarketAPI {
     if (language != null) {
       dtos.forEach(dto -> dto.language = language.getLanuage());
     }
-    return new PagedCollection(dtos, bos.config);
+    return new PagedCollection<>(dtos, bos.config);
   }
 
   @PermitAll
@@ -129,11 +130,11 @@ public class SightServiceMarketAPI {
   };
 
   @PermitAll
-  public PagedCollection getRecommended(Integer count, LanguageVersion languageVersion) {
+  public PagedCollection<SightDTO> getRecommended(Integer count, LanguageVersion languageVersion) {
     SightPagedCollectionConfig config = prepareConfigForRandom(count);
     PagedEntityCollection<Sight> pagedCollection = service.getList(config, languageVersion);
     fetchSightEventPrices(pagedCollection.items);
-    return new PagedCollection(
+    return new PagedCollection<>(
         pagedCollection.items.stream()
             .map(minPriceMapper)
             .collect(Collectors.toList()),
@@ -182,7 +183,7 @@ public class SightServiceMarketAPI {
   }
 
   @RolesAllowed("user")
-  public PagedCollection favourites(SightPagedCollectionConfig config,
+  public PagedCollection<SightDTO> favourites(SightPagedCollectionConfig config,
       String contentLanguageSymbol) {
     if (userService.getLoggedUser() != null) {
       config.onlyFavourite(userService.getLoggedUser().getId());

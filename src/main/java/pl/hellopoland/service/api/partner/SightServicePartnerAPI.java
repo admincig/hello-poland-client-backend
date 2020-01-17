@@ -37,7 +37,7 @@ public class SightServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
-  public PagedCollection getList(String contentLanguageSymbol) {
+  public PagedCollection<SightDTO> getList(String contentLanguageSymbol) {
     LanguageVersion language = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
     List<Sight> bos = service.getActiveForPartner(language);
     var dtos = bos.stream().map(bo -> {
@@ -48,7 +48,7 @@ public class SightServicePartnerAPI {
     if (language != null) {
       dtos.forEach(dto -> dto.language = language.getLanuage());
     }
-    return new PagedCollection(dtos, null);
+    return new PagedCollection<>(dtos, null);
   }
 
   @RolesAllowed("partner")

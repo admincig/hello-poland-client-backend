@@ -25,14 +25,14 @@ public class PartnerServiceMarketAPI {
   TranslationService transService;
 
   @PermitAll
-  public PagedCollection list(LanguageVersion languageVersion) {
+  public PagedCollection<MarketPartnerDTO> list(LanguageVersion languageVersion) {
     PartnerPagedCollectionConfig config = new PartnerPagedCollectionConfig();
     config.setBlocked(false);
     PagedEntityCollection<Partner> pec = service.getList(config);
     pec.items = transService.translateEntities(pec.items, languageVersion);
     List<MarketPartnerDTO> dtos =
         pec.items.stream().map(DtoMapper::getMarketDTO).collect(Collectors.toList());
-    return new PagedCollection(dtos, config);
+    return new PagedCollection<>(dtos, config);
   }
 
   @PermitAll

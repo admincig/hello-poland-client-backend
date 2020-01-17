@@ -25,7 +25,7 @@ public class PartnerTagRestService {
   TagServicePartnerAPI service;
 
   @GET
-  public PagedCollection getCategories(
+  public PagedCollection<TagDTO> getCategories(
       @HeaderParam("Content-Language") String contentLanguage) {
     LanguageVersion lang = RestService.parseLang(contentLanguage);
     return service.pagedList(lang);

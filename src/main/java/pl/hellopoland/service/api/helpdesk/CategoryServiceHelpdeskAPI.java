@@ -34,12 +34,12 @@ public class CategoryServiceHelpdeskAPI {
   }
 
   @RolesAllowed("admin")
-  public PagedCollection pagedList(LanguageVersion language) {
+  public PagedCollection<CategoryDTO> pagedList(LanguageVersion language) {
     var config = new CategoryPagedCollectionConfig();
     var bos = service.pagedList(config);
     bos.items = tService.translateEntities(bos.items, language);
     List<CategoryDTO> dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
-    return new PagedCollection(dtos, bos.config);
+    return new PagedCollection<>(dtos, bos.config);
   }
 
   @RolesAllowed("admin")

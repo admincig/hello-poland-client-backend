@@ -37,7 +37,8 @@ public class PartnerSightEventRestService {
   SightEventServicePartnerAPI service;
 
   @GET
-  public PagedCollection getList(@HeaderParam("Accept-Language") String acceptLanguage,
+  public PagedCollection<SightEventDTO> getList(
+      @HeaderParam("Accept-Language") String acceptLanguage,
       @HeaderParam("Content-Language") String contentLanguage) {
     return service.getList(new SightEventPagedCollectionConfig(),
         contentLanguage != null ? contentLanguage : acceptLanguage);

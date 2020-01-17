@@ -40,7 +40,7 @@ public class HelpdeskSightRestService {
   }
 
   @GET
-  public PagedCollection list(
+  public PagedCollection<SightDTO> list(
       @HeaderParam("Content-Language") String contentLanguage) {
     return service.list(new SightPagedCollectionConfig(),
         RestService.parseLang(contentLanguage));

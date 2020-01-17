@@ -42,7 +42,7 @@ public class PartnerRestService {
 
   @GET
   @Path("/ushers")
-  public PagedCollection getUshers() {
+  public PagedCollection<UserDTO> getUshers() {
     return userService.getUshers();
   }
 

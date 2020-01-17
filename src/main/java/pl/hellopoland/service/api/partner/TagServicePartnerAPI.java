@@ -23,12 +23,12 @@ public class TagServicePartnerAPI {
   TranslationService tService;
 
   @RolesAllowed("partner")
-  public PagedCollection pagedList(LanguageVersion language) {
+  public PagedCollection<TagDTO> pagedList(LanguageVersion language) {
     var config = new TagPagedCollectionConfig();
     var bos = service.pagedList(config);
     bos.items = tService.translateEntities(bos.items, language);
     List<TagDTO> dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
-    return new PagedCollection(dtos, bos.config);
+    return new PagedCollection<>(dtos, bos.config);
   }
 
   @RolesAllowed("partner")

@@ -26,8 +26,8 @@ public class TicketDefinitionServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
-  public PagedCollection getList() {
-    return new PagedCollection(getTicketDefinitionsForLoggedUser(), null);
+  public PagedCollection<TicketDefinitionDTO> getList() {
+    return new PagedCollection<>(getTicketDefinitionsForLoggedUser(), null);
   }
 
   @RolesAllowed("partner")

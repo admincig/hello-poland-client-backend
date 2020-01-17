@@ -25,7 +25,7 @@ public class MarketCategoryRestService {
   CategoryServiceMarketAPI service;
 
   @GET
-  public PagedCollection getCategories(
+  public PagedCollection<CategoryDTO> getCategories(
       @HeaderParam("Content-Language") String contentLanguage) {
     LanguageVersion lang = RestService.parseLang(contentLanguage);
     return service.pagedList(lang);

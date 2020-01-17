@@ -36,7 +36,7 @@ public class MarketSightRestService {
   private FilterMarketAPI filterService;
 
   @GET
-  public PagedCollection get(@QueryParam("city") String city,
+  public PagedCollection<SightDTO> get(@QueryParam("city") String city,
       @HeaderParam("Accept-Language") String acceptLanguage,
       @HeaderParam("Content-Language") String contentLanguage) {
     var config = new SightPagedCollectionConfig();
@@ -69,7 +69,7 @@ public class MarketSightRestService {
 
   @GET
   @Path("/favourites")
-  public PagedCollection favourites(@HeaderParam("Accept-Language") String acceptLanguage,
+  public PagedCollection<SightDTO> favourites(@HeaderParam("Accept-Language") String acceptLanguage,
       @HeaderParam("Content-Language") String contentLanguage) {
     var config = new SightPagedCollectionConfig();
     config.onlyActive();
@@ -85,7 +85,7 @@ public class MarketSightRestService {
 
   @GET
   @Path("/recommended")
-  public PagedCollection recommended(
+  public PagedCollection<SightDTO> recommended(
       @HeaderParam("Content-Language") String contentLanguage,
       @QueryParam("count") @DefaultValue("6") Integer count) {
     LanguageVersion lang = RestService.parseLang(contentLanguage);

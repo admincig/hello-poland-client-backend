@@ -31,7 +31,7 @@ public class PartnerTicketDefinitionRestService {
   }
 
   @GET
-  public PagedCollection ticketDefinitions() {
+  public PagedCollection<TicketDefinitionDTO> ticketDefinitions() {
     return service.getList();
   }
 

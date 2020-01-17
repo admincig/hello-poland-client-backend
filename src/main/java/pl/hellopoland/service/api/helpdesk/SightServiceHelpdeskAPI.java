@@ -27,12 +27,12 @@ public class SightServiceHelpdeskAPI {
   private TranslationService tService;
 
   @RolesAllowed("admin")
-  public PagedCollection list(SightPagedCollectionConfig config,
+  public PagedCollection<SightDTO> list(SightPagedCollectionConfig config,
       LanguageVersion language) {
     config.onlyActive();
     PagedEntityCollection<Sight> bos = service.getList(config, language);
     var dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
-    return new PagedCollection(dtos, bos.config);
+    return new PagedCollection<>(dtos, bos.config);
   }
 
   @RolesAllowed("admin")

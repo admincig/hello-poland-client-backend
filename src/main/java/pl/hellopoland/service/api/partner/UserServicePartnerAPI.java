@@ -25,8 +25,7 @@ public class UserServicePartnerAPI {
   @RolesAllowed("partner")
   public UserORO me() {
     User bo = service.me();
-    var dto = new UserORO(bo);
-    return dto;
+    return new UserORO(bo);
   }
 
   @RolesAllowed("partner")
@@ -45,8 +44,8 @@ public class UserServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
-  public PagedCollection getUshers() {
-    return new PagedCollection(service.getUshers(), null);
+  public PagedCollection<UserDTO> getUshers() {
+    return new PagedCollection<>(service.getUshers(), null);
   }
 
   @RolesAllowed("partner")

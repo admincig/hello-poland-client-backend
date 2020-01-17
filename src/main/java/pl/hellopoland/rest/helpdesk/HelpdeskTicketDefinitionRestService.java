@@ -26,7 +26,8 @@ public class HelpdeskTicketDefinitionRestService {
   TicketDefinitionServiceHelpdeskAPI service;
 
   @GET
-  public PagedCollection ticketDefinitions(@QueryParam("partnerId") Long partnerId) {
+  public PagedCollection<TicketDefinitionDTO> ticketDefinitions(
+      @QueryParam("partnerId") Long partnerId) {
     return service.getList(partnerId);
   }
 

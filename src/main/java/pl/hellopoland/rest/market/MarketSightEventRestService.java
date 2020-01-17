@@ -42,25 +42,52 @@ public class MarketSightEventRestService {
   private FilterMarketAPI filterService;
 
   @GET
-  public PagedCollection getList(@QueryParam("city") String city,
+  public PagedCollection<SightEventDTO> list(@QueryParam("city") String city,
       @QueryParam("fromDate") @DateFormat Date fromDate,
       @QueryParam("toDate") @DateFormat Date toDate,
       @HeaderParam("Accept-Language") String acceptLanguage,
       @HeaderParam("Content-Language") String contentLanguage) {
+    LanguageVersion lang =
+        RestService.parseLang(contentLanguage != null ? contentLanguage : acceptLanguage);
+
     var config = new SightEventPagedCollectionConfig();
     config.setCity(city);
-    return service.getList(config, fromDate, toDate,
-        contentLanguage != null ? contentLanguage : acceptLanguage);
+    config.setDateFrom(fromDate);
+    config.setDateTo(fromDate);
+    config.setLanguage(lang);
+    return service.getList(config);
+  }
+
+  @GET
+  @Path("/favourites")
+  public PagedCollection<SightEventDTO> favourites(
+      @HeaderParam("Accept-Language") String acceptLanguage,
+      @QueryParam("fromDate") @DateFormat Date fromDate,
+      @QueryParam("toDate") @DateFormat Date toDate,
+      @HeaderParam("Content-Language") String contentLanguage) {
+    LanguageVersion lang =
+        RestService.parseLang(contentLanguage != null ? contentLanguage : acceptLanguage);
+
+    var config = new SightEventPagedCollectionConfig();
+    config.setDateFrom(fromDate);
+    config.setDateTo(fromDate);
+    config.setLanguage(lang);
+    config.setLoggedUserFavourites();
+    return service.getList(config);
   }
 
   @GET
   @Path("/promoted")
-  public PagedCollection getPromotedSightEvents(
+  public PagedCollection<SightEventDTO> promoted(
       @HeaderParam("Content-Language") String contentLanguage) {
-    SightEventPagedCollectionConfig config = new SightEventPagedCollectionConfig();
+    LanguageVersion lang = RestService.parseLang(contentLanguage);
+
+    var config = new SightEventPagedCollectionConfig();
+    config.setLanguage(lang);
     config.setPromotion(1, 2, 3);
     config.setOrderColumn("e.promotion, id");
-    return service.getPromoted(config, RestService.parseLang(contentLanguage));
+    config.setDateFrom(new Date());
+    return service.getList(config);
   }
 
   @GET
@@ -97,27 +124,35 @@ public class MarketSightEventRestService {
 
   @GET
   @Path("/recommended")
-  public PagedCollection recommended(
+  public PagedCollection<SightEventDTO> recommended(
       @HeaderParam("Content-Language") String contentLanguage,
       @QueryParam("count") @DefaultValue("6") Integer count) {
     LanguageVersion lang = RestService.parseLang(contentLanguage);
-    return service.getRecommended(count, lang);
+
+    var config = new SightEventPagedCollectionConfig();
+    config.setLanguage(lang);
+    config.setPageSize(6);
+    config.setOrderColumn("random()");
+    return service.getList(config);
   }
 
   @POST
   @Path("/personalized")
-  public PagedCollection personalized(
+  public PagedCollection<SightEventDTO> personalized(
       SightEventPagedCollectionConfig config,
       @HeaderParam("Content-Language") String contentLanguage,
       @QueryParam("count") @DefaultValue("6") Integer count) {
     LanguageVersion lang = RestService.parseLang(contentLanguage);
-    return service.getPersonalized(config, count, lang);
+    config.setPageSize(count);
+    config.setLanguage(lang);
+    return service.getPersonalized(config);
   }
 
   @PATCH
   @Path("/{id}/favourite")
   public SightEventDTO addToFavourite(@PathParam("id") Long id) {
-    return service.addFavourite(id);
+    service.addFavourite(id);
+    return get(id, "pl-pl", "pl-pl");
   }
 
   @DELETE
@@ -125,17 +160,6 @@ public class MarketSightEventRestService {
   public Response removeFavourite(@PathParam("id") Long id) {
     service.removeFavourite(id);
     return Response.ok().build();
-  }
-
-  @GET
-  @Path("/favourites")
-  public PagedCollection favourites(@HeaderParam("Accept-Language") String acceptLanguage,
-      @QueryParam("fromDate") @DateFormat Date fromDate,
-      @QueryParam("toDate") @DateFormat Date toDate,
-      @HeaderParam("Content-Language") String contentLanguage) {
-    LanguageVersion lang =
-        RestService.parseLang(contentLanguage != null ? contentLanguage : acceptLanguage);
-    return service.favourites(fromDate, toDate, lang);
   }
 
 }

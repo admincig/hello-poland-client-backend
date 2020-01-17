@@ -43,12 +43,13 @@ public class SightEventServiceHelpdeskAPI {
 
 
   @RolesAllowed("admin")
-  public PagedCollection list(SightEventPagedCollectionConfig config,
+  public PagedCollection<SightEventDTO> list(SightEventPagedCollectionConfig config,
       LanguageVersion language) {
     config.onlyActive();
-    PagedEntityCollection<SightEvent> bos = service.getList(config, language);
+    config.setLanguage(language);
+    PagedEntityCollection<SightEvent> bos = service.getList(config);
     var dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
-    return new PagedCollection(dtos, bos.config);
+    return new PagedCollection<>(dtos, bos.config);
   }
 
   @RolesAllowed("admin")

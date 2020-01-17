@@ -1,19 +1,29 @@
 package pl.hellopoland.config;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.text.WordUtils;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.enums.LanguageVersion;
 
 public class SightEventPagedCollectionConfig extends PagedCollectionConfig<SightEvent> {
 
+  public SightEventPagedCollectionConfig() {
+    this.setOrderColumn("e.name");
+  }
+
   private boolean currentPartner;
+  private boolean loggedUserFavourites;
   private boolean fetchCategories;
   private boolean fetchTags;
   private boolean fetchUsers;
+  private LanguageVersion language;
   private Set<Long> excludedIds;
+  private Date dateFrom;
+  private Date dateTo;
 
   @Override
   public String joins() {
@@ -142,6 +152,38 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
 
   public boolean isFetchTags() {
     return fetchTags;
+  }
+
+  public LanguageVersion getLanguage() {
+    return language;
+  }
+
+  public void setLanguage(LanguageVersion language) {
+    this.language = language;
+  }
+
+  public Date getDateFrom() {
+    return dateFrom;
+  }
+
+  public void setDateFrom(Date dateFrom) {
+    this.dateFrom = dateFrom;
+  }
+
+  public Date getDateTo() {
+    return dateTo;
+  }
+
+  public void setDateTo(Date dateTo) {
+    this.dateTo = dateTo;
+  }
+
+  public boolean isLoggedUserFavourites() {
+    return loggedUserFavourites;
+  }
+
+  public void setLoggedUserFavourites() {
+    this.loggedUserFavourites = true;
   }
 
 }

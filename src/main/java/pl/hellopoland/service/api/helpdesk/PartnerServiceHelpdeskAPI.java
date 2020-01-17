@@ -33,12 +33,12 @@ public class PartnerServiceHelpdeskAPI {
   }
 
   @RolesAllowed("admin")
-  public PagedCollection listPartners(PartnerPagedCollectionConfig config,
+  public PagedCollection<PartnerDTO> listPartners(PartnerPagedCollectionConfig config,
       LanguageVersion language) {
     PagedEntityCollection<Partner> bos = service.getList(config);
     bos.items = transService.translateEntities(bos.items, language);
     var dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
-    return new PagedCollection(dtos, bos.config);
+    return new PagedCollection<>(dtos, bos.config);
   }
 
   @RolesAllowed("admin")
@@ -55,7 +55,7 @@ public class PartnerServiceHelpdeskAPI {
           "Can not change the default language. Translation for language " + lang.getLanuage()
               + "doesn't exists");
     }
-    bo = service.changeDefaultLanguage(bo, lang);
+    service.changeDefaultLanguage(bo, lang);
     return get(id, lang);
   }
 
@@ -71,7 +71,7 @@ public class PartnerServiceHelpdeskAPI {
   @RolesAllowed("admin")
   public PartnerDTO update(PartnerDTO dto, LanguageVersion lang) {
     Partner bo = service.get(dto.id);
-    bo = service.update(bo, dto, lang);
+    service.update(bo, dto, lang);
     return get(dto.id, lang);
   }
 

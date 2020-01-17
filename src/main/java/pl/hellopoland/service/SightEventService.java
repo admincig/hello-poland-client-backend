@@ -83,10 +83,17 @@ public class SightEventService extends ServiceSuperclass {
         SightEvent.class).getResultList();
   }
 
-  public PagedEntityCollection<SightEvent> getList(SightEventPagedCollectionConfig config,
-      LanguageVersion language) {
+  public PagedEntityCollection<SightEvent> getList(SightEventPagedCollectionConfig config) {
+    if (config.getDateFrom() != null && config.getDateTo() != null
+        && config.getDateTo().before(config.getDateFrom())) {
+      throw new ConflictingException(
+          "toDate[" + config.getDateTo() + "] is before fromDate[" + config.getDateFrom() + "]");
+    }
     if (config.isCurrentPartner()) {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
+    }
+    if (config.isLoggedUserFavourites()) {
+      config.onlyFavourite(userService.getLoggedUser().getId());
     }
     List<SightEvent> sightEvents = getQuery(config).getResultList();
     sightEvents.stream().forEach(s -> {
@@ -104,8 +111,13 @@ public class SightEventService extends ServiceSuperclass {
           .collect(groupingBy(SightEventTag::getSightEvent, toSet()));
       sightEvents.forEach(se -> se.setTags(grouped.get(se)));
     }
-    if (language != null) {
-      sightEvents = translationService.translateEntities(sightEvents, language);
+    if (config.getLanguage() != null) {
+      sightEvents = translationService.translateEntities(sightEvents, config.getLanguage());
+    }
+    if (config.getDateFrom() != null || config.getDateTo() != null) {
+      HelloTicket hptClient = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
+      sightEvents = hptClient.getSightEventsInDateRange(new ArrayList<SightEvent>(sightEvents),
+          config.getDateFrom(), config.getDateTo());
     }
     // List<SightEvent> sightEvents = getQuery(config).getResultList().stream()
     // .sorted(sightEventDatesComparator()).collect(toList());
@@ -136,10 +148,11 @@ public class SightEventService extends ServiceSuperclass {
     seConfig.setCity(city);
     seConfig.setFetchCategories(true);
     seConfig.setFetchTags(true);
+    seConfig.setLanguage(languageVersion);
     if (favouriteOwnerId != null) {
       seConfig.onlyFavourite(favouriteOwnerId);
     }
-    PagedEntityCollection<SightEvent> sesPagedList = getList(seConfig, languageVersion);
+    PagedEntityCollection<SightEvent> sesPagedList = getList(seConfig);
     List<SightEvent> ses =
         sesPagedList.items.stream().filter(SightEvent::isAccessible).collect(toList());
     if (!ses.isEmpty()) {
