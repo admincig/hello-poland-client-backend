@@ -1,12 +1,12 @@
 package pl.hellopoland.service.api.helpdesk;
 
 import java.lang.System.Logger;
-import java.lang.System.Logger.Level;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import pl.hellopoland.bo.Partner;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.PartnerService;
@@ -27,10 +27,15 @@ public class TicketDefinitionServiceHelpdeskAPI {
         service.getTicketDefinitions(partnerId, service.getLoggedUser());
     List<Long> partnerHptIds = tds.stream().map(td -> td.partnerId).collect(Collectors.toList());
     var partners = partnerService.findByHptIds(partnerHptIds);
-    tds.forEach(td -> {
-      logger.log(Level.INFO, "working with partner id " + td.partnerId);
-      td.partnerId = partners.get(td.partnerId).getId();
-    });
+    for (var iter = tds.iterator(); iter.hasNext();) {
+      TicketDefinitionDTO td = iter.next();
+      Partner tdPartner = partners.get(td.partnerId);
+      if (tdPartner == null) {
+        iter.remove();
+      } else {
+        td.partnerId = tdPartner.getId();
+      }
+    }
     return new PagedCollection<>(tds, null);
   }
 
