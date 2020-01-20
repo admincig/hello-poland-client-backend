@@ -113,6 +113,7 @@ public class SightEventServiceMarketAPI {
     config.onlyActive();
     config.onlyPublished();
     config.onlyAvailable();
+    config.setDateFrom(new Date());
     return config;
   }
 
