@@ -10,10 +10,9 @@ import pl.hellopoland.bo.HptSubject;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.SightEvent;
-import pl.hellopoland.bo.TicketDefinition;
-import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole.Role;
+import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.AccessDeniedException;
@@ -155,7 +154,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     return tpds;
   }
 
- private void validateTicketDiscount(TicketPoolDefinitionDTO poolDef) {
+  private void validateTicketDiscount(TicketPoolDefinitionDTO poolDef) {
     SightEvent se = sightEventService.get(poolDef.sightEventId);
     BigDecimal commission = se.getPartner().getCommission();
 
