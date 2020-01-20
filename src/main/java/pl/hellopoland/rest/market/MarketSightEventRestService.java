@@ -112,7 +112,7 @@ public class MarketSightEventRestService {
     var config = new SightEventPagedCollectionConfig();
     config.setLanguage(lang);
     config.setPromotion(1, 2, 3);
-    config.setOrderColumn("e.promotion, id");
+    config.setOrderColumn("e.promotion, e.id");
     config.setDateFrom(new Date());
     return service.getList(config);
   }
