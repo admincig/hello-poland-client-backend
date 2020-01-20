@@ -11,6 +11,8 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
 import javax.ws.rs.InternalServerErrorException;
+import javax.ws.rs.NotFoundException;
+import org.apache.commons.lang3.RandomStringUtils;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.User;
@@ -53,7 +55,7 @@ public class UserService extends ServiceSuperclass {
       }
       return bo;
     } catch (NoResultException e) {
-      return create(email, null, picture, details);
+      return create(email, RandomStringUtils.randomAlphanumeric(10), picture, details);
     }
   }
 
@@ -61,7 +63,7 @@ public class UserService extends ServiceSuperclass {
       UserDetails details) {
     User bo = new User(Role.USER);
     bo.setEmail(email.toLowerCase());
-    bo.setPassword(password);
+    bo.changePassword(password);
     bo.setPicture(picture);
     bo.setDetails(details);
 
@@ -75,7 +77,7 @@ public class UserService extends ServiceSuperclass {
       throw new ConflictingException("Cannot create user with empty email");
     }
     bo.setEmail(email.toLowerCase());
-    bo.setPassword(passwordEncoder.encode(decodedPassword));
+    bo.changePassword(decodedPassword);
 
     UserDetails details = new UserDetails();
     details.setTosAgreement(tosAgreement);
@@ -92,7 +94,7 @@ public class UserService extends ServiceSuperclass {
       throw new ConflictingException("Cannot create user with empty email");
     }
     bo.setEmail(email.toLowerCase());
-    bo.setPassword(passwordEncoder.encode(decodedPassword));
+    bo.changePassword(decodedPassword);
     bo.setPicture(picture);
     bo.setPartner(partner);
 
@@ -158,6 +160,12 @@ public class UserService extends ServiceSuperclass {
     }
   }
 
+  public User get(Long id) {
+    return em.createQuery("from User where id=:id and deleted=false", User.class)
+        .setParameter("id", id).getResultStream().findFirst()
+        .orElseThrow(() -> new NotFoundException());
+  }
+
   public User findOneUndeletedByEmail(String email) {
     return em.createQuery("from User where lower(email) = :email and deleted=false", User.class)
         .setParameter("email", email.toLowerCase()).getSingleResult();
@@ -177,12 +185,24 @@ public class UserService extends ServiceSuperclass {
 
   public void changePasswordForLoggedPartner(UserAuthDTO userAuthDTO) {
     if (passwordEncoder.matches(userAuthDTO.oldPassword, getLoggedUser().getPassword())) {
-      getLoggedUser().setPassword(passwordEncoder.encode(userAuthDTO.password));
+      getLoggedUser().changePassword(userAuthDTO.password);
       Portal hpt = getPortal("Hello Ticket Cloud");
       HelloTicket ht = new HelloTicket(hpt.getUrl());
       ht.changePartnerPassword(userAuthDTO, getLoggedPartner().getHptToken());
     } else {
       throw new ConflictingException("Incorrect old password.");
+    }
+  }
+
+  public void updatePasswordForUser(User user, String password) {
+    user.changePassword(password);
+    Portal hpt = getPortal("Hello Ticket Cloud");
+    HelloTicket ht = new HelloTicket(hpt.getUrl());
+
+    var dto = new UserAuthDTO();
+    dto.password = password;
+    if (user.getPartner() != null) {
+      ht.changePartnerPassword(dto, user.getPartner().getHptToken());
     }
   }
 
@@ -194,7 +214,7 @@ public class UserService extends ServiceSuperclass {
 
   public void changePasswordForLoggedUser(UserAuthDTO userAuthDTO) {
     if (passwordEncoder.matches(userAuthDTO.oldPassword, getLoggedUser().getPassword())) {
-      getLoggedUser().setPassword(passwordEncoder.encode(userAuthDTO.password));
+      getLoggedUser().changePassword(userAuthDTO.password);
     } else {
       throw new ConflictingException("Incorrect old password.");
     }
@@ -226,7 +246,7 @@ public class UserService extends ServiceSuperclass {
   }
 
   public void attachToPartner(User user, Partner partner) {
-    user.setPassword(passwordEncoder.encode(user.getPassword()));
+    user.changePassword(user.getPassword());
     user.setPartner(partner);
     createUserRole(user, Role.USHER);
     createUserRole(user, Role.PARTNER);

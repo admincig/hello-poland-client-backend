@@ -228,7 +228,7 @@ public class DbFiller extends ServiceSuperclass {
     User user = new User(roles);
     user.setDetails(new UserDetails(name, null));
     user.setEmail(email);
-    user.setPassword(passwordEncoder.encode(password));
+    user.changePassword(password);
     user.setPartner(partner);
     user.setHptToken(hptToken);
     em.persist(user);

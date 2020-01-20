@@ -19,4 +19,11 @@ public class UserServiceHelpdeskAPI {
     var dto = new UserORO(bo);
     return dto;
   }
+
+  @RolesAllowed("admin")
+  public void updatePassword(Long id, String newPassword) {
+    User bo = service.get(id);
+    service.updatePasswordForUser(bo, newPassword);
+
+  }
 }
