@@ -71,9 +71,8 @@ public abstract class ServiceSuperclass {
     query += " order by " + config.getOrder();
     TypedQuery<E> tq = em.createQuery(query, config.entityClass());
     if (config.getConditions() != null) {
-      config.getConditions().forEach(condition -> {
-        tq.setParameter(condition.parameterName, condition.value);
-      });
+      config.getConditions()
+          .forEach(condition -> tq.setParameter(condition.parameterName, condition.value));
     }
     if (config.getPageSize() != null) {
       tq.setMaxResults(config.getPageSize());
@@ -83,7 +82,7 @@ public abstract class ServiceSuperclass {
     return tq;
   }
 
-  private <E extends ModelSuperclass> String humanReadable(String query,
+  private String humanReadable(String query,
       Collection<Entry> collection) {
     if (collection != null) {
       for (var e : collection) {
@@ -110,12 +109,6 @@ public abstract class ServiceSuperclass {
 
   public Partner getLoggedPartner() {
     return getLoggedUser().getPartner();
-  }
-
-  public Partner getHelloPolandPartner() {
-    String hpEmail = "biuro@hello-poland.pl";
-    return em.createQuery("from Partner where email=:hpEmail", Partner.class)
-        .setParameter("hpEmail", hpEmail).getSingleResult();
   }
 
   @AroundInvoke

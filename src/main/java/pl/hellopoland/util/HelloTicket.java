@@ -668,8 +668,6 @@ public class HelloTicket {
 
   public List<TicketPoolDefinitionDTO> updateTicketPoolDefinition(TicketPoolDefinitionDTO dto,
       String partnerAuthToken) {
-    // TODO wyciągać commision(prowizja)
-
     try {
       Jsonb jsonb = JsonbConfig.getInstance();
       JsonStructure json =
