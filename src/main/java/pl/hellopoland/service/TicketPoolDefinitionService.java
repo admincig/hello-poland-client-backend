@@ -1,5 +1,6 @@
 package pl.hellopoland.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -9,6 +10,8 @@ import pl.hellopoland.bo.HptSubject;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.bo.TicketDefinition;
+import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole.Role;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
@@ -123,6 +126,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
   }
 
   private List<TicketPoolDefinitionDTO> update(TicketPoolDefinitionDTO dto, HptSubject subject) {
+    validateTicketDiscount(dto);
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     TicketPoolDefinitionDTO tpd = hpt.getTicketPoolDefinition(subject.getHptToken(), dto.id);
@@ -151,4 +155,20 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     return tpds;
   }
 
+ private void validateTicketDiscount(TicketPoolDefinitionDTO poolDef) {
+    SightEvent se = sightEventService.get(poolDef.sightEventId);
+    BigDecimal commission = se.getPartner().getCommission();
+
+    Integer priceAfterDiscount = null;
+    BigDecimal padDecimal = null;
+    for (TicketDefinitionDTO ticketDef : poolDef.ticketDefinitions) {
+      priceAfterDiscount =
+          ticketDef.price - ticketDef.discountHplPart - ticketDef.discountPartnerPart;
+      padDecimal = new BigDecimal(priceAfterDiscount / 100);
+
+      if (padDecimal.compareTo(commission) < 0) {
+        throw new ConflictingException("Price after discount cannot be less than commission");
+      }
+    }
+  }
 }

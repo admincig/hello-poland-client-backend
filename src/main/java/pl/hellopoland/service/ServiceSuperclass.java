@@ -112,6 +112,12 @@ public abstract class ServiceSuperclass {
     return getLoggedUser().getPartner();
   }
 
+  public Partner getHelloPolandPartner() {
+    String hpEmail = "biuro@hello-poland.pl";
+    return em.createQuery("from Partner where email=:hpEmail", Partner.class)
+        .setParameter("hpEmail", hpEmail).getSingleResult();
+  }
+
   @AroundInvoke
   public Object catchNoResultException(InvocationContext ctx) throws Exception {
     try {

@@ -4,6 +4,7 @@ import java.util.List;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.service.TicketPoolDefinitionService;
 
@@ -30,6 +31,10 @@ public class TicketPoolDefinitionServicePartnerAPI {
 
   @RolesAllowed("partner")
   public List<TicketPoolDefinitionDTO> update(TicketPoolDefinitionDTO dto) {
+    for (TicketDefinitionDTO ticketDef : dto.ticketDefinitions) {
+      ticketDef.discountIsHplOwner = false;
+      ticketDef.discountHplPart = 0;
+    }
     return service.update(dto);
   }
 
