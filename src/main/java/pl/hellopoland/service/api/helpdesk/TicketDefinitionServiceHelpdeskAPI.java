@@ -1,5 +1,7 @@
 package pl.hellopoland.service.api.helpdesk;
 
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.security.RolesAllowed;
@@ -13,6 +15,7 @@ import pl.hellopoland.service.TicketDefinitionService;
 @Stateless
 public class TicketDefinitionServiceHelpdeskAPI {
 
+  final static Logger logger = System.getLogger(TicketDefinitionServiceHelpdeskAPI.class.getName());
   @Inject
   TicketDefinitionService service;
   @Inject
@@ -25,6 +28,7 @@ public class TicketDefinitionServiceHelpdeskAPI {
     List<Long> partnerHptIds = tds.stream().map(td -> td.partnerId).collect(Collectors.toList());
     var partners = partnerService.findByHptIds(partnerHptIds);
     tds.forEach(td -> {
+      logger.log(Level.INFO, "working with partner id " + td.partnerId);
       td.partnerId = partners.get(td.partnerId).getId();
     });
     return new PagedCollection<>(tds, null);
