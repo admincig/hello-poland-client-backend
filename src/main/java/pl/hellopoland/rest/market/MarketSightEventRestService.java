@@ -100,6 +100,7 @@ public class MarketSightEventRestService {
     LanguageVersion lang = RestService.parseLang(contentLanguage);
     config.setPageSize(count);
     config.setLanguage(lang);
+    config.setDateFrom(new Date());
     return service.getPersonalized(config);
   }
 
