@@ -161,8 +161,7 @@ public class HellopolandService extends ServiceSuperclass {
     // 5. sending emails to users (with theirs login and password):
     emailPassword.forEach((key, value) -> {
       try {
-        emailService.sendEmail(key, "Nowe konto w Hello Poland.",
-            "Twój login to " + key + ", hasło to " + value);
+        emailService.sendEmail(new Email(key, "Nowe konto w Hello Poland.", "Twój login to " + key + ", hasło to " + value));
       } catch (Exception e) {
         logger.log(System.Logger.Level.ERROR, e.getLocalizedMessage());
         ht.removePartner(partner.email, hptToken);

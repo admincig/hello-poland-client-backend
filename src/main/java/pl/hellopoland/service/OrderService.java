@@ -81,11 +81,14 @@ public class OrderService extends ServiceSuperclass {
     o.setUser(getLoggedUser());
     var details = iro.details;
     details.setUserLogged(getLoggedUser() != null);
+    Country country = Country.PL;
     try {
-      details.setCountry(Country.valueOf(details.getCountry()).name());
+      country = Country.valueOf(details.getCountry());
     } catch (IllegalArgumentException e) {
-      details.setCountry(Country.PL.name());
+      logger.log(Level.WARNING, "Setting country to PL: " + e.getMessage());
     }
+    details.setCountry(country.name());
+    details.setLanguage(country.getP24Language());
     o.setDetails(details);
     em.persist(o);
     Set<Long> atnaIds =
@@ -219,10 +222,10 @@ public class OrderService extends ServiceSuperclass {
         .collect(Collectors.summingInt(oe -> oe.getUnitPrice() * oe.getQuantity()));
     passageCart.setAmount(amount);
     passageCart.setCountry(o.getDetails().getCountry());
+    passageCart.setLanguage(o.getDetails().getLanguage());
     var currency = "PLN";
     passageCart.setCurrency(currency);
     passageCart.setDescription("Hello Poland, " + o.getHash());
-    passageCart.setLanguage("pl");
     var merchantId = Integer.valueOf(properties.getProperty("przelewy24.merchantId"));
     passageCart.setMerchantId(merchantId);
     passageCart.setSign(getP24Sign(o.getHash(), merchantId, amount, currency));

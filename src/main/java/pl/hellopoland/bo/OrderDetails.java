@@ -19,6 +19,7 @@ public class OrderDetails {
   private String zipCode;
   private String city;
   private String country;
+  private String language;
   @Enumerated(EnumType.STRING)
   private Platform platform;
   private boolean userLogged;
@@ -101,6 +102,14 @@ public class OrderDetails {
 
   public void setUserLogged(boolean userLogged) {
     this.userLogged = userLogged;
+  }
+
+  public String getLanguage() {
+    return language;
+  }
+
+  public void setLanguage(String language) {
+    this.language = language;
   }
 
 }

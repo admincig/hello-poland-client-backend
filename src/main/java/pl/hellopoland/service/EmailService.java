@@ -33,17 +33,17 @@ public class EmailService extends ServiceSuperclass {
       "mail.smtp.socketFactory.class";
   private static final String MAIL_SMTP_STARTTLS_ENABLE_PROPERTY = "mail.smtp.starttls.enable";
 
-  public void sendEmail(String recipientEmail, String subject, String msg)
+  public void sendEmail(Email parameterObject)
       throws MessagingException, UnsupportedEncodingException {
     var session = createSessionForEmail(getSessionProperties());
     var message = new MimeMessage(session);
     try {
       message
           .setFrom(new InternetAddress(System.getProperty(MAIL_USERNAME_PROPERTY), MAIL_PERSONAL));
-      message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
-      message.setSubject(subject, "UTF-8");
+      message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(parameterObject.recipientEmail));
+      message.setSubject(parameterObject.subject, "UTF-8");
       var mimeBodyPart = new MimeBodyPart();
-      mimeBodyPart.setText(msg, "UTF-8");
+      mimeBodyPart.setText(parameterObject.msg, "UTF-8");
       var multipart = new MimeMultipart();
       multipart.addBodyPart(mimeBodyPart);
       message.setContent(multipart);
@@ -65,7 +65,7 @@ public class EmailService extends ServiceSuperclass {
         logger.log(Level.INFO, "Email has not been sent to  " + addr);
       }
     } catch (MessagingException | UnsupportedEncodingException e) {
-      logger.log(System.Logger.Level.ERROR, "Sending an email failed: " + recipientEmail);
+      logger.log(System.Logger.Level.ERROR, "Sending an email failed: " + parameterObject.recipientEmail);
       logger.log(System.Logger.Level.ERROR, e.getLocalizedMessage());
       throw e;
     }

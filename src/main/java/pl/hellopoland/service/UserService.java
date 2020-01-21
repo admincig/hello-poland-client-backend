@@ -139,9 +139,8 @@ public class UserService extends ServiceSuperclass {
     orderService.anonymizeOrdersForUser(user);
     anonymizeUser(user);
     try {
-      emailService.sendEmail(hplMail, "Usunięto konto użytkownika", hplMailContent);
-      emailService.sendEmail(userEmail, "Usunięto konto w Hello Poland",
-          "Usunięto Twoje konto w systemie Hello Poland. Usunięto Twoje dane osobowe w związku z cofnięciem zgody na warunki zawarte w naszym regulaminie oraz polityce prywatności.");
+      emailService.sendEmail(new Email(hplMail, "Usunięto konto użytkownika", hplMailContent));
+      emailService.sendEmail(new Email(userEmail, "Usunięto konto w Hello Poland", "Usunięto Twoje konto w systemie Hello Poland. Usunięto Twoje dane osobowe w związku z cofnięciem zgody na warunki zawarte w naszym regulaminie oraz polityce prywatności."));
     } catch (Exception e) {
       logger.log(System.Logger.Level.ERROR, e.getLocalizedMessage());
       throw new InternalServerErrorException(
