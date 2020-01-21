@@ -1,6 +1,6 @@
 package pl.hellopoland.soap.p24.enums;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -47,7 +47,18 @@ public enum Country {
   BY(pl("Białoruś"), en("Belarus")),
   RU(pl("Rosja"), en("Russia"));
 
-  private Map<LanguageVersion, String> labels = new HashMap<>();
+  private static final Map<Country, String> p24Languages;
+  static {
+    p24Languages = new EnumMap<>(Country.class);
+    for (Country c : Country.values()) {
+      p24Languages.put(c, "en");
+    }
+    p24Languages.put(Country.PL, "pl");
+    p24Languages.put(Country.ES, "es");
+    p24Languages.put(Country.IT, "it");
+  }
+
+  private Map<LanguageVersion, String> labels = new EnumMap<>(LanguageVersion.class);
 
   private Country(Map.Entry<LanguageVersion, String>... entries) {
     if (entries != null) {
@@ -63,6 +74,10 @@ public enum Country {
 
   private static Map.Entry<LanguageVersion, String> en(String label) {
     return Map.entry(LanguageVersion.EN_GB, label);
+  }
+
+  public String getP24Language() {
+    return p24Languages.get(this);
   }
 
   public static List<CountryDTO> values(LanguageVersion lv) {
