@@ -11,6 +11,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import pl.hellopoland.annotation.DateFormat;
+import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.FilterDTO;
 import pl.hellopoland.dto.SearchResultDTO;
 import pl.hellopoland.rest.RestService;
@@ -36,16 +37,15 @@ public class MarketSearchRestService {
       @QueryParam("minPrice") Integer minPrice,
       @QueryParam("maxPrice") Integer maxPrice,
       @HeaderParam("Content-Language") String contentLanguage) {
-    return service.search(
-        RestService.parseLang(contentLanguage),
-        query,
-        categoryIds,
-        tagIds,
-        city,
-        fromDate,
-        toDate,
-        minPrice,
-        maxPrice);
+    SightEventPagedCollectionConfig seConfig = new SightEventPagedCollectionConfig();
+    seConfig.setLanguage(RestService.parseLang(contentLanguage));
+    seConfig.setSearchQuery(query);
+    seConfig.setCategoriesIdsArray(categoryIds);
+    seConfig.setTagsIdsArray(tagIds);
+    seConfig.setCity(city);
+    seConfig.setDateFrom(fromDate);
+    seConfig.setDateTo(toDate);
+    return service.search(seConfig, minPrice, maxPrice);
   }
 
   @GET
