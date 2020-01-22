@@ -110,8 +110,10 @@ public class PartnerService extends ServiceSuperclass {
   }
 
   public Partner update(Partner bo, MarketPartnerDTO dto, LanguageVersion lang) {
-    if (!translationService.isTranslated(bo, lang)) {
+    if (!translationService.isTranslated(bo.getAddress(), lang)) {
       translationService.createEntityLanguageVersion(bo.getAddress(), dto, lang);
+    }
+    if (!translationService.isTranslated(bo, lang)) {
       bo = em.merge(bo);
       translationService.createEntityLanguageVersion(bo, dto, lang);
     }
@@ -128,8 +130,11 @@ public class PartnerService extends ServiceSuperclass {
   }
 
   public Partner update(Partner bo, PartnerDTO dto, LanguageVersion lang) {
-    if (!translationService.isTranslated(bo, lang)) {
+    if (!translationService.isTranslated(bo.getAddress(), lang)) {
       translationService.createEntityLanguageVersion(bo.getAddress(), dto.location, lang);
+    }
+
+    if (!translationService.isTranslated(bo, lang)) {
       bo = em.merge(bo);
       translationService.createEntityLanguageVersion(bo, dto, lang);
     }

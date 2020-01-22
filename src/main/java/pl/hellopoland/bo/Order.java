@@ -20,6 +20,10 @@ import javax.validation.constraints.NotNull;
 @Table(name = "orders")
 public class Order extends ModelSuperclass {
 
+  public Order() {
+    this.generateHash();
+  }
+
   public enum Status {
     NEW, CONFIRMED, PROBLEM, CANCELLED;
   }

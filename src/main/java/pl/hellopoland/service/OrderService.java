@@ -68,29 +68,21 @@ public class OrderService extends ServiceSuperclass {
   public PassageCart create(OrderIRO iro) {
     throwIfExpiredTickets(iro);
     throwIfTicketPricesDontMatch(iro);
-    logger.log(Level.INFO, "-------Start creating order --------");
-    logger.log(Level.INFO, "Order details: " + iro.details.getEmail() + " "
-        + iro.details.getFirstName() + " " + iro.details.getLastName());
-    var orderEntriesLog = new StringBuilder();
-    iro.entries.forEach(entry -> orderEntriesLog.append("[").append("date:").append(entry.date)
-        .append("; quantity:").append(entry.quantity).append("; partnerAffiliateCode:")
-        .append(entry.partnerAffiliateCode).append("; TicketDefinition id:").append(entry.id)
-        .append("];\n"));
-    logger.log(Level.INFO, "Order entries: " + orderEntriesLog.toString());
+    writeSomeLogs(iro);
     Order o = new Order();
-    o.generateHash();
     o.setUser(getLoggedUser());
-    var details = iro.details;
-    details.setUserLogged(getLoggedUser() != null);
+    iro.details.setUserLogged(o.getUser() != null);
+
     Country country = Country.PL;
     try {
-      country = Country.valueOf(details.getCountry());
+      country = Country.valueOf(iro.details.getCountry());
     } catch (IllegalArgumentException e) {
       logger.log(Level.WARNING, "Setting country to PL: " + e.getMessage());
     }
-    details.setCountry(country.name());
-    details.setLanguage(country.getP24Language());
-    o.setDetails(details);
+    iro.details.setCountry(country.name());
+    iro.details.setLanguage(country.getP24Language());
+
+    o.setDetails(iro.details);
     em.persist(o);
     Set<Long> atnaIds =
         iro.entries.stream().filter(oe -> oe.quantity != null && oe.quantity.compareTo(0) > 0)
@@ -152,6 +144,18 @@ public class OrderService extends ServiceSuperclass {
     logger.log(Level.INFO, "Returned order id=" + o.getId() + "; p24cart id=" + cart.getId());
     logger.log(Level.INFO, "-------End creating order --------");
     return cart;
+  }
+
+  private void writeSomeLogs(OrderIRO iro) {
+    logger.log(Level.INFO, "-------Start creating order --------");
+    logger.log(Level.INFO, "Order details: " + iro.details.getEmail() + " "
+        + iro.details.getFirstName() + " " + iro.details.getLastName());
+    var orderEntriesLog = new StringBuilder();
+    iro.entries.forEach(entry -> orderEntriesLog.append("[").append("date:").append(entry.date)
+        .append("; quantity:").append(entry.quantity).append("; partnerAffiliateCode:")
+        .append(entry.partnerAffiliateCode).append("; TicketDefinition id:").append(entry.id)
+        .append("];\n"));
+    logger.log(Level.INFO, "Order entries: " + orderEntriesLog.toString());
   }
 
   private void throwIfTicketPricesDontMatch(OrderIRO iro) {
