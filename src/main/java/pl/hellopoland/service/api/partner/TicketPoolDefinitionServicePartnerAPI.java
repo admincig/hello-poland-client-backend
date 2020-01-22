@@ -32,8 +32,10 @@ public class TicketPoolDefinitionServicePartnerAPI {
   @RolesAllowed("partner")
   public List<TicketPoolDefinitionDTO> update(TicketPoolDefinitionDTO dto) {
     for (TicketDefinitionDTO ticketDef : dto.ticketDefinitions) {
-      ticketDef.discountIsHplOwner = false;
-      ticketDef.discountHplPart = 0;
+      if (ticketDef.discount != null) {
+        ticketDef.discount.isHplOwner = false;
+        ticketDef.discount.hplPart = 0;
+      }
     }
     return service.update(dto);
   }

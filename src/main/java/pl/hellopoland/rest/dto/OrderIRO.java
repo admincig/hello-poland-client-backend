@@ -14,5 +14,6 @@ public class OrderIRO {
     public Date date;
     public Integer quantity;
     public String partnerAffiliateCode;
+    public Integer price;
   }
 }

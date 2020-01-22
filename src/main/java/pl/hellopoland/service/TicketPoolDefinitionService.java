@@ -161,12 +161,14 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     Integer priceAfterDiscount = null;
     BigDecimal padDecimal = null;
     for (TicketDefinitionDTO ticketDef : poolDef.ticketDefinitions) {
-      priceAfterDiscount =
-          ticketDef.price - ticketDef.discountHplPart - ticketDef.discountPartnerPart;
-      padDecimal = new BigDecimal(priceAfterDiscount / 100);
+      if (ticketDef.discount != null) {
+        priceAfterDiscount =
+            ticketDef.price - ticketDef.discount.hplPart - ticketDef.discount.partnerPart;
+        padDecimal = new BigDecimal(priceAfterDiscount / 100);
 
-      if (padDecimal.compareTo(commission) < 0) {
-        throw new ConflictingException("Price after discount cannot be less than commission");
+        if (padDecimal.compareTo(commission) < 0) {
+          throw new ConflictingException("Price after discount cannot be less than commission");
+        }
       }
     }
   }

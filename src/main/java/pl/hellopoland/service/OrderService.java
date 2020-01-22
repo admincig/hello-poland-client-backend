@@ -67,6 +67,7 @@ public class OrderService extends ServiceSuperclass {
 
   public PassageCart create(OrderIRO iro) {
     throwIfExpiredTickets(iro);
+    throwIfTicketPricesDontMatch(iro);
     logger.log(Level.INFO, "-------Start creating order --------");
     logger.log(Level.INFO, "Order details: " + iro.details.getEmail() + " "
         + iro.details.getFirstName() + " " + iro.details.getLastName());
@@ -151,6 +152,29 @@ public class OrderService extends ServiceSuperclass {
     logger.log(Level.INFO, "Returned order id=" + o.getId() + "; p24cart id=" + cart.getId());
     logger.log(Level.INFO, "-------End creating order --------");
     return cart;
+  }
+
+  private void throwIfTicketPricesDontMatch(OrderIRO iro) {
+    List<OrderEntryIRO> entriesWithPrice = iro.entries.stream()
+        .filter(oe -> oe.price != null)
+        .collect(Collectors.toList());
+    Set<Long> ids = entriesWithPrice.stream()
+        .map(oe -> oe.id)
+        .collect(Collectors.toSet());
+
+    HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
+    List<TicketDefinitionDTO> tds = hpt.getTicketDefinitions(ids);
+    for (TicketDefinitionDTO td : tds) {
+      for (OrderEntryIRO oe : iro.entries) {
+        if (oe.id.equals(td.atnaId)) {
+          if (!oe.price.equals(td.getRealPrice())) {
+            throw new ConflictingException(
+                "Cena biletu " + td.atnaId + ": " + td.name + " uległa zmianie.");
+          }
+          break;
+        }
+      }
+    }
   }
 
   private void throwIfExpiredTickets(OrderIRO iro) {

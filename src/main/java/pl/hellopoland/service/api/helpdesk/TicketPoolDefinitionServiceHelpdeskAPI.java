@@ -36,7 +36,9 @@ public class TicketPoolDefinitionServiceHelpdeskAPI {
   @RolesAllowed("admin")
   public List<TicketPoolDefinitionDTO> update(TicketPoolDefinitionDTO dto) {
     for (TicketDefinitionDTO ticketDef : dto.ticketDefinitions) {
-      ticketDef.discountIsHplOwner = true;
+      if (ticketDef.discount != null) {
+        ticketDef.discount.isHplOwner = true;
+      }
     }
     return service.update(dto);
   }
