@@ -45,6 +45,7 @@ public class PartnerServiceHelpdeskAPI {
   public void deleteLanguageVersion(Long id, LanguageVersion lang) {
     Partner bo = service.get(id);
     transService.deleteEntityTranslations(bo, lang);
+    transService.deleteEntityTranslations(bo.getAddress(), lang);
   }
 
   @RolesAllowed("admin")
