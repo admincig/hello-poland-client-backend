@@ -166,16 +166,18 @@ public class OrderService extends ServiceSuperclass {
         .map(oe -> oe.id)
         .collect(Collectors.toSet());
 
-    HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
-    List<TicketDefinitionDTO> tds = hpt.getTicketDefinitions(ids);
-    for (TicketDefinitionDTO td : tds) {
-      for (OrderEntryIRO oe : iro.entries) {
-        if (oe.id.equals(td.atnaId)) {
-          if (!oe.price.equals(td.getRealPrice())) {
-            throw new ConflictingException(
-                "Cena biletu " + td.atnaId + ": " + td.name + " uległa zmianie.");
+    if (!ids.isEmpty()) {
+      HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
+      List<TicketDefinitionDTO> tds = hpt.getTicketDefinitions(ids);
+      for (TicketDefinitionDTO td : tds) {
+        for (OrderEntryIRO oe : iro.entries) {
+          if (oe.id.equals(td.atnaId)) {
+            if (!oe.price.equals(td.getRealPrice())) {
+              throw new ConflictingException(
+                  "Cena biletu " + td.atnaId + ": " + td.name + " uległa zmianie.");
+            }
+            break;
           }
-          break;
         }
       }
     }
