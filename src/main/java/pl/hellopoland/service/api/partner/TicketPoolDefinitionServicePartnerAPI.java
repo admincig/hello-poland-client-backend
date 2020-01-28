@@ -33,8 +33,7 @@ public class TicketPoolDefinitionServicePartnerAPI {
   public List<TicketPoolDefinitionDTO> update(TicketPoolDefinitionDTO dto) {
     for (TicketDefinitionDTO ticketDef : dto.ticketDefinitions) {
       if (ticketDef.discount != null) {
-        ticketDef.discount.isHplOwner = false;
-        ticketDef.discount.hplPart = 0;
+        ticketDef.discount.isCustomCommision = false;
       }
     }
     return service.update(dto);

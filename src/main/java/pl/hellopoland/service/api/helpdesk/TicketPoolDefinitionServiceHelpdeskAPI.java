@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.service.PartnerService;
 import pl.hellopoland.service.TicketPoolDefinitionService;
@@ -35,11 +34,6 @@ public class TicketPoolDefinitionServiceHelpdeskAPI {
 
   @RolesAllowed("admin")
   public List<TicketPoolDefinitionDTO> update(TicketPoolDefinitionDTO dto) {
-    for (TicketDefinitionDTO ticketDef : dto.ticketDefinitions) {
-      if (ticketDef.discount != null) {
-        ticketDef.discount.isHplOwner = true;
-      }
-    }
     return service.update(dto);
   }
 
