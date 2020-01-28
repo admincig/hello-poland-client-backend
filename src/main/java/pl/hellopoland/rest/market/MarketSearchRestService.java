@@ -43,6 +43,9 @@ public class MarketSearchRestService {
     seConfig.setCategoriesIdsArray(categoryIds);
     seConfig.setTagsIdsArray(tagIds);
     seConfig.setCity(city);
+    if (fromDate == null) {
+      fromDate = new Date();
+    }
     seConfig.setDateFrom(fromDate);
     seConfig.setDateTo(toDate);
     return service.search(seConfig, minPrice, maxPrice);
