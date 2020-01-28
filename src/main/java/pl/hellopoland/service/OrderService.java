@@ -172,7 +172,7 @@ public class OrderService extends ServiceSuperclass {
       for (TicketDefinitionDTO td : tds) {
         for (OrderEntryIRO oe : iro.entries) {
           if (oe.id.equals(td.atnaId)) {
-            if (!oe.price.equals(td.getRealPrice())) {
+            if (!oe.price.equals(td.price)) {
               throw new ConflictingException(
                   "Cena biletu " + td.atnaId + ": " + td.name + " uległa zmianie.");
             }
