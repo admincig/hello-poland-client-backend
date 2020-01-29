@@ -45,7 +45,7 @@ public class AnalyticsService extends ServiceSuperclass {
         "ID PARTNERA P24",
         "NAZWA PARTNERA", "AFILIACJA", "WARTOŚĆ", "PROWIZJA", "WALUTA", "NR TRANSAKCJI P24",
         "TYTUŁ PRZELEWU P24", "NAZWA UŻUTKOWNIKA", "TELEON", "ADRES EMAIL", "PLATFORMA",
-        "ZALOGOWANY", "NAZWA OFERTY", "DATA OFERTY", "ILOŚĆ", "NAZWA BILETÓW");
+        "ZALOGOWANY", "NAZWA OFERTY", "DATA OFERTY", "ILOŚĆ", "NAZWA BILETÓW", "PROMOCJA");
 
     var orders = orderService.getOrdersInDateRange(fromDate, toDate,
         getLoggedUser().hasRole(UserRole.Role.ADMIN) ? null : getLoggedPartner());
@@ -84,7 +84,8 @@ public class AnalyticsService extends ServiceSuperclass {
           sightEvent.getName(),
           DATE_FORMATER.format(dateEntry.getDate()),
           String.valueOf(oe.getQuantity()),
-          oe.getName());
+          oe.getName(),
+          String.valueOf(oe.getDiscount() != null));
     }
     return csvFile;
   }
