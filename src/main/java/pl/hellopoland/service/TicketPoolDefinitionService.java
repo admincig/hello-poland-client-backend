@@ -12,6 +12,7 @@ import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole.Role;
+import pl.hellopoland.dto.DiscountTypeDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
@@ -162,8 +163,13 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     BigDecimal padDecimal = null;
     for (TicketDefinitionDTO ticketDef : poolDef.ticketDefinitions) {
       if (ticketDef.discount != null) {
-        priceAfterDiscount =
-            ticketDef.price - ticketDef.discount.hplPart - ticketDef.discount.partnerPart;
+        int amount;
+        if (ticketDef.discount.type == DiscountTypeDTO.FLAT) {
+          amount = ticketDef.discount.value;
+        } else {
+          amount = (int) (1.0 * ticketDef.price * ticketDef.discount.value / 100);
+        }
+        priceAfterDiscount = ticketDef.price - amount;
         padDecimal = new BigDecimal(priceAfterDiscount / 100);
 
         if (padDecimal.compareTo(commission) < 0) {

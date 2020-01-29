@@ -29,6 +29,7 @@ import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.persistence.TypedQuery;
 import javax.ws.rs.core.MediaType;
+import pl.hellopoland.bo.Discount;
 import pl.hellopoland.bo.Order;
 import pl.hellopoland.bo.Order.Status;
 import pl.hellopoland.bo.OrderDateEntry;
@@ -117,7 +118,13 @@ public class OrderService extends ServiceSuperclass {
             OrderEntry oe = new OrderEntry();
             oe.setName(ticket.name);
             oe.setQuantity(oeIRO.quantity);
-            oe.setUnitPrice(ticket.price);
+            oe.setUnitPrice(ticket.originalPrice);
+            if (ticket.discount != null) {
+              oe.setDiscount(new Discount());
+              oe.getDiscount().setPrice(ticket.discount.price);
+              oe.getDiscount().setHplPart(ticket.discount.hplPart);
+              oe.getDiscount().setPartnerPart(ticket.discount.partnerPart);
+            }
             oe.setDateEntry(dateEntry);
             oe.setExternalDefinitionId(ticket.id);
             oe.setPoolId(ticket.poolId);
@@ -249,7 +256,7 @@ public class OrderService extends ServiceSuperclass {
     passageCart.setSandbox(Boolean.parseBoolean(properties.getProperty("przelewy24.isSandbox")));
     List<OrderEntry> orderEntries = gatherOrderEntries(o.getEntries());
     var amount = orderEntries.stream()
-        .collect(Collectors.summingInt(oe -> oe.getUnitPrice() * oe.getQuantity()));
+        .collect(Collectors.summingInt(oe -> oe.getRealPrice() * oe.getQuantity()));
     passageCart.setAmount(amount);
     passageCart.setCountry(o.getDetails().getCountry());
     passageCart.setLanguage(o.getDetails().getLanguage());

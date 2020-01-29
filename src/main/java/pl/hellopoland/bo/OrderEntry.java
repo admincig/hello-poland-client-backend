@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.ElementCollection;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
@@ -23,6 +24,8 @@ public class OrderEntry extends ModelSuperclass {
   private Integer unitPrice;
   @NotNull
   private String name;
+  @Embedded
+  private Discount discount;
   private Long externalId;
   private Long externalDefinitionId;
   private Long poolId;
@@ -106,6 +109,14 @@ public class OrderEntry extends ModelSuperclass {
     return unitPrice * quantity;
   }
 
+  public Discount getDiscount() {
+    return discount;
+  }
+
+  public void setDiscount(Discount discount) {
+    this.discount = discount;
+  }
+
   public void addNumber(String number) {
     if (this.numbers == null) {
       this.numbers = new ArrayList<>();
@@ -139,7 +150,12 @@ public class OrderEntry extends ModelSuperclass {
         return false;
       }
     }
-    if (!this.unitPrice.equals(dto.price)) {
+    int dtoPrice = dto.price;
+    if (dto.discount != null) {
+      dtoPrice = dto.discount.price;
+    }
+
+    if (getRealPrice() != dtoPrice) {
       // System.out.println("this.unitPrice != dto.price");
       // System.out.println("this.unitPrice= " + this.unitPrice);
       // System.out.println("dto.price= " + dto.price);
@@ -152,5 +168,13 @@ public class OrderEntry extends ModelSuperclass {
       return false;
     }
     return true;
+  }
+
+  public Integer getRealPrice() {
+    int thisPrice = this.unitPrice;
+    if (this.discount != null) {
+      thisPrice = this.discount.getPrice();
+    }
+    return thisPrice;
   }
 }

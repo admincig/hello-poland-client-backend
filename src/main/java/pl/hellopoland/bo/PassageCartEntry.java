@@ -51,13 +51,20 @@ public class PassageCartEntry extends ModelSuperclass {
   }
 
   private void setTargetAmountAndCommission(OrderEntry oe) {
+    var totalOriginal = new BigDecimal(oe.getUnitPrice() * oe.getQuantity());
+    var totalDiscounted = new BigDecimal(oe.getRealPrice() * oe.getQuantity());
     var hundred = new BigDecimal("100");
-    var total = new BigDecimal(oe.getUnitPrice() * oe.getQuantity());
-    this.commission = total
+    var hplPartMultiplied = BigDecimal.ZERO;
+    if (oe.getDiscount() != null) {
+      hplPartMultiplied = new BigDecimal(oe.getQuantity() * oe.getDiscount().getHplPart());
+    }
+    this.commission = totalOriginal
         .multiply(oe.getDateEntry().getSightEntry().getSightEvent().getPartner().getCommission())
-        .divide(hundred);
+        .divide(hundred)
+        .subtract(hplPartMultiplied);
     this.targetAmount =
-        total.subtract(this.commission).setScale(0, RoundingMode.HALF_EVEN).intValue();
+        totalDiscounted.subtract(this.commission)
+            .setScale(0, RoundingMode.HALF_EVEN).intValue();
   }
 
   public PassageCart getPassageCart() {
