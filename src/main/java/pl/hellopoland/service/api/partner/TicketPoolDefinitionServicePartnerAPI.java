@@ -33,7 +33,7 @@ public class TicketPoolDefinitionServicePartnerAPI {
   public List<TicketPoolDefinitionDTO> update(TicketPoolDefinitionDTO dto) {
     for (TicketDefinitionDTO ticketDef : dto.ticketDefinitions) {
       if (ticketDef.discount != null) {
-        ticketDef.discount.isCustomCommision = false;
+        ticketDef.discount.isCustomCommission = false;
       }
     }
     return service.update(dto);
