@@ -1,6 +1,5 @@
 package pl.hellopoland.service.api.partner;
 
-import java.util.List;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -30,7 +29,7 @@ public class TicketPoolDefinitionServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
-  public List<TicketPoolDefinitionDTO> update(TicketPoolDefinitionDTO dto) {
+  public TicketPoolDefinitionDTO update(TicketPoolDefinitionDTO dto) {
     for (TicketDefinitionDTO ticketDef : dto.ticketDefinitions) {
       if (ticketDef.discount != null) {
         ticketDef.discount.isCustomCommission = false;
