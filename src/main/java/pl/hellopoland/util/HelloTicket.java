@@ -666,14 +666,14 @@ public class HelloTicket {
     private static final long serialVersionUID = 6554050835860859011L;
   }
 
-  public List<TicketPoolDefinitionDTO> updateTicketPoolDefinition(TicketPoolDefinitionDTO dto,
+  public TicketPoolDefinitionDTO updateTicketPoolDefinition(TicketPoolDefinitionDTO dto,
       String partnerAuthToken) {
     try {
       Jsonb jsonb = JsonbConfig.getInstance();
       JsonStructure json =
           put("/v1/ticket-pool-definitions/" + dto.id, jsonb.toJson(dto), partnerAuthToken);
 
-      return jsonb.fromJson(json.toString(), ListOfTicketPoolDefinitionDTOs.class);
+      return jsonb.fromJson(json.toString(), TicketPoolDefinitionDTO.class);
     } catch (Exception e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
       if (e.getMessage() != null && e.getMessage().contains("400")) {

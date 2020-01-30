@@ -31,7 +31,7 @@ public class HelpdeskTicketPoolDefinitionRestService {
 
   @PUT
   @Path("/{id}")
-  public List<TicketPoolDefinitionDTO> update(@PathParam("id") Long id,
+  public TicketPoolDefinitionDTO update(@PathParam("id") Long id,
       TicketPoolDefinitionDTO dto) {
     dto.id = id;
     return service.update(dto);

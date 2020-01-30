@@ -116,7 +116,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     return hpt.checkAvailableDates(hptId, date, halfYearLater);
   }
 
-  public List<TicketPoolDefinitionDTO> update(TicketPoolDefinitionDTO dto) {
+  public TicketPoolDefinitionDTO update(TicketPoolDefinitionDTO dto) {
     User logged = getLoggedUser();
     if (logged.hasRole(Role.ADMIN)) {
       return update(dto, logged);
@@ -125,7 +125,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     }
   }
 
-  private List<TicketPoolDefinitionDTO> update(TicketPoolDefinitionDTO dto, HptSubject subject) {
+  private TicketPoolDefinitionDTO update(TicketPoolDefinitionDTO dto, HptSubject subject) {
     validateTicketDiscount(dto);
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
@@ -157,22 +157,21 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
 
   private void validateTicketDiscount(TicketPoolDefinitionDTO poolDef) {
     SightEvent se = sightEventService.get(poolDef.sightEventId);
-    BigDecimal commission = se.getPartner().getCommission();
+    BigDecimal commissionPercent = se.getPartner().getCommission();
 
-    Integer priceAfterDiscount = null;
-    BigDecimal padDecimal = null;
     for (TicketDefinitionDTO ticketDef : poolDef.ticketDefinitions) {
       if (ticketDef.discount != null) {
-        int amount;
         if (ticketDef.discount.type == DiscountTypeDTO.FLAT) {
-          amount = ticketDef.discount.value;
+          ticketDef.discount.amount = ticketDef.discount.value;
         } else {
-          amount = (int) (1.0 * ticketDef.price * ticketDef.discount.value / 100);
+          ticketDef.discount.amount =
+              (int) (1.0 * ticketDef.originalPrice * ticketDef.discount.value / 100);
         }
-        priceAfterDiscount = ticketDef.price - amount;
-        padDecimal = new BigDecimal(priceAfterDiscount / 100);
-
-        if (padDecimal.compareTo(commission) < 0) {
+        ticketDef.discount.price = ticketDef.originalPrice - ticketDef.discount.amount;
+        BigDecimal commissionAmount = commissionPercent
+            .multiply(new BigDecimal(ticketDef.originalPrice)).divide(new BigDecimal(100));
+        BigDecimal priceAfterDiscount = new BigDecimal(ticketDef.discount.price);
+        if (priceAfterDiscount.compareTo(commissionAmount) < 0) {
           throw new ConflictingException("Price after discount cannot be less than commission");
         }
       }

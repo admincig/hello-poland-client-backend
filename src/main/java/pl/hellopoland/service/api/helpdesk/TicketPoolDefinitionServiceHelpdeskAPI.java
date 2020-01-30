@@ -33,7 +33,7 @@ public class TicketPoolDefinitionServiceHelpdeskAPI {
   }
 
   @RolesAllowed("admin")
-  public List<TicketPoolDefinitionDTO> update(TicketPoolDefinitionDTO dto) {
+  public TicketPoolDefinitionDTO update(TicketPoolDefinitionDTO dto) {
     return service.update(dto);
   }
 
