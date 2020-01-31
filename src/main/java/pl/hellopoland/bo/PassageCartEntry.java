@@ -61,7 +61,7 @@ public class PassageCartEntry extends ModelSuperclass {
     this.commission = totalOriginal
         .multiply(oe.getDateEntry().getSightEntry().getSightEvent().getPartner().getCommission())
         .divide(hundred)
-        .subtract(hplPartMultiplied);
+        .subtract(hplPartMultiplied).max(BigDecimal.ZERO);
     this.targetAmount =
         totalDiscounted.subtract(this.commission)
             .setScale(0, RoundingMode.HALF_EVEN).intValue();
