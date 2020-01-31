@@ -106,7 +106,7 @@ public class OrderEntry extends ModelSuperclass {
   }
 
   public Integer getSum() {
-    return unitPrice * quantity;
+    return getRealPrice() * quantity;
   }
 
   public Discount getDiscount() {

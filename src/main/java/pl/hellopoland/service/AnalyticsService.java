@@ -60,7 +60,7 @@ public class AnalyticsService extends ServiceSuperclass {
       Platform platform = oDetails.getPlatform();
 
       var hundred = new BigDecimal("100");
-      var total = new BigDecimal(oe.getUnitPrice() * oe.getQuantity()).divide(hundred);
+      var total = new BigDecimal(oe.getSum()).divide(hundred);
       BigDecimal commissionVal =
           total.multiply(commission).divide(hundred).setScale(2, RoundingMode.HALF_EVEN);
 
