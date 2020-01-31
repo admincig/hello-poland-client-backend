@@ -172,7 +172,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
             .multiply(new BigDecimal(ticketDef.originalPrice)).divide(new BigDecimal(100));
         BigDecimal priceAfterDiscount = new BigDecimal(ticketDef.discount.price);
         if (priceAfterDiscount.compareTo(commissionAmount) < 0) {
-          throw new ConflictingException("Price after discount cannot be less than commission");
+          throw new ConflictingException("Cena po rabacie nie może być mniejsza niż prowizja");
         }
       }
     }
