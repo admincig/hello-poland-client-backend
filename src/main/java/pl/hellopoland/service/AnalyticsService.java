@@ -30,6 +30,8 @@ public class AnalyticsService extends ServiceSuperclass {
   final static String PATH =
       properties.getProperty("dms.root.path") + File.separator + "analitics" + File.separator;
   final static SimpleDateFormat DATE_FORMATER = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+  final static BigDecimal HUNDRED = new BigDecimal("100");
+
 
   @Inject
   OrderService orderService;
@@ -56,17 +58,11 @@ public class AnalyticsService extends ServiceSuperclass {
       Partner partner = sightEvent.getPartner();
       Order order = sightEntry.getOrder();
       OrderDetails oDetails = order.getDetails();
-      BigDecimal commission = partner.getCommission();
+      BigDecimal commissionPercent = partner.getCommission();
       Platform platform = oDetails.getPlatform();
+      BigDecimal commission = calculateCommission(commissionPercent, oe);
+      BigDecimal total = new BigDecimal(oe.getSum()).divide(HUNDRED);
 
-      var hundred = new BigDecimal("100");
-      var total = new BigDecimal(oe.getSum()).divide(hundred);
-      var originalTotal = new BigDecimal(oe.getUnitPrice() * oe.getQuantity()).divide(hundred);
-      BigDecimal commissionVal =
-          originalTotal.multiply(commission).divide(hundred).setScale(2, RoundingMode.HALF_EVEN);
-      if (oe.getDiscount() != null) {
-        commissionVal = commissionVal.subtract(new BigDecimal(oe.getDiscount().getHplPart()));
-      }
       writeCsvRow(csvFile.toPath(),
           order.getHash(),
           DATE_FORMATER.format(order.getDate()),
@@ -75,7 +71,7 @@ public class AnalyticsService extends ServiceSuperclass {
           partner.getName(),
           oe.getPartnerAffiliateCode() != null ? "afiliacja" : "",
           String.valueOf(total).replace(".", ","),
-          String.valueOf(commissionVal).replace(".", ","),
+          String.valueOf(commission).replace(".", ","),
           order.getP24Currency(),
           order.getP24OrderId(),
           order.getP24Statement(),
@@ -91,6 +87,18 @@ public class AnalyticsService extends ServiceSuperclass {
           String.valueOf(oe.getDiscount() != null));
     }
     return csvFile;
+  }
+
+  private BigDecimal calculateCommission(BigDecimal commissionPercent, OrderEntry oe) {
+    var originalTotal = new BigDecimal(oe.getUnitPrice() * oe.getQuantity());
+    BigDecimal commissionVal =
+        originalTotal.multiply(commissionPercent).divide(HUNDRED).setScale(2,
+            RoundingMode.HALF_EVEN);
+    if (oe.getDiscount() != null) {
+      commissionVal = commissionVal.subtract(new BigDecimal(oe.getDiscount().getHplPart()));
+    }
+    commissionVal = commissionVal.divide(HUNDRED);
+    return commissionVal;
   }
 
   private void writeCsvRow(Path path, String... strings) {
