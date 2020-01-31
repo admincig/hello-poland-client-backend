@@ -64,7 +64,9 @@ public class AnalyticsService extends ServiceSuperclass {
       var originalTotal = new BigDecimal(oe.getUnitPrice() * oe.getQuantity()).divide(hundred);
       BigDecimal commissionVal =
           originalTotal.multiply(commission).divide(hundred).setScale(2, RoundingMode.HALF_EVEN);
-
+      if (oe.getDiscount() != null) {
+        commissionVal = commissionVal.subtract(new BigDecimal(oe.getDiscount().getHplPart()));
+      }
       writeCsvRow(csvFile.toPath(),
           order.getHash(),
           DATE_FORMATER.format(order.getDate()),
