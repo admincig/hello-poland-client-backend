@@ -25,6 +25,8 @@ public class MailingListService extends ServiceSuperclass {
 
   private static String sendInBlueKey = properties.getProperty("sendInBlue.secret.key");
   private Long sendInBlueListId = Long.valueOf(properties.getProperty("sendInBlue.list.id"));
+  private Long sendInBlueConfirmationTemplateId =
+      Long.valueOf(properties.getProperty("sendInBlue.confirmation.template.id"));
 
   ContactsApi contactsApi = new ContactsApi();
   SmtpApi smtpApi = new SmtpApi();
@@ -82,7 +84,7 @@ public class MailingListService extends ServiceSuperclass {
 
   public void sendConfirmationMail(String email) {
     SendSmtpEmail confirmationMail = new SendSmtpEmail();
-    confirmationMail.setTemplateId(4l);
+    confirmationMail.setTemplateId(sendInBlueConfirmationTemplateId);
     confirmationMail.setTo(List.of(new SendSmtpEmailTo().email(email)));
     try {
       smtpApi.sendTransacEmail(confirmationMail);
