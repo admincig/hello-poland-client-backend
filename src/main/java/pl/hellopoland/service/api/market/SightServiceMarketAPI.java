@@ -93,8 +93,10 @@ public class SightServiceMarketAPI {
             se.partnerAffiliateCode = null;
             return se;
           }).collect(Collectors.toList());
-      dto.minPrice = dto.sightEvents.stream().min(Comparator.comparing(seDto -> seDto.minPrice))
-          .map(seDto -> seDto.minPrice).orElse(null);
+      var cheapestSE =
+          dto.sightEvents.stream().min(Comparator.comparing(seDto -> seDto.minPrice)).get();
+      dto.minPrice = cheapestSE.minPrice;
+      dto.minDiscountPrice = cheapestSE.minDiscountPrice;
       dto.similar = getSimilar(bo, language);
       // hiding
       dto.sightEvents.stream().forEach(seDto -> seDto.pdfAttachment = null);
