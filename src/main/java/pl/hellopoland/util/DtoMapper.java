@@ -175,6 +175,7 @@ public class DtoMapper {
     dto.partnerId = bo.getPartner().getId();
     dto.partnerName = bo.getPartner().getName();
     dto.minPrice = bo.getMinPrice();
+    dto.minDiscountPrice = bo.getMinDiscountPrice();
     dto.language = bo.getCurrentLanguage() == null ? dto.defaultLanguage
         : bo.getCurrentLanguage().getLanuage();
     dto.favourite = bo.isFavourite();

@@ -518,6 +518,7 @@ public class HelloTicket {
             for (SightEvent se : sightEvents) {
               if (idPrice.id.equals(se.getHptId())) {
                 se.setMinPrice(idPrice.price);
+                se.setMinDiscountPrice(idPrice.discountPrice);
                 return se;
               }
             }

@@ -102,6 +102,11 @@ public class SearchServiceMarketAPI {
           .filter(Objects::nonNull)
           .min(Comparator.naturalOrder())
           .orElse(null);
+      dto.minDiscountPrice = dto.sightEvents.stream()
+          .map(sedto -> sedto.minDiscountPrice)
+          .filter(Objects::nonNull)
+          .min(Comparator.naturalOrder())
+          .orElse(null);
       dto.categories = tService.translateEntities(categories, languageVersion).stream()
           .map(DtoMapper::getDTO)
           .collect(toSet());

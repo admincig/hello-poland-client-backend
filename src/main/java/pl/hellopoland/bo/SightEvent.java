@@ -65,6 +65,8 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
   private Integer duration;
   @Transient
   private Integer minPrice;
+  @Transient
+  private Integer minDiscountPrice;
   private Float score;
   @Embedded
   private Location location;
@@ -433,6 +435,14 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
 
   public void setFavourite(boolean favourite) {
     this.favourite = favourite;
+  }
+
+  public Integer getMinDiscountPrice() {
+    return minDiscountPrice;
+  }
+
+  public void setMinDiscountPrice(Integer minDiscountPrice) {
+    this.minDiscountPrice = minDiscountPrice;
   }
 
   public void fetchCollections() {
