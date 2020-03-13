@@ -41,6 +41,7 @@ import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.AvailableTicketNumberAssociationDTO;
 import pl.hellopoland.dto.PushDTO;
 import pl.hellopoland.dto.SightEventDTO;
+import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.enums.LanguageVersion;
@@ -379,24 +380,21 @@ public class SightEventService extends ServiceSuperclass {
       }
 
       for (var sightEventDto : dtos) {
-        sightEventDto.minPrice = findMinPrice(sightEventDto);
+        TicketDefinitionDTO cheapest = findCheapest(sightEventDto);
+        sightEventDto.minPrice = cheapest.originalPrice;
+        if (cheapest.discount != null) {
+          sightEventDto.minDiscountPrice = cheapest.discount.price;
+        }
       }
     }
 
   }
 
-  private Integer findMinPrice(SightEventDTO sightEventDto) {
-    Integer minPrice = null;
-    if (sightEventDto.ticketPoolDefinitions != null) {
-      minPrice = Integer.MAX_VALUE;
-      for (var poolDef : sightEventDto.ticketPoolDefinitions) {
-        poolDef.sightEventId = sightEventDto.id;
-        for (var t : poolDef.ticketDefinitions) {
-          minPrice = Math.min(minPrice, t.price);
-        }
-      }
-    }
-    return minPrice;
+  private TicketDefinitionDTO findCheapest(SightEventDTO sightEventDto) {
+    return sightEventDto.ticketPoolDefinitions.stream()
+        .flatMap(tpd -> tpd.ticketDefinitions.stream())
+        .min(Comparator.comparing(td -> td.originalPrice))
+        .get();
   }
 
   private List<TicketPoolDefinitionDTO> downloadHptTpds(HptTpdsDownloadConfigurator configurator) {
