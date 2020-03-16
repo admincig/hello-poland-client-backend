@@ -460,19 +460,23 @@ public class SightEventService extends ServiceSuperclass {
   @SuppressWarnings("deprecation")
   public AvailableTicketNumberAssociationDTO checkAvailability(Long sightEventId, Date fromDate,
       Date toDate) {
-    HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
-    AvailableTicketNumberAssociationDTO associationDTO =
-        hpt.checkAvailabilityOfTicketsForSightEvent(get(sightEventId), fromDate, toDate);
-    associationDTO.ticketPoolDefinitions.forEach(tpd -> {
-      tpd.ticketDefinitions.forEach(td -> td.id = td.atnaId);
-      tpd.startDate.setYear(fromDate.getYear());
-      tpd.startDate.setMonth(fromDate.getMonth());
-      tpd.startDate.setDate(fromDate.getDate());
-    });
-    if (associationDTO.ticketPools != null) {
-      associationDTO.ticketPools.forEach(tp -> {
-        tp.ticketDefinitions.forEach(td -> td.id = td.atnaId);
+    AvailableTicketNumberAssociationDTO associationDTO = new AvailableTicketNumberAssociationDTO();
+    SightEvent sightEvent = get(sightEventId);
+    if (sightEvent.isAccessible()) {
+      HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
+      associationDTO =
+          hpt.checkAvailabilityOfTicketsForSightEvent(sightEvent, fromDate, toDate);
+      associationDTO.ticketPoolDefinitions.forEach(tpd -> {
+        tpd.ticketDefinitions.forEach(td -> td.id = td.atnaId);
+        tpd.startDate.setYear(fromDate.getYear());
+        tpd.startDate.setMonth(fromDate.getMonth());
+        tpd.startDate.setDate(fromDate.getDate());
       });
+      if (associationDTO.ticketPools != null) {
+        associationDTO.ticketPools.forEach(tp -> {
+          tp.ticketDefinitions.forEach(td -> td.id = td.atnaId);
+        });
+      }
     }
 
     return associationDTO;

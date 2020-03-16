@@ -22,6 +22,7 @@ import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
+import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.rest.dto.AvailableDatesORO;
 import pl.hellopoland.rest.dto.AvailableTicketNumberAssociationORO;
 import pl.hellopoland.rest.dto.PagedCollection;
@@ -68,25 +69,26 @@ public class SightEventServiceMarketAPI {
     LanguageVersion language = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
     SightEvent bo = service.get(id);
     SightEventDTO dto = null;
-    if (bo.isAccessible()) {
-      if (language != null) {
-        bo = translationService.translateEntity(bo, language);
-        Set<Category> categories = bo.getCategories().stream()
-            .map(SightEventCategory::getCategory).collect(Collectors.toSet());
-        translationService.translateEntities(categories, language);
-        Set<Tag> tags = bo.getTags().stream()
-            .map(SightEventTag::getTag).collect(Collectors.toSet());
-        translationService.translateEntities(tags, language);
-      } else {
-        language = bo.getDefaultLanguage();
-      }
-      dto = DtoMapper.getFullDTO(bo);
-      dto.partnerAffiliateCode = null;
-      dto.language = language.getLanuage();
-      service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), false, true);
-      if (service.isAvailable(dto, null, null)) {
-        dto.similar = getSimilar(bo, language);
-      }
+    if (!bo.isAccessible()) {
+      throw new ResourceNotFoundException();
+    }
+    if (language != null) {
+      bo = translationService.translateEntity(bo, language);
+      Set<Category> categories = bo.getCategories().stream()
+          .map(SightEventCategory::getCategory).collect(Collectors.toSet());
+      translationService.translateEntities(categories, language);
+      Set<Tag> tags = bo.getTags().stream()
+          .map(SightEventTag::getTag).collect(Collectors.toSet());
+      translationService.translateEntities(tags, language);
+    } else {
+      language = bo.getDefaultLanguage();
+    }
+    dto = DtoMapper.getFullDTO(bo);
+    dto.partnerAffiliateCode = null;
+    dto.language = language.getLanuage();
+    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), false, true);
+    if (service.isAvailable(dto, null, null)) {
+      dto.similar = getSimilar(bo, language);
     }
     // hiding
     dto.pdfAttachment = null;

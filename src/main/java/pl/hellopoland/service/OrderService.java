@@ -96,6 +96,9 @@ public class OrderService extends ServiceSuperclass {
       OrderSightEntry ose = new OrderSightEntry();
       ose.setOrder(o);
       SightEvent sightEvent = seService.getByHptId(entry.getKey());
+      if (!sightEvent.isAccessible()) {
+        throw new ConflictingException("Sight Event is not accessible.");
+      }
       ose.setSightEvent(sightEvent);
       em.persist(ose);
       ose.setAgreements(new ArrayList<>(sightEvent.getAgreements()));
