@@ -380,21 +380,25 @@ public class SightEventService extends ServiceSuperclass {
       }
 
       for (var sightEventDto : dtos) {
-        TicketDefinitionDTO cheapest = findCheapest(sightEventDto);
-        sightEventDto.minPrice = cheapest.originalPrice;
-        if (cheapest.discount != null) {
-          sightEventDto.minDiscountPrice = cheapest.discount.price;
-        }
+        Optional<TicketDefinitionDTO> cheapestOpt = findCheapest(sightEventDto);
+        cheapestOpt.ifPresent(cheapest -> {
+          sightEventDto.minPrice = cheapest.originalPrice;
+          if (cheapest.discount != null) {
+            sightEventDto.minDiscountPrice = cheapest.discount.price;
+          }
+        });
       }
     }
-
   }
 
-  private TicketDefinitionDTO findCheapest(SightEventDTO sightEventDto) {
-    return sightEventDto.ticketPoolDefinitions.stream()
-        .flatMap(tpd -> tpd.ticketDefinitions.stream())
-        .min(Comparator.comparing(td -> td.originalPrice))
-        .get();
+  private Optional<TicketDefinitionDTO> findCheapest(SightEventDTO sightEventDto) {
+    if (sightEventDto.ticketPoolDefinitions != null) {
+      return sightEventDto.ticketPoolDefinitions.stream()
+          .flatMap(tpd -> tpd.ticketDefinitions.stream())
+          .min(Comparator.comparing(td -> td.originalPrice));
+    } else {
+      return Optional.empty();
+    }
   }
 
   private List<TicketPoolDefinitionDTO> downloadHptTpds(HptTpdsDownloadConfigurator configurator) {
