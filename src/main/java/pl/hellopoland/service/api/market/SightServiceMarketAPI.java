@@ -123,14 +123,13 @@ public class SightServiceMarketAPI {
           s.getSightEvents().stream()
               .map(DtoMapper::getDTO)
               .collect(Collectors.toList());
-      dto.minPrice = dto.sightEvents.stream()
-          .min(Comparator.comparing(seDto -> seDto.minPrice))
-          .map(seDto -> seDto.minPrice)
-          .orElse(null);
-      dto.minDiscountPrice = dto.sightEvents.stream()
-          .min(Comparator.comparing(seDto -> seDto.minDiscountPrice))
-          .map(seDto -> seDto.minDiscountPrice)
-          .orElse(null);
+      dto.sightEvents.stream()
+          .min(Comparator.comparing(seDto -> seDto.minPrice,
+              Comparator.nullsLast(Comparator.naturalOrder())))
+          .ifPresent(cheapest -> {
+            dto.minPrice = cheapest.minPrice;
+            dto.minDiscountPrice = cheapest.minDiscountPrice;
+          });
     }
     return dto;
   };
