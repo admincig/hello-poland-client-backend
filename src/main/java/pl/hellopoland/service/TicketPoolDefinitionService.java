@@ -156,7 +156,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
   }
 
   private void validateTicketDiscount(TicketPoolDefinitionDTO poolDef) {
-    SightEvent se = sightEventService.get(poolDef.sightEventId);
+    SightEvent se = sightEventService.getByHptId(poolDef.sightEventId);
     BigDecimal commissionPercent = se.getPartner().getCommission();
 
     for (TicketDefinitionDTO ticketDef : poolDef.ticketDefinitions) {
