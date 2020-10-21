@@ -32,7 +32,7 @@ public class GoogleAPIConnector {
                     "319066854009-vd6lt8aj3373igh6tf9qu78n8krmenme.apps.googleusercontent.com",
                     "319066854009-shv7nogo8kuqa602kp62jhfe74jdkrv2.apps.googleusercontent.com"))
             .setIssuers(List.of("https://accounts.google.com", "accounts.google.com")).build();
-    logger.log(Logger.Level.INFO, "verifying idToken=" + idToken);
+    logger.log(Logger.Level.INFO, "verifying idToken=" + StringUtils.right(idToken, 6));
     GoogleIdToken token = verifier.verify(idToken);
     GoogleIdToken.Payload payload = token.getPayload();
     if (payload != null) {
