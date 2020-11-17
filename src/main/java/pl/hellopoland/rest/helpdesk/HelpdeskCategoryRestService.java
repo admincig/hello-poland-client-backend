@@ -15,6 +15,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import pl.hellopoland.dto.CategoryDTO;
+import pl.hellopoland.dto.TagDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.rest.RestService;
 import pl.hellopoland.rest.dto.PagedCollection;
@@ -94,5 +95,13 @@ public class HelpdeskCategoryRestService {
     LanguageVersion lang = RestService.parseLang(contentLanguage);
     return service.changeDefaultLanguage(id, lang);
   }
+
+  @PUT
+  @Path("/{id}/icon")
+  @Consumes({"image/jpeg", "image/jpg"})
+  public CategoryDTO uploadIcon(@PathParam("id") Long id,  byte[] bytes) {
+    return service.uploadIcon(id, bytes);
+  }
+
 
 }

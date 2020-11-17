@@ -21,10 +21,8 @@ import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.security.enterprise.SecurityContext;
-import pl.hellopoland.bo.ModelSuperclass;
-import pl.hellopoland.bo.Partner;
-import pl.hellopoland.bo.Portal;
-import pl.hellopoland.bo.User;
+
+import pl.hellopoland.bo.*;
 import pl.hellopoland.config.Entry;
 import pl.hellopoland.config.PagedCollectionConfig;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;

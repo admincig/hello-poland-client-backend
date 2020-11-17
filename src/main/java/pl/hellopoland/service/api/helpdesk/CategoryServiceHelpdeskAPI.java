@@ -6,8 +6,10 @@ import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import pl.hellopoland.bo.Category;
+import pl.hellopoland.bo.Tag;
 import pl.hellopoland.config.CategoryPagedCollectionConfig;
 import pl.hellopoland.dto.CategoryDTO;
+import pl.hellopoland.dto.TagDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.dto.PagedCollection;
@@ -77,5 +79,10 @@ public class CategoryServiceHelpdeskAPI {
     service.deleteLanguageVersion(id, lang);
   }
 
+  @RolesAllowed("admin")
+  public CategoryDTO uploadIcon(Long id, byte[] bytes) {
+    Category category = service.uploadIcon(id, bytes);
+    return DtoMapper.getFullDTO(category);
+  }
 
 }

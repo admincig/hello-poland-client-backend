@@ -76,6 +76,13 @@ public class HelpdeskTagRestService {
     return service.update(dto, lang);
   }
 
+  @PUT
+  @Path("/{id}/icon")
+  @Consumes({"image/jpeg", "image/jpg"})
+  public TagDTO uploadIcon(@PathParam("id") Long id,  byte[] bytes) {
+    return service.uploadIcon(id, bytes);
+  }
+
   @DELETE
   @Path("/{id}/languageVersion/{language}")
   public Response delete(

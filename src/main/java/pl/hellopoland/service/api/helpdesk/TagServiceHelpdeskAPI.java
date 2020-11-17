@@ -77,4 +77,9 @@ public class TagServiceHelpdeskAPI {
     service.deleteLanguageVersion(id, lang);
   }
 
+  @RolesAllowed("admin")
+  public TagDTO uploadIcon(Long id, byte[] bytes) {
+    Tag tag = service.uploadIcon(id, bytes);
+    return DtoMapper.getFullDTO(tag);
+  }
 }

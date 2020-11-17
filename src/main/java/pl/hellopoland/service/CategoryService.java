@@ -1,13 +1,7 @@
 package pl.hellopoland.service;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
 import pl.hellopoland.bo.Category;
+import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.SightEventCategory;
 import pl.hellopoland.config.CategoryPagedCollectionConfig;
@@ -16,11 +10,18 @@ import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.util.PagedEntityCollection;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import java.io.ByteArrayInputStream;
+import java.util.*;
+
 @Stateless
 public class CategoryService extends ServiceSuperclass {
 
   @Inject
   private TranslationService tService;
+  @Inject
+  private ImageService iService;
 
   public Category create(CategoryDTO dto) {
     Category cat = new Category();
@@ -94,4 +95,13 @@ public class CategoryService extends ServiceSuperclass {
             SightEventCategory.class)
         .setParameter("sightEvents", sightEvents).getResultList();
   }
+
+  public Category uploadIcon(Long id, byte[] bytes) {
+    Category category = get(id);
+    ImageCollector ic =
+        iService.validateAndStoreImageCollector(new ByteArrayInputStream(bytes), "jpeg", null);
+    category.setIconUrl(ic.getQvga().getDownloadUrl());
+    return category;
+  }
+
 }

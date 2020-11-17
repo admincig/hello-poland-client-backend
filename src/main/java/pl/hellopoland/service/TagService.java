@@ -1,12 +1,6 @@
 package pl.hellopoland.service;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.SightEventTag;
 import pl.hellopoland.bo.Tag;
@@ -17,11 +11,18 @@ import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.util.BeanUtils;
 import pl.hellopoland.util.PagedEntityCollection;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import java.io.ByteArrayInputStream;
+import java.util.*;
+
 @Stateless
 public class TagService extends ServiceSuperclass {
 
   @Inject
   private TranslationService tService;
+  @Inject
+  private ImageService iService;
 
   public Tag create(TagDTO dto) {
     Tag tag = new Tag();
@@ -92,5 +93,13 @@ public class TagService extends ServiceSuperclass {
         .createQuery("from SightEventTag where sightEvent in (:sightEvents)",
             SightEventTag.class)
         .setParameter("sightEvents", sightEvents).getResultList();
+  }
+
+  public Tag uploadIcon(Long id, byte[] bytes) {
+    Tag tag = get(id);
+    ImageCollector ic =
+        iService.validateAndStoreImageCollector(new ByteArrayInputStream(bytes), "jpeg", null);
+    tag.setIconUrl(ic.getQvga().getDownloadUrl());
+    return tag;
   }
 }
