@@ -69,6 +69,7 @@ public class HelloTicket {
     BookingDTO booking = new BookingDTO();
     booking.customerEmail = details.getEmail();
     booking.customerName = details.getFirstName() + " " + details.getLastName();
+    booking.invoice = details.getInvoice();
     List<TicketOrderDTO> ticketBookings = orderEntries.stream().map(oe -> {
       TicketOrderDTO t = new TicketOrderDTO();
       t.ticketDefinitionId = oe.getExternalDefinitionId();

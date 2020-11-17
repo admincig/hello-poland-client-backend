@@ -1,47 +1,7 @@
 package pl.hellopoland.service;
 
-import static java.util.stream.Collectors.groupingBy;
-import java.lang.System.Logger;
-import java.lang.System.Logger.Level;
-import java.math.BigDecimal;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.json.JsonObject;
-import javax.persistence.TypedQuery;
-import javax.ws.rs.core.MediaType;
-import pl.hellopoland.bo.Discount;
-import pl.hellopoland.bo.Order;
+import pl.hellopoland.bo.*;
 import pl.hellopoland.bo.Order.Status;
-import pl.hellopoland.bo.OrderDateEntry;
-import pl.hellopoland.bo.OrderDetails;
-import pl.hellopoland.bo.OrderEntry;
-import pl.hellopoland.bo.OrderSightEntry;
-import pl.hellopoland.bo.Partner;
-import pl.hellopoland.bo.PassageCart;
-import pl.hellopoland.bo.PassageCartEntry;
-import pl.hellopoland.bo.Portal;
-import pl.hellopoland.bo.SightEvent;
-import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserRole.Role;
 import pl.hellopoland.dto.EmailSendingReportDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
@@ -55,14 +15,31 @@ import pl.hellopoland.soap.p24.enums.Country;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PaymentUtils;
 
+import javax.ejb.LocalBean;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.json.JsonObject;
+import javax.persistence.TypedQuery;
+import javax.ws.rs.core.MediaType;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
+import java.math.BigDecimal;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.groupingBy;
+
 @LocalBean
 @Stateless
 public class OrderService extends ServiceSuperclass {
 
-  @Inject
-  UserService uService;
-  @Inject
-  AgreementService aService;
   @Inject
   SightEventService seService;
 
@@ -208,12 +185,12 @@ public class OrderService extends ServiceSuperclass {
           .map(td -> td.poolId)
           .collect(Collectors.toList()));
       for (var pool : wholeDayPools) {
-        for (var iter = expiredTickets.iterator(); iter.hasNext();) {
+        for (var iter = expiredTickets.iterator(); iter.hasNext(); ) {
           TicketDefinitionDTO ticket = iter.next();
           if (Objects.equals(pool.id, ticket.poolId)
               && !LocalDate
-                  .ofInstant(expiredIds.get(ticket.atnaId).date.toInstant(), ZoneId.systemDefault())
-                  .isBefore(LocalDate.now())) {
+              .ofInstant(expiredIds.get(ticket.atnaId).date.toInstant(), ZoneId.systemDefault())
+              .isBefore(LocalDate.now())) {
             expiredIds.remove(ticket.atnaId);
             iter.remove();
           }
@@ -380,13 +357,6 @@ public class OrderService extends ServiceSuperclass {
     return returnList;
   }
 
-  public OrderEntry getOrderEntry(long id) {
-    OrderEntry oe = em.find(OrderEntry.class, id);
-
-    oe.getNumbers().size();
-    return oe;
-  }
-
   public OrderDateEntry getOrderDateEntryForLoggedUser(long id) {
     String queryString =
         "from OrderDateEntry where deleted=false and id=:id and sightEntry.order.user=:user";
@@ -505,11 +475,6 @@ public class OrderService extends ServiceSuperclass {
     order.setStatus(Status.CONFIRMED);
   }
 
-  public void sudoAck(String hash) {
-    Order order = findByHash(hash);
-    confirm(order);
-  }
-
   public Status getStatus(String hash) {
     return findByHash(hash).getStatus();
   }
@@ -518,8 +483,9 @@ public class OrderService extends ServiceSuperclass {
     return em
         .createQuery("from Order where (:fromDate <= date and :toDate > date) and status = :status",
             Order.class)
+        .setParameter("toDate", toDate)
         .setParameter("fromDate", fromDate).setParameter("toDate", new Date())
-        .setParameter("status", Status.CONFIRMED).getResultList();
+        .setParameter("status", status).getResultList();
   }
 
   public List<OrderEntry> getOrdersInDateRange(Date fromDate, Date toDate, Partner partner) {
@@ -561,12 +527,12 @@ public class OrderService extends ServiceSuperclass {
     if (report.validUnsentAddresses != null && report.validUnsentAddresses.length > 0) {
       Arrays.stream(report.validUnsentAddresses).filter(address -> clientEmail.equals(address))
           .findAny().orElseThrow(() -> new EmailSendingException(
-              "Wystąpił błąd podczas wysyłania kopii biletów do " + clientEmail));
+          "Wystąpił błąd podczas wysyłania kopii biletów do " + clientEmail));
     }
     if (report.invalidAddresses != null && report.invalidAddresses.length > 0) {
       Arrays.stream(report.invalidAddresses).filter(address -> clientEmail.equals(address))
           .findAny().orElseThrow(() -> new EmailSendingException(
-              "Wystąpił błąd podczas wysyłania kopii biletów do " + clientEmail));
+          "Wystąpił błąd podczas wysyłania kopii biletów do " + clientEmail));
     }
     return report;
   }

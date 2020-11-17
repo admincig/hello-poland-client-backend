@@ -48,7 +48,7 @@
 		<dependency>
 			<groupId>pl.hellopoland</groupId>
 			<artifactId>hellopoland-dto</artifactId>
-			<version>1.2.6</version>
+			<version>1.2.7</version>
 		</dependency>
 		<dependency>
 			<groupId>pl.fream.commons</groupId>
@@ -125,7 +125,6 @@
 								<file>src/main/resources/maven.build.properties</file>
 								<file>${local.properties}</file>
 							</files>
-							<encoding>UTF-8</encoding>
 						</configuration>
 					</execution>
 				</executions>

@@ -11,6 +11,7 @@ public class OrderDetails {
     ANDROID, IOS, WEB, WEB_MOBILE, UNKNOWN;
   }
 
+
   private String firstName;
   private String lastName;
   private String email;
@@ -23,6 +24,8 @@ public class OrderDetails {
   @Enumerated(EnumType.STRING)
   private Platform platform;
   private boolean userLogged;
+  private Boolean invoice;
+
 
   public String getFirstName() {
     return firstName;
@@ -112,4 +115,11 @@ public class OrderDetails {
     this.language = language;
   }
 
+  public Boolean getInvoice() {
+    return invoice;
+  }
+
+  public void setInvoice(Boolean invoice) {
+    this.invoice = invoice;
+  }
 }

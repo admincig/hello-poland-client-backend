@@ -47,7 +47,7 @@ public class AnalyticsService extends ServiceSuperclass {
         "ID PARTNERA P24",
         "NAZWA PARTNERA", "AFILIACJA", "WARTOŚĆ", "PROWIZJA", "WALUTA", "NR TRANSAKCJI P24",
         "TYTUŁ PRZELEWU P24", "NAZWA UŻUTKOWNIKA", "TELEON", "ADRES EMAIL", "PLATFORMA",
-        "ZALOGOWANY", "NAZWA OFERTY", "DATA OFERTY", "ILOŚĆ", "NAZWA BILETÓW", "PROMOCJA");
+        "ZALOGOWANY", "NAZWA OFERTY", "DATA OFERTY", "ILOŚĆ", "NAZWA BILETÓW", "PROMOCJA", "FAKTURA");
 
     var orders = orderService.getOrdersInDateRange(fromDate, toDate,
         getLoggedUser().hasRole(UserRole.Role.ADMIN) ? null : getLoggedPartner());
@@ -63,7 +63,8 @@ public class AnalyticsService extends ServiceSuperclass {
       BigDecimal commission = calculateCommission(commissionPercent, oe);
       BigDecimal total = new BigDecimal(oe.getSum()).divide(HUNDRED);
 
-      writeCsvRow(csvFile.toPath(),
+      writeCsvRow(
+          csvFile.toPath(),
           order.getHash(),
           DATE_FORMATER.format(order.getDate()),
           String.valueOf(partner.getId()),
@@ -84,7 +85,9 @@ public class AnalyticsService extends ServiceSuperclass {
           DATE_FORMATER.format(dateEntry.getDate()),
           String.valueOf(oe.getQuantity()),
           oe.getName(),
-          String.valueOf(oe.getDiscount() != null));
+          String.valueOf(oe.getDiscount() != null),
+          String.valueOf(Boolean.TRUE.equals(oDetails.getInvoice()))
+      );
     }
     return csvFile;
   }

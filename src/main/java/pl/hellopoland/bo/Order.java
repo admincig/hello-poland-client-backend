@@ -1,20 +1,12 @@
 package pl.hellopoland.bo;
 
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "orders")
@@ -27,6 +19,7 @@ public class Order extends ModelSuperclass {
   public enum Status {
     NEW, CONFIRMED, PROBLEM, CANCELLED;
   }
+
 
   private static final long serialVersionUID = 3824722747352862154L;
 
@@ -120,22 +113,8 @@ public class Order extends ModelSuperclass {
     this.p24Statement = p24Statement;
   }
 
-  public Integer getSum() {
-    if (entries == null) {
-      return 0;
-    }
-    return entries.stream().collect(Collectors.summingInt(OrderSightEntry::getSum));
-  }
-
   public void generateHash() {
     this.hash = UUID.randomUUID().toString();
-  }
-
-  public void addEntry(OrderSightEntry entry) {
-    if (this.getEntries() == null) {
-      this.setEntries(new ArrayList<>());
-    }
-    this.getEntries().add(entry);
   }
 
 }
