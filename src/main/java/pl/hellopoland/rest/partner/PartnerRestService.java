@@ -19,9 +19,13 @@ import pl.hellopoland.dto.UserAuthDTO;
 import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.rest.RestService;
+import pl.hellopoland.rest.dto.HplInstanceRO;
 import pl.hellopoland.rest.dto.PagedCollection;
+import pl.hellopoland.service.api.partner.DiscoveryServicePartnerAPI;
 import pl.hellopoland.service.api.partner.PartnerServicePartnerAPI;
 import pl.hellopoland.service.api.partner.UserServicePartnerAPI;
+
+import java.util.List;
 
 @Path("/partner")
 @RequestScoped
@@ -33,6 +37,14 @@ public class PartnerRestService {
   private UserServicePartnerAPI userService;
   @Inject
   private PartnerServicePartnerAPI service;
+  @Inject
+  private DiscoveryServicePartnerAPI discoveryService;
+
+  @GET
+  @Path("/discovery")
+  public List<HplInstanceRO> discovery() {
+    return discoveryService.discovery();
+  }
 
   @POST
   @Path("/ushers")
