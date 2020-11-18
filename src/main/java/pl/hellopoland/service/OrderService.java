@@ -252,7 +252,7 @@ public class OrderService extends ServiceSuperclass {
       var cartEntry = new PassageCartEntry(oe);
       cartEntry.setPassageCart(passageCart);
       cartEntry.setDescription("Hello Poland, " + o.getHash());
-      if (passageCart.getAmount() > 0) {
+      if (cartEntry.getTargetAmount() > 0) {
         passageCartEntries.add(cartEntry);
       }
     });
