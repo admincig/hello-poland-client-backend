@@ -61,4 +61,12 @@ public class HelpdeskRestService {
     return Response.ok().build();
   }
 
+  @GET
+  @Path("/orders/{hash}/sudoAck")
+  @Operation(hidden = true)
+  public Response sudoAck(@PathParam("hash") String hash) {
+    service.sudoAckOrder(hash);
+    return Response.ok().build();
+  }
+
 }

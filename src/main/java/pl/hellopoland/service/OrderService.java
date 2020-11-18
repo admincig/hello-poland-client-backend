@@ -252,7 +252,9 @@ public class OrderService extends ServiceSuperclass {
       var cartEntry = new PassageCartEntry(oe);
       cartEntry.setPassageCart(passageCart);
       cartEntry.setDescription("Hello Poland, " + o.getHash());
-      passageCartEntries.add(cartEntry);
+      if (passageCart.getAmount() > 0) {
+        passageCartEntries.add(cartEntry);
+      }
     });
     passageCart.setCartEntries(passageCartEntries);
     var hpCommissionEntry = getHpCommissionEntry(amount, passageCart.getCartEntries(), o.getHash());
@@ -260,6 +262,11 @@ public class OrderService extends ServiceSuperclass {
     passageCart.setHpCommissionEntry(hpCommissionEntry);
     em.persist(passageCart);
     return passageCart;
+  }
+
+  public void sudoAck(String hash) {
+    Order order = findByHash(hash);
+    confirm(order);
   }
 
   private static List<OrderEntry> gatherOrderEntries(Collection<OrderSightEntry> collection) {

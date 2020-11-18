@@ -41,6 +41,11 @@ public class ServiceHelpdeskAPI {
     sightEventService.rebuildSearchIndices();
   }
 
+  @RolesAllowed("admin")
+  public void sudoAckOrder(String hash) {
+    orderService.sudoAck(hash);
+  }
+
   // TODO delete this
   @RolesAllowed("admin")
   public void globalRework() {
