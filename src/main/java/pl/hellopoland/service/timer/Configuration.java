@@ -10,14 +10,6 @@ import pl.hellopoland.util.GoogleAPIConnector;
 
 @Startup
 @Singleton
-@DataSourceDefinition(
-    name = "java:global/jdbc/hellopolandDS",
-    className = "org.postgresql.xa.PGXADataSource",
-    serverName = "database",
-    portNumber = 5432,
-    databaseName = "hellopoland",
-    user = "hellopoland",
-    password = "hellopoland")
 public class Configuration {
 
   @Produces
