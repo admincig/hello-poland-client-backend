@@ -29,7 +29,6 @@ Build for test server:
   artifacts:
     paths:
       - target/hellopoland.war
-  allow_failure: false
   when: manual
 
 Build for production server:
@@ -44,7 +43,6 @@ Build for production server:
   artifacts:
     paths:
       - target/hellopoland.war
-  allow_failure: false
   when: manual
 
 Build for Wrocław ON production server:
@@ -59,7 +57,6 @@ Build for Wrocław ON production server:
   artifacts:
     paths:
       - target/hellopoland.war
-  allow_failure: false
   when: manual
 
 
