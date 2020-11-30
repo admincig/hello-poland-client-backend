@@ -24,6 +24,9 @@ Build for test server:
     - envcfg -p
   script:
     - mvn -Dlocal.maven.build.properties=${FRM_HPL_TEST_MAVEN_LOCAL_PROPERTIES_DIR} -Dmaven.test.skip=true clean package -U
+    - docker build -t "${FRM_HPL_TEST_DOCKER_BACKEND_IMAGE}" .
+    - docker push "${FRM_HPL_TEST_DOCKER_BACKEND_IMAGE}"
+    - docker image rm "${FRM_HPL_TEST_DOCKER_BACKEND_IMAGE}"
   tags:
     - maven
   artifacts:
@@ -38,6 +41,9 @@ Build for production server:
     - envcfg -p
   script:
     - mvn -Dlocal.maven.build.properties=${FRM_HPL_PROD_MAVEN_LOCAL_PROPERTIES_DIR} -Dmaven.test.skip=true clean package -U
+    - docker build -t "${FRM_HPL_PROD_DOCKER_BACKEND_IMAGE}" .
+    - docker push "${FRM_HPL_PROD_DOCKER_BACKEND_IMAGE}"
+    - docker image rm "${FRM_HPL_PROD_DOCKER_BACKEND_IMAGE}"
   tags:
     - maven
   artifacts:
@@ -52,51 +58,14 @@ Build for Wrocław ON production server:
     - envcfg -p
   script:
     - mvn -Dlocal.maven.build.properties=${FRM_HPL_PROD2_MAVEN_LOCAL_PROPERTIES_DIR} -Dmaven.test.skip=true clean package -U
+    - docker build -t "${FRM_HPL_PROD2_DOCKER_BACKEND_IMAGE}" .
+    - docker push "${FRM_HPL_PROD2_DOCKER_BACKEND_IMAGE}"
+    - docker image rm "${FRM_HPL_PROD2_DOCKER_BACKEND_IMAGE}"
   tags:
     - maven
   artifacts:
     paths:
       - target/hellopoland.war
-  when: manual
-
-
-Build and push docker TEST image:
-  stage: docker
-  before_script:
-    - . envcfg
-    - envcfg -p
-  script:
-    - docker build -t "${FRM_HPL_TEST_DOCKER_BACKEND_IMAGE}" .
-    - docker push "${FRM_HPL_TEST_DOCKER_BACKEND_IMAGE}"
-    - docker image rm "${FRM_HPL_TEST_DOCKER_BACKEND_IMAGE}"
-  tags:
-    - docker
-  when: manual
-
-Build and push docker PROD image:
-  stage: docker
-  before_script:
-    - . envcfg
-    - envcfg -p
-  script:
-    - docker build -t "${FRM_HPL_PROD_DOCKER_BACKEND_IMAGE}" .
-    - docker push "${FRM_HPL_PROD_DOCKER_BACKEND_IMAGE}"
-    - docker image rm "${FRM_HPL_PROD_DOCKER_BACKEND_IMAGE}"
-  tags:
-    - docker
-  when: manual
-
-Build and push docker Wrocław ON PROD image:
-  stage: docker
-  before_script:
-    - . envcfg
-    - envcfg -p
-  script:
-    - docker build -t "${FRM_HPL_PROD2_DOCKER_BACKEND_IMAGE}" .
-    - docker push "${FRM_HPL_PROD2_DOCKER_BACKEND_IMAGE}"
-    - docker image rm "${FRM_HPL_PROD2_DOCKER_BACKEND_IMAGE}"
-  tags:
-    - docker
   when: manual
 
 Deploy on test server:
