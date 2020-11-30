@@ -29,9 +29,6 @@ Build for test server:
     - docker image rm "${FRM_HPL_TEST_DOCKER_BACKEND_IMAGE}"
   tags:
     - maven
-  artifacts:
-    paths:
-      - target/hellopoland.war
   when: manual
 
 Build for production server:
@@ -46,9 +43,6 @@ Build for production server:
     - docker image rm "${FRM_HPL_PROD_DOCKER_BACKEND_IMAGE}"
   tags:
     - maven
-  artifacts:
-    paths:
-      - target/hellopoland.war
   when: manual
 
 Build for Wrocław ON production server:
@@ -63,9 +57,6 @@ Build for Wrocław ON production server:
     - docker image rm "${FRM_HPL_PROD2_DOCKER_BACKEND_IMAGE}"
   tags:
     - maven
-  artifacts:
-    paths:
-      - target/hellopoland.war
   when: manual
 
 Deploy on test server:
@@ -76,7 +67,6 @@ Deploy on test server:
     - docker-compose -p ${FRM_HPL_TEST_CONTAINER_NAME} up -d
   tags:
     - qs1-server
-  dependencies: [ ]
   when: manual
 
 Deploy on Wrocław ON prod server:
@@ -88,5 +78,4 @@ Deploy on Wrocław ON prod server:
     - docker run -d --network="bridge" -p ${FRM_HPL_PROD2_PORT}:8080 -v ${FRM_HPL_PROD2_LOCAL_RUNTIME_PROP_DIR}:/opt/local.runtime.properties -v DMS:/DMS --name "${FRM_HPL_PROD2_CONTAINER_NAME}" "${FRM_HPL_PROD2_DOCKER_BACKEND_IMAGE}"
   tags:
     - hpl-prod
-  dependencies: [ ]
   when: manual
