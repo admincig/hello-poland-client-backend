@@ -14,7 +14,7 @@
 		<maven.compiler.target>11</maven.compiler.target>
 		<failOnMissingWebXml>false</failOnMissingWebXml>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<local.properties>src/main/resources/maven.build.properties</local.properties>
+		<local.maven.build.properties>src/main/resources/maven.build.properties</local.maven.build.properties>
 		<maven.war.filteringDeploymentDescriptors>true</maven.war.filteringDeploymentDescriptors>
 	</properties>
 
@@ -124,7 +124,7 @@
 							<quiet>true</quiet>
 							<files>
 								<file>src/main/resources/maven.build.properties</file>
-								<file>${local.properties}</file>
+								<file>${local.maven.build.properties}</file>
 							</files>
 						</configuration>
 					</execution>
