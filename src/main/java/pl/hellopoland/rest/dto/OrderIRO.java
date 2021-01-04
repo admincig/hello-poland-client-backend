@@ -8,7 +8,6 @@ public class OrderIRO {
 
   public List<OrderEntryIRO> entries;
   public OrderDetails details;
-  public Boolean invoice;
 
   public static class OrderEntryIRO {
     public Long id;
