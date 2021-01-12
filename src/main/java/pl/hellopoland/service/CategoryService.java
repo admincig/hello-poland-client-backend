@@ -99,7 +99,7 @@ public class CategoryService extends ServiceSuperclass {
   public Category uploadIcon(Long id, byte[] bytes, String extension) {
     Category category = get(id);
     ImageCollector ic =
-        iService.validateAndStoreImageCollector(new ByteArrayInputStream(bytes), extension, null);
+        iService.storeImageCollector(new ByteArrayInputStream(bytes), extension, null);
     category.setIconUrl(ic.getQvga().getDownloadUrl());
     return category;
   }

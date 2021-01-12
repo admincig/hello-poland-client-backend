@@ -47,6 +47,16 @@ public class ImageService extends ServiceSuperclass {
     }
   }
 
+  public ImageCollector storeImageCollector(InputStream is, String extension,
+    String url) {
+    try {
+      BufferedImage imageIO = ImageIO.read(is);
+      return storeImageCollector(imageIO, extension, url);
+    } catch (IOException e) {
+      throw new ConflictingException("Failed to load image", e);
+    }
+  }
+
   private ImageCollector storeImageCollector(BufferedImage buffImage, String extension,
       String url) {
     var collector = new ImageCollector();
