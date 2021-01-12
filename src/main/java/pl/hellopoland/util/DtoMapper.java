@@ -398,7 +398,9 @@ public class DtoMapper {
     p24PassageCart.getCartEntries().forEach(ce -> {
       passageCartEntries.add(getP24PassageCartEntryDTO(ce));
     });
-    passageCartEntries.add(getP24PassageCartEntryDTO(p24PassageCart.getHpCommissionEntry()));
+    if (p24PassageCart.getHpCommissionEntry() != null) {
+      passageCartEntries.add(getP24PassageCartEntryDTO(p24PassageCart.getHpCommissionEntry()));
+    }
 
     dto.passageCart = passageCartEntries;
     return dto;
