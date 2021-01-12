@@ -46,7 +46,6 @@ public class PassageCart extends ModelSuperclass {
   @Column(nullable = false)
   @OneToMany(cascade = CascadeType.ALL, mappedBy = "passageCart")
   private Set<PassageCartEntry> cartEntries;
-  @NotNull
   @OneToOne(cascade = CascadeType.ALL, mappedBy = "passageCart", optional = false)
   private PassageCartEntry hpCommissionEntry;
 

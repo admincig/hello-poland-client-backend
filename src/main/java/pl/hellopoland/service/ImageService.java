@@ -147,7 +147,9 @@ public class ImageService extends ServiceSuperclass {
     var img = buffImage.getScaledInstance(width, -1, BufferedImage.SCALE_SMOOTH);
     width = img.getWidth(null);
     var height = img.getHeight(null);
-    var bImg = new BufferedImage(width, height, buffImage.getType());
+    int imageType = buffImage.getType();
+    if(imageType == 0) imageType = 5;
+    var bImg = new BufferedImage(width, height, imageType);
     var g2d = bImg.createGraphics();
     g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
         RenderingHints.VALUE_INTERPOLATION_BICUBIC);
