@@ -258,8 +258,10 @@ public class OrderService extends ServiceSuperclass {
     });
     passageCart.setCartEntries(passageCartEntries);
     var hpCommissionEntry = getHpCommissionEntry(amount, passageCart.getCartEntries(), o.getHash());
-    hpCommissionEntry.setPassageCart(passageCart);
-    passageCart.setHpCommissionEntry(hpCommissionEntry);
+    if (hpCommissionEntry.getTargetAmount() > 0) {
+      hpCommissionEntry.setPassageCart(passageCart);
+      passageCart.setHpCommissionEntry(hpCommissionEntry);
+    }
     em.persist(passageCart);
     return passageCart;
   }
