@@ -78,8 +78,8 @@ public class TagServiceHelpdeskAPI {
   }
 
   @RolesAllowed("admin")
-  public TagDTO uploadIcon(Long id, byte[] bytes) {
-    Tag tag = service.uploadIcon(id, bytes);
+  public TagDTO uploadIcon(Long id, byte[] bytes, String extension) {
+    Tag tag = service.uploadIcon(id, bytes, extension);
     return DtoMapper.getFullDTO(tag);
   }
 }

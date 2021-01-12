@@ -80,8 +80,8 @@ public class CategoryServiceHelpdeskAPI {
   }
 
   @RolesAllowed("admin")
-  public CategoryDTO uploadIcon(Long id, byte[] bytes) {
-    Category category = service.uploadIcon(id, bytes);
+  public CategoryDTO uploadIcon(Long id, byte[] bytes, String extension) {
+    Category category = service.uploadIcon(id, bytes, extension);
     return DtoMapper.getFullDTO(category);
   }
 

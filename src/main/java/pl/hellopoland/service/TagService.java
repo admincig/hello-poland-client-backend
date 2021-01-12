@@ -95,10 +95,10 @@ public class TagService extends ServiceSuperclass {
         .setParameter("sightEvents", sightEvents).getResultList();
   }
 
-  public Tag uploadIcon(Long id, byte[] bytes) {
+  public Tag uploadIcon(Long id, byte[] bytes, String extension) {
     Tag tag = get(id);
     ImageCollector ic =
-        iService.validateAndStoreImageCollector(new ByteArrayInputStream(bytes), "jpeg", null);
+        iService.validateAndStoreImageCollector(new ByteArrayInputStream(bytes), extension, null);
     tag.setIconUrl(ic.getQvga().getDownloadUrl());
     return tag;
   }

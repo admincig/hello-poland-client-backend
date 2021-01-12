@@ -96,10 +96,10 @@ public class CategoryService extends ServiceSuperclass {
         .setParameter("sightEvents", sightEvents).getResultList();
   }
 
-  public Category uploadIcon(Long id, byte[] bytes) {
+  public Category uploadIcon(Long id, byte[] bytes, String extension) {
     Category category = get(id);
     ImageCollector ic =
-        iService.validateAndStoreImageCollector(new ByteArrayInputStream(bytes), "jpeg", null);
+        iService.validateAndStoreImageCollector(new ByteArrayInputStream(bytes), extension, null);
     category.setIconUrl(ic.getQvga().getDownloadUrl());
     return category;
   }
