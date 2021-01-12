@@ -43,7 +43,6 @@ Build for test server:
     - docker image rm $TEST_IMAGE
   tags:
     - maven
-  when: manual
 
 Build for production server:
   stage: build
