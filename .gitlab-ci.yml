@@ -77,7 +77,7 @@ Deploy on test server:
   script:
     - docker pull $TEST_IMAGE
     - docker ps -aq --filter name=$TEST_CONTAINER_NAME | grep -q . && docker stop $TEST_CONTAINER_NAME && docker rm $TEST_CONTAINER_NAME
-    - docker run -d -p 127.0.0.1:8361:8080 -v DMS:/DMS -v ${TEST_RUNTIME_PROPERTIES}:/opt/local.runtime.properties --name $TEST_CONTAINER_NAME $TEST_IMAGE
+    - docker run -d -p 127.0.0.1:8361:8080 -v HPL_TEST_DMS:/DMS -v ${TEST_RUNTIME_PROPERTIES}:/opt/local.runtime.properties --name $TEST_CONTAINER_NAME $TEST_IMAGE
   tags:
     - qs1-server
   when: manual
@@ -98,7 +98,7 @@ Deploy on Wrocław ON prod server:
   script:
     - docker pull $PROD2_IMAGE
     - docker ps -aq --filter name=$PROD2_CONTAINER_NAME | grep -q . && docker stop $PROD2_CONTAINER_NAME && docker rm $PROD2_CONTAINER_NAME
-    - docker run -d -p 127.0.0.1:8680:8080 -v DMS:/DMS -v ${PROD2_RUNTIME_PROPERTIES}:/opt/local.runtime.properties --name $PROD2_CONTAINER_NAME $PROD2_IMAGE
+    - docker run -d -p 127.0.0.1:8680:8080 -v WROCLAW_ON_DMS:/DMS -v ${PROD2_RUNTIME_PROPERTIES}:/opt/local.runtime.properties --name $PROD2_CONTAINER_NAME $PROD2_IMAGE
   tags:
     - hpl-prod
   when: manual
