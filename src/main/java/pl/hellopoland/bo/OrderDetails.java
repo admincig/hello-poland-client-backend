@@ -24,7 +24,7 @@ public class OrderDetails {
   @Enumerated(EnumType.STRING)
   private Platform platform;
   private boolean userLogged;
-  private Boolean invoice;
+  private boolean invoice;
 
 
   public String getFirstName() {
@@ -115,11 +115,11 @@ public class OrderDetails {
     this.language = language;
   }
 
-  public Boolean getInvoice() {
+  public boolean getInvoice() {
     return invoice;
   }
 
-  public void setInvoice(Boolean invoice) {
+  public void setInvoice(boolean invoice) {
     this.invoice = invoice;
   }
 }
