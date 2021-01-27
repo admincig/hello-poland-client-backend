@@ -479,7 +479,7 @@ public class OrderService extends ServiceSuperclass {
     // TODO handle failure
   }
 
-  private void confirm(Order order) {
+  public void confirm(Order order) {
     confirmInExternalAPI(order);
     order.setStatus(Status.CONFIRMED);
   }

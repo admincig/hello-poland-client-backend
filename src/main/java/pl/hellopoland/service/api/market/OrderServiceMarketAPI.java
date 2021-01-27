@@ -7,8 +7,11 @@ import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+
+import pl.hellopoland.bo.Order;
 import pl.hellopoland.bo.Order.Status;
 import pl.hellopoland.bo.OrderDateEntry;
+import pl.hellopoland.bo.PassageCart;
 import pl.hellopoland.dto.P24PassageCartDTO;
 import pl.hellopoland.rest.dto.OrderDateEntryORO;
 import pl.hellopoland.rest.dto.OrderDateEntryOnListingORO;
@@ -26,7 +29,15 @@ public class OrderServiceMarketAPI {
 
   @PermitAll
   public P24PassageCartDTO create(OrderIRO iro) {
-    return DtoMapper.getDTO(service.create(iro));
+    PassageCart pc = service.create(iro);
+    Order order = pc.getOrder();
+    if (order.sumIsZero()) {
+      order.setP24OrderId("----");
+      order.setP24Currency("PLN");
+      order.setP24Statement("----");
+      service.confirm(order);
+    }
+    return DtoMapper.getDTO(pc);
   }
 
   @PermitAll

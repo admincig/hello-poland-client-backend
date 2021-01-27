@@ -2,11 +2,9 @@ package pl.hellopoland.bo;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "orders")
@@ -115,6 +113,12 @@ public class Order extends ModelSuperclass {
 
   public void generateHash() {
     this.hash = UUID.randomUUID().toString();
+  }
+
+  public boolean sumIsZero() {
+    return this.entries.stream()
+        .mapToInt(OrderSightEntry::getSum)
+        .noneMatch(sum -> sum > 0);
   }
 
 }
