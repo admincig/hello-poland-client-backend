@@ -366,6 +366,8 @@ public class DtoMapper {
 
   public static P24PassageCartDTO getDTO(PassageCart p24PassageCart) {
     var dto = new P24PassageCartDTO();
+    dto.orderId = p24PassageCart.getOrder().getId();
+    dto.orderHash = p24PassageCart.getOrder().getHash();
     dto.requiresPayment = !p24PassageCart.getOrder().sumIsZero();
     dto.isSandbox = p24PassageCart.isSandbox();
     dto.transactionParams = getParams(p24PassageCart);
