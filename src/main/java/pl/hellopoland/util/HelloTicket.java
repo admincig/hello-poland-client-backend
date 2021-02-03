@@ -67,6 +67,7 @@ public class HelloTicket {
 
   public JsonStructure book(OrderDetails details, List<OrderEntry> orderEntries) {
     BookingDTO booking = new BookingDTO();
+    booking.buyerNotes = details.getBuyerNotes();
     booking.customerEmail = details.getEmail();
     booking.customerName = details.getFirstName() + " " + details.getLastName();
     booking.invoice = details.getInvoice();

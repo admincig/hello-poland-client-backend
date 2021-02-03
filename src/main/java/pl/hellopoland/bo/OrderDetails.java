@@ -1,5 +1,6 @@
 package pl.hellopoland.bo;
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -25,6 +26,8 @@ public class OrderDetails {
   private Platform platform;
   private boolean userLogged;
   private boolean invoice;
+  @Column(columnDefinition = "varchar")
+  private String buyerNotes;
 
 
   public String getFirstName() {
@@ -121,5 +124,13 @@ public class OrderDetails {
 
   public void setInvoice(boolean invoice) {
     this.invoice = invoice;
+  }
+
+  public String getBuyerNotes() {
+    return buyerNotes;
+  }
+
+  public void setBuyerNotes(String buyerNotes) {
+    this.buyerNotes = buyerNotes;
   }
 }
