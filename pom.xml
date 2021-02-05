@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>pl.hellopoland</groupId>
 	<artifactId>hellopoland</artifactId>
-	<version>1.0.0</version>
+	<version>1.2.0</version>
 	<packaging>war</packaging>
 	<name>Hello Poland</name>
 	<description>Hello Poland backend project</description>
@@ -44,6 +44,12 @@
 			<groupId>javax</groupId>
 			<artifactId>javaee-api</artifactId>
 			<version>8.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-multipart-provider</artifactId>
+			<version>3.6.3.Final</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

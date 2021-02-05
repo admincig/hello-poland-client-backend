@@ -492,7 +492,7 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public SightEvent uploadPdf(SightEvent bo, byte[] pdf) {
-    bo.setPdfAttachment(fdService.storeFileDescriptor(new ByteArrayInputStream(pdf), "pdf"));
+    bo.setPdfAttachment(fdService.storeSightEventAttachment(new ByteArrayInputStream(pdf), "pdf"));
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
     helloTicket.addPdfToSightEvent(bo.getHptId(), DtoMapper.getFullDTO(bo.getPdfAttachment()),

@@ -77,4 +77,5 @@ public class RestService {
     return Optional.ofNullable(LanguageVersion.getForCreateAndUpdateEntity(contentLanguage))
         .orElseThrow(() -> new ConflictingException("Unsupported language: " + contentLanguage));
   }
+
 }

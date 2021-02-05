@@ -9,26 +9,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import pl.hellopoland.bo.Address;
-import pl.hellopoland.bo.Agreement;
-import pl.hellopoland.bo.Category;
-import pl.hellopoland.bo.ContactPerson;
-import pl.hellopoland.bo.FileDescriptor;
-import pl.hellopoland.bo.ImageCollector;
-import pl.hellopoland.bo.Location;
-import pl.hellopoland.bo.OpeningHours;
-import pl.hellopoland.bo.OrderDetails;
-import pl.hellopoland.bo.Partner;
-import pl.hellopoland.bo.PartnerRepresentative;
-import pl.hellopoland.bo.PassageCart;
-import pl.hellopoland.bo.PassageCartEntry;
-import pl.hellopoland.bo.Sight;
-import pl.hellopoland.bo.SightEvent;
-import pl.hellopoland.bo.SightEventCategory;
-import pl.hellopoland.bo.SightEventTag;
-import pl.hellopoland.bo.Tag;
-import pl.hellopoland.bo.User;
-import pl.hellopoland.bo.UserRole;
+
+import pl.hellopoland.bo.*;
 import pl.hellopoland.dto.AgreementDTO;
 import pl.hellopoland.dto.CategoryDTO;
 import pl.hellopoland.dto.ContactPersonDTO;
@@ -48,6 +30,7 @@ import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.dto.TagDTO;
 import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.rest.dto.LibraryFileORO;
 import pl.hellopoland.soap.p24.enums.BusinessType;
 
 public class DtoMapper {
@@ -625,4 +608,16 @@ public class DtoMapper {
     // bo.setTechnicalContact(technicalContact);
   }
 
+  public static LibraryFileORO getDTO(LibraryFile libraryFile) {
+    LibraryFileORO dto = new LibraryFileORO();
+    dto.id = libraryFile.getId();
+    dto.name = libraryFile.getName();
+    if (libraryFile.getImage() != null) {
+      dto.image = getDTO(libraryFile.getImage());
+    }
+    if (libraryFile.getNonImage() != null) {
+      dto.nonImage = getDTO(libraryFile.getNonImage());
+    }
+    return dto;
+  }
 }
