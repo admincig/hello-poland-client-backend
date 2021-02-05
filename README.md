@@ -25,3 +25,5 @@ Ustawienie domyślne ścieżki do DMS (`dms.root.path`) jest przygotowane z myś
 Aby nie utracić danych między releasami zalecane jest utworzenie named volume i podpięcie go na ścieżce `dms.root.path`:
 
 + `docker run -v HELLO_DMS:/DMS`
+
+Analogicznie wygląda proces dla klonów HPL.
