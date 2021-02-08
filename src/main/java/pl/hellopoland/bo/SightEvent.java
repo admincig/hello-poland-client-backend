@@ -2,14 +2,7 @@ package pl.hellopoland.bo;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.persistence.Column;
@@ -33,12 +26,13 @@ import pl.hellopoland.annotation.Multilingual;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.util.Imaged;
 import pl.hellopoland.util.Located;
+import pl.hellopoland.util.Partnered;
 import pl.hellopoland.util.Translated;
 
 @Entity
 @Table(uniqueConstraints = {
     @UniqueConstraint(name = "sightevent_promotion_unique", columnNames = {"promotion"})})
-public class SightEvent extends ModelSuperclass implements Located, Imaged, Translated {
+public class SightEvent extends ModelSuperclass implements Located, Imaged, Translated, Partnered {
 
   private static final long serialVersionUID = -34796485244638912L;
 
@@ -54,7 +48,7 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
       joinColumns = {@JoinColumn(name = "sightevent_id", referencedColumnName = "id")},
       inverseJoinColumns = {
           @JoinColumn(name = "imagecollector_id", referencedColumnName = "id", unique = true)})
-  private Collection<ImageCollector> images = new ArrayList<>();
+  private List<ImageCollector> images = new ArrayList<>();
   @ManyToMany
   private Set<Agreement> agreements = new HashSet<>();
   @Multilingual
@@ -272,11 +266,11 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
     this.generalAdmission = generalAdmission;
   }
 
-  public Collection<ImageCollector> getImages() {
+  public List<ImageCollector> getImages() {
     return images;
   }
 
-  public void setImages(Collection<ImageCollector> images) {
+  public void setImages(List<ImageCollector> images) {
     this.images = images;
   }
 

@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
@@ -17,8 +19,11 @@ import javax.persistence.NoResultException;
 import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.ImageVariant;
 import pl.hellopoland.bo.ImageVariant.Variant;
+import pl.hellopoland.dto.ImageDTO;
+import pl.hellopoland.dto.ImagedDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.util.Imaged;
+import pl.hellopoland.util.Partnered;
 import pl.hellopoland.util.webp.WebpIO;
 
 @LocalBean
@@ -201,7 +206,7 @@ public class ImageService extends ServiceSuperclass {
     return im;
   }
 
-  public void update(Imaged bo, String importUrl) {
+  public void updateMainImage(Imaged bo, String importUrl) {
     if (importUrl == null) {
       bo.setMainImage(null);
     } else {
@@ -213,7 +218,7 @@ public class ImageService extends ServiceSuperclass {
     }
   }
 
-  private ImageCollector getOrDownload(String importUrl) {
+  public ImageCollector getOrDownload(String importUrl) {
     try {
       var parts = importUrl.split("\\/");
       String name = parts[parts.length - 1];
@@ -231,5 +236,34 @@ public class ImageService extends ServiceSuperclass {
   public ImageCollector get(Long id) {
     return em.createQuery("from ImageCollector where id=:id", ImageCollector.class)
         .setParameter("id", id).getSingleResult();
+  }
+
+  public <E extends Imaged & Partnered> void handleImagesWhenCreating(E bo, ImagedDTO dto) {
+    if (dto.mainImage != null) {
+      if (dto.mainImage.id != null) {
+        ImageCollector image = get(dto.mainImage.id);
+        if (image.getPartner() != null && bo.getPartner().getId().equals(image.getPartner().getId())) {
+          bo.setMainImage(image);
+        }
+      } else if (dto.mainImage.original != null) {
+        updateMainImage(bo, dto.mainImage == null ? null : dto.mainImage.original);
+      }
+    }
+
+    if (dto.images != null) {
+      List<ImageCollector> images = new ArrayList<>();
+      for (ImageDTO im : dto.images) {
+        if (im.id != null) {
+          ImageCollector image = get(im.id);
+          if (image.getPartner() != null && bo.getPartner().getId().equals(image.getPartner().getId())) {
+            images.add(image);
+          }
+        } else if (im.original != null) {
+          ImageCollector image = getOrDownload(im.original);
+          images.add(image);
+        }
+      }
+      bo.setImages(images);
+    }
   }
 }

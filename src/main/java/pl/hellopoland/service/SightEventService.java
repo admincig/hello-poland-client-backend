@@ -38,12 +38,7 @@ import pl.hellopoland.bo.SightEventCategory;
 import pl.hellopoland.bo.SightEventTag;
 import pl.hellopoland.bo.Translation;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
-import pl.hellopoland.dto.AvailableTicketNumberAssociationDTO;
-import pl.hellopoland.dto.PushDTO;
-import pl.hellopoland.dto.SightEventDTO;
-import pl.hellopoland.dto.TicketDefinitionDTO;
-import pl.hellopoland.dto.TicketPoolDTO;
-import pl.hellopoland.dto.TicketPoolDefinitionDTO;
+import pl.hellopoland.dto.*;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.AccessDeniedException;
@@ -186,7 +181,7 @@ public class SightEventService extends ServiceSuperclass {
     dto.availableLanguageVersions = availableLanguageVersions;
     SightEvent bo = new SightEvent();
     DtoMapper.copy(dto, bo);
-    iService.update(bo, dto.mainImage == null ? null : dto.mainImage.original);
+    iService.handleImagesWhenCreating(bo, dto);
     bo.setPortal(hpt);
 
     if (sight != null) {

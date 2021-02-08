@@ -30,10 +30,11 @@ import pl.hellopoland.annotation.Multilingual;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.util.Imaged;
 import pl.hellopoland.util.Located;
+import pl.hellopoland.util.Partnered;
 import pl.hellopoland.util.Translated;
 
 @Entity
-public class Sight extends ModelSuperclass implements Located, Imaged, Translated {
+public class Sight extends ModelSuperclass implements Located, Imaged, Translated, Partnered {
 
   private static final long serialVersionUID = -6821312294116712881L;
 
@@ -52,7 +53,7 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
       joinColumns = {@JoinColumn(name = "sight_id", referencedColumnName = "id")},
       inverseJoinColumns = {
           @JoinColumn(name = "imagecollector_id", referencedColumnName = "id", unique = true)})
-  private Collection<ImageCollector> images = new ArrayList<>();
+  private List<ImageCollector> images = new ArrayList<>();
   private String email;
   private String phone;
   @Embedded
@@ -189,11 +190,11 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
     this.score = new BigDecimal(score).setScale(1, RoundingMode.HALF_UP).floatValue();
   }
 
-  public Collection<ImageCollector> getImages() {
+  public List<ImageCollector> getImages() {
     return images;
   }
 
-  public void setImages(Collection<ImageCollector> images) {
+  public void setImages(List<ImageCollector> images) {
     this.images = images;
   }
 

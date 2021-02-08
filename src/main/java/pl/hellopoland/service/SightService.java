@@ -1,22 +1,6 @@
 package pl.hellopoland.service;
 
-import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import pl.hellopoland.bo.ImageCollector;
-import pl.hellopoland.bo.OpeningHours;
-import pl.hellopoland.bo.Partner;
-import pl.hellopoland.bo.Sight;
-import pl.hellopoland.bo.SightEvent;
-import pl.hellopoland.bo.Translation;
+import pl.hellopoland.bo.*;
 import pl.hellopoland.config.SightPagedCollectionConfig;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.dto.SightEventDTO;
@@ -27,6 +11,13 @@ import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.util.BeanUtils;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.PagedEntityCollection;
+
+import javax.ejb.LocalBean;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import java.io.ByteArrayInputStream;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @LocalBean
 @Stateless
@@ -88,8 +79,9 @@ public class SightService extends ServiceSuperclass {
       partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
     }
     bo.setPartner(partner);
-    imageService.update(bo, dto.mainImage == null ? null : dto.mainImage.original);
     em.persist(bo);
+
+    imageService.handleImagesWhenCreating(bo, dto);
 
     ArrayList<OpeningHours> oHoursList = getOpeningHoursCollectionFromDTO(dto);
     if (oHoursList != null && !oHoursList.isEmpty()) {
