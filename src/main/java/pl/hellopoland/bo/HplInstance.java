@@ -10,6 +10,8 @@ public class HplInstance extends ModelSuperclass {
   private String name;
   @NotNull
   private String url;
+  private String tosUrl;
+  private String privacyPolicyUrl;
 
   public String getName() {
     return name;
@@ -25,5 +27,21 @@ public class HplInstance extends ModelSuperclass {
 
   public void setUrl(String url) {
     this.url = url;
+  }
+
+  public String getTosUrl() {
+    return tosUrl;
+  }
+
+  public void setTosUrl(String tosUrl) {
+    this.tosUrl = tosUrl;
+  }
+
+  public String getPrivacyPolicyUrl() {
+    return privacyPolicyUrl;
+  }
+
+  public void setPrivacyPolicyUrl(String privacyPolicyUrl) {
+    this.privacyPolicyUrl = privacyPolicyUrl;
   }
 }

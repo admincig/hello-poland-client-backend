@@ -16,7 +16,7 @@ public class DiscoveryServicePartnerAPI {
 
   public List<HplInstanceRO> discovery() {
     return service.discovery().stream()
-        .map(instance -> new HplInstanceRO(instance.getName(), instance.getUrl()))
+        .map(instance -> new HplInstanceRO(instance.getName(), instance.getUrl(), instance.getTosUrl(), instance.getPrivacyPolicyUrl()))
         .collect(Collectors.toList());
   }
 
