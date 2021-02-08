@@ -8,10 +8,7 @@ import pl.hellopoland.service.api.partner.FileServicePartnerAPI;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.util.List;
@@ -29,6 +26,12 @@ public class PartnerFileRestService {
   public UploadFilesResult uploadFiles(MultipartFormDataInput input) throws IOException {
     List<Pair<String, byte[]>> pairs = Utils.extractFiles(input);
     return service.uploadImages(pairs);
+  }
+
+  @Path("/images/{imageId}")
+  @DELETE
+  public void delete(@PathParam("imageId") Long imageId) {
+    service.deleteImage(imageId);
   }
 
 }

@@ -1,5 +1,6 @@
 package pl.hellopoland.bo;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
@@ -14,52 +15,52 @@ public class ImageCollector extends ModelSuperclass {
 
   private String imageURL;
 
-  @OneToOne
+  @OneToOne(cascade = CascadeType.REMOVE)
   private ImageVariant orginal;
 
-  @OneToOne
+  @OneToOne(cascade = CascadeType.REMOVE)
   private ImageVariant qvga;
 
-  @OneToOne
+  @OneToOne(cascade = CascadeType.REMOVE)
   private ImageVariant vga;
 
-  @OneToOne
+  @OneToOne(cascade = CascadeType.REMOVE)
   private ImageVariant hd;
 
-  @OneToOne
+  @OneToOne(cascade = CascadeType.REMOVE)
   private ImageVariant xga;
 
-  @OneToOne
+  @OneToOne(cascade = CascadeType.REMOVE)
   private ImageVariant sxga;
 
-  @OneToOne
+  @OneToOne(cascade = CascadeType.REMOVE)
   private ImageVariant fhd;
 
-  @OneToOne
+  @OneToOne(cascade = CascadeType.REMOVE)
   private ImageVariant fourK;
 
-  @OneToOne
+  @OneToOne(cascade = CascadeType.REMOVE)
   private ImageVariant orginalWebp;
 
-  @OneToOne
+  @OneToOne(cascade = CascadeType.REMOVE)
   private ImageVariant qvgaWebp;
 
-  @OneToOne
+  @OneToOne(cascade = CascadeType.REMOVE)
   private ImageVariant vgaWebp;
 
-  @OneToOne
+  @OneToOne(cascade = CascadeType.REMOVE)
   private ImageVariant hdWebp;
 
-  @OneToOne
+  @OneToOne(cascade = CascadeType.REMOVE)
   private ImageVariant xgaWebp;
 
-  @OneToOne
+  @OneToOne(cascade = CascadeType.REMOVE)
   private ImageVariant sxgaWebp;
 
-  @OneToOne
+  @OneToOne(cascade = CascadeType.REMOVE)
   private ImageVariant fhdWebp;
 
-  @OneToOne
+  @OneToOne(cascade = CascadeType.REMOVE)
   private ImageVariant fourKWebp;
 
   public String getImageURL() {

@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -264,6 +266,31 @@ public class ImageService extends ServiceSuperclass {
         }
       }
       bo.setImages(images);
+    }
+  }
+
+  public void delete(Long imageId) {
+    ImageCollector ic = get(imageId);
+    try {
+      Files.deleteIfExists(Path.of(ic.getFhd().getPath()));
+      Files.deleteIfExists(Path.of(ic.getFhdWebp().getPath()));
+      Files.deleteIfExists(Path.of(ic.getFourK().getPath()));
+      Files.deleteIfExists(Path.of(ic.getFourKWebp().getPath()));
+      Files.deleteIfExists(Path.of(ic.getHdWebp().getPath()));
+      Files.deleteIfExists(Path.of(ic.getHd().getPath()));
+      Files.deleteIfExists(Path.of(ic.getOrginal().getPath()));
+      Files.deleteIfExists(Path.of(ic.getOrginalWebp().getPath()));
+      Files.deleteIfExists(Path.of(ic.getQvga().getPath()));
+      Files.deleteIfExists(Path.of(ic.getQvgaWebp().getPath()));
+      Files.deleteIfExists(Path.of(ic.getSxga().getPath()));
+      Files.deleteIfExists(Path.of(ic.getSxgaWebp().getPath()));
+      Files.deleteIfExists(Path.of(ic.getVga().getPath()));
+      Files.deleteIfExists(Path.of(ic.getVgaWebp().getPath()));
+      Files.deleteIfExists(Path.of(ic.getXga().getPath()));
+      Files.deleteIfExists(Path.of(ic.getXgaWebp().getPath()));
+      em.remove(ic);
+    } catch (IOException e) {
+      logger.log(Level.WARNING, "Failed to delete file", e);
     }
   }
 }

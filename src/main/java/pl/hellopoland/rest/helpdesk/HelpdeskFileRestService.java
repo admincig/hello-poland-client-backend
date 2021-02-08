@@ -30,4 +30,10 @@ public class HelpdeskFileRestService {
     return service.uploadImages(pairs, partnerId);
   }
 
+  @Path("/images/{imageId}")
+  @DELETE
+  public void delete(@PathParam("imageId") Long imageId) {
+    service.deleteImage(imageId);
+  }
+
 }
