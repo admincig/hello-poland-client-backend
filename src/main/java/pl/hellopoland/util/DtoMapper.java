@@ -1,8 +1,10 @@
 package pl.hellopoland.util;
 
-import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
+import pl.hellopoland.bo.*;
+import pl.hellopoland.dto.*;
+import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.soap.p24.enums.BusinessType;
+
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.util.ArrayList;
@@ -10,28 +12,9 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import pl.hellopoland.bo.*;
-import pl.hellopoland.dto.AgreementDTO;
-import pl.hellopoland.dto.CategoryDTO;
-import pl.hellopoland.dto.ContactPersonDTO;
-import pl.hellopoland.dto.FileDescriptorDTO;
-import pl.hellopoland.dto.ImageDTO;
-import pl.hellopoland.dto.LocationDTO;
-import pl.hellopoland.dto.MarketPartnerDTO;
-import pl.hellopoland.dto.OpeningHoursDTO;
-import pl.hellopoland.dto.P24PassageCartDTO;
-import pl.hellopoland.dto.P24PassageCartEntryDTO;
-import pl.hellopoland.dto.P24PassageTransactionParamsDTO;
-import pl.hellopoland.dto.PartnerDTO;
-import pl.hellopoland.dto.PartnerRepresentativeDTO;
-import pl.hellopoland.dto.RoleDTO;
-import pl.hellopoland.dto.SightDTO;
-import pl.hellopoland.dto.SightEventDTO;
-import pl.hellopoland.dto.TagDTO;
-import pl.hellopoland.dto.UserDTO;
-import pl.hellopoland.enums.LanguageVersion;
-import pl.hellopoland.rest.dto.LibraryFileORO;
-import pl.hellopoland.soap.p24.enums.BusinessType;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 public class DtoMapper {
 
@@ -608,16 +591,4 @@ public class DtoMapper {
     // bo.setTechnicalContact(technicalContact);
   }
 
-  public static LibraryFileORO getDTO(LibraryFile libraryFile) {
-    LibraryFileORO dto = new LibraryFileORO();
-    dto.id = libraryFile.getId();
-    dto.name = libraryFile.getName();
-    if (libraryFile.getImage() != null) {
-      dto.image = getDTO(libraryFile.getImage());
-    }
-    if (libraryFile.getNonImage() != null) {
-      dto.nonImage = getDTO(libraryFile.getNonImage());
-    }
-    return dto;
-  }
 }
