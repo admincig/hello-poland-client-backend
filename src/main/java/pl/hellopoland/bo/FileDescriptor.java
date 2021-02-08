@@ -2,10 +2,7 @@ package pl.hellopoland.bo;
 
 import java.io.File;
 import java.time.LocalDateTime;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import pl.hellopoland.exception.conflict.ConflictingException;
 
@@ -28,6 +25,8 @@ public class FileDescriptor extends ModelSuperclass {
     }
   }
 
+  @ManyToOne
+  private Partner partner;
   @NotNull
   @Enumerated(EnumType.STRING)
   private MimeType mimeType;
@@ -42,6 +41,11 @@ public class FileDescriptor extends ModelSuperclass {
     this.mimeType = guessMimeType(file);
     this.path = file.getPath();
     this.created = LocalDateTime.now();
+  }
+
+  public FileDescriptor(File file, Partner partner) {
+    this(file);
+    this.partner = partner;
   }
 
   public MimeType getMimeType() {
@@ -89,6 +93,14 @@ public class FileDescriptor extends ModelSuperclass {
       extension = "";
     }
     return extension;
+  }
+
+  public Partner getPartner() {
+    return partner;
+  }
+
+  public void setPartner(Partner partner) {
+    this.partner = partner;
   }
 
   @Transient

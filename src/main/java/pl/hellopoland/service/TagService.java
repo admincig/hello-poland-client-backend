@@ -98,7 +98,7 @@ public class TagService extends ServiceSuperclass {
   public Tag uploadIcon(Long id, byte[] bytes, String extension) {
     Tag tag = get(id);
     ImageCollector ic =
-        iService.storeImageCollector(new ByteArrayInputStream(bytes), extension, null);
+        iService.storeImageCollector(new ByteArrayInputStream(bytes), extension);
     tag.setIconUrl(ic.getQvga().getDownloadUrl());
     return tag;
   }

@@ -11,6 +11,7 @@ import java.util.UUID;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import pl.hellopoland.bo.FileDescriptor;
+import pl.hellopoland.bo.Partner;
 
 @LocalBean
 @Stateless
@@ -23,9 +24,9 @@ public class FileDescriptorService extends ServiceSuperclass {
     return fd;
   }
 
-  public FileDescriptor storeLibraryFile(ByteArrayInputStream bais, String extension, Long partnerId) {
-    File file = storeLibraryFileOnDisc(bais, extension, partnerId);
-    FileDescriptor fd = new FileDescriptor(file);
+  public FileDescriptor storeLibraryFile(ByteArrayInputStream bais, String extension, Partner partner) {
+    File file = storeLibraryFileOnDisc(bais, extension, partner.getId());
+    FileDescriptor fd = new FileDescriptor(file, partner);
     em.persist(fd);
     return fd;
   }
@@ -98,7 +99,7 @@ public class FileDescriptorService extends ServiceSuperclass {
         + File.separator
         + "partners"
         + File.separator
-        + partnerId
+        + (partnerId == null ? "-1" : partnerId)
         + File.separator
         + hash.substring(0, 1)
         + File.separator

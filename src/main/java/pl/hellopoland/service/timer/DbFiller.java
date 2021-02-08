@@ -282,7 +282,7 @@ public class DbFiller extends ServiceSuperclass {
   }
 
   private ImageCollector createImageCollector(InputStream is) {
-    return imgService.validateAndStoreImageCollector(is, "jpg", null);
+    return imgService.validateAndStoreImageCollector(is, "jpg");
   }
 
   private void createLocations() {

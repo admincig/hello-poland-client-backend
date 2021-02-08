@@ -3,7 +3,7 @@ package pl.hellopoland.rest.partner;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import pl.hellopoland.rest.Utils;
-import pl.hellopoland.rest.dto.LibraryFileORO;
+import pl.hellopoland.rest.dto.UploadFilesResult;
 import pl.hellopoland.service.api.partner.FileServicePartnerAPI;
 
 import javax.enterprise.context.RequestScoped;
@@ -26,7 +26,7 @@ public class PartnerFileRestService {
 
   @POST
   @Consumes(MediaType.MULTIPART_FORM_DATA)
-  public List<LibraryFileORO> uploadFiles(MultipartFormDataInput input) throws IOException {
+  public UploadFilesResult uploadFiles(MultipartFormDataInput input) throws IOException {
     List<Pair<String, byte[]>> pairs = Utils.extractFiles(input);
     return service.uploadImages(pairs);
   }

@@ -29,8 +29,18 @@ public class ImageService extends ServiceSuperclass {
 
   public ImageCollector validateAndStoreImageCollector(InputStream is, String extension,
       String url) {
+    String name = url.substring(url.lastIndexOf('/') + 1);
+    return validateAndStoreImageCollector(name, is, extension, url);
+  }
+
+  public ImageCollector validateAndStoreImageCollector(InputStream is, String extension) {
+    return validateAndStoreImageCollector(null, is, extension, null);
+  }
+
+  public ImageCollector validateAndStoreImageCollector(String name, InputStream is, String extension,
+      String url) {
     BufferedImage buffImage = validate(is);
-    return storeImageCollector(buffImage, extension, url);
+    return storeImageCollectorInternal(name, buffImage, extension, url);
   }
 
   private BufferedImage validate(InputStream is) {
@@ -47,19 +57,24 @@ public class ImageService extends ServiceSuperclass {
     }
   }
 
-  public ImageCollector storeImageCollector(InputStream is, String extension,
-    String url) {
+  private ImageCollector storeImageCollector(String name, InputStream is, String extension,
+      String url) {
     try {
       BufferedImage imageIO = ImageIO.read(is);
-      return storeImageCollector(imageIO, extension, url);
+      return storeImageCollectorInternal(name, imageIO, extension, url);
     } catch (IOException e) {
       throw new ConflictingException("Failed to load image", e);
     }
   }
 
-  private ImageCollector storeImageCollector(BufferedImage buffImage, String extension,
+  public ImageCollector storeImageCollector(InputStream is, String extension) {
+    return storeImageCollector(null, is, extension, null);
+  }
+
+  private ImageCollector storeImageCollectorInternal(String name, BufferedImage buffImage, String extension,
       String url) {
     var collector = new ImageCollector();
+    collector.setName(name);
     collector.setImageURL(url);
     em.persist(collector);
     var qvga = storeImageVariant(scaleImage(buffImage, 320), extension, ImageVariant.Variant.QVGA,

@@ -1,11 +1,16 @@
 package pl.hellopoland.bo;
 
 import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
 @Entity
 public class ImageCollector extends ModelSuperclass {
   private static final long serialVersionUID = 1L;
+
+  private String name;
+  @ManyToOne
+  private Partner partner;
 
   private String imageURL;
 
@@ -193,4 +198,19 @@ public class ImageCollector extends ModelSuperclass {
     this.fourKWebp = fourKWebp;
   }
 
+  public Partner getPartner() {
+    return partner;
+  }
+
+  public void setPartner(Partner partner) {
+    this.partner = partner;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
 }
