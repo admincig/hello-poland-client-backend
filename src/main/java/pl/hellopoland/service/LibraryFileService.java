@@ -28,7 +28,7 @@ public class LibraryFileService extends ServiceSuperclass {
     pairs.stream()
         .forEach(pair -> {
           String name = pair.getLeft();
-          String extension = name.substring(name.lastIndexOf('.' + 1));
+          String extension = name.substring(name.lastIndexOf('.') + 1);
           ByteArrayInputStream bais = new ByteArrayInputStream(pair.getRight());
           if (isImage(extension)) {
             ImageCollector ic =
