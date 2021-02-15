@@ -255,6 +255,7 @@ public class ImageService extends ServiceSuperclass {
       bo.setMainImage(null);
     }
 
+    bo.setImages(Collections.emptyList());
     if (dto.images != null) {
       List<ImageCollector> images = new ArrayList<>();
       for (ImageDTO im : dto.images) {
@@ -269,8 +270,6 @@ public class ImageService extends ServiceSuperclass {
         }
       }
       bo.setImages(images);
-    } else {
-      bo.setImages(Collections.emptyList());
     }
   }
 
