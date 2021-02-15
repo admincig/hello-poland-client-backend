@@ -27,13 +27,13 @@ public class HelpdeskFileRestService {
   public UploadFilesResult uploadFiles(MultipartFormDataInput input,
       @QueryParam("partner") Long partnerId) throws IOException {
     List<Pair<String, byte[]>> pairs = Utils.extractFiles(input);
-    return service.uploadImages(pairs, partnerId);
+    return service.uploadFiles(pairs, partnerId);
   }
 
-  @Path("/images/{imageId}")
+  @Path("/{fileId}")
   @DELETE
-  public void delete(@PathParam("imageId") Long imageId) {
-    service.deleteImage(imageId);
+  public void delete(@PathParam("fileId") Long fileId) {
+    service.deleteFile(fileId);
   }
 
 }

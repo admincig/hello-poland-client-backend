@@ -7,8 +7,10 @@ import pl.hellopoland.bo.Partner;
 import pl.hellopoland.rest.dto.UploadFilesResult;
 import pl.hellopoland.util.DtoMapper;
 
+import javax.ejb.EJBAccessException;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.persistence.NoResultException;
 import java.io.ByteArrayInputStream;
 import java.util.List;
 
@@ -22,7 +24,7 @@ public class LibraryFileService extends ServiceSuperclass {
   @Inject
   private PartnerService partnerService;
 
-  public UploadFilesResult uploadImages(List<Pair<String, byte[]>> pairs, Long partnerId) {
+  public UploadFilesResult uploadFiles(List<Pair<String, byte[]>> pairs, Long partnerId) {
     Partner partner = partnerService.get(partnerId);
     UploadFilesResult result = new UploadFilesResult();
     pairs.stream()
@@ -51,4 +53,25 @@ public class LibraryFileService extends ServiceSuperclass {
   }
 
 
+  public void deleteFile(Long fileId, Long partnerId) {
+    try {
+      ImageCollector image = imageService.get(fileId);
+      if (partnerId == null) { //helpdesk case
+        imageService.delete(fileId);
+      } else if (image.getPartner() != null && partnerId.equals(image.getPartner().getId())) {
+        imageService.delete(fileId);
+      } else { //no partner or not owned by partnerId
+        throw new EJBAccessException();
+      }
+    } catch (NoResultException e) {
+      FileDescriptor file = fileDescriptorService.get(fileId);
+      if (partnerId == null) { //helpdesk case
+        fileDescriptorService.delete(fileId);
+      } else if (file.getPartner() != null && partnerId.equals(file.getPartner().getId())) {
+        fileDescriptorService.delete(fileId);
+      } else { //no partner or not owned by partnerId
+        throw new EJBAccessException();
+      }
+    }
+  }
 }

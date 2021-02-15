@@ -1,18 +1,13 @@
 package pl.hellopoland.service;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.lang.System.Logger;
-import java.lang.System.Logger.Level;
-import java.text.Collator;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Properties;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import pl.hellopoland.bo.ModelSuperclass;
+import pl.hellopoland.bo.Partner;
+import pl.hellopoland.bo.Portal;
+import pl.hellopoland.bo.User;
+import pl.hellopoland.config.Entry;
+import pl.hellopoland.config.PagedCollectionConfig;
+import pl.hellopoland.exception.notfound.ResourceNotFoundException;
+
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InvocationContext;
@@ -21,11 +16,15 @@ import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.security.enterprise.SecurityContext;
-
-import pl.hellopoland.bo.*;
-import pl.hellopoland.config.Entry;
-import pl.hellopoland.config.PagedCollectionConfig;
-import pl.hellopoland.exception.notfound.ResourceNotFoundException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
+import java.text.Collator;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
 public abstract class ServiceSuperclass {

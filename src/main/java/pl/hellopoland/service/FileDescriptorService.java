@@ -1,5 +1,10 @@
 package pl.hellopoland.service;
 
+import pl.hellopoland.bo.FileDescriptor;
+import pl.hellopoland.bo.Partner;
+
+import javax.ejb.LocalBean;
+import javax.ejb.Stateless;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -8,10 +13,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import pl.hellopoland.bo.FileDescriptor;
-import pl.hellopoland.bo.Partner;
 
 @LocalBean
 @Stateless
@@ -24,14 +25,15 @@ public class FileDescriptorService extends ServiceSuperclass {
     return fd;
   }
 
-  public FileDescriptor storeLibraryFile(ByteArrayInputStream bais, String extension, Partner partner) {
+  public FileDescriptor storeLibraryFile(ByteArrayInputStream bais, String extension,
+      Partner partner) {
     File file = storeLibraryFileOnDisc(bais, extension, partner.getId());
     FileDescriptor fd = new FileDescriptor(file, partner);
     em.persist(fd);
     return fd;
   }
 
-  public File getFileDescriptor(String name) {
+  public File getFile(String name) {
     var path = em
         .createQuery("select path from FileDescriptor where path like :name or path like :name2",
             String.class)
@@ -107,4 +109,18 @@ public class FileDescriptorService extends ServiceSuperclass {
         + File.separator;
   }
 
+  public FileDescriptor get(Long fileId) {
+    return em.createQuery("from FileDescriptor where id = :id", FileDescriptor.class)
+        .setParameter("id", fileId).getSingleResult();
+  }
+
+  public void delete(Long fileId) {
+    FileDescriptor fd = get(fileId);
+    try {
+      Files.deleteIfExists(Path.of(fd.getPath()));
+      em.remove(fd);
+    } catch (Exception e) {
+      logger.log(Level.WARNING, "Failed to delete file descriptor", e);
+    }
+  }
 }

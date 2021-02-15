@@ -59,7 +59,7 @@ public class RestService {
   @Path("/files/{path}")
   @Produces({MediaType.APPLICATION_JSON, "application/pdf"})
   public Response downloadFile(@PathParam("path") String path) {
-    File file = fileService.getFileDescriptor(path);
+    File file = fileService.getFile(path);
     String extension = file.getName().substring(file.getName().lastIndexOf('.') + 1);
     return Response.ok().entity(file).type("application/" + extension).build();
   }

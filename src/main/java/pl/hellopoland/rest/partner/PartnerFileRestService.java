@@ -25,13 +25,13 @@ public class PartnerFileRestService {
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   public UploadFilesResult uploadFiles(MultipartFormDataInput input) throws IOException {
     List<Pair<String, byte[]>> pairs = Utils.extractFiles(input);
-    return service.uploadImages(pairs);
+    return service.uploadFiles(pairs);
   }
 
-  @Path("/images/{imageId}")
+  @Path("/{fileId}")
   @DELETE
-  public void delete(@PathParam("imageId") Long imageId) {
-    service.deleteImage(imageId);
+  public void delete(@PathParam("fileId") Long fileId) {
+    service.deleteFile(fileId);
   }
 
 }
