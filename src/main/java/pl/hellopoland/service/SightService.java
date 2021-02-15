@@ -280,5 +280,8 @@ public class SightService extends ServiceSuperclass {
     em.createQuery("update Sight set mainImage = null where mainImage.id = :id")
         .setParameter("id", fileId)
         .executeUpdate();
+    em.createNativeQuery("delete from sight_images where imagecollector_id = :id")
+        .setParameter("id", fileId)
+        .executeUpdate();
   }
 }

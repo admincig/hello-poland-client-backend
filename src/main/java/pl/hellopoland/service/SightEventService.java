@@ -599,6 +599,9 @@ public class SightEventService extends ServiceSuperclass {
     em.createQuery("update SightEvent set mainImage = null where mainImage.id = :id")
         .setParameter("id", fileId)
         .executeUpdate();
+    em.createNativeQuery("delete from sightevent_images where imagecollector_id = :id")
+        .setParameter("id", fileId)
+        .executeUpdate();
   }
 
   public void dereferenceAttachment(Long fileId) {

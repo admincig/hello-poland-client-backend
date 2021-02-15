@@ -261,8 +261,8 @@ public class ImageService extends ServiceSuperclass {
     if (dto.images != null) {
       List<ImageCollector> images = new ArrayList<>();
       for (ImageDTO im : dto.images) {
-        if (im.id != null){
-          if (bo.getMainImage() != null && !im.id.equals(bo.getMainImage().getId())) {
+        if (im.id != null) {
+          if (bo.getMainImage() == null || !im.id.equals(bo.getMainImage().getId())) {
             ImageCollector image = get(im.id);
             if (image.getPartner() != null && bo.getPartner().getId()
                 .equals(image.getPartner().getId())) {
