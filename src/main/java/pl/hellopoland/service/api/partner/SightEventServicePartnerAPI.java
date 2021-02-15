@@ -87,19 +87,6 @@ public class SightEventServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
-  public SightEventDTO uploadPdf(Long id, byte[] pdf) {
-    SightEvent bo = service.uploadPdfForLoggedUser(id, pdf);
-    var dto = DtoMapper.getFullDTO(bo);
-    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), true, false);
-    return dto;
-  }
-
-  @RolesAllowed("partner")
-  public void deletePdf(Long id) {
-    service.deletePdfForLoggedUser(id);
-  }
-
-  @RolesAllowed("partner")
   public void stopSale(Long sightId, Long ticketPoolDefId, Date date) {
     service.stopSale(sightId, ticketPoolDefId, date);
   }

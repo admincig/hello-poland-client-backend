@@ -11,6 +11,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import javax.ejb.LocalBean;
@@ -208,7 +209,7 @@ public class ImageService extends ServiceSuperclass {
     return im;
   }
 
-  public void updateMainImage(Imaged bo, String importUrl) {
+  public void downloadAndSetMainImage(Imaged bo, String importUrl) {
     if (importUrl == null) {
       bo.setMainImage(null);
     } else {
@@ -240,7 +241,7 @@ public class ImageService extends ServiceSuperclass {
         .setParameter("id", id).getSingleResult();
   }
 
-  public <E extends Imaged & Partnered> void handleImagesWhenCreating(E bo, ImagedDTO dto) {
+  public <E extends Imaged & Partnered> void handleImagesUpdate(E bo, ImagedDTO dto) {
     if (dto.mainImage != null) {
       if (dto.mainImage.id != null) {
         ImageCollector image = get(dto.mainImage.id);
@@ -248,8 +249,10 @@ public class ImageService extends ServiceSuperclass {
           bo.setMainImage(image);
         }
       } else if (dto.mainImage.original != null) {
-        updateMainImage(bo, dto.mainImage == null ? null : dto.mainImage.original);
+        downloadAndSetMainImage(bo, dto.mainImage == null ? null : dto.mainImage.original);
       }
+    } else {
+      bo.setMainImage(null);
     }
 
     if (dto.images != null) {
@@ -266,6 +269,8 @@ public class ImageService extends ServiceSuperclass {
         }
       }
       bo.setImages(images);
+    } else {
+      bo.setImages(Collections.emptyList());
     }
   }
 

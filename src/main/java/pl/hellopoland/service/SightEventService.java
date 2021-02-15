@@ -4,7 +4,7 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import java.io.ByteArrayInputStream;
+
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.nio.file.Paths;
@@ -23,19 +23,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.ejb.EJBAccessException;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import pl.hellopoland.bo.OpeningHours;
-import pl.hellopoland.bo.Partner;
-import pl.hellopoland.bo.Portal;
-import pl.hellopoland.bo.Sight;
-import pl.hellopoland.bo.SightEvent;
-import pl.hellopoland.bo.SightEventCategory;
-import pl.hellopoland.bo.SightEventTag;
-import pl.hellopoland.bo.Translation;
+import pl.hellopoland.bo.*;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.*;
 import pl.hellopoland.enums.LanguageVersion;
@@ -173,7 +167,8 @@ public class SightEventService extends ServiceSuperclass {
     dto.availableLanguageVersions = availableLanguageVersions;
     SightEvent bo = new SightEvent();
     DtoMapper.copy(dto, bo);
-    iService.handleImagesWhenCreating(bo, dto);
+    iService.handleImagesUpdate(bo, dto);
+    handleAttachmentUpdate(bo, dto);
     bo.setPortal(hpt);
 
     if (sight != null) {
@@ -254,6 +249,8 @@ public class SightEventService extends ServiceSuperclass {
       }
       bo.setOpeningHours(null);
       bo.setOpeningHours(oHoursList);
+      iService.handleImagesUpdate(bo, dto);
+      handleAttachmentUpdate(bo, dto);
       Sight sight = em.merge(bo.getSight());
       em.refresh(sight);
       sightService.recreateSearchIndex(sight);
@@ -263,12 +260,20 @@ public class SightEventService extends ServiceSuperclass {
     return translationService.updateEntityLanguageVersion(bo, dto, language);
   }
 
-  public List<SightEvent> getForPartner() {
-    Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
-
-    return em.createQuery(
-        "from SightEvent event where event.sight.partner=:partner order by event.id desc",
-        SightEvent.class).setParameter("partner", partner).getResultList();
+  private void handleAttachmentUpdate(SightEvent bo, SightEventDTO dto) {
+    FileDescriptor newAttachment = null;
+    Long newAttachmentId = null;
+    if (dto.pdfAttachment != null) {
+      newAttachmentId = dto.pdfAttachment.id;
+      newAttachment = fdService.get(newAttachmentId);
+      if (newAttachment.getPartner() == null || !newAttachment.getPartner().getId().equals(bo.getPartner().getId())) {
+        throw new EJBAccessException();
+      }
+    }
+    if (bo.getPdfAttachment() != null && !bo.getPdfAttachment().getId().equals(newAttachmentId)) {
+      deleteAttachment(bo);
+    }
+    setAttachment(bo, newAttachment);
   }
 
   public SightEvent getForLoggedUser(Long id) {
@@ -426,26 +431,18 @@ public class SightEventService extends ServiceSuperclass {
     return associationDTO;
   }
 
-  public SightEvent uploadPdfForLoggedUser(Long id, byte[] pdf) {
-    SightEvent bo = getForLoggedUser(id);
-    return uploadPdf(bo, pdf);
-  }
-
-  public SightEvent uploadPdf(SightEvent bo, byte[] pdf) {
-    bo.setPdfAttachment(fdService.storeSightEventAttachment(new ByteArrayInputStream(pdf), "pdf"));
-    Portal hpt = getPortal("Hello Ticket Cloud");
-    HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
-    helloTicket.addPdfToSightEvent(bo.getHptId(), DtoMapper.getFullDTO(bo.getPdfAttachment()),
-        bo.getPartner().getHptToken());
+  public SightEvent setAttachment(SightEvent bo, FileDescriptor file) {
+    bo.setPdfAttachment(file);
+    if (file != null) {
+      Portal hpt = getPortal("Hello Ticket Cloud");
+      HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
+      helloTicket.addPdfToSightEvent(bo.getHptId(), DtoMapper.getFullDTO(bo.getPdfAttachment()),
+          bo.getPartner().getHptToken());
+    }
     return bo;
   }
 
-  public void deletePdfForLoggedUser(Long id) {
-    SightEvent bo = getForLoggedUser(id);
-    deletePdf(bo);
-  }
-
-  public void deletePdf(SightEvent bo) {
+  public void deleteAttachment(SightEvent bo) {
     var pdf = bo.getPdfAttachment();
     if (pdf != null) {
       fdService.deleteFile(Paths.get(pdf.getPath()));

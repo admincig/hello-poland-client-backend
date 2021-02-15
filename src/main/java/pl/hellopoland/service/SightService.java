@@ -80,7 +80,7 @@ public class SightService extends ServiceSuperclass {
     bo.setPartner(partner);
     em.persist(bo);
 
-    imageService.handleImagesWhenCreating(bo, dto);
+    imageService.handleImagesUpdate(bo, dto);
 
     ArrayList<OpeningHours> oHoursList = getOpeningHoursCollectionFromDTO(dto);
     if (oHoursList != null && !oHoursList.isEmpty()) {
@@ -93,16 +93,7 @@ public class SightService extends ServiceSuperclass {
     if (Boolean.TRUE.equals(dto.generalAdmission)) {
       createGeneralAdmissionSightEvent(bo, partner);
     }
-    var agreements = dto.agreements;
-    if (agreements != null && !agreements.isEmpty()) {
-      var agreementBos = Set.copyOf(agreementService.getForLoggedUser(
-          agreements.stream().map(agrDto -> agrDto.id).collect(Collectors.toSet())));
-      bo.setAgreements(agreementBos);
-      var sightEventBos = bo.getSightEvents();
-      if (sightEventBos != null && !sightEventBos.isEmpty()) {
-        sightEventBos.forEach(se -> se.setAgreements(agreementBos));
-      }
-    }
+    handleAgreementsUpdate(bo, dto);
     final var bo2 = createLanguageVersion(DtoMapper.getDTO(bo), bo.getDefaultLanguage());
     recreateSearchIndex(bo2);
     return bo2;
@@ -163,21 +154,26 @@ public class SightService extends ServiceSuperclass {
       }
       bo.setOpeningHours(null);
       bo.setOpeningHours(oHoursList);
-      var agreements = dto.agreements;
-      if (agreements != null && !agreements.isEmpty()) {
-        var agreementBos = Set.copyOf(agreementService.getForLoggedUser(
-            agreements.stream().map(agrDto -> agrDto.id).collect(Collectors.toSet())));
-        bo.setAgreements(agreementBos);
-        var sightEventBos = bo.getSightEvents();
-        if (sightEventBos != null && !sightEventBos.isEmpty()) {
-          sightEventBos.forEach(se -> se.setAgreements(agreementBos));
-        }
-      }
+      handleAgreementsUpdate(bo, dto);
+      imageService.handleImagesUpdate(bo, dto);
     }
     final var bo2 = translationService.updateEntityLanguageVersion(get(dto.id), dto,
         language);
     recreateSearchIndex(em.merge(bo));
     return bo2;
+  }
+
+  private void handleAgreementsUpdate(Sight bo, SightDTO dto) {
+    var agreements = dto.agreements;
+    if (agreements != null && !agreements.isEmpty()) {
+      var agreementBos = Set.copyOf(agreementService.getForLoggedUser(
+          agreements.stream().map(agrDto -> agrDto.id).collect(Collectors.toSet())));
+      bo.setAgreements(agreementBos);
+      var sightEventBos = bo.getSightEvents();
+      if (sightEventBos != null && !sightEventBos.isEmpty()) {
+        sightEventBos.forEach(se -> se.setAgreements(agreementBos));
+      }
+    }
   }
 
   private boolean hasActiveSightEvents(List<SightEvent> sightEvents) {

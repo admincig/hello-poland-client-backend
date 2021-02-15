@@ -18,13 +18,6 @@ import java.util.UUID;
 @Stateless
 public class FileDescriptorService extends ServiceSuperclass {
 
-  public FileDescriptor storeSightEventAttachment(ByteArrayInputStream bais, String extension) {
-    File file = storeSightEventAttachmentOnDisc(bais, extension);
-    FileDescriptor fd = new FileDescriptor(file);
-    em.persist(fd);
-    return fd;
-  }
-
   public FileDescriptor storeLibraryFile(ByteArrayInputStream bais, String extension,
       Partner partner) {
     File file = storeLibraryFileOnDisc(bais, extension, partner.getId());
