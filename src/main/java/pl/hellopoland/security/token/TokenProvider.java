@@ -1,14 +1,16 @@
 package pl.hellopoland.security.token;
 
-import static java.util.stream.Collectors.joining;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+
+import javax.enterprise.context.ApplicationScoped;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.enterprise.context.ApplicationScoped;
+
+import static java.util.stream.Collectors.joining;
 
 @ApplicationScoped
 public class TokenProvider {

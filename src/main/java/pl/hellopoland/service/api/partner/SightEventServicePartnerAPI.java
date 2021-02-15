@@ -17,7 +17,6 @@ import javax.ejb.EJBAccessException;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 

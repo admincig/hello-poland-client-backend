@@ -1,14 +1,12 @@
 package pl.hellopoland.security;
 
-import static java.util.Optional.empty;
-import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toSet;
-import static javax.security.enterprise.AuthenticationStatus.SEND_FAILURE;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.Optional;
-import java.util.Set;
+import pl.hellopoland.bo.User;
+import pl.hellopoland.bo.UserRole;
+import pl.hellopoland.security.token.*;
+import pl.hellopoland.service.UserService;
+import pl.hellopoland.util.FacebookAPIConnector;
+import pl.hellopoland.util.GoogleAPIConnector;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
@@ -23,16 +21,16 @@ import javax.security.enterprise.identitystore.IdentityStoreHandler;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.HttpHeaders;
-import pl.hellopoland.bo.User;
-import pl.hellopoland.bo.UserRole;
-import pl.hellopoland.security.token.ExpiredTokenService;
-import pl.hellopoland.security.token.JwtCredential;
-import pl.hellopoland.security.token.TokenInExpiredTokensListException;
-import pl.hellopoland.security.token.TokenProvider;
-import pl.hellopoland.security.token.TokenType;
-import pl.hellopoland.service.UserService;
-import pl.hellopoland.util.FacebookAPIConnector;
-import pl.hellopoland.util.GoogleAPIConnector;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.Optional;
+import java.util.Set;
+
+import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toSet;
+import static javax.security.enterprise.AuthenticationStatus.SEND_FAILURE;
 
 @ApplicationScoped
 public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {

@@ -38,4 +38,8 @@ public class Utils {
     return pairs;
   }
 
+  public enum FileType {
+    image, file
+  }
+
 }

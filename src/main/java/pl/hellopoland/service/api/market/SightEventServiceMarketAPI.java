@@ -1,23 +1,6 @@
 package pl.hellopoland.service.api.market;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import pl.hellopoland.bo.Category;
-import pl.hellopoland.bo.SightEvent;
-import pl.hellopoland.bo.SightEventCategory;
-import pl.hellopoland.bo.SightEventTag;
-import pl.hellopoland.bo.Tag;
+import pl.hellopoland.bo.*;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.enums.LanguageVersion;
@@ -33,6 +16,16 @@ import pl.hellopoland.service.UserService;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PagedEntityCollection;
+
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Stateless
 public class SightEventServiceMarketAPI {

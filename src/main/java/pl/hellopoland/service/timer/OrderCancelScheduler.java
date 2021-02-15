@@ -1,15 +1,16 @@
 package pl.hellopoland.service.timer;
 
-import java.lang.System.Logger;
-import java.util.Calendar;
-import java.util.List;
+import pl.hellopoland.bo.Order;
+import pl.hellopoland.service.OrderService;
+import pl.hellopoland.service.ServiceSuperclass;
+
 import javax.ejb.DependsOn;
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.inject.Inject;
-import pl.hellopoland.bo.Order;
-import pl.hellopoland.service.OrderService;
-import pl.hellopoland.service.ServiceSuperclass;
+import java.lang.System.Logger;
+import java.util.Calendar;
+import java.util.List;
 
 @Singleton
 @DependsOn({"StartupP24OrdersConfirmation"})

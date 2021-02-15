@@ -10,7 +10,6 @@ import pl.hellopoland.util.DtoMapper;
 import javax.ejb.EJBAccessException;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.persistence.NoResultException;
 import java.io.ByteArrayInputStream;
 import java.util.List;
 
@@ -23,6 +22,10 @@ public class LibraryFileService extends ServiceSuperclass {
   private FileDescriptorService fileDescriptorService;
   @Inject
   private PartnerService partnerService;
+  @Inject
+  private SightService sightService;
+  @Inject
+  private SightEventService sightEventService;
 
   public UploadFilesResult uploadFiles(List<Pair<String, byte[]>> pairs, Long partnerId) {
     Partner partner = partnerService.get(partnerId);
@@ -53,21 +56,22 @@ public class LibraryFileService extends ServiceSuperclass {
   }
 
 
-  public void deleteFile(Long fileId, Long partnerId) {
-    try {
+  public void deleteFile(Long fileId, Long partnerId, boolean isImage) {
+    if (isImage) {
       ImageCollector image = imageService.get(fileId);
-      if (partnerId == null) { //helpdesk case
-        imageService.delete(fileId);
-      } else if (image.getPartner() != null && partnerId.equals(image.getPartner().getId())) {
+      if (partnerId == null //helpdesk case
+          || image.getPartner() != null && partnerId.equals(image.getPartner().getId())) {
+        sightService.dereferenceImage(fileId);
+        sightEventService.dereferenceImage(fileId);
         imageService.delete(fileId);
       } else { //no partner or not owned by partnerId
         throw new EJBAccessException();
       }
-    } catch (NoResultException e) {
+    } else {
       FileDescriptor file = fileDescriptorService.get(fileId);
-      if (partnerId == null) { //helpdesk case
-        fileDescriptorService.delete(fileId);
-      } else if (file.getPartner() != null && partnerId.equals(file.getPartner().getId())) {
+      if (partnerId == null //helpdesk case
+          || file.getPartner() != null && partnerId.equals(file.getPartner().getId())) {
+        sightEventService.dereferenceAttachment(fileId);
         fileDescriptorService.delete(fileId);
       } else { //no partner or not owned by partnerId
         throw new EJBAccessException();

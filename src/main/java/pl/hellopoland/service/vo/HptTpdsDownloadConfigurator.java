@@ -1,7 +1,8 @@
 package pl.hellopoland.service.vo;
 
-import java.util.List;
 import pl.hellopoland.bo.HptSubject;
+
+import java.util.List;
 
 public class HptTpdsDownloadConfigurator {
 

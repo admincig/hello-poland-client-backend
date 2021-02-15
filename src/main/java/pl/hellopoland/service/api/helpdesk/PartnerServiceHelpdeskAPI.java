@@ -1,9 +1,5 @@
 package pl.hellopoland.service.api.helpdesk;
 
-import java.util.stream.Collectors;
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
 import pl.hellopoland.bo.Address;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.config.PartnerPagedCollectionConfig;
@@ -16,6 +12,11 @@ import pl.hellopoland.service.PartnerService;
 import pl.hellopoland.service.TranslationService;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.PagedEntityCollection;
+
+import javax.annotation.security.RolesAllowed;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import java.util.stream.Collectors;
 
 @Stateless
 public class PartnerServiceHelpdeskAPI {

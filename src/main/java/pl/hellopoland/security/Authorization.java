@@ -1,11 +1,12 @@
 package pl.hellopoland.security;
 
-import java.util.Set;
+import pl.hellopoland.service.UserService;
+
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.security.enterprise.identitystore.CredentialValidationResult;
 import javax.security.enterprise.identitystore.IdentityStore;
-import pl.hellopoland.service.UserService;
+import java.util.Set;
 
 @RequestScoped
 public class Authorization implements IdentityStore {

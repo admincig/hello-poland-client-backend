@@ -1,8 +1,9 @@
 package pl.hellopoland.exception;
 
+import pl.hellopoland.exception.conflict.SightHasAssignedSightEventsException;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import pl.hellopoland.exception.conflict.SightHasAssignedSightEventsException;
 
 @ApplicationScoped
 public class ExceptionFactory {

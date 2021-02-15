@@ -21,7 +21,7 @@ public class FileServiceHelpdeskAPI {
   }
 
   @RolesAllowed({"admin", "salesman"})
-  public void deleteFile(Long fileId) {
-    service.deleteFile(fileId, null);
+  public void deleteFile(Long fileId, boolean image) {
+    service.deleteFile(fileId, null, image);
   }
 }

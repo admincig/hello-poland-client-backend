@@ -1,17 +1,16 @@
 package pl.hellopoland.service.timer;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.annotation.PostConstruct;
-import javax.ejb.DependsOn;
-import javax.ejb.Lock;
-import javax.ejb.LockType;
-import javax.ejb.Singleton;
-import javax.inject.Inject;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.service.PartnerService;
 import pl.hellopoland.util.HelloTicket;
+
+import javax.annotation.PostConstruct;
+import javax.ejb.DependsOn;
+import javax.ejb.Singleton;
+import javax.inject.Inject;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Singleton
 @DependsOn("DbFiller")

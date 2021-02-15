@@ -275,4 +275,10 @@ public class SightService extends ServiceSuperclass {
         .collect(Collectors.toSet());
     s.recreateSearchIndex(words);
   }
+
+  public void dereferenceImage(Long fileId) {
+    em.createQuery("update Sight set mainImage = null where mainImage.id = :id")
+        .setParameter("id", fileId)
+        .executeUpdate();
+  }
 }

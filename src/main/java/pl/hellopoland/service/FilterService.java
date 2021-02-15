@@ -1,10 +1,11 @@
 package pl.hellopoland.service;
 
-import java.util.List;
-import java.util.Set;
+import pl.hellopoland.dto.FiltersContainerDTO;
+
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
-import pl.hellopoland.dto.FiltersContainerDTO;
+import java.util.List;
+import java.util.Set;
 
 @LocalBean
 @Stateless

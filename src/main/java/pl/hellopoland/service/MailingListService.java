@@ -1,9 +1,5 @@
 package pl.hellopoland.service;
 
-import java.lang.System.Logger;
-import java.util.List;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import sendinblue.ApiClient;
 import sendinblue.ApiException;
@@ -11,13 +7,12 @@ import sendinblue.Configuration;
 import sendinblue.auth.ApiKeyAuth;
 import sibApi.ContactsApi;
 import sibApi.SmtpApi;
-import sibModel.AddContactToList;
-import sibModel.CreateContact;
-import sibModel.CreateModel;
-import sibModel.GetExtendedContactDetails;
-import sibModel.PostContactInfo;
-import sibModel.SendSmtpEmail;
-import sibModel.SendSmtpEmailTo;
+import sibModel.*;
+
+import javax.ejb.LocalBean;
+import javax.ejb.Stateless;
+import java.lang.System.Logger;
+import java.util.List;
 
 @LocalBean
 @Stateless

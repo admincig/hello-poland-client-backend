@@ -1,23 +1,7 @@
 package pl.hellopoland.service;
 
-import java.lang.System.Logger.Level;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.ws.rs.InternalServerErrorException;
-import javax.ws.rs.NotFoundException;
 import org.apache.commons.lang3.RandomStringUtils;
-import pl.hellopoland.bo.Partner;
-import pl.hellopoland.bo.Portal;
-import pl.hellopoland.bo.User;
-import pl.hellopoland.bo.UserDetails;
-import pl.hellopoland.bo.UserRole;
+import pl.hellopoland.bo.*;
 import pl.hellopoland.bo.UserRole.Role;
 import pl.hellopoland.dto.UserAuthDTO;
 import pl.hellopoland.dto.UserDTO;
@@ -26,6 +10,19 @@ import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.security.password.PasswordEncoder;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.NameAndAddressSplitter;
+
+import javax.ejb.LocalBean;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.persistence.NoResultException;
+import javax.ws.rs.InternalServerErrorException;
+import javax.ws.rs.NotFoundException;
+import java.lang.System.Logger.Level;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @LocalBean
 @Stateless

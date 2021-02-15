@@ -1,24 +1,6 @@
 package pl.hellopoland.service.api.market;
 
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import javax.annotation.security.PermitAll;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import pl.hellopoland.bo.Category;
-import pl.hellopoland.bo.Sight;
-import pl.hellopoland.bo.SightEvent;
-import pl.hellopoland.bo.SightEventCategory;
-import pl.hellopoland.bo.SightEventTag;
-import pl.hellopoland.bo.Tag;
+import pl.hellopoland.bo.*;
 import pl.hellopoland.config.CategoryPagedCollectionConfig;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.config.TagPagedCollectionConfig;
@@ -33,6 +15,14 @@ import pl.hellopoland.service.TagService;
 import pl.hellopoland.service.TranslationService;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.PagedEntityCollection;
+
+import javax.annotation.security.PermitAll;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.*;
 
 @Stateless
 public class SearchServiceMarketAPI {

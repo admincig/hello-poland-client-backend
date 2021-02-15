@@ -1,11 +1,5 @@
 package pl.hellopoland.service.api.market;
 
-import java.lang.System.Logger;
-import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.EJBTransactionRolledbackException;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserDetails;
 import pl.hellopoland.dto.UserAuthDTO;
@@ -13,6 +7,13 @@ import pl.hellopoland.dto.UserInfoDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.dto.UserORO;
 import pl.hellopoland.service.UserService;
+
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
+import javax.ejb.EJBTransactionRolledbackException;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import java.lang.System.Logger;
 
 @Stateless
 public class UserServiceMarketAPI {

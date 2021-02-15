@@ -1,10 +1,11 @@
 package pl.hellopoland.service.api.partner;
 
+import pl.hellopoland.dto.EmailSendingReportDTO;
+import pl.hellopoland.service.OrderService;
+
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import pl.hellopoland.dto.EmailSendingReportDTO;
-import pl.hellopoland.service.OrderService;
 
 @Stateless
 public class OrderServicePartnerAPI {

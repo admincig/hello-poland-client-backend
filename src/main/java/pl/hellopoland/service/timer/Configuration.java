@@ -1,12 +1,12 @@
 package pl.hellopoland.service.timer;
 
-import javax.annotation.sql.DataSourceDefinition;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.enterprise.inject.Produces;
 import pl.hellopoland.security.password.PasswordEncoder;
 import pl.hellopoland.util.FacebookAPIConnector;
 import pl.hellopoland.util.GoogleAPIConnector;
+
+import javax.ejb.Singleton;
+import javax.ejb.Startup;
+import javax.enterprise.inject.Produces;
 
 @Startup
 @Singleton

@@ -1,16 +1,6 @@
 package pl.hellopoland.service;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import pl.hellopoland.bo.HptSubject;
-import pl.hellopoland.bo.Partner;
-import pl.hellopoland.bo.Portal;
-import pl.hellopoland.bo.SightEvent;
-import pl.hellopoland.bo.User;
+import pl.hellopoland.bo.*;
 import pl.hellopoland.bo.UserRole.Role;
 import pl.hellopoland.dto.DiscountTypeDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
@@ -19,6 +9,13 @@ import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.AccessDeniedException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.util.HelloTicket;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <h3>Klasa wymaga refactoru:</h3>

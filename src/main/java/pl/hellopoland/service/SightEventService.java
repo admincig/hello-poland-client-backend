@@ -1,32 +1,5 @@
 package pl.hellopoland.service;
 
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toCollection;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-
-import java.lang.System.Logger;
-import java.lang.System.Logger.Level;
-import java.nio.file.Paths;
-import java.text.Collator;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.ejb.EJBAccessException;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import pl.hellopoland.bo.*;
@@ -37,11 +10,22 @@ import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.AccessDeniedException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.service.vo.HptTpdsDownloadConfigurator;
-import pl.hellopoland.util.BeanUtils;
-import pl.hellopoland.util.DtoMapper;
-import pl.hellopoland.util.HelloTicket;
-import pl.hellopoland.util.PagedEntityCollection;
-import pl.hellopoland.util.Triplet;
+import pl.hellopoland.util.*;
+
+import javax.ejb.EJBAccessException;
+import javax.ejb.LocalBean;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
+import java.nio.file.Paths;
+import java.text.Collator;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.*;
 
 @LocalBean
 @Stateless
@@ -611,4 +595,16 @@ public class SightEventService extends ServiceSuperclass {
     return se;
   }
 
+  public void dereferenceImage(Long fileId) {
+    em.createQuery("update SightEvent set mainImage = null where mainImage.id = :id")
+        .setParameter("id", fileId)
+        .executeUpdate();
+  }
+
+  public void dereferenceAttachment(Long fileId) {
+    em.createQuery("from SightEvent where pdfAttachment.id = :id", SightEvent.class)
+        .setParameter("id", fileId)
+        .getResultList()
+        .forEach(this::deleteAttachment);
+  }
 }

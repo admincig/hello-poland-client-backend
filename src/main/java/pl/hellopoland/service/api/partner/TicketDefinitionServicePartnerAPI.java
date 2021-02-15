@@ -1,13 +1,14 @@
 package pl.hellopoland.service.api.partner;
 
-import java.util.List;
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.TicketDefinitionService;
+
+import javax.annotation.security.RolesAllowed;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import java.util.List;
 
 @Stateless
 public class TicketDefinitionServicePartnerAPI {

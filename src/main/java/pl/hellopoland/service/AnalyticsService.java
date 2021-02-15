@@ -1,5 +1,12 @@
 package pl.hellopoland.service;
 
+import org.apache.commons.lang3.RandomStringUtils;
+import pl.hellopoland.bo.*;
+import pl.hellopoland.bo.OrderDetails.Platform;
+
+import javax.ejb.LocalBean;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.lang.System.Logger.Level;
@@ -10,19 +17,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import org.apache.commons.lang3.RandomStringUtils;
-import pl.hellopoland.bo.Order;
-import pl.hellopoland.bo.OrderDateEntry;
-import pl.hellopoland.bo.OrderDetails;
-import pl.hellopoland.bo.OrderDetails.Platform;
-import pl.hellopoland.bo.OrderEntry;
-import pl.hellopoland.bo.OrderSightEntry;
-import pl.hellopoland.bo.Partner;
-import pl.hellopoland.bo.SightEvent;
-import pl.hellopoland.bo.UserRole;
 
 @LocalBean
 @Stateless

@@ -1,16 +1,13 @@
 package pl.hellopoland.service.timer;
 
-import java.util.List;
-import javax.annotation.PostConstruct;
-import javax.ejb.DependsOn;
-import javax.ejb.Lock;
-import javax.ejb.LockType;
-import javax.ejb.Schedule;
-import javax.ejb.Singleton;
-import javax.inject.Inject;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.util.HelloTicket;
+
+import javax.annotation.PostConstruct;
+import javax.ejb.*;
+import javax.inject.Inject;
+import java.util.List;
 
 @Singleton
 @DependsOn("DbFiller")

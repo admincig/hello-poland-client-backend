@@ -1,5 +1,12 @@
 package pl.hellopoland.service.timer;
 
+import pl.hellopoland.service.FileDescriptorService;
+import pl.hellopoland.service.ServiceSuperclass;
+
+import javax.ejb.DependsOn;
+import javax.ejb.Schedule;
+import javax.ejb.Singleton;
+import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.lang.System.Logger;
@@ -7,12 +14,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
-import javax.ejb.DependsOn;
-import javax.ejb.Schedule;
-import javax.ejb.Singleton;
-import javax.inject.Inject;
-import pl.hellopoland.service.FileDescriptorService;
-import pl.hellopoland.service.ServiceSuperclass;
 
 @Singleton
 @DependsOn("DbFiller")

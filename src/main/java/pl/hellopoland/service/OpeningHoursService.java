@@ -1,10 +1,11 @@
 package pl.hellopoland.service;
 
-import java.util.Collection;
-import java.util.Optional;
+import pl.hellopoland.bo.OpeningHours;
+
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
-import pl.hellopoland.bo.OpeningHours;
+import java.util.Collection;
+import java.util.Optional;
 
 @LocalBean
 @Stateless

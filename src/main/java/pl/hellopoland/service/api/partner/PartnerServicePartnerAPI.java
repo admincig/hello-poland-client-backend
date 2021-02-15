@@ -1,8 +1,5 @@
 package pl.hellopoland.service.api.partner;
 
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
 import pl.hellopoland.bo.Address;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.dto.MarketPartnerDTO;
@@ -11,6 +8,10 @@ import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.service.PartnerService;
 import pl.hellopoland.service.TranslationService;
 import pl.hellopoland.util.DtoMapper;
+
+import javax.annotation.security.RolesAllowed;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
 
 @Stateless
 public class PartnerServicePartnerAPI {

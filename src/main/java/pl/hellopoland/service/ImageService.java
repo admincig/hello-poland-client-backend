@@ -1,6 +1,22 @@
 package pl.hellopoland.service;
 
-import java.awt.RenderingHints;
+import pl.hellopoland.bo.ImageCollector;
+import pl.hellopoland.bo.ImageVariant;
+import pl.hellopoland.bo.ImageVariant.Variant;
+import pl.hellopoland.bo.Partner;
+import pl.hellopoland.dto.ImageDTO;
+import pl.hellopoland.dto.ImagedDTO;
+import pl.hellopoland.exception.conflict.ConflictingException;
+import pl.hellopoland.util.Imaged;
+import pl.hellopoland.util.Partnered;
+import pl.hellopoland.util.webp.WebpIO;
+
+import javax.ejb.LocalBean;
+import javax.ejb.Stateless;
+import javax.imageio.ImageIO;
+import javax.inject.Inject;
+import javax.persistence.NoResultException;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -11,23 +27,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.imageio.ImageIO;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import pl.hellopoland.bo.ImageCollector;
-import pl.hellopoland.bo.ImageVariant;
-import pl.hellopoland.bo.ImageVariant.Variant;
-import pl.hellopoland.dto.ImageDTO;
-import pl.hellopoland.dto.ImagedDTO;
-import pl.hellopoland.exception.conflict.ConflictingException;
-import pl.hellopoland.util.Imaged;
-import pl.hellopoland.util.Partnered;
-import pl.hellopoland.util.webp.WebpIO;
 
 @LocalBean
 @Stateless
@@ -195,13 +196,14 @@ public class ImageService extends ServiceSuperclass {
     return new File(path + name);
   }
 
-  public ImageCollector downloadImage(String url) {
+  public ImageCollector downloadImage(String url, Partner partner) {
     ImageCollector im = null;
     if (url != null) {
       try {
         logger.log(Logger.Level.INFO, "Downloading image " + url);
         im = validateAndStoreImageCollector(new URL(url).openConnection().getInputStream(), "jpg",
             url);
+        im.setPartner(partner);
       } catch (Exception e) {
         logger.log(Logger.Level.WARNING, e.getMessage());
       }
@@ -209,29 +211,30 @@ public class ImageService extends ServiceSuperclass {
     return im;
   }
 
-  public void downloadAndSetMainImage(Imaged bo, String importUrl) {
+  public <E extends Imaged, Partnered> void downloadAndSetMainImage(E bo, Partner partner, String importUrl) {
     if (importUrl == null) {
       bo.setMainImage(null);
     } else {
       var boImage = bo.getMainImage();
-      var image = getOrDownload(importUrl);
+      var image = getOrDownload(importUrl, partner);
       if (boImage == null || !boImage.getId().equals(image.getId())) {
         bo.setMainImage(image);
       }
     }
   }
 
-  public ImageCollector getOrDownload(String importUrl) {
+  public ImageCollector getOrDownload(String importUrl, Partner partner) {
     try {
       var parts = importUrl.split("\\/");
       String name = parts[parts.length - 1];
       String hash = name.split("\\.")[0];
-      return em.createQuery("from ImageCollector where imageURL=:url "
+      return em.createQuery("from ImageCollector where imageURL=:url and partner=:partner "
           + "or orginal.hash=:hash or qvga.hash=:hash or vga.hash=:hash or hd.hash=:hash or xga.hash=:hash or sxga.hash=:hash or fhd.hash=:hash or fourK.hash=:hash",
           ImageCollector.class).setParameter("url", importUrl).setParameter("hash", hash)
+          .setParameter("partner", partner)
           .getSingleResult();
     } catch (NoResultException e) {
-      return downloadImage(importUrl);
+      return downloadImage(importUrl, partner);
     }
 
   }
@@ -249,23 +252,25 @@ public class ImageService extends ServiceSuperclass {
           bo.setMainImage(image);
         }
       } else if (dto.mainImage.original != null) {
-        downloadAndSetMainImage(bo, dto.mainImage == null ? null : dto.mainImage.original);
+        downloadAndSetMainImage(bo, bo.getPartner(), dto.mainImage.original);
       }
     } else {
       bo.setMainImage(null);
     }
 
-    bo.setImages(Collections.emptyList());
     if (dto.images != null) {
       List<ImageCollector> images = new ArrayList<>();
       for (ImageDTO im : dto.images) {
-        if (im.id != null) {
-          ImageCollector image = get(im.id);
-          if (image.getPartner() != null && bo.getPartner().getId().equals(image.getPartner().getId())) {
-            images.add(image);
+        if (im.id != null){
+          if (bo.getMainImage() != null && !im.id.equals(bo.getMainImage().getId())) {
+            ImageCollector image = get(im.id);
+            if (image.getPartner() != null && bo.getPartner().getId()
+                .equals(image.getPartner().getId())) {
+              images.add(image);
+            }
           }
         } else if (im.original != null) {
-          ImageCollector image = getOrDownload(im.original);
+          ImageCollector image = getOrDownload(im.original, bo.getPartner());
           images.add(image);
         }
       }
@@ -276,25 +281,30 @@ public class ImageService extends ServiceSuperclass {
   public void delete(Long imageId) {
     ImageCollector ic = get(imageId);
     try {
-      Files.deleteIfExists(Path.of(ic.getFhd().getPath()));
-      Files.deleteIfExists(Path.of(ic.getFhdWebp().getPath()));
-      Files.deleteIfExists(Path.of(ic.getFourK().getPath()));
-      Files.deleteIfExists(Path.of(ic.getFourKWebp().getPath()));
-      Files.deleteIfExists(Path.of(ic.getHdWebp().getPath()));
-      Files.deleteIfExists(Path.of(ic.getHd().getPath()));
-      Files.deleteIfExists(Path.of(ic.getOrginal().getPath()));
-      Files.deleteIfExists(Path.of(ic.getOrginalWebp().getPath()));
-      Files.deleteIfExists(Path.of(ic.getQvga().getPath()));
-      Files.deleteIfExists(Path.of(ic.getQvgaWebp().getPath()));
-      Files.deleteIfExists(Path.of(ic.getSxga().getPath()));
-      Files.deleteIfExists(Path.of(ic.getSxgaWebp().getPath()));
-      Files.deleteIfExists(Path.of(ic.getVga().getPath()));
-      Files.deleteIfExists(Path.of(ic.getVgaWebp().getPath()));
-      Files.deleteIfExists(Path.of(ic.getXga().getPath()));
-      Files.deleteIfExists(Path.of(ic.getXgaWebp().getPath()));
+      deleteDiscFile(ic.getFhd());
+      deleteDiscFile(ic.getFhdWebp());
+      deleteDiscFile(ic.getFourK());
+      deleteDiscFile(ic.getFourKWebp());
+      deleteDiscFile(ic.getHd());
+      deleteDiscFile(ic.getHdWebp());
+      deleteDiscFile(ic.getOrginal());
+      deleteDiscFile(ic.getOrginalWebp());
+      deleteDiscFile(ic.getQvga());
+      deleteDiscFile(ic.getQvgaWebp());
+      deleteDiscFile(ic.getSxga());
+      deleteDiscFile(ic.getSxgaWebp());
+      deleteDiscFile(ic.getVga());
+      deleteDiscFile(ic.getVgaWebp());
+      deleteDiscFile(ic.getXga());
+      deleteDiscFile(ic.getXgaWebp());
       em.remove(ic);
     } catch (IOException e) {
       logger.log(Level.WARNING, "Failed to delete file", e);
     }
+  }
+
+  private void deleteDiscFile(ImageVariant iv) throws IOException {
+    Path path = Path.of(iv.getPath() + iv.getHash() + "." + iv.getExtension());
+    Files.deleteIfExists(path);
   }
 }

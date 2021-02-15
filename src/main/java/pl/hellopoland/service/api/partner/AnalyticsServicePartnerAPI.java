@@ -1,11 +1,12 @@
 package pl.hellopoland.service.api.partner;
 
-import java.io.File;
-import java.util.Date;
+import pl.hellopoland.service.AnalyticsService;
+
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import pl.hellopoland.service.AnalyticsService;
+import java.io.File;
+import java.util.Date;
 
 @Stateless
 public class AnalyticsServicePartnerAPI {

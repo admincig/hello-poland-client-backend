@@ -1,16 +1,17 @@
 package pl.hellopoland.service.api.helpdesk;
 
-import java.lang.System.Logger;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.PartnerService;
 import pl.hellopoland.service.TicketDefinitionService;
+
+import javax.annotation.security.RolesAllowed;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import java.lang.System.Logger;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Stateless
 public class TicketDefinitionServiceHelpdeskAPI {

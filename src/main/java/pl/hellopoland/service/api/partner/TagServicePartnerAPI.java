@@ -1,10 +1,5 @@
 package pl.hellopoland.service.api.partner;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
 import pl.hellopoland.bo.Tag;
 import pl.hellopoland.config.TagPagedCollectionConfig;
 import pl.hellopoland.dto.TagDTO;
@@ -13,6 +8,12 @@ import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.TagService;
 import pl.hellopoland.service.TranslationService;
 import pl.hellopoland.util.DtoMapper;
+
+import javax.annotation.security.RolesAllowed;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Stateless
 public class TagServicePartnerAPI {

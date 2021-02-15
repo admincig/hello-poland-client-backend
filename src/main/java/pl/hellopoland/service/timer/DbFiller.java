@@ -1,51 +1,24 @@
 package pl.hellopoland.service.timer;
 
-import java.io.InputStream;
-import java.lang.System.Logger;
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
-import java.util.stream.Collectors;
+import pl.hellopoland.bo.*;
+import pl.hellopoland.bo.Portal.Type;
+import pl.hellopoland.bo.UserRole.Role;
+import pl.hellopoland.dto.*;
+import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.security.password.PasswordEncoder;
+import pl.hellopoland.service.*;
+import pl.hellopoland.util.DtoMapper;
+
 import javax.annotation.PostConstruct;
 import javax.ejb.DependsOn;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import pl.hellopoland.bo.ImageCollector;
-import pl.hellopoland.bo.Location;
-import pl.hellopoland.bo.Partner;
-import pl.hellopoland.bo.Portal;
-import pl.hellopoland.bo.Portal.Type;
-import pl.hellopoland.bo.Sight;
-import pl.hellopoland.bo.SightEvent;
-import pl.hellopoland.bo.User;
-import pl.hellopoland.bo.UserDetails;
-import pl.hellopoland.bo.UserRole.Role;
-import pl.hellopoland.dto.CategoryDTO;
-import pl.hellopoland.dto.FrequencyDataDTO;
-import pl.hellopoland.dto.FrequencyTypeDTO;
-import pl.hellopoland.dto.MarketPartnerDTO;
-import pl.hellopoland.dto.SightEventDTO;
-import pl.hellopoland.dto.TagDTO;
-import pl.hellopoland.dto.TicketDefinitionDTO;
-import pl.hellopoland.dto.TicketPoolDefinitionDTO;
-import pl.hellopoland.enums.LanguageVersion;
-import pl.hellopoland.security.password.PasswordEncoder;
-import pl.hellopoland.service.CategoryService;
-import pl.hellopoland.service.ImageService;
-import pl.hellopoland.service.ServiceSuperclass;
-import pl.hellopoland.service.SightEventService;
-import pl.hellopoland.service.SightService;
-import pl.hellopoland.service.TagService;
-import pl.hellopoland.service.TicketDefinitionService;
-import pl.hellopoland.service.TicketPoolDefinitionService;
-import pl.hellopoland.service.TranslationService;
-import pl.hellopoland.util.DtoMapper;
+import java.lang.System.Logger;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Startup
 @Singleton

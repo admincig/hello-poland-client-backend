@@ -30,8 +30,9 @@ public class PartnerFileRestService {
 
   @Path("/{fileId}")
   @DELETE
-  public void delete(@PathParam("fileId") Long fileId) {
-    service.deleteFile(fileId);
+  public void delete(@PathParam("fileId") Long fileId, @QueryParam("type") Utils.FileType type) {
+    boolean isImage = Utils.FileType.image.equals(type);
+    service.deleteFile(fileId, isImage);
   }
 
 }

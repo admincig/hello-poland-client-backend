@@ -1,16 +1,13 @@
 package pl.hellopoland.service.api.helpdesk;
 
-import java.io.File;
-import java.util.Date;
+import pl.hellopoland.dto.EmailSendingReportDTO;
+import pl.hellopoland.service.*;
+
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import pl.hellopoland.dto.EmailSendingReportDTO;
-import pl.hellopoland.service.AnalyticsService;
-import pl.hellopoland.service.OrderService;
-import pl.hellopoland.service.SightEventService;
-import pl.hellopoland.service.SightService;
-import pl.hellopoland.service.UserService;
+import java.io.File;
+import java.util.Date;
 
 @Stateless
 public class ServiceHelpdeskAPI {

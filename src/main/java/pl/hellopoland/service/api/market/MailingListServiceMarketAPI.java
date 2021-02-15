@@ -1,12 +1,13 @@
 package pl.hellopoland.service.api.market;
 
-import java.lang.System.Logger;
-import java.lang.System.Logger.Level;
+import pl.hellopoland.exception.conflict.ConflictingException;
+import pl.hellopoland.service.MailingListService;
+
 import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import pl.hellopoland.exception.conflict.ConflictingException;
-import pl.hellopoland.service.MailingListService;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 
 @Stateless
 public class MailingListServiceMarketAPI {

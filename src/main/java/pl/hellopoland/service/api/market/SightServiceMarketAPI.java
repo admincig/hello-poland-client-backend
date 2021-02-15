@@ -1,17 +1,5 @@
 package pl.hellopoland.service.api.market;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import javax.annotation.security.PermitAll;
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.SightEventCategory;
@@ -28,6 +16,14 @@ import pl.hellopoland.service.UserService;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PagedEntityCollection;
+
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Stateless
 public class SightServiceMarketAPI {

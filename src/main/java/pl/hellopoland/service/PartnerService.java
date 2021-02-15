@@ -1,20 +1,6 @@
 package pl.hellopoland.service;
 
-import java.io.ByteArrayInputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import pl.hellopoland.bo.Address;
-import pl.hellopoland.bo.Category;
-import pl.hellopoland.bo.Partner;
-import pl.hellopoland.bo.SightEventCategory;
-import pl.hellopoland.bo.SightEventTag;
-import pl.hellopoland.bo.Tag;
+import pl.hellopoland.bo.*;
 import pl.hellopoland.config.PartnerPagedCollectionConfig;
 import pl.hellopoland.dto.MarketPartnerDTO;
 import pl.hellopoland.dto.PartnerDTO;
@@ -23,6 +9,16 @@ import pl.hellopoland.util.BeanUtils;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.Located;
 import pl.hellopoland.util.PagedEntityCollection;
+
+import javax.ejb.LocalBean;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import java.io.ByteArrayInputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @LocalBean
 @Stateless

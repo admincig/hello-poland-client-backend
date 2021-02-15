@@ -1,15 +1,16 @@
 package pl.hellopoland.service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
 import pl.hellopoland.bo.HptSubject;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.exception.badrequest.BadRequestException;
 import pl.hellopoland.util.HelloTicket;
+
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Stateless
 public class TicketDefinitionService extends ServiceSuperclass {

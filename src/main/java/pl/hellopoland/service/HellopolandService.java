@@ -1,34 +1,11 @@
 package pl.hellopoland.service;
 
-import java.lang.System.Logger.Level;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.exception.ConstraintViolationException;
-import pl.hellopoland.bo.Address;
-import pl.hellopoland.bo.ContactPerson;
-import pl.hellopoland.bo.Partner;
-import pl.hellopoland.bo.PartnerRepresentative;
-import pl.hellopoland.bo.Portal;
-import pl.hellopoland.bo.User;
-import pl.hellopoland.bo.UserRole;
+import pl.hellopoland.bo.*;
 import pl.hellopoland.bo.UserRole.Role;
-import pl.hellopoland.config.PartnerPagedCollectionConfig;
 import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.dto.RoleDTO;
 import pl.hellopoland.dto.UserDTO;
@@ -40,8 +17,17 @@ import pl.hellopoland.soap.p24.enums.Trade;
 import pl.hellopoland.soap.p24.object.MerchantRegisterRequest;
 import pl.hellopoland.soap.p24.service.P24SOAPClient;
 import pl.hellopoland.util.HelloTicket;
-import pl.hellopoland.util.PagedEntityCollection;
 import pl.hellopoland.util.soap.p24.MerchantRegisterValidator;
+
+import javax.ejb.LocalBean;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import java.lang.System.Logger.Level;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @LocalBean
 @Stateless

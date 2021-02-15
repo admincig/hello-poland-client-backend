@@ -1,8 +1,8 @@
 package pl.hellopoland.exception;
 
+import javax.enterprise.context.RequestScoped;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import javax.enterprise.context.RequestScoped;
 
 @RequestScoped
 public class ExceptionMessagesService {

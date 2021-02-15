@@ -1,23 +1,19 @@
 package pl.hellopoland.service;
 
-import java.io.UnsupportedEncodingException;
-import java.lang.System.Logger;
-import java.lang.System.Logger.Level;
-import java.util.Properties;
+import com.sun.mail.smtp.SMTPSendFailedException;
+import com.sun.mail.smtp.SMTPTransport;
+
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
-import javax.mail.Address;
-import javax.mail.Authenticator;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
+import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import com.sun.mail.smtp.SMTPSendFailedException;
-import com.sun.mail.smtp.SMTPTransport;
+import java.io.UnsupportedEncodingException;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
+import java.util.Properties;
 
 @LocalBean
 @Stateless

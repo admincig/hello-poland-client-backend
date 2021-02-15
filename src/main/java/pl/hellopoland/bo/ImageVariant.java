@@ -17,7 +17,6 @@ public class ImageVariant extends ModelSuperclass {
   @NotNull
   @Enumerated(EnumType.STRING)
   private Variant variant;
-  @NotNull
   @OneToOne
   private ImageCollector collector;
   @NotNull

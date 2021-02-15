@@ -23,8 +23,8 @@ public class FileServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
-  public void deleteFile(Long fileId) {
+  public void deleteFile(Long fileId, boolean isImage) {
     Partner partner = service.getLoggedPartner();
-    service.deleteFile(fileId, partner.getId());
+    service.deleteFile(fileId, partner.getId(), isImage);
   }
 }
