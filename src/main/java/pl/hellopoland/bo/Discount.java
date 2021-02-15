@@ -1,7 +1,7 @@
 package pl.hellopoland.bo;
 
-import java.io.Serializable;
 import javax.persistence.Embeddable;
+import java.io.Serializable;
 
 @Embeddable
 public class Discount implements Serializable {

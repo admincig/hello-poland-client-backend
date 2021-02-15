@@ -27,12 +27,4 @@ public class ExpiredTokenDao {
         .setParameter("token", token).getResultStream().findFirst();
   }
 
-  public List<ExpiredToken> findAll() {
-    return entityManager.createQuery("from ExpiredToken expiredToken", ExpiredToken.class)
-        .getResultList();
-  }
-
-  public void remove(ExpiredToken expiredToken) {
-    entityManager.remove(expiredToken);
-  }
 }

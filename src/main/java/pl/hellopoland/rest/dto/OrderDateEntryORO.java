@@ -1,9 +1,10 @@
 package pl.hellopoland.rest.dto;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import pl.hellopoland.bo.OrderDateEntry;
 import pl.hellopoland.bo.OrderDetails;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class OrderDateEntryORO extends OrderDateEntryOnListingORO {
 

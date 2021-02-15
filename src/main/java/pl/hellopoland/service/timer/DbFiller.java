@@ -247,43 +247,47 @@ public class DbFiller extends ServiceSuperclass {
     em.persist(portal);
   }
 
-  private void createImageCollectors() {
-    afrImg = createImageCollector(this.getClass().getResourceAsStream("/images/afrykarium.jpg"));
-    hpImg = createImageCollector(this.getClass().getResourceAsStream("/images/HP.jpg"));
-    kol1Img = createImageCollector(this.getClass().getResourceAsStream("/images/kolekowo_1.jpg"));
-    kol2Img = createImageCollector(this.getClass().getResourceAsStream("/images/Kolejkowo_2.jpg"));
-    meczLSImg =
-        createImageCollector(this.getClass().getResourceAsStream("/images/mecz_lechia_slask.jpg"));
-    meczPCImg =
-        createImageCollector(this.getClass().getResourceAsStream("/images/mecz_polsa_czechy.jpg"));
-    parkSzcz1Img =
-        createImageCollector(this.getClass().getResourceAsStream("/images/park_szczytnicki_1.jpg"));
-    parkSzcz2Img =
-        createImageCollector(this.getClass().getResourceAsStream("/images/park_szczytnicki_2.jpg"));
-    stadGdImg = createImageCollector(
-        this.getClass().getResourceAsStream("/images/Stadion_w_Gdańsku_1.jpg"));
-    zooImg = createImageCollector(this.getClass().getResourceAsStream("/images/zoo.jpg"));
-    zwStadImg = createImageCollector(
-        this.getClass().getResourceAsStream("/images/zwiedzanie_stadionu.jpg"));
-    zwZooImg =
-        createImageCollector(this.getClass().getResourceAsStream("/images/zwiedzanie_zoo.jpg"));
-    zwKielc1Img =
-        createImageCollector(this.getClass().getResourceAsStream("/images/Kielce_sight.jpeg"));
-    zwKielc2Img =
-        createImageCollector(this.getClass().getResourceAsStream("/images/Kielce_se.jpeg"));
-    geopark1Img =
-        createImageCollector(this.getClass().getResourceAsStream("/images/Geopark_sight.jpeg"));
-    geopark2Img =
-        createImageCollector(this.getClass().getResourceAsStream("/images/Geopark_se.jpeg"));
-    zerom1Img =
-        createImageCollector(this.getClass().getResourceAsStream("/images/Zeromski_sight.jpeg"));
-    zerom2Img =
-        createImageCollector(this.getClass().getResourceAsStream("/images/Zeromski_se.jpeg"));
-  }
+// --Commented out by Inspection START (2021-02-15 10:17):
+//  private void createImageCollectors() {
+//    afrImg = createImageCollector(this.getClass().getResourceAsStream("/images/afrykarium.jpg"));
+//    hpImg = createImageCollector(this.getClass().getResourceAsStream("/images/HP.jpg"));
+//    kol1Img = createImageCollector(this.getClass().getResourceAsStream("/images/kolekowo_1.jpg"));
+//    kol2Img = createImageCollector(this.getClass().getResourceAsStream("/images/Kolejkowo_2.jpg"));
+//    meczLSImg =
+//        createImageCollector(this.getClass().getResourceAsStream("/images/mecz_lechia_slask.jpg"));
+//    meczPCImg =
+//        createImageCollector(this.getClass().getResourceAsStream("/images/mecz_polsa_czechy.jpg"));
+//    parkSzcz1Img =
+//        createImageCollector(this.getClass().getResourceAsStream("/images/park_szczytnicki_1.jpg"));
+//    parkSzcz2Img =
+//        createImageCollector(this.getClass().getResourceAsStream("/images/park_szczytnicki_2.jpg"));
+//    stadGdImg = createImageCollector(
+//        this.getClass().getResourceAsStream("/images/Stadion_w_Gdańsku_1.jpg"));
+//    zooImg = createImageCollector(this.getClass().getResourceAsStream("/images/zoo.jpg"));
+//    zwStadImg = createImageCollector(
+//        this.getClass().getResourceAsStream("/images/zwiedzanie_stadionu.jpg"));
+//    zwZooImg =
+//        createImageCollector(this.getClass().getResourceAsStream("/images/zwiedzanie_zoo.jpg"));
+//    zwKielc1Img =
+//        createImageCollector(this.getClass().getResourceAsStream("/images/Kielce_sight.jpeg"));
+//    zwKielc2Img =
+//        createImageCollector(this.getClass().getResourceAsStream("/images/Kielce_se.jpeg"));
+//    geopark1Img =
+//        createImageCollector(this.getClass().getResourceAsStream("/images/Geopark_sight.jpeg"));
+//    geopark2Img =
+//        createImageCollector(this.getClass().getResourceAsStream("/images/Geopark_se.jpeg"));
+//    zerom1Img =
+//        createImageCollector(this.getClass().getResourceAsStream("/images/Zeromski_sight.jpeg"));
+//    zerom2Img =
+//        createImageCollector(this.getClass().getResourceAsStream("/images/Zeromski_se.jpeg"));
+//  }
+// --Commented out by Inspection STOP (2021-02-15 10:17)
 
-  private ImageCollector createImageCollector(InputStream is) {
-    return imgService.validateAndStoreImageCollector(is, "jpg");
-  }
+// --Commented out by Inspection START (2021-02-15 10:28):
+//  private ImageCollector createImageCollector(InputStream is) {
+//    return imgService.validateAndStoreImageCollector(is, "jpg");
+//  }
+// --Commented out by Inspection STOP (2021-02-15 10:28)
 
   private void createLocations() {
     hpLocation = createLocation(51.111746, 17.0240973, "Świętego Mikołaja 19", "50-128", "Wrocław",

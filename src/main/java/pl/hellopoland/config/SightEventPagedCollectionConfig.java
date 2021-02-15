@@ -1,13 +1,14 @@
 package pl.hellopoland.config;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
 import org.apache.commons.text.WordUtils;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.enums.LanguageVersion;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 public class SightEventPagedCollectionConfig extends PagedCollectionConfig<SightEvent> {
 

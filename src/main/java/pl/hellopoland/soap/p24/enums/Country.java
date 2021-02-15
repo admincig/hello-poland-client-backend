@@ -1,12 +1,13 @@
 package pl.hellopoland.soap.p24.enums;
 
+import pl.hellopoland.dto.CountryDTO;
+import pl.hellopoland.enums.LanguageVersion;
+
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import pl.hellopoland.dto.CountryDTO;
-import pl.hellopoland.enums.LanguageVersion;
 
 @SuppressWarnings("unchecked")
 public enum Country {

@@ -245,10 +245,4 @@ public class HellopolandService extends ServiceSuperclass {
     return stream.toArray(UserRole.Role[]::new);
   }
 
-  public PagedEntityCollection<Partner> getList(PartnerPagedCollectionConfig config) {
-    List<Partner> partners = getQuery(config).getResultList();
-    Collections.sort(partners, getNamesComparator(Partner::getName, new Locale("pl_PL")));
-    return new PagedEntityCollection<>(partners, config);
-  }
-
 }

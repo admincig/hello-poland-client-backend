@@ -15,7 +15,6 @@ import pl.hellopoland.util.PagedEntityCollection;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import java.io.ByteArrayInputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -193,53 +192,6 @@ public class SightService extends ServiceSuperclass {
   private void createGeneralAdmissionSightEvent(Sight sight, Partner partner) {
     SightEventDTO sed = DtoMapper.getGAEventDTO(sight);
     sightEventService.create(sed, partner);
-  }
-
-  public Sight uploadMainImageForLoggedUser(Long id, byte[] icon) {
-    Sight bo = getActiveForLoggedPartner(id);
-    return uploadMainImage(bo, icon);
-  }
-
-  public Sight uploadMainImage(Sight bo, byte[] icon) {
-    bo.setMainImage(
-        imageService.validateAndStoreImageCollector(new ByteArrayInputStream(icon), "jpeg"));
-    return bo;
-  }
-
-  public Sight addImageToSightGallery(Long id, byte[] img) {
-    Sight bo = get(id);
-    bo.addImage(
-        imageService.validateAndStoreImageCollector(new ByteArrayInputStream(img), "jpeg"));
-    return bo;
-  }
-
-  public Sight addImageToSightGalleryForLoggedUser(Long id, byte[] img) {
-    Sight bo = getActiveForLoggedPartner(id);
-    bo.addImage(
-        imageService.validateAndStoreImageCollector(new ByteArrayInputStream(img), "jpeg"));
-    return bo;
-  }
-
-  public Sight removeImageFromGallery(Long id, Long imgId) {
-    Sight bo = get(id);
-    ImageCollector img = imageService.get(imgId);
-    if (!bo.getImages().contains(img)) {
-      throw new ConflictingException(
-          "Image [id:" + imgId + " is not in gallery of sightevent[id:" + id + "].");
-    }
-    bo.removeImage(img);
-    return bo;
-  }
-
-  public Sight removeImageFromGalleryForLoggedUser(Long id, Long imgId) {
-    Sight bo = getActiveForLoggedPartner(id);
-    ImageCollector img = imageService.get(imgId);
-    if (!bo.getImages().contains(img)) {
-      throw new ConflictingException(
-          "Image [id:" + imgId + " is not in gallery of sightevent[id:" + id + "].");
-    }
-    bo.removeImage(img);
-    return bo;
   }
 
   public Sight getActiveForLoggedPartner(Long id) {

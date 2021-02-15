@@ -1,5 +1,10 @@
 package pl.hellopoland.util;
 
+import pl.hellopoland.rest.JsonbConfig;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonStructure;
 import java.lang.System.Logger.Level;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -8,10 +13,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Properties;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonStructure;
-import pl.hellopoland.rest.JsonbConfig;
 
 public class FacebookFanPagePostReader {
   private static final System.Logger logger =

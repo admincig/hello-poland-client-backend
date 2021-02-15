@@ -1,11 +1,13 @@
 package pl.hellopoland.rest.exceptionhandler;
 
-import static javax.ws.rs.core.Response.Status.PRECONDITION_FAILED;
+import pl.hellopoland.exception.preconditionfailed.PreconditionFailedBaseException;
+import pl.hellopoland.rest.dto.AbstractJSONError;
+
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-import pl.hellopoland.exception.preconditionfailed.PreconditionFailedBaseException;
-import pl.hellopoland.rest.dto.AbstractJSONError;
+
+import static javax.ws.rs.core.Response.Status.PRECONDITION_FAILED;
 
 @Provider
 public class PreconditionFailedExceptionHandler

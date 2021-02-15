@@ -1,7 +1,8 @@
 package pl.hellopoland.rest.partner;
 
-import java.io.File;
-import java.util.Date;
+import pl.hellopoland.annotation.DateFormat;
+import pl.hellopoland.service.api.partner.AnalyticsServicePartnerAPI;
+
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -11,8 +12,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import pl.hellopoland.annotation.DateFormat;
-import pl.hellopoland.service.api.partner.AnalyticsServicePartnerAPI;
+import java.io.File;
+import java.util.Date;
 
 @Path("/partner/analytics")
 @RequestScoped

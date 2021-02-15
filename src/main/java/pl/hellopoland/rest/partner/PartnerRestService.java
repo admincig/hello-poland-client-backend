@@ -1,19 +1,5 @@
 package pl.hellopoland.rest.partner;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.PATCH;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import pl.hellopoland.dto.MarketPartnerDTO;
 import pl.hellopoland.dto.UserAuthDTO;
 import pl.hellopoland.dto.UserDTO;
@@ -25,6 +11,11 @@ import pl.hellopoland.service.api.partner.DiscoveryServicePartnerAPI;
 import pl.hellopoland.service.api.partner.PartnerServicePartnerAPI;
 import pl.hellopoland.service.api.partner.UserServicePartnerAPI;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.List;
 
 @Path("/partner")

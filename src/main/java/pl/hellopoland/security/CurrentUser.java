@@ -44,12 +44,4 @@ public class CurrentUser {
     this.refreshToken = refreshToken;
   }
 
-  public boolean hasRole(String role) {
-    return roles.contains(role);
-  }
-
-  public boolean hasAnyRoles(String... roles) {
-    return this.roles.stream().anyMatch(c -> asList(roles).contains(c));
-  }
-
 }

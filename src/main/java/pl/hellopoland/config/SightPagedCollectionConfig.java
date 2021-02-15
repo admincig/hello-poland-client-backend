@@ -1,7 +1,8 @@
 package pl.hellopoland.config;
 
-import java.util.Set;
 import pl.hellopoland.bo.Sight;
+
+import java.util.Set;
 
 public class SightPagedCollectionConfig extends PagedCollectionConfig<Sight> {
 
@@ -52,10 +53,6 @@ public class SightPagedCollectionConfig extends PagedCollectionConfig<Sight> {
   public void onlyFavourite(Long userId) {
     fetchUsers = true;
     addCondition("userId", userId, "u.id=:userId");
-  }
-
-  public void onlyCurrentPartner(boolean only) {
-    currentPartner = only;
   }
 
   public boolean isCurrentPartner() {

@@ -1,10 +1,5 @@
 package pl.hellopoland.service.api.helpdesk;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
 import pl.hellopoland.bo.Category;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEventCategory;
@@ -17,6 +12,12 @@ import pl.hellopoland.service.SightService;
 import pl.hellopoland.service.TranslationService;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.PagedEntityCollection;
+
+import javax.annotation.security.RolesAllowed;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Stateless
 public class SightServiceHelpdeskAPI {
@@ -82,27 +83,6 @@ public class SightServiceHelpdeskAPI {
   public void deleteLanguageVersion(Long id, LanguageVersion language) {
     Sight bo = service.get(id);
     tService.deleteEntityTranslations(bo, language);
-  }
-
-  @RolesAllowed("admin")
-  public SightDTO uploadMainImage(Long id, byte[] icon) {
-    var bo = service.get(id);
-    bo = service.uploadMainImage(bo, icon);
-    var dto = DtoMapper.getFullDTO(bo);
-    return dto;
-  }
-
-  @RolesAllowed("admin")
-  public SightDTO uploadImage(Long id, byte[] icon) {
-    Sight bo = service.addImageToSightGallery(id, icon);
-    return DtoMapper.getFullDTO(bo);
-  }
-
-  @RolesAllowed("admin")
-  public SightDTO deleteImage(Long id, Long imageId) {
-    Sight bo = service.removeImageFromGallery(id, imageId);
-    var dto = DtoMapper.getFullDTO(bo);
-    return dto;
   }
 
 }

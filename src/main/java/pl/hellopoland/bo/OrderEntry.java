@@ -1,15 +1,12 @@
 package pl.hellopoland.bo;
 
+import pl.hellopoland.dto.booking.TicketDTO;
+
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import javax.persistence.ElementCollection;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
-import javax.validation.constraints.NotNull;
-import pl.hellopoland.dto.booking.TicketDTO;
 
 @Entity
 public class OrderEntry extends ModelSuperclass {

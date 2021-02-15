@@ -1,10 +1,11 @@
 package pl.hellopoland.bo;
 
-import java.io.File;
-import java.time.LocalDateTime;
+import pl.hellopoland.exception.conflict.ConflictingException;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import pl.hellopoland.exception.conflict.ConflictingException;
+import java.io.File;
+import java.time.LocalDateTime;
 
 @Entity
 

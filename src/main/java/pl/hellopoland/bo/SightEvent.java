@@ -1,33 +1,19 @@
 package pl.hellopoland.bo;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.NotNull;
 import pl.hellopoland.annotation.Multilingual;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.util.Imaged;
 import pl.hellopoland.util.Located;
 import pl.hellopoland.util.Partnered;
 import pl.hellopoland.util.Translated;
+
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Entity
 @Table(uniqueConstraints = {
@@ -281,19 +267,6 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
 
   public void setPdfAttachment(FileDescriptor pdfAttachment) {
     this.pdfAttachment = pdfAttachment;
-  }
-
-  public void addImage(ImageCollector img) {
-    if (images == null) {
-      images = new ArrayList<>();
-    }
-    images.add(img);
-  }
-
-  public void removeImage(ImageCollector img) {
-    if (images != null) {
-      images.remove(img);
-    }
   }
 
   /**

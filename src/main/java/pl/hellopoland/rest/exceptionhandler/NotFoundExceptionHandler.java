@@ -1,11 +1,13 @@
 package pl.hellopoland.rest.exceptionhandler;
 
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import pl.hellopoland.exception.notfound.NotFoundBaseException;
+
 import javax.json.Json;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-import pl.hellopoland.exception.notfound.NotFoundBaseException;
+
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 @Provider
 public class NotFoundExceptionHandler implements ExceptionMapper<NotFoundBaseException> {

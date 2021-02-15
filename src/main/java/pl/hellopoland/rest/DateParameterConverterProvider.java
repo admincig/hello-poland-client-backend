@@ -1,13 +1,14 @@
 package pl.hellopoland.rest;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.util.Date;
+import pl.hellopoland.annotation.DateFormat;
+import pl.hellopoland.annotation.DateTimeFormat;
+
 import javax.ws.rs.ext.ParamConverter;
 import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Provider;
-import pl.hellopoland.annotation.DateFormat;
-import pl.hellopoland.annotation.DateTimeFormat;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.Date;
 
 @Provider
 public class DateParameterConverterProvider implements ParamConverterProvider {

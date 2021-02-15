@@ -37,8 +37,4 @@ public class SightEventFetcherCacheScheduler {
     });
   }
 
-  @Lock(LockType.READ)
-  public List<TicketPoolDefinitionDTO> getHptTPDs(Long partnerId) {
-    return cache.get(partnerId);
-  }
 }

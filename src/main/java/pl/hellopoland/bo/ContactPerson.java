@@ -1,9 +1,9 @@
 package pl.hellopoland.bo;
 
-import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotBlank;
+import java.util.List;
 
 @Entity
 public class ContactPerson extends ModelSuperclass {

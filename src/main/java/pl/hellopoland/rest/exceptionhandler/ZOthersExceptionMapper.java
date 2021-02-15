@@ -1,9 +1,9 @@
 package pl.hellopoland.rest.exceptionhandler;
 
-import java.util.logging.Logger;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
+import java.util.logging.Logger;
 
 @Provider
 public class ZOthersExceptionMapper implements ExceptionMapper<Exception> {

@@ -1,11 +1,13 @@
 package pl.hellopoland.rest.exceptionhandler;
 
-import static javax.ws.rs.core.Response.Status.CONFLICT;
+import pl.hellopoland.exception.email.EmailSendingRollbackException;
+import pl.hellopoland.rest.dto.AbstractJSONError;
+
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-import pl.hellopoland.exception.email.EmailSendingRollbackException;
-import pl.hellopoland.rest.dto.AbstractJSONError;
+
+import static javax.ws.rs.core.Response.Status.CONFLICT;
 
 @Provider
 public class EmailSendingRollbackExceptionHandler

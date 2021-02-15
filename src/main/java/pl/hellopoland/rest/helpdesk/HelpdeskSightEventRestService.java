@@ -1,19 +1,5 @@
 package pl.hellopoland.rest.helpdesk;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.PATCH;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.enums.LanguageVersion;
@@ -21,6 +7,12 @@ import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.RestService;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.api.helpdesk.SightEventServiceHelpdeskAPI;
+
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 @RequestScoped
 @Path("/helpdesk/sight-events")
@@ -140,40 +132,6 @@ public class HelpdeskSightEventRestService {
       @PathParam("id") Long id,
       @PathParam("tId") Long tagId) {
     return service.removeTag(id, tagId);
-  }
-
-  @POST
-  @Path("/{id}/pdf")
-  @Consumes("application/pdf")
-  public SightEventDTO uploadPdf(@PathParam("id") Long id, byte[] pdf) {
-    return service.uploadPdf(id, pdf);
-  }
-
-  @DELETE
-  @Path("/{id}/pdf")
-  @Consumes("application/pdf")
-  public void deletePdf(@PathParam("id") Long id) {
-    service.deletePdf(id);
-  }
-
-  @PUT
-  @Path("/{id}/mainImage")
-  @Consumes({"image/jpeg", "image/jpg"})
-  public SightEventDTO uploadIcon(@PathParam("id") Long id, byte[] icon) {
-    return service.uploadMainImage(id, icon);
-  }
-
-  @POST
-  @Path("/{id}/images")
-  @Consumes({"image/jpeg", "image/jpg"})
-  public SightEventDTO uploadImage(@PathParam("id") Long id, byte[] img) {
-    return service.uploadImage(id, img);
-  }
-
-  @DELETE
-  @Path("/{id}/images/{imgId}")
-  public SightEventDTO deleteImage(@PathParam("id") Long id, @PathParam("imgId") Long imgId) {
-    return service.deleteImage(id, imgId);
   }
 
 }

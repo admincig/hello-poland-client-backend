@@ -39,11 +39,6 @@ public class PartnerService extends ServiceSuperclass {
         Partner.class).setParameter("email", email.toLowerCase()).getSingleResult();
   }
 
-  public Partner findByToken(String token) {
-    return em.createQuery("select partner from Partner partner where partner.hptToken=:token",
-        Partner.class).setParameter("token", token).getSingleResult();
-  }
-
   public Map<Long, Partner> findByHptIds(List<Long> hptIds) {
     Map<Long, Partner> map = new HashMap<>();
     List<Partner> result =

@@ -1,13 +1,5 @@
 package pl.hellopoland.service.api.partner;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.EJBAccessException;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
 import pl.hellopoland.bo.Category;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.SightEventCategory;
@@ -16,14 +8,18 @@ import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.rest.dto.PagedCollection;
-import pl.hellopoland.service.CategoryService;
-import pl.hellopoland.service.SightEventCategoryService;
-import pl.hellopoland.service.SightEventService;
-import pl.hellopoland.service.SightEventTagService;
-import pl.hellopoland.service.TagService;
-import pl.hellopoland.service.TranslationService;
+import pl.hellopoland.service.*;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.PagedEntityCollection;
+
+import javax.annotation.security.RolesAllowed;
+import javax.ejb.EJBAccessException;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Stateless
 public class SightEventServicePartnerAPI {
@@ -87,29 +83,6 @@ public class SightEventServicePartnerAPI {
   @RolesAllowed("partner")
   public SightEventDTO update(SightEventDTO dto, LanguageVersion language) {
     SightEvent bo = service.updateForLoggedUser(dto, language);
-    return DtoMapper.getFullDTO(bo);
-  }
-
-
-  @RolesAllowed("partner")
-  public SightEventDTO uploadMainImage(Long id, byte[] icon) {
-    SightEvent bo = service.uploadMainImageForLoggedUser(id, icon);
-    var dto = DtoMapper.getFullDTO(bo);
-    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), true, false);
-    return dto;
-  }
-
-  @RolesAllowed("partner")
-  public SightEventDTO uploadImage(Long id, byte[] img) {
-    SightEvent bo = service.addImageToSightEventGalleryForLoggedUser(id, img);
-    var dto = DtoMapper.getFullDTO(bo);
-    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), true, false);
-    return dto;
-  }
-
-  @RolesAllowed("partner")
-  public SightEventDTO removeImageFromGallery(Long id, Long imgId) {
-    SightEvent bo = service.removeImageFromGalleryForLoggedUser(id, imgId);
     return DtoMapper.getFullDTO(bo);
   }
 

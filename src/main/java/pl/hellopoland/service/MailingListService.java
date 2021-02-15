@@ -40,6 +40,7 @@ public class MailingListService extends ServiceSuperclass {
   public String getOrCreateContact(String email) {
     GetExtendedContactDetails details = getContact(email);
     if (details == null) {
+      //noinspection unused
       Long sendInBlueId = createContact(email);
     }
     return email;

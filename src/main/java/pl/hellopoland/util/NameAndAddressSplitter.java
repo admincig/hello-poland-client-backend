@@ -1,8 +1,9 @@
 package pl.hellopoland.util;
 
+import pl.hellopoland.exception.conflict.ConflictingException;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import pl.hellopoland.exception.conflict.ConflictingException;
 
 public class NameAndAddressSplitter {
 

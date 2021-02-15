@@ -1,8 +1,8 @@
 package pl.hellopoland.rest;
 
+import javax.json.bind.adapter.JsonbAdapter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import javax.json.bind.adapter.JsonbAdapter;
 
 public class LocalDateTimeCustomAdapter implements JsonbAdapter<LocalDateTime, String> {
 

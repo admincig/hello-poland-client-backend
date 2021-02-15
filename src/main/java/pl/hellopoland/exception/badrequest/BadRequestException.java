@@ -6,8 +6,6 @@ import javax.ejb.ApplicationException;
 public class BadRequestException extends BadRequestBaseException {
   private static final long serialVersionUID = -620784240239165262L;
 
-  public BadRequestException() {}
-
   public BadRequestException(String message) {
     super(message);
   }

@@ -28,7 +28,6 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.OpeningHours;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
@@ -139,13 +138,6 @@ public class SightEventService extends ServiceSuperclass {
     se.fetchCollections();
     se.setFavourite(se.getUsers().contains(userService.getLoggedUser()));
     return se;
-  }
-
-  public void savePush(PushDTO push) {
-    Partner partner = partnerService.findByToken(push.secret);
-    push.sightEvents.forEach(sdto -> {
-      create(sdto, partner);
-    });
   }
 
 
@@ -277,53 +269,6 @@ public class SightEventService extends ServiceSuperclass {
     return em.createQuery(
         "from SightEvent event where event.sight.partner=:partner order by event.id desc",
         SightEvent.class).setParameter("partner", partner).getResultList();
-  }
-
-  public SightEvent uploadMainImageForLoggedUser(Long id, byte[] icon) {
-    SightEvent bo = getForLoggedUser(id);
-    return uploadMainImage(bo, icon);
-  }
-
-  public SightEvent uploadMainImage(SightEvent bo, byte[] icon) {
-    bo.setMainImage(
-        iService.validateAndStoreImageCollector(new ByteArrayInputStream(icon), "jpeg"));
-    return bo;
-  }
-
-  public SightEvent addImageToSightEventGallery(Long id, byte[] img) {
-    SightEvent bo = get(id);
-    bo.addImage(
-        iService.validateAndStoreImageCollector(new ByteArrayInputStream(img), "jpeg"));
-    return bo;
-  }
-
-  public SightEvent addImageToSightEventGalleryForLoggedUser(Long id, byte[] img) {
-    SightEvent bo = getForLoggedUser(id);
-    bo.addImage(
-        iService.validateAndStoreImageCollector(new ByteArrayInputStream(img), "jpeg"));
-    return bo;
-  }
-
-  public SightEvent removeImageFromGallery(Long id, Long imgId) {
-    SightEvent bo = get(id);
-    ImageCollector img = iService.get(imgId);
-    if (!bo.getImages().contains(img)) {
-      throw new ConflictingException(
-          "Image [id:" + imgId + " is not in gallery of sightevent[id:" + id + "].");
-    }
-    bo.removeImage(img);
-    return bo;
-  }
-
-  public SightEvent removeImageFromGalleryForLoggedUser(Long id, Long imgId) {
-    SightEvent bo = getForLoggedUser(id);
-    ImageCollector img = iService.get(imgId);
-    if (!bo.getImages().contains(img)) {
-      throw new ConflictingException(
-          "Image [id:" + imgId + " is not in gallery of sightevent[id:" + id + "].");
-    }
-    bo.removeImage(img);
-    return bo;
   }
 
   public SightEvent getForLoggedUser(Long id) {

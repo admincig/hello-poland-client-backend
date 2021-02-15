@@ -1,9 +1,10 @@
 package pl.hellopoland.config;
 
+import pl.hellopoland.bo.ModelSuperclass;
+
 import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
 import java.util.LinkedList;
-import pl.hellopoland.bo.ModelSuperclass;
 
 public abstract class PagedCollectionConfig<E extends ModelSuperclass> {
 

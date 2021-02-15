@@ -1,10 +1,11 @@
 package pl.hellopoland.soap.p24.object;
 
-import javax.validation.constraints.NotBlank;
 import pl.hellopoland.dto.LocationDTO;
 
+import javax.validation.constraints.NotBlank;
+
 public class CorrespondenceAddress {
-  public CorrespondenceAddress() {}
+  @SuppressWarnings("unused") public CorrespondenceAddress() {}
 
   public CorrespondenceAddress(LocationDTO locationDTO) {
     city = locationDTO.city;

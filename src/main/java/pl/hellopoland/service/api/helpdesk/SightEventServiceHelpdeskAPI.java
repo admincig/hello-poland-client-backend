@@ -159,28 +159,4 @@ public class SightEventServiceHelpdeskAPI {
     service.deletePdf(bo);
   }
 
-  @RolesAllowed("admin")
-  public SightEventDTO uploadMainImage(Long id, byte[] icon) {
-    var bo = service.get(id);
-    bo = service.uploadMainImage(bo, icon);
-    var dto = DtoMapper.getFullDTO(bo);
-    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), true, false);
-    return dto;
-  }
-
-  @RolesAllowed("admin")
-  public SightEventDTO uploadImage(Long id, byte[] img) {
-    SightEvent bo = service.addImageToSightEventGallery(id, img);
-    var dto = DtoMapper.getFullDTO(bo);
-    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), true, false);
-    return dto;
-  }
-
-  @RolesAllowed("admin")
-  public SightEventDTO deleteImage(Long id, Long imageId) {
-    SightEvent bo = service.removeImageFromGallery(id, imageId);
-    var dto = DtoMapper.getFullDTO(bo);
-    return dto;
-  }
-
 }

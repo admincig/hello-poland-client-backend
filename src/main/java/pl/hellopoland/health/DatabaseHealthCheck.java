@@ -1,16 +1,17 @@
 package pl.hellopoland.health;
 
-import java.lang.System.Logger.Level;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-import javax.annotation.Resource;
-import javax.enterprise.context.ApplicationScoped;
-import javax.sql.DataSource;
 import org.eclipse.microprofile.health.Health;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.eclipse.microprofile.health.HealthCheckResponseBuilder;
+
+import javax.annotation.Resource;
+import javax.enterprise.context.ApplicationScoped;
+import javax.sql.DataSource;
+import java.lang.System.Logger.Level;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 
 @Health
 @ApplicationScoped

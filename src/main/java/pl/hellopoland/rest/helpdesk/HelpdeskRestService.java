@@ -1,21 +1,17 @@
 package pl.hellopoland.rest.helpdesk;
 
-import java.io.File;
-import java.util.Date;
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import io.swagger.v3.oas.annotations.Operation;
 import pl.hellopoland.annotation.DateFormat;
 import pl.hellopoland.service.api.helpdesk.ServiceHelpdeskAPI;
+
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import java.io.File;
+import java.util.Date;
 
 @RequestScoped
 @Path("/helpdesk")

@@ -1,17 +1,14 @@
 package pl.hellopoland.rest.market;
 
-import java.util.List;
-import javax.enterprise.context.RequestScoped;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 import pl.hellopoland.dto.CountryDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.rest.RestService;
 import pl.hellopoland.soap.p24.enums.Country;
+
+import javax.enterprise.context.RequestScoped;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import java.util.List;
 
 @Path("/market")
 @RequestScoped

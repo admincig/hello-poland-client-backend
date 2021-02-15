@@ -1,10 +1,11 @@
 package pl.hellopoland.soap.p24.object;
 
-import javax.validation.constraints.NotBlank;
 import pl.hellopoland.dto.ContactPersonDTO;
 
+import javax.validation.constraints.NotBlank;
+
 public class TechnicalContact {
-  public TechnicalContact() {}
+  @SuppressWarnings("unused") public TechnicalContact() {}
 
   public TechnicalContact(ContactPersonDTO dto) {
     name = dto.name;

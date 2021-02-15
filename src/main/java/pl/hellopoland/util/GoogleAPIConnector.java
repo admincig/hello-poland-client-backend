@@ -1,15 +1,16 @@
 package pl.hellopoland.util;
 
-import java.lang.System.Logger;
-import java.util.List;
-import org.apache.commons.lang3.RandomStringUtils;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserDetails;
+
+import java.lang.System.Logger;
+import java.util.List;
 
 public class GoogleAPIConnector {
 

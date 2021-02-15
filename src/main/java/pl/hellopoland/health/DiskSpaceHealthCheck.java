@@ -1,11 +1,12 @@
 package pl.hellopoland.health;
 
-import java.io.File;
-import javax.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.health.Health;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.eclipse.microprofile.health.HealthCheckResponseBuilder;
+
+import javax.enterprise.context.ApplicationScoped;
+import java.io.File;
 
 @Health
 @ApplicationScoped

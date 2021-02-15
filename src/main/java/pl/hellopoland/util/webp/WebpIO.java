@@ -1,12 +1,6 @@
 package pl.hellopoland.util.webp;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Objects;
 
 /**
@@ -15,7 +9,7 @@ import java.util.Objects;
  * @author biezhi
  * @date 2017/10/2
  */
-public class WebpIO {
+@SuppressWarnings("ALL") public class WebpIO {
 
   /**
    * cwebp/dwebp/gif2webp

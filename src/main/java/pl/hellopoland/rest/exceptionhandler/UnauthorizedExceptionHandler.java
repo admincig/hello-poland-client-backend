@@ -1,11 +1,12 @@
 package pl.hellopoland.rest.exceptionhandler;
 
+import pl.hellopoland.exception.UnauthorizedException;
+
 import javax.json.Json;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-import pl.hellopoland.exception.UnauthorizedException;
 
 @Provider
 public class UnauthorizedExceptionHandler implements ExceptionMapper<UnauthorizedException> {

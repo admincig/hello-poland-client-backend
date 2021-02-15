@@ -1,14 +1,15 @@
 package pl.hellopoland.util;
 
+import pl.hellopoland.bo.User;
+import pl.hellopoland.bo.UserDetails;
+import pl.hellopoland.rest.JsonbConfig;
+
+import javax.json.JsonObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.logging.Logger;
-import javax.json.JsonObject;
-import pl.hellopoland.bo.User;
-import pl.hellopoland.bo.UserDetails;
-import pl.hellopoland.rest.JsonbConfig;
 
 public class FacebookAPIConnector {
 

@@ -18,11 +18,6 @@ public class TicketPoolDefinitionServiceHelpdeskAPI {
   PartnerService partnerService;
 
   @RolesAllowed("admin")
-  public TicketPoolDefinitionDTO add(TicketPoolDefinitionDTO dto) {
-    return service.add(dto);
-  }
-
-  @RolesAllowed("admin")
   public TicketPoolDefinitionDTO get(Long id) {
     return service.get(id);
   }

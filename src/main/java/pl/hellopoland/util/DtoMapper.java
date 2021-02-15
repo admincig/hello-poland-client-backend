@@ -52,18 +52,20 @@ public class DtoMapper {
     return target;
   }
 
-  public static Agreement copy(AgreementDTO source, Agreement target) {
-    if (source.linkUrl != null && !source.linkUrl.isEmpty()) {
-      target.setLinkUrl(source.linkUrl);
-    }
-    if (source.text != null && !source.text.isEmpty()) {
-      target.setText(source.text);
-    }
-    if (source.obligatory != null) {
-      target.setObligatory(source.obligatory);
-    }
-    return target;
-  }
+// --Commented out by Inspection START (2021-02-15 10:18):
+//  public static Agreement copy(AgreementDTO source, Agreement target) {
+//    if (source.linkUrl != null && !source.linkUrl.isEmpty()) {
+//      target.setLinkUrl(source.linkUrl);
+//    }
+//    if (source.text != null && !source.text.isEmpty()) {
+//      target.setText(source.text);
+//    }
+//    if (source.obligatory != null) {
+//      target.setObligatory(source.obligatory);
+//    }
+//    return target;
+//  }
+// --Commented out by Inspection STOP (2021-02-15 10:18)
 
   public static SightDTO getDTO(Sight bo) {
     SightDTO dto = new SightDTO();

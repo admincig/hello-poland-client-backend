@@ -1,37 +1,19 @@
 package pl.hellopoland.bo;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
 import pl.hellopoland.annotation.Multilingual;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.util.Imaged;
 import pl.hellopoland.util.Located;
 import pl.hellopoland.util.Partnered;
 import pl.hellopoland.util.Translated;
+
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Entity
 public class Sight extends ModelSuperclass implements Located, Imaged, Translated, Partnered {
@@ -196,19 +178,6 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
 
   public void setImages(List<ImageCollector> images) {
     this.images = images;
-  }
-
-  public void addImage(ImageCollector img) {
-    if (images == null) {
-      images = new ArrayList<>();
-    }
-    images.add(img);
-  }
-
-  public void removeImage(ImageCollector img) {
-    if (images != null) {
-      images.remove(img);
-    }
   }
 
   public List<OpeningHours> getOpeningHours() {

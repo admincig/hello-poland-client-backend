@@ -1,10 +1,10 @@
 package pl.hellopoland.bo;
 
-import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @Entity
 public class PartnerRepresentative extends ModelSuperclass {

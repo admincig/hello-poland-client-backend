@@ -1,10 +1,10 @@
 package pl.hellopoland.bo;
 
-import java.util.Set;
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotBlank;
+import java.util.Set;
 
 @Entity
 public class Agreement extends ModelSuperclass {

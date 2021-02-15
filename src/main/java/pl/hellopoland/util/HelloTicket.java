@@ -1,47 +1,8 @@
 package pl.hellopoland.util;
 
-import static javax.ws.rs.core.Response.Status.NO_CONTENT;
-import static javax.ws.rs.core.Response.Status.OK;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.lang.System.Logger.Level;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.json.JsonArray;
-import javax.json.JsonException;
-import javax.json.JsonString;
-import javax.json.JsonStructure;
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbException;
 import org.apache.cxf.helpers.IOUtils;
-import pl.hellopoland.bo.Order;
-import pl.hellopoland.bo.OrderDateEntry;
-import pl.hellopoland.bo.OrderDetails;
-import pl.hellopoland.bo.OrderEntry;
-import pl.hellopoland.bo.OrderSightEntry;
-import pl.hellopoland.bo.SightEvent;
-import pl.hellopoland.dto.AvailableTicketNumberAssociationDTO;
-import pl.hellopoland.dto.EmailSendingReportDTO;
-import pl.hellopoland.dto.FileDescriptorDTO;
-import pl.hellopoland.dto.PartnerDTO;
-import pl.hellopoland.dto.SightEventDTO;
-import pl.hellopoland.dto.SightEventPriceDTO;
-import pl.hellopoland.dto.TicketDefinitionDTO;
-import pl.hellopoland.dto.TicketPoolDefinitionDTO;
-import pl.hellopoland.dto.UserAuthDTO;
-import pl.hellopoland.dto.UserDTO;
+import pl.hellopoland.bo.*;
+import pl.hellopoland.dto.*;
 import pl.hellopoland.dto.booking.BookingDTO;
 import pl.hellopoland.dto.booking.TicketDTO;
 import pl.hellopoland.dto.booking.TicketOrderDTO;
@@ -52,6 +13,27 @@ import pl.hellopoland.exception.conflict.ExternalSystemException;
 import pl.hellopoland.exception.email.EmailSendingException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.rest.JsonbConfig;
+
+import javax.json.JsonArray;
+import javax.json.JsonException;
+import javax.json.JsonString;
+import javax.json.JsonStructure;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbException;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.lang.System.Logger.Level;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+import static javax.ws.rs.core.Response.Status.OK;
 
 public class HelloTicket {
 

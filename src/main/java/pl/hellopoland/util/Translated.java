@@ -1,7 +1,8 @@
 package pl.hellopoland.util;
 
-import java.util.Set;
 import pl.hellopoland.enums.LanguageVersion;
+
+import java.util.Set;
 
 /**
  * This interface should be implemented by entities that will be translated into different

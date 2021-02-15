@@ -1,7 +1,8 @@
 package pl.hellopoland.rest.dto;
 
-import java.util.Collection;
 import pl.hellopoland.config.PagedCollectionConfig;
+
+import java.util.Collection;
 
 public class PagedCollection<T> {
 

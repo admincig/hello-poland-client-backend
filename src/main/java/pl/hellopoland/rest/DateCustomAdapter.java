@@ -1,8 +1,8 @@
 package pl.hellopoland.rest;
 
+import javax.json.bind.adapter.JsonbAdapter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import javax.json.bind.adapter.JsonbAdapter;
 
 public class DateCustomAdapter implements JsonbAdapter<Date, String> {
 

@@ -1,11 +1,12 @@
 package pl.hellopoland.health;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
-import javax.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.health.Health;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
+
+import javax.enterprise.context.ApplicationScoped;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
 
 @Health
 @ApplicationScoped

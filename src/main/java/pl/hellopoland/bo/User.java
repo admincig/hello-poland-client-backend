@@ -1,22 +1,17 @@
 package pl.hellopoland.bo;
 
-import static javax.persistence.CascadeType.PERSIST;
-import static javax.persistence.FetchType.EAGER;
+import pl.hellopoland.exception.conflict.ConflictingException;
+import pl.hellopoland.security.password.PasswordEncoder;
+
+import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import javax.persistence.CascadeType;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotNull;
-import pl.hellopoland.exception.conflict.ConflictingException;
-import pl.hellopoland.security.password.PasswordEncoder;
+
+import static javax.persistence.CascadeType.PERSIST;
+import static javax.persistence.FetchType.EAGER;
 
 @Entity
 @Table(name = "users",

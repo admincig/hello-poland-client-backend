@@ -1,24 +1,20 @@
 package pl.hellopoland.soap.p24.service;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.lang.System.Logger.Level;
-import java.nio.charset.Charset;
+import pl.hellopoland.exception.conflict.ConflictingException;
+import pl.hellopoland.service.ServiceSuperclass;
+import pl.hellopoland.soap.p24.object.MerchantRegisterRequest;
+
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.soap.MessageFactory;
-import javax.xml.soap.MimeHeaders;
-import javax.xml.soap.SOAPBody;
-import javax.xml.soap.SOAPConnectionFactory;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
-import pl.hellopoland.exception.conflict.ConflictingException;
-import pl.hellopoland.service.ServiceSuperclass;
-import pl.hellopoland.soap.p24.object.MerchantRegisterRequest;
+import javax.xml.soap.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.lang.System.Logger.Level;
+import java.nio.charset.Charset;
 
 @LocalBean
 @Stateless

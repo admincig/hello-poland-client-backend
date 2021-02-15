@@ -1,10 +1,10 @@
 package pl.hellopoland.rest;
 
-import java.util.logging.Logger;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
+import java.util.logging.Logger;
 
 @Provider
 public class JsonbConfig implements ContextResolver<Jsonb> {

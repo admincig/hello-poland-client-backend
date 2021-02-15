@@ -1,18 +1,11 @@
 package pl.hellopoland.bo;
 
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.validation.constraints.NotNull;
 
 @Entity
 public class OrderSightEntry extends ModelSuperclass {
@@ -84,13 +77,6 @@ public class OrderSightEntry extends ModelSuperclass {
       entries.addAll(e.getEntries());
     }
     return entries.stream().collect(Collectors.summingInt(OrderEntry::getSum));
-  }
-
-  public void addEntry(OrderDateEntry entry) {
-    if (this.getEntries() == null) {
-      this.setEntries(new ArrayList<>());
-    }
-    this.getEntries().add(entry);
   }
 
   public Collection<Agreement> getAgreements() {

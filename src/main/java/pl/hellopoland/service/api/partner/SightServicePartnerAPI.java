@@ -1,12 +1,5 @@
 package pl.hellopoland.service.api.partner;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
 import pl.hellopoland.bo.Category;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEventCategory;
@@ -16,6 +9,14 @@ import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.SightService;
 import pl.hellopoland.service.TranslationService;
 import pl.hellopoland.util.DtoMapper;
+
+import javax.annotation.security.RolesAllowed;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Stateless
 public class SightServicePartnerAPI {
@@ -78,24 +79,6 @@ public class SightServicePartnerAPI {
   @RolesAllowed("partner")
   public void delete(Long id, LanguageVersion language) {
     service.deleteForLoggedUser(id, language);
-  }
-
-  @RolesAllowed("partner")
-  public SightDTO uploadMainImage(Long id, byte[] icon) {
-    Sight bo = service.uploadMainImageForLoggedUser(id, icon);
-    return DtoMapper.getFullDTO(bo);
-  }
-
-  @RolesAllowed("partner")
-  public SightDTO uploadImage(Long id, byte[] icon) {
-    Sight bo = service.addImageToSightGalleryForLoggedUser(id, icon);
-    return DtoMapper.getFullDTO(bo);
-  }
-
-  @RolesAllowed("partner")
-  public SightDTO removeImageFromGallery(Long id, Long imgId) {
-    Sight bo = service.removeImageFromGalleryForLoggedUser(id, imgId);
-    return DtoMapper.getFullDTO(bo);
   }
 
   @RolesAllowed("partner")
