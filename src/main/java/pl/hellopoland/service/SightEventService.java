@@ -144,6 +144,7 @@ public class SightEventService extends ServiceSuperclass {
     var defLang = dto.defaultLanguage;
     var availableLanguageVersions = dto.availableLanguageVersions;
     dto.generalAdmission = Boolean.TRUE.equals(dto.generalAdmission);
+    fetchImagesOriginalById(dto);
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
     dto = helloTicket.addSightEvent(dto, partner.getHptToken());
@@ -178,6 +179,19 @@ public class SightEventService extends ServiceSuperclass {
     recreateSearchIndex(bo);
     logger.log(Logger.Level.INFO, "Saved new sight event: " + bo.getName());
     return createLanguageVersion(DtoMapper.getDTO(bo), partner, bo.getDefaultLanguage());
+  }
+
+  private void fetchImagesOriginalById(SightEventDTO dto) {
+    if (dto.mainImage != null && dto.mainImage.id != null) {
+      dto.mainImage.original = DtoMapper.getDTO(iService.get(dto.mainImage.id)).original;
+    }
+    if (dto.images != null) {
+      for (ImageDTO im : dto.images) {
+        if (im.id != null) {
+          im.original = DtoMapper.getDTO(iService.get(im.id)).original;
+        }
+      }
+    }
   }
 
   private ArrayList<OpeningHours> getOpeningHoursCollectionFromDTO(SightEventDTO dto) {
@@ -215,6 +229,7 @@ public class SightEventService extends ServiceSuperclass {
       createLanguageVersion(dto, language);
     }
     if (bo.getDefaultLanguage().equals(language)) {
+      fetchImagesOriginalById(dto);
       if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
         Partner partner = bo.getPartner();
         Portal hpt = getPortal("Hello Ticket Cloud");
