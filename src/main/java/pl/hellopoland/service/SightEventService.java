@@ -145,13 +145,16 @@ public class SightEventService extends ServiceSuperclass {
     var availableLanguageVersions = dto.availableLanguageVersions;
     dto.generalAdmission = Boolean.TRUE.equals(dto.generalAdmission);
     fetchImagesOriginalById(dto);
+    List<ImageDTO> gallery = dto.images;
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
     dto = helloTicket.addSightEvent(dto, partner.getHptToken());
+    dto.images = gallery;
     dto.defaultLanguage = defLang;
     dto.availableLanguageVersions = availableLanguageVersions;
     SightEvent bo = new SightEvent();
     DtoMapper.copy(dto, bo);
+    bo.setPartner(partner);
     iService.handleImagesUpdate(bo, dto);
     handleAttachmentUpdate(bo, dto);
     bo.setPortal(hpt);
@@ -163,7 +166,6 @@ public class SightEventService extends ServiceSuperclass {
       }
     }
 
-    bo.setPartner(partner);
     em.persist(bo);
 
     ArrayList<OpeningHours> oHoursList = getOpeningHoursCollectionFromDTO(dto);
@@ -235,7 +237,9 @@ public class SightEventService extends ServiceSuperclass {
         Portal hpt = getPortal("Hello Ticket Cloud");
         HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
         dto.id = bo.getHptId();
+        List<ImageDTO> gallery = dto.images;
         dto = helloTicket.updateSightEvent(dto, partner.getHptToken());
+        dto.images = gallery;
       }
       DtoMapper.copy(dto, bo);
       oHoursService.remove(bo.getOpeningHours());
