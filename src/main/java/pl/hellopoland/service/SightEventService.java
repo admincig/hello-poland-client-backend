@@ -148,7 +148,10 @@ public class SightEventService extends ServiceSuperclass {
     List<ImageDTO> gallery = dto.images;
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
+    FileDescriptorDTO pdf = dto.pdfAttachment;
+    dto.pdfAttachment = null;
     dto = helloTicket.addSightEvent(dto, partner.getHptToken());
+    dto.pdfAttachment = pdf;
     dto.images = gallery;
     dto.defaultLanguage = defLang;
     dto.availableLanguageVersions = availableLanguageVersions;
@@ -237,9 +240,12 @@ public class SightEventService extends ServiceSuperclass {
         Portal hpt = getPortal("Hello Ticket Cloud");
         HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
         dto.id = bo.getHptId();
+        FileDescriptorDTO pdf = dto.pdfAttachment;
+        dto.pdfAttachment = null;
         List<ImageDTO> gallery = dto.images;
         dto = helloTicket.updateSightEvent(dto, partner.getHptToken());
         dto.images = gallery;
+        dto.pdfAttachment = pdf;
       }
       DtoMapper.copy(dto, bo);
       oHoursService.remove(bo.getOpeningHours());
