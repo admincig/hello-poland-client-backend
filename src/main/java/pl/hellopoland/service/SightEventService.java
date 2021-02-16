@@ -266,7 +266,7 @@ public class SightEventService extends ServiceSuperclass {
   private void handleAttachmentUpdate(SightEvent bo, SightEventDTO dto) {
     FileDescriptor newAttachment = null;
     Long newAttachmentId = null;
-    if (dto.pdfAttachment != null) {
+    if (dto.pdfAttachment != null && dto.pdfAttachment.id != null) {
       newAttachmentId = dto.pdfAttachment.id;
       newAttachment = fdService.get(newAttachmentId);
       if (newAttachment.getPartner() == null || !newAttachment.getPartner().getId().equals(bo.getPartner().getId())) {
