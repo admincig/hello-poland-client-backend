@@ -11,11 +11,12 @@ import pl.hellopoland.util.Imaged;
 import pl.hellopoland.util.Partnered;
 import pl.hellopoland.util.webp.WebpIO;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+
 import javax.imageio.ImageIO;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;

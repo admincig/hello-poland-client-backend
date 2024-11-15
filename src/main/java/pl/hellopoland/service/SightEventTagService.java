@@ -4,7 +4,7 @@ import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.SightEventTag;
 import pl.hellopoland.bo.Tag;
 
-import javax.ejb.Stateless;
+import jakarta.ejb.Stateless;
 
 @Stateless
 public class SightEventTagService extends ServiceSuperclass {

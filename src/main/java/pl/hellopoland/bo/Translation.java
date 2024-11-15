@@ -3,9 +3,9 @@ package pl.hellopoland.bo;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.util.Translated;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(name = "translation_key_language_unique",

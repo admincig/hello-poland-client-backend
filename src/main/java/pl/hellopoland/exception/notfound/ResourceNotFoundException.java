@@ -1,6 +1,6 @@
 package pl.hellopoland.exception.notfound;
 
-import javax.ejb.ApplicationException;
+import jakarta.ejb.ApplicationException;
 
 @ApplicationException(rollback = true)
 public class ResourceNotFoundException extends NotFoundBaseException {

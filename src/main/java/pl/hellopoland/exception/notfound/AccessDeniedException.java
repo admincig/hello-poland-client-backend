@@ -1,7 +1,7 @@
 package pl.hellopoland.exception.notfound;
 
-import javax.ejb.ApplicationException;
-import javax.ejb.EJBAccessException;
+import jakarta.ejb.ApplicationException;
+import jakarta.ejb.EJBAccessException;
 
 @ApplicationException(rollback = true)
 public class AccessDeniedException extends EJBAccessException {

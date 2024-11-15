@@ -12,10 +12,10 @@ import pl.hellopoland.service.*;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.PagedEntityCollection;
 
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.EJBAccessException;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ejb.EJBAccessException;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;

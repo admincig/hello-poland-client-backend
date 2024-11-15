@@ -2,8 +2,8 @@ package pl.hellopoland.service;
 
 import pl.hellopoland.bo.OpeningHours;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
 import java.util.Collection;
 import java.util.Optional;
 

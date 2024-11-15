@@ -2,9 +2,9 @@ package pl.hellopoland.util;
 
 import pl.hellopoland.rest.JsonbConfig;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonStructure;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonStructure;
 import java.lang.System.Logger.Level;
 import java.net.HttpURLConnection;
 import java.net.URL;

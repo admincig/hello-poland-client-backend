@@ -6,10 +6,10 @@ import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.service.FileDescriptorService;
 import pl.hellopoland.service.ImageService;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
 import java.io.File;
 import java.lang.System.Logger;
 import java.util.Optional;

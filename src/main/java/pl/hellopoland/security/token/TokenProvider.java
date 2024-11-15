@@ -4,7 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Set;
@@ -74,14 +74,14 @@ public class TokenProvider {
   private void validateAccessToken(String token) {
     String accessTokenSecretKey = System.getProperty(JWT_ACCESS_TOKEN_SECRET_KEY_PROPERTY);
 
-    Jwts.parser().setSigningKey(accessTokenSecretKey).parseClaimsJws(token);
+    Jwts.parser().setSigningKey(accessTokenSecretKey).build().parseSignedClaims(token);
 
   }
 
   private void validateRefreshToken(String token) {
     String refreshTokenSecretKey = System.getProperty(JWT_REFRESH_TOKEN_SECRET_KEY_PROPERTY);
 
-    Jwts.parser().setSigningKey(refreshTokenSecretKey).parseClaimsJws(token);
+    Jwts.parser().setSigningKey(refreshTokenSecretKey).build().parseSignedClaims(token);
   }
 
   private JwtCredential getAccessTokenCredential(String token) {
@@ -97,7 +97,7 @@ public class TokenProvider {
   }
 
   private JwtCredential getCredential(String token, String secretKey) {
-    Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+    Claims claims = Jwts.parser().setSigningKey(secretKey).build().parseSignedClaims(token).getPayload();
 
     Set<String> authorities = Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
         .collect(Collectors.toSet());

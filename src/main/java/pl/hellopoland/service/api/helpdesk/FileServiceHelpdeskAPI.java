@@ -4,9 +4,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import pl.hellopoland.rest.dto.UploadFilesResult;
 import pl.hellopoland.service.LibraryFileService;
 
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import java.util.List;
 
 @Stateless

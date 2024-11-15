@@ -3,11 +3,11 @@ package pl.hellopoland.rest.exceptionhandler;
 import pl.hellopoland.exception.conflict.ConflictBaseException;
 import pl.hellopoland.rest.dto.AbstractJSONError;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.Provider;
 
-import static javax.ws.rs.core.Response.Status.CONFLICT;
+import static jakarta.ws.rs.core.Response.Status.CONFLICT;
 
 @Provider
 public class ConflictExceptionHandler implements ExceptionMapper<ConflictBaseException> {

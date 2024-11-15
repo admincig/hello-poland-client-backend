@@ -5,9 +5,9 @@ import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.TicketDefinitionService;
 
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import java.util.List;
 
 @Stateless

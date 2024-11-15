@@ -7,9 +7,9 @@ import pl.hellopoland.bo.Partner;
 import pl.hellopoland.rest.dto.UploadFilesResult;
 import pl.hellopoland.util.DtoMapper;
 
-import javax.ejb.EJBAccessException;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.ejb.EJBAccessException;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.util.List;
 

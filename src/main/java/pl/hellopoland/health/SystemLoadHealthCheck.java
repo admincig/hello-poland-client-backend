@@ -1,15 +1,15 @@
 package pl.hellopoland.health;
 
-import org.eclipse.microprofile.health.Health;
+import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.eclipse.microprofile.health.HealthCheckResponseBuilder;
+import org.eclipse.microprofile.health.Liveness;
 
-import javax.enterprise.context.ApplicationScoped;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 
-@Health
+@Liveness
 @ApplicationScoped
 public class SystemLoadHealthCheck implements HealthCheck {
 
@@ -36,7 +36,7 @@ public class SystemLoadHealthCheck implements HealthCheck {
 
     if (systemLoadAverage > 0) {
       boolean status = systemLoadAveragePerProcessors < max;
-      return responseBuilder.state(status).build();
+      return responseBuilder.status(status).build();
     } else {
       // Load average not available
       return responseBuilder.up().build();

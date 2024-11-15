@@ -2,8 +2,8 @@ package pl.hellopoland.service;
 
 import pl.hellopoland.bo.Agreement;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
 import java.util.List;
 import java.util.Set;
 

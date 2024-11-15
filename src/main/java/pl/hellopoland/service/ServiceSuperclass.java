@@ -8,17 +8,15 @@ import pl.hellopoland.config.Entry;
 import pl.hellopoland.config.PagedCollectionConfig;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 
-import javax.inject.Inject;
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.InvocationContext;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-import javax.security.enterprise.SecurityContext;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import jakarta.inject.Inject;
+import jakarta.interceptor.AroundInvoke;
+import jakarta.interceptor.InvocationContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import jakarta.security.enterprise.SecurityContext;
+import java.io.*;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.text.Collator;
@@ -33,16 +31,18 @@ public abstract class ServiceSuperclass {
   private static Logger staticLogger = System.getLogger(ServiceSuperclass.class.getName());
 
   static {
+    properties = System.getProperties();
     try {
-      properties = System.getProperties();
-      var copy = new HashMap<>(properties);
-      properties.clear();
-      properties.load(ServiceSuperclass.class.getResourceAsStream("/runtime.properties"));
-      if (copy.containsKey("local.runtime.properties")) {
-        properties
-            .load(new FileInputStream(new File((String) copy.get("local.runtime.properties"))));
+      try (InputStream is = ServiceSuperclass.class.getResourceAsStream("/runtime.properties")) {
+        Reader reader = new InputStreamReader(is, "UTF-8");
+        properties.load(reader);
       }
-      properties.putAll(copy);
+      if (properties.containsKey("local.runtime.properties")) {
+        try (FileInputStream fis = new FileInputStream(new File((String) properties.get("local.runtime.properties")))) {
+          Reader reader = new InputStreamReader(fis, "UTF-8");
+          properties.load(reader);
+        }
+      }
       staticLogger.log(Logger.Level.DEBUG,
           properties.entrySet().stream().map(Object::toString).collect(Collectors.joining("\n")));
     } catch (IOException e) {

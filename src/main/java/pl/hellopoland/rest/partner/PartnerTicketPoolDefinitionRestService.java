@@ -3,10 +3,10 @@ package pl.hellopoland.rest.partner;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.service.api.partner.TicketPoolDefinitionServicePartnerAPI;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 
 @Path("/partner/ticket-pool-definitions")
 @RequestScoped

@@ -7,8 +7,8 @@ import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.exception.badrequest.BadRequestException;
 import pl.hellopoland.util.HelloTicket;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import java.util.List;
 import java.util.stream.Collectors;
 

@@ -7,10 +7,10 @@ import pl.hellopoland.dto.SearchResultDTO;
 import pl.hellopoland.rest.RestService;
 import pl.hellopoland.service.api.market.SearchServiceMarketAPI;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import java.util.Date;
 
 @Path("/market/search")

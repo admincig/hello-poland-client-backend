@@ -2,8 +2,8 @@ package pl.hellopoland.bo;
 
 import pl.hellopoland.dto.booking.TicketDTO;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;

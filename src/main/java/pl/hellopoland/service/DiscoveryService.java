@@ -2,7 +2,7 @@ package pl.hellopoland.service;
 
 import pl.hellopoland.bo.HplInstance;
 
-import javax.ejb.Stateless;
+import jakarta.ejb.Stateless;
 import java.util.List;
 
 @Stateless

@@ -2,7 +2,7 @@ package pl.hellopoland.soap.p24.object;
 
 import pl.hellopoland.dto.LocationDTO;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 public class CorrespondenceAddress {
   @SuppressWarnings("unused") public CorrespondenceAddress() {}

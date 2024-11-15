@@ -4,12 +4,12 @@ import pl.hellopoland.dto.P24PassageCartDTO;
 import pl.hellopoland.rest.dto.OrderIRO;
 import pl.hellopoland.service.api.market.OrderServiceMarketAPI;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.json.Json;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.json.Json;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 @Path("/market/orders")
 @RequestScoped

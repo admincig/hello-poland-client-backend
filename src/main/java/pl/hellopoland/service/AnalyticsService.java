@@ -4,9 +4,9 @@ import org.apache.commons.lang3.RandomStringUtils;
 import pl.hellopoland.bo.*;
 import pl.hellopoland.bo.OrderDetails.Platform;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.lang.System.Logger.Level;

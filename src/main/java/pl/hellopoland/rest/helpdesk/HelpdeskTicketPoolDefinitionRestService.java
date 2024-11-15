@@ -3,10 +3,10 @@ package pl.hellopoland.rest.helpdesk;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.service.api.helpdesk.TicketPoolDefinitionServiceHelpdeskAPI;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import java.util.List;
 
 @Path("/helpdesk/ticket-pool-definitions")

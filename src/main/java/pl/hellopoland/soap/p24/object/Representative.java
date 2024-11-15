@@ -2,7 +2,7 @@ package pl.hellopoland.soap.p24.object;
 
 import pl.hellopoland.dto.PartnerRepresentativeDTO;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 public class Representative {
   @SuppressWarnings("unused") public Representative() {}

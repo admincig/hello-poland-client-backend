@@ -3,9 +3,9 @@ package pl.hellopoland.service.api.market;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.service.MailingListService;
 
-import javax.annotation.security.PermitAll;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.annotation.security.PermitAll;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 

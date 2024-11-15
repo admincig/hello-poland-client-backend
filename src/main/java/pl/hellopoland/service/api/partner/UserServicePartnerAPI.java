@@ -9,9 +9,9 @@ import pl.hellopoland.service.PartnerService;
 import pl.hellopoland.service.TranslationService;
 import pl.hellopoland.service.UserService;
 
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 
 @Stateless
 public class UserServicePartnerAPI {

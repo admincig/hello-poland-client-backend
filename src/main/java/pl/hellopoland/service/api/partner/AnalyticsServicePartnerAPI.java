@@ -2,9 +2,9 @@ package pl.hellopoland.service.api.partner;
 
 import pl.hellopoland.service.AnalyticsService;
 
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.annotation.security.RolesAllowed;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import java.io.File;
 import java.util.Date;
 

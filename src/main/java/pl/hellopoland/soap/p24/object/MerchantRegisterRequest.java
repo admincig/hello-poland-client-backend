@@ -3,10 +3,10 @@ package pl.hellopoland.soap.p24.object;
 import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.soap.p24.enums.Trade;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 

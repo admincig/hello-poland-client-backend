@@ -4,12 +4,12 @@ import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.service.ServiceSuperclass;
 import pl.hellopoland.soap.p24.object.MerchantRegisterRequest;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.soap.*;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.soap.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;

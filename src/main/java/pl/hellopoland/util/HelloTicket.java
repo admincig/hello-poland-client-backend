@@ -1,6 +1,6 @@
 package pl.hellopoland.util;
 
-import org.apache.cxf.helpers.IOUtils;
+import org.apache.commons.io.IOUtils;
 import pl.hellopoland.bo.*;
 import pl.hellopoland.dto.*;
 import pl.hellopoland.dto.booking.BookingDTO;
@@ -14,12 +14,12 @@ import pl.hellopoland.exception.email.EmailSendingException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.rest.JsonbConfig;
 
-import javax.json.JsonArray;
-import javax.json.JsonException;
-import javax.json.JsonString;
-import javax.json.JsonStructure;
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbException;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonException;
+import jakarta.json.JsonString;
+import jakarta.json.JsonStructure;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,8 +32,8 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static javax.ws.rs.core.Response.Status.NO_CONTENT;
-import static javax.ws.rs.core.Response.Status.OK;
+import static jakarta.ws.rs.core.Response.Status.NO_CONTENT;
+import static jakarta.ws.rs.core.Response.Status.OK;
 
 public class HelloTicket {
 

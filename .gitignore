@@ -1,3 +1,4 @@
+.DS_Store
 .sts4-cache
 # Created by https://www.gitignore.io/api/maven,eclipse,windows
 
@@ -100,3 +101,4 @@ $RECYCLE.BIN/
 *.iml
 .idea/
 
+dolejnik.config.properties

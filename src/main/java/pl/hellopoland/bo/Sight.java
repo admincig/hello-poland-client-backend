@@ -7,8 +7,8 @@ import pl.hellopoland.util.Located;
 import pl.hellopoland.util.Partnered;
 import pl.hellopoland.util.Translated;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;

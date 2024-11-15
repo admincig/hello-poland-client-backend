@@ -4,7 +4,7 @@ import pl.hellopoland.bo.User;
 import pl.hellopoland.bo.UserDetails;
 import pl.hellopoland.rest.JsonbConfig;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;

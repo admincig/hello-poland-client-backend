@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>pl.hellopoland</groupId>
 	<artifactId>hellopoland</artifactId>
-	<version>1.2.0</version>
+	<version>2.0.0</version>
 	<packaging>war</packaging>
 	<name>Hello Poland</name>
 	<description>Hello Poland backend project</description>
@@ -22,7 +22,7 @@
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
-			<version>5.3.10.Final</version>
+			<version>6.6.2.Final</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -41,15 +41,21 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>javax</groupId>
-			<artifactId>javaee-api</artifactId>
-			<version>8.0</version>
+			<groupId>jakarta.platform</groupId>
+			<artifactId>jakarta.jakartaee-api</artifactId>
+			<version>10.0.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.angus</groupId>
+			<artifactId>angus-mail</artifactId>
+			<version>2.0.3</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-multipart-provider</artifactId>
-			<version>3.6.3.Final</version>
+			<version>6.2.10.Final</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -63,15 +69,19 @@
 			<version>0.1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.microprofile.health</groupId>
-			<artifactId>microprofile-health-api</artifactId>
-			<version>1.0</version>
-			<scope>provided</scope>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>0.12.6</version>
 		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
-			<artifactId>jjwt</artifactId>
-			<version>0.9.1</version>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.12.6</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId> <!-- or jjwt-gson if Gson is preferred -->
+			<version>0.12.6</version>
 		</dependency>
 		<!-- GoogleAPIConnector -->
 		<dependency>
@@ -85,7 +95,7 @@
 			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
+<!--		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-jaxrs2</artifactId>
 			<version>2.0.9</version>
@@ -94,12 +104,18 @@
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-jaxrs2-servlet-initializer</artifactId>
 			<version>2.0.9</version>
-		</dependency>
+		</dependency>-->
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>42.2.8</version>
+			<version>42.7.3</version>
 			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.smallrye</groupId>
+			<artifactId>smallrye-health</artifactId>
+			<version>4.0.4</version>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- send in blue -->
@@ -135,6 +151,21 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<webResources>
+						<resource>
+							<filtering>true</filtering>
+							<directory>src/main/webapp</directory>
+							<includes>
+								<include>**/web.xml</include>
+							</includes>
+						</resource>
+					</webResources>
+				</configuration>
 			</plugin>
 		</plugins>
 		<resources>

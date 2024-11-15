@@ -1,7 +1,7 @@
 package pl.hellopoland.bo;
 
-import javax.persistence.Entity;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.Entity;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class HplInstance extends ModelSuperclass {

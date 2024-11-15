@@ -3,8 +3,8 @@ package pl.hellopoland.service.api.partner;
 import pl.hellopoland.rest.dto.HplInstanceRO;
 import pl.hellopoland.service.DiscoveryService;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import java.util.List;
 import java.util.stream.Collectors;
 

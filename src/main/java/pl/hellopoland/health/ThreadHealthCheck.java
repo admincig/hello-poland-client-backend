@@ -1,15 +1,16 @@
 package pl.hellopoland.health;
 
-import org.eclipse.microprofile.health.Health;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.eclipse.microprofile.health.HealthCheckResponseBuilder;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
+import org.eclipse.microprofile.health.Liveness;
+
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 
-@Health
+@Liveness
 @ApplicationScoped
 public class ThreadHealthCheck implements HealthCheck {
 
@@ -40,7 +41,7 @@ public class ThreadHealthCheck implements HealthCheck {
 
     if (threadCount > 0 && maxThreadCount > 0) {
       boolean status = threadCount < maxThreadCount;
-      return responseBuilder.state(status).build();
+      return responseBuilder.status(status).build();
     } else {
       // Thread count not available
       return responseBuilder.up().build();

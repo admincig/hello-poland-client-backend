@@ -19,9 +19,9 @@ import pl.hellopoland.soap.p24.service.P24SOAPClient;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.soap.p24.MerchantRegisterValidator;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import java.lang.System.Logger.Level;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -89,9 +89,9 @@ public class HellopolandService extends ServiceSuperclass {
       em.flush();
     } catch (Exception e) {
       var exc = e.getCause();
-      if (exc instanceof javax.validation.ConstraintViolationException) {
+      if (exc instanceof jakarta.validation.ConstraintViolationException) {
         var errMsg = new StringBuilder();
-        ((javax.validation.ConstraintViolationException) exc).getConstraintViolations().forEach(
+        ((jakarta.validation.ConstraintViolationException) exc).getConstraintViolations().forEach(
             cv -> errMsg.append(cv.getPropertyPath() + " ").append(cv.getMessage() + ", "));
         logger.log(Level.ERROR, "Błąd podczas dodawania partnera; " + errMsg.toString());
         throw new ConflictingException("Błąd podczas dodawania partnera; " + errMsg.toString());

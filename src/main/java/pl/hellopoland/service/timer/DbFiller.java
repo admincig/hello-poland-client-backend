@@ -9,12 +9,12 @@ import pl.hellopoland.security.password.PasswordEncoder;
 import pl.hellopoland.service.*;
 import pl.hellopoland.util.DtoMapper;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.DependsOn;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.DependsOn;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.Startup;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.lang.System.Logger;
 import java.math.BigDecimal;
 import java.util.*;
@@ -155,9 +155,9 @@ public class DbFiller extends ServiceSuperclass {
   }
 
   private void createUsers() {
-    userHelloPoland = createUser("Hello Poland - admin", "hp-admin@fream.pl", "hp-admin",
+    userHelloPoland = createUser("Hello Poland - root", "root@hello-poland.pl", "root",
         "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJocC1hZG1pbkBmcmVhbS5wbCIsImF1dGgiOiJST0xFX0FETUlOIn0.ffo2GsvkbE72S4BMWEoXs2ZV9PIBkTaiFKX7DQr_Xm0pxXMrWSzI8TICovtwvi4RdEzsX4Xty8DNKXvkP12ciw",
-        null, Role.ADMIN);
+        null, Role.ADMIN, Role.ROOT);
     userHelloPoland = createPartner("Hello Poland", "hp-partner@fream.pl", "hp-partner",
         "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.",
         Integer.valueOf(properties.getProperty("przelewy24.posId")), BigDecimal.TEN, "zaqwsx",

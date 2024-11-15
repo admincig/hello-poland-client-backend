@@ -1,14 +1,14 @@
 package pl.hellopoland.health;
 
-import org.eclipse.microprofile.health.Health;
+import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
+import org.eclipse.microprofile.health.Liveness;
 
-import javax.enterprise.context.ApplicationScoped;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 
-@Health
+@Liveness
 @ApplicationScoped
 public class HeapHealthCheck implements HealthCheck {
 
@@ -17,7 +17,7 @@ public class HeapHealthCheck implements HealthCheck {
     MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
     long memUsed = memoryBean.getHeapMemoryUsage().getUsed();
     long memMax = memoryBean.getHeapMemoryUsage().getMax();
-    return HealthCheckResponse.named("heap").state(memUsed < memMax * 0.9)
+    return HealthCheckResponse.named("heap").status(memUsed < memMax * 0.9)
         .withData("memUsed", memUsed).withData("memMax", memMax).build();
   }
 

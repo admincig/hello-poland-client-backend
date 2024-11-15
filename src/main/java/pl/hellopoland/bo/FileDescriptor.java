@@ -2,8 +2,8 @@ package pl.hellopoland.bo;
 
 import pl.hellopoland.exception.conflict.ConflictingException;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import java.io.File;
 import java.time.LocalDateTime;
 

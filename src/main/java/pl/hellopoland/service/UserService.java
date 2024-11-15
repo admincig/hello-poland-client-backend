@@ -11,12 +11,12 @@ import pl.hellopoland.security.password.PasswordEncoder;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.NameAndAddressSplitter;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.NoResultException;
-import javax.ws.rs.InternalServerErrorException;
-import javax.ws.rs.NotFoundException;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.persistence.NoResultException;
+import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.NotFoundException;
 import java.lang.System.Logger.Level;
 import java.util.ArrayList;
 import java.util.List;

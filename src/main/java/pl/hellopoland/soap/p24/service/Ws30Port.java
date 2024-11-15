@@ -3,11 +3,11 @@ package pl.hellopoland.soap.p24.service;
 import pl.hellopoland.soap.p24.object.MerchantRegisterRequest;
 import pl.hellopoland.soap.p24.object.MerchantRegisterResult;
 
-import javax.jws.WebMethod;
-import javax.jws.WebParam;
-import javax.jws.WebResult;
-import javax.jws.WebService;
-import javax.jws.soap.SOAPBinding;
+import jakarta.jws.WebMethod;
+import jakarta.jws.WebParam;
+import jakarta.jws.WebResult;
+import jakarta.jws.WebService;
+import jakarta.jws.soap.SOAPBinding;
 
 @WebService(name = SoapConstants.PORT_TYPE, targetNamespace = SoapConstants.NAMESPACE_URI)
 @SOAPBinding(style = SOAPBinding.Style.RPC)

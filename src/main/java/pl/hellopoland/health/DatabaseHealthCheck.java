@@ -1,19 +1,19 @@
 package pl.hellopoland.health;
 
-import org.eclipse.microprofile.health.Health;
+import jakarta.annotation.Resource;
+import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.eclipse.microprofile.health.HealthCheckResponseBuilder;
+import org.eclipse.microprofile.health.Liveness;
 
-import javax.annotation.Resource;
-import javax.enterprise.context.ApplicationScoped;
 import javax.sql.DataSource;
 import java.lang.System.Logger.Level;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
-@Health
+@Liveness
 @ApplicationScoped
 public class DatabaseHealthCheck implements HealthCheck {
 
@@ -35,7 +35,7 @@ public class DatabaseHealthCheck implements HealthCheck {
               .withData("driverName", metaData.getDriverName())
               .withData("driverVersion", metaData.getDriverVersion()).withData("isValid", isValid);
 
-      return responseBuilder.state(isValid).build();
+      return responseBuilder.status(isValid).build();
 
     } catch (SQLException e) {
       System.getLogger(DatabaseHealthCheck.class.getName()).log(Level.WARNING, e);

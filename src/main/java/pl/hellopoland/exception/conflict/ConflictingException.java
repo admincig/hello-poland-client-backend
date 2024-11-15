@@ -1,6 +1,6 @@
 package pl.hellopoland.exception.conflict;
 
-import javax.ejb.ApplicationException;
+import jakarta.ejb.ApplicationException;
 
 @ApplicationException(rollback = true)
 public class ConflictingException extends RuntimeException {

@@ -10,9 +10,9 @@ import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.Located;
 import pl.hellopoland.util.PagedEntityCollection;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.util.HashMap;
 import java.util.List;

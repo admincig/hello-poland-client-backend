@@ -1,15 +1,15 @@
 package pl.hellopoland.rest.helpdesk;
 
-import io.swagger.v3.oas.annotations.Operation;
+//import io.swagger.v3.oas.annotations.Operation;
 import pl.hellopoland.annotation.DateFormat;
 import pl.hellopoland.service.api.helpdesk.ServiceHelpdeskAPI;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
 import java.io.File;
 import java.util.Date;
 
@@ -42,7 +42,7 @@ public class HelpdeskRestService {
 
   @GET
   @Path("/rebuildSearchIndices")
-  @Operation(hidden = true)
+//  @Operation(hidden = true)
   public Response rebuildSearchIndices() {
     service.rebuildSearchIndices();
     return Response.ok().build();
@@ -51,7 +51,7 @@ public class HelpdeskRestService {
   // TODO do usunięcia
   @GET
   @Path("/globalUserNameRefactor")
-  @Operation(hidden = true)
+//  @Operation(hidden = true)
   public Response globalUserNameRefactor() {
     service.globalRework();
     return Response.ok().build();
@@ -59,7 +59,7 @@ public class HelpdeskRestService {
 
   @GET
   @Path("/orders/{hash}/sudoAck")
-  @Operation(hidden = true)
+//  @Operation(hidden = true)
   public Response sudoAck(@PathParam("hash") String hash) {
     service.sudoAckOrder(hash);
     return Response.ok().build();

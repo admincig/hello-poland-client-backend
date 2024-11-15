@@ -2,7 +2,7 @@ package pl.hellopoland.bo;
 
 import pl.hellopoland.util.NameAndAddressSplitter;
 
-import javax.persistence.Embeddable;
+import jakarta.persistence.Embeddable;
 
 @Embeddable
 public class UserDetails {

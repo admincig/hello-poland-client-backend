@@ -11,11 +11,11 @@ import pl.hellopoland.service.api.partner.DiscoveryServicePartnerAPI;
 import pl.hellopoland.service.api.partner.PartnerServicePartnerAPI;
 import pl.hellopoland.service.api.partner.UserServicePartnerAPI;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.util.List;
 
 @Path("/partner")

@@ -12,10 +12,10 @@ import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.service.vo.HptTpdsDownloadConfigurator;
 import pl.hellopoland.util.*;
 
-import javax.ejb.EJBAccessException;
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
-import javax.inject.Inject;
+import jakarta.ejb.EJBAccessException;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.nio.file.Paths;

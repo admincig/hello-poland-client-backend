@@ -1,14 +1,14 @@
 package pl.hellopoland.health;
 
-import org.eclipse.microprofile.health.Health;
+import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.eclipse.microprofile.health.HealthCheckResponseBuilder;
+import org.eclipse.microprofile.health.Liveness;
 
-import javax.enterprise.context.ApplicationScoped;
 import java.io.File;
 
-@Health
+@Liveness
 @ApplicationScoped
 public class DiskSpaceHealthCheck implements HealthCheck {
 
@@ -25,6 +25,6 @@ public class DiskSpaceHealthCheck implements HealthCheck {
         .withData("totalMegabytes", allMegaBytes).withData("freeMegabytes", freeMegaBytes)
         .withData("% used", String.valueOf((100 - (100.0 * freeMegaBytes / allMegaBytes))));
 
-    return responseBuilder.state(enoughSpace).build();
+    return responseBuilder.status(enoughSpace).build();
   }
 }

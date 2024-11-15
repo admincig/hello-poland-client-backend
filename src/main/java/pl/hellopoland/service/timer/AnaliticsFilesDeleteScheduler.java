@@ -3,10 +3,10 @@ package pl.hellopoland.service.timer;
 import pl.hellopoland.service.FileDescriptorService;
 import pl.hellopoland.service.ServiceSuperclass;
 
-import javax.ejb.DependsOn;
-import javax.ejb.Schedule;
-import javax.ejb.Singleton;
-import javax.inject.Inject;
+import jakarta.ejb.DependsOn;
+import jakarta.ejb.Schedule;
+import jakarta.ejb.Singleton;
+import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.lang.System.Logger;

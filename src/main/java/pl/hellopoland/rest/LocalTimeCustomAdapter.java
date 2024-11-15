@@ -1,6 +1,6 @@
 package pl.hellopoland.rest;
 
-import javax.json.bind.adapter.JsonbAdapter;
+import jakarta.json.bind.adapter.JsonbAdapter;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 

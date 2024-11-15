@@ -4,9 +4,9 @@ import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.util.HelloTicket;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.*;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.*;
+import jakarta.inject.Inject;
 import java.util.List;
 
 @Singleton

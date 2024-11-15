@@ -1,6 +1,6 @@
 package pl.hellopoland.security.token;
 
-import javax.security.enterprise.credential.Credential;
+import jakarta.security.enterprise.credential.Credential;
 import java.util.Set;
 
 public class JwtCredential implements Credential {

@@ -3,8 +3,8 @@ package pl.hellopoland.service;
 import pl.hellopoland.bo.FileDescriptor;
 import pl.hellopoland.bo.Partner;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;

@@ -9,8 +9,8 @@ import sibApi.ContactsApi;
 import sibApi.SmtpApi;
 import sibModel.*;
 
-import javax.ejb.LocalBean;
-import javax.ejb.Stateless;
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
 import java.lang.System.Logger;
 import java.util.List;
 

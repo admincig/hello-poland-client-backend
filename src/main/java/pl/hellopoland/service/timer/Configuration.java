@@ -4,9 +4,9 @@ import pl.hellopoland.security.password.PasswordEncoder;
 import pl.hellopoland.util.FacebookAPIConnector;
 import pl.hellopoland.util.GoogleAPIConnector;
 
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.enterprise.inject.Produces;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.Startup;
+import jakarta.enterprise.inject.Produces;
 
 @Startup
 @Singleton

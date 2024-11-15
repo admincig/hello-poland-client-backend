@@ -4,11 +4,11 @@ import pl.hellopoland.bo.Order;
 import pl.hellopoland.bo.Order.Status;
 import pl.hellopoland.service.OrderService;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.DependsOn;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.DependsOn;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.Startup;
+import jakarta.inject.Inject;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.time.LocalDateTime;

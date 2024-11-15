@@ -3,8 +3,8 @@ package pl.hellopoland.rest;
 import pl.hellopoland.annotation.DateFormat;
 import pl.hellopoland.annotation.DateTimeFormat;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.ext.ParamConverter;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.ext.ParamConverter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
