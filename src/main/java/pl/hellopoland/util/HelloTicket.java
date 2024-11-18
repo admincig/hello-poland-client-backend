@@ -454,10 +454,9 @@ public class HelloTicket {
     }
   }
 
-  public List<SightEvent> getAvailableSightEvents(List<SightEvent> sightEvents) {
-    var result = new ArrayList<SightEvent>();
-    String json = JsonbConfig.getInstance()
-        .toJson(sightEvents.stream().map(SightEvent::getHptId).collect(Collectors.toSet()));
+  public List<Long> getAvailableSightEvents(List<Long> sightEvents) {
+    var result = new ArrayList<Long>();
+    String json = JsonbConfig.getInstance().toJson(sightEvents);
     try {
       final Jsonb jsonb = JsonbConfig.getInstance();
       JsonStructure respJson = post("/v1/sight-events/available", json, AUTH_TOKEN);
@@ -468,8 +467,8 @@ public class HelloTicket {
         resp.add(id);
       });
       resp.forEach(hptId -> {
-        for (SightEvent se : sightEvents) {
-          if (hptId.equals(se.getHptId())) {
+        for (Long se : sightEvents) {
+          if (hptId.equals(se)) {
             result.add(se);
             break;
           }

@@ -59,7 +59,7 @@ public class RestService {
   @GET
   @Path("/ping")
   public Response ping() {
-    return Response.ok().build();
+    return Response.ok("pong").build();
   }
 
   public static LanguageVersion parseLang(String contentLanguage) {

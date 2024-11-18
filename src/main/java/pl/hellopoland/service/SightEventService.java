@@ -50,10 +50,10 @@ public class SightEventService extends ServiceSuperclass {
   @Inject
   TagService tagService;
 
-  public List<SightEvent> getAllActiveAndPublishedAndNotBlocked() {
+  public List<Long> getAllActiveAndPublishedAndNotBlocked() {
     return em.createQuery(
-        "from SightEvent where active is true and published is true and blocked is false",
-        SightEvent.class).getResultList();
+        "select hptId from SightEvent where active is true and published is true and blocked is false",
+        Long.class).getResultList();
   }
 
   public PagedEntityCollection<SightEvent> getList(SightEventPagedCollectionConfig config) {
@@ -634,5 +634,12 @@ public class SightEventService extends ServiceSuperclass {
         .setParameter("id", fileId)
         .getResultList()
         .forEach(this::deleteAttachment);
+  }
+
+  public void setAvailableByHptId(List<Long> ids, boolean available) {
+    em.createQuery("update SightEvent set available = :available where hptId in (:ids)")
+        .setParameter("ids", ids)
+        .setParameter("available", available)
+        .executeUpdate();
   }
 }

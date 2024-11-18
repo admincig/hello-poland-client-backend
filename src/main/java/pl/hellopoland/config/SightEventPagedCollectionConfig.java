@@ -34,7 +34,7 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
   }
 
   public void setSearchQuery(String searchQuery) {
-    if (searchQuery != null) {
+      if (searchQuery != null) {
       addCondition("searchQuery",
           WordUtils.capitalizeFully(searchQuery),
           "tsearch('polish_hunspell', e.searchIndex, :searchQuery) = true");

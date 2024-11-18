@@ -26,11 +26,13 @@ public class SightEventAvailableScheduler {
   @Schedule(minute = "*/2", hour = "*", persistent = false)
   @Lock(LockType.WRITE)
   private void perform() {
-    List<SightEvent> all = service.getAllActiveAndPublishedAndNotBlocked();
-    List<SightEvent> available = hptClient.getAvailableSightEvents(all);
-    available.forEach(se -> se.setAvailable(true));
-    all.removeAll(available);
-    all.forEach(se -> se.setAvailable(false));
+    List<Long> ids = service.getAllActiveAndPublishedAndNotBlocked();
+    List<Long> available = hptClient.getAvailableSightEvents(ids);
+    ids.removeAll(available);
+    service.setAvailableByHptId(available, true);
+    service.setAvailableByHptId(ids, false);
+//    available.forEach(se -> se.setAvailable(true));
+//    all.forEach(se -> se.setAvailable(false));
   }
 
 }
