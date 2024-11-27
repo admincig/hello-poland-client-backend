@@ -12,6 +12,7 @@ import java.util.Set;
 
 import static jakarta.persistence.CascadeType.PERSIST;
 import static jakarta.persistence.FetchType.EAGER;
+import static jakarta.persistence.FetchType.LAZY;
 
 @Entity
 @Table(name = "users",
@@ -40,7 +41,7 @@ public class User extends ModelSuperclass implements HptSubject {
   private UserDetails details;
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = EAGER)
   private List<UserRole> roles;
-  @ManyToOne(cascade = PERSIST)
+  @ManyToOne(cascade = PERSIST, fetch = LAZY)
   private Partner partner;
   private String hptToken;
   private boolean deleted;
@@ -148,5 +149,9 @@ public class User extends ModelSuperclass implements HptSubject {
       }
     }
     return toString;
+  }
+
+  public boolean hasSight(Sight sight) {
+    return sights.stream().anyMatch(s -> s.getId().equals(sight.getId()));
   }
 }

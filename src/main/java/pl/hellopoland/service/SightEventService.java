@@ -642,4 +642,10 @@ public class SightEventService extends ServiceSuperclass {
         .setParameter("available", available)
         .executeUpdate();
   }
+
+  public List<Long> getAllFavouritesIdsForLoggedUser(User loggedUser) {
+    return em.createNativeQuery("select distinct sights_id from sight_users where users_id = :id")
+        .setParameter("id", loggedUser.getId())
+        .getResultList();
+  }
 }

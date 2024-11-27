@@ -42,6 +42,7 @@ public class SightService extends ServiceSuperclass {
 
   @Inject
   private TranslationService translationService;
+
   @Inject
   private UserService userService;
 
@@ -51,9 +52,9 @@ public class SightService extends ServiceSuperclass {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
     }
     List<Sight> sights = getQuery(config).getResultList();
-    sights.stream().forEach(s -> {
-      s.setFavourite(s.getUsers().contains(userService.getLoggedUser()));
-    });
+    User loggedUser = userService.getLoggedUser();
+    List<Long> favourites = sightEventService.getAllFavouritesIdsForLoggedUser(loggedUser);
+    sights.forEach(s -> s.setFavourite(favourites.contains(s.getId())));
     if (language != null) {
       sights = translationService.translateEntities(sights, language);
       if (config.isFetchSightEvents()) {
