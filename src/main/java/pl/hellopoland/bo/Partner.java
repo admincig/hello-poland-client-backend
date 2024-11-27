@@ -31,16 +31,16 @@ public class Partner extends ModelSuperclass implements Translated, HptSubject {
 
   private Long hptId;
 
-  @OneToMany(mappedBy = "partner")
+  @OneToMany(mappedBy = "partner", fetch = FetchType.LAZY)
   private List<User> users;
 
-  @OneToMany(mappedBy = "partner")
+  @OneToMany(mappedBy = "partner", fetch = FetchType.LAZY)
   private List<Sight> sight;
 
-  @OneToMany(mappedBy = "partner")
+  @OneToMany(mappedBy = "partner", fetch = FetchType.LAZY)
   private List<SightEvent> sightEvents;
 
-  @OneToMany(mappedBy = "partner")
+  @OneToMany(mappedBy = "partner", fetch = FetchType.LAZY)
   private List<Agreement> agreements;
 
   @NotNull
@@ -59,18 +59,18 @@ public class Partner extends ModelSuperclass implements Translated, HptSubject {
   @Enumerated(EnumType.STRING)
   private Trade trade;
 
-  @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.DETACH})
+  @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.DETACH}, fetch = FetchType.LAZY)
   private List<PartnerRepresentative> representatives;
 
-  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE})
+  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH, CascadeType.MERGE}, fetch = FetchType.LAZY)
   private Address address;
 
-  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH})
+  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH}, fetch = FetchType.LAZY)
   private Address correspondenceAddress;
 
   private String bankAccount;
 
-  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH})
+  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH}, fetch = FetchType.LAZY)
   private ContactPerson contactPerson;
 
   private String invoiceEmail;
@@ -94,10 +94,10 @@ public class Partner extends ModelSuperclass implements Translated, HptSubject {
 
   private LocalDateTime created;
 
-  @ManyToOne(cascade = CascadeType.PERSIST)
+  @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
   private ContactPerson technicalContact;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   private ImageCollector mainImage;
 
   @Transient

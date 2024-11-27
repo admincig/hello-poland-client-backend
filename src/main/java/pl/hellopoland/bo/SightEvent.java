@@ -27,15 +27,15 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
   private String name;
   private Date date;
   private Boolean generalAdmission;
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   private ImageCollector mainImage;
-  @OneToMany
+  @OneToMany(fetch = FetchType.LAZY)
   @JoinTable(name = "sightevent_images",
       joinColumns = {@JoinColumn(name = "sightevent_id", referencedColumnName = "id")},
       inverseJoinColumns = {
           @JoinColumn(name = "imagecollector_id", referencedColumnName = "id", unique = true)})
   private List<ImageCollector> images = new ArrayList<>();
-  @ManyToMany
+  @ManyToMany(fetch = FetchType.LAZY)
   private Set<Agreement> agreements = new HashSet<>();
   @Multilingual
   private String lead;
@@ -52,16 +52,16 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
   private Location location;
   private String email;
   private String phone;
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   private FileDescriptor pdfAttachment;
-  @OneToMany(mappedBy = "sightEvent")
+  @OneToMany(mappedBy = "sightEvent", fetch = FetchType.LAZY)
   @OrderBy("day asc")
   private Collection<OpeningHours> openingHours = new ArrayList<>();
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   private Portal portal;
   @ManyToOne(fetch = FetchType.EAGER)
   private Sight sight;
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   private Partner partner;
   @NotNull
   private Long hptId;
@@ -80,13 +80,13 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
   @Transient
   private LanguageVersion currentLanguage;
   private Integer promotion;
-  @OneToMany(mappedBy = "sightEvent")
+  @OneToMany(mappedBy = "sightEvent", fetch = FetchType.LAZY)
   private Set<SightEventCategory> categories = new HashSet<>();
-  @OneToMany(mappedBy = "sightEvent")
+  @OneToMany(mappedBy = "sightEvent", fetch = FetchType.LAZY)
   private Set<SightEventTag> tags = new HashSet<>();
   @Column(columnDefinition = "varchar")
   private String searchIndex;
-  @ManyToMany
+  @ManyToMany(fetch = FetchType.LAZY)
   private Set<User> users = new HashSet<>();
   @Transient
   private boolean favourite;

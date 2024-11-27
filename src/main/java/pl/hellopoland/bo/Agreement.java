@@ -1,6 +1,7 @@
 package pl.hellopoland.bo;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotBlank;
@@ -11,13 +12,13 @@ public class Agreement extends ModelSuperclass {
 
   private static final long serialVersionUID = -3524491821261836536L;
 
-  @ManyToMany(mappedBy = "agreements")
+  @ManyToMany(mappedBy = "agreements", fetch = FetchType.LAZY)
   private Set<Sight> sight;
 
-  @ManyToMany(mappedBy = "agreements")
+  @ManyToMany(mappedBy = "agreements", fetch = FetchType.LAZY)
   private Set<SightEvent> sightEvent;
 
-  @ManyToOne(optional = false)
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
   private Partner partner;
 
   @NotBlank

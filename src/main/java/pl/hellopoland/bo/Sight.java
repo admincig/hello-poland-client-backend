@@ -28,9 +28,9 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
   @Multilingual
   private String description;
   private Float score;
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   private ImageCollector mainImage;
-  @OneToMany
+  @OneToMany(fetch = FetchType.LAZY)
   @JoinTable(name = "sight_images",
       joinColumns = {@JoinColumn(name = "sight_id", referencedColumnName = "id")},
       inverseJoinColumns = {
@@ -40,15 +40,15 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
   private String phone;
   @Embedded
   private Location location;
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   private Partner partner;
   private boolean active = true;
-  @OneToMany(mappedBy = "sight")
+  @OneToMany(mappedBy = "sight", fetch = FetchType.LAZY)
   private List<SightEvent> sightEvents = new ArrayList<>();
-  @OneToMany(mappedBy = "sight")
+  @OneToMany(mappedBy = "sight", fetch = FetchType.LAZY)
   @OrderBy("day asc")
   private List<OpeningHours> openingHours = new ArrayList<>();
-  @ManyToMany
+  @ManyToMany(fetch = FetchType.LAZY)
   private Set<Agreement> agreements = new HashSet<>();
   private boolean published;
   private boolean blocked;
@@ -57,7 +57,7 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
   @Enumerated(EnumType.STRING)
   private LanguageVersion defaultLanguage;
   @Column(nullable = false)
-  @ElementCollection
+  @ElementCollection(fetch = FetchType.LAZY)
   @Enumerated(EnumType.STRING)
   private Set<LanguageVersion> availableLanguageVersions;
   @Transient
@@ -68,7 +68,7 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
   private Set<Category> categories;
   @Transient
   private Set<Tag> tags;
-  @ManyToMany
+  @ManyToMany(fetch = FetchType.LAZY)
   private Set<User> users = new HashSet<>();
   @Transient
   private boolean favourite;

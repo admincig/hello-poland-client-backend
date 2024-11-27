@@ -237,35 +237,51 @@ public class DtoMapper {
     }
     ImageDTO dto = new ImageDTO();
     dto.id = bo.getId();
-    dto.original = bo.getOrginal().getDownloadUrl();
+    if (bo.getOrginal() != null) {
+      dto.original = bo.getOrginal().getDownloadUrl();
+    }
     if (bo.getOrginalWebp() != null) {
       dto.originalWebp = bo.getOrginalWebp().getDownloadUrl();
     }
-    dto.fhd = bo.getFhd().getDownloadUrl();
+    if (bo.getFhd() != null) {
+      dto.fhd = bo.getFhd().getDownloadUrl();
+    }
     if (bo.getFhdWebp() != null) {
       dto.fhdWebp = bo.getFhdWebp().getDownloadUrl();
     }
-    dto.fourK = bo.getFourK().getDownloadUrl();
+    if (bo.getFourK() != null) {
+      dto.fourK = bo.getFourK().getDownloadUrl();
+    }
     if (bo.getFourKWebp() != null) {
       dto.fourKWebp = bo.getFourKWebp().getDownloadUrl();
     }
-    dto.hd = bo.getHd().getDownloadUrl();
+    if (bo.getHd() != null) {
+      dto.hd = bo.getHd().getDownloadUrl();
+    }
     if (bo.getHdWebp() != null) {
       dto.hdWebp = bo.getHdWebp().getDownloadUrl();
     }
-    dto.qvg = bo.getQvga().getDownloadUrl();
+    if (bo.getQvga() != null) {
+      dto.qvg = bo.getQvga().getDownloadUrl();
+    }
     if (bo.getQvgaWebp() != null) {
       dto.qvgWebp = bo.getQvgaWebp().getDownloadUrl();
     }
-    dto.sxga = bo.getSxga().getDownloadUrl();
+    if (bo.getSxga() != null) {
+      dto.sxga = bo.getSxga().getDownloadUrl();
+    }
     if (bo.getSxgaWebp() != null) {
       dto.sxgaWebp = bo.getSxgaWebp().getDownloadUrl();
     }
-    dto.vga = bo.getVga().getDownloadUrl();
+    if (bo.getVga() != null) {
+      dto.vga = bo.getVga().getDownloadUrl();
+    }
     if (bo.getVgaWebp() != null) {
       dto.vgaWebp = bo.getVgaWebp().getDownloadUrl();
     }
-    dto.xga = bo.getXga().getDownloadUrl();
+    if (bo.getXga() != null) {
+      dto.xga = bo.getXga().getDownloadUrl();
+    }
     if (bo.getXgaWebp() != null) {
       dto.xgaWebp = bo.getXgaWebp().getDownloadUrl();
     }

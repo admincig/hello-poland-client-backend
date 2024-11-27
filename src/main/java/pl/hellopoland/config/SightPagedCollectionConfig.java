@@ -12,7 +12,26 @@ public class SightPagedCollectionConfig extends PagedCollectionConfig<Sight> {
 
   @Override
   public String joins() {
-    return "left join fetch e.mainImage mi join fetch e.partner p"
+    return "left join fetch e.mainImage mi "
+        + "left join fetch mi.orginal mio "
+        + "left join fetch mi.qvga miq "
+        + "left join fetch mi.vga miv "
+        + "left join fetch mi.hd mih "
+        + "left join fetch mi.xga mix "
+        + "left join fetch mi.sxga mis "
+        + "left join fetch mi.fhd mif "
+        + "left join fetch mi.fourK mi4 "
+        + "left join fetch mi.orginalWebp miow "
+        + "left join fetch mi.qvgaWebp miqw "
+        + "left join fetch mi.vgaWebp mivw "
+        + "left join fetch mi.hdWebp mihw "
+        + "left join fetch mi.xgaWebp mixw "
+        + "left join fetch mi.sxgaWebp mivsw "
+        + "left join fetch mi.fhdWebp mifw "
+        + "left join fetch mi.fourKWebp mi4w "
+        + "join fetch e.partner p "
+        + "left join fetch p.contactPerson pc "
+        + "left join fetch p.technicalContact tc"
         + (fetchSightEvents ? " left join fetch e.sightEvents ses" : "")
         + (fetchUsers ? " inner join e.users u" : "");
   }

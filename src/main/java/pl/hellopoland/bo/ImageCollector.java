@@ -1,16 +1,13 @@
 package pl.hellopoland.bo;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 
 @Entity
 public class ImageCollector extends ModelSuperclass {
   private static final long serialVersionUID = 1L;
 
   private String name;
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   private Partner partner;
 
   private String imageURL;
