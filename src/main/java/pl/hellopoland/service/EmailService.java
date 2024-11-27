@@ -28,9 +28,20 @@ public class EmailService extends ServiceSuperclass {
   private static final String MAIL_SMTP_SOCKET_FACTORY_CLASS_PROPERTY =
       "mail.smtp.socketFactory.class";
   private static final String MAIL_SMTP_STARTTLS_ENABLE_PROPERTY = "mail.smtp.starttls.enable";
+  private static final String MAIL_SMTP_ENABLED_PROPERTY = "mail.smtp.enabled";
 
   public void sendEmail(Email parameterObject)
       throws MessagingException, UnsupportedEncodingException {
+    if (!Boolean.TRUE.toString().equals(System.getProperty(MAIL_SMTP_ENABLED_PROPERTY))) {
+      logger.log(Level.WARNING, "SMTP Integration is disabled");
+      logger.log(Level.INFO, "Email:\n"
+          + "To: " + parameterObject.recipientEmail + "\n"
+          + "Subject: " + parameterObject.subject + "\n"
+          + "Body: " + parameterObject.msg
+      );
+      return;
+    }
+
     var session = createSessionForEmail(getSessionProperties());
     var message = new MimeMessage(session);
     try {
