@@ -64,7 +64,7 @@ public class HellopolandService extends ServiceSuperclass {
     Partner partnerBO = getPartnerFromMerchantRegisterRequest(merchant);
 
     // 1. creating a partner in p24:
-    if (partner.skipP24) {
+    if (true/*partner.skipP24*/) {
       partnerBO.setP24Id(-1);
     } else {
       Integer merchantId = p24SOAPClient.merchantRegistration(merchant);
