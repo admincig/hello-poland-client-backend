@@ -155,6 +155,7 @@ public class HellopolandService extends ServiceSuperclass {
       }
     });
 
+
     // 6. create first translation
     translationService.createEntityLanguageVersion(partnerBO, partner, LanguageVersion.PL_PL);
     translationService.createEntityLanguageVersion(partnerBO.getAddress(), partner.location,
