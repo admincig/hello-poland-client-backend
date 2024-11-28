@@ -5,8 +5,8 @@ import pl.hellopoland.config.SightPagedCollectionConfig;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.enums.LanguageVersion;
-import pl.hellopoland.exception.ExceptionFactory;
 import pl.hellopoland.exception.conflict.ConflictingException;
+import pl.hellopoland.exception.conflict.SightHasAssignedSightEventsException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.util.BeanUtils;
 import pl.hellopoland.util.DtoMapper;
@@ -30,9 +30,6 @@ public class SightService extends ServiceSuperclass {
 
   @Inject
   private SightEventService sightEventService;
-
-  @Inject
-  private ExceptionFactory exceptionFactory;
 
   @Inject
   private OpeningHoursService oHoursService;
@@ -222,7 +219,7 @@ public class SightService extends ServiceSuperclass {
 
   public void delete(Sight bo) {
     if (hasActiveSightEvents(bo.getSightEvents())) {
-      throw exceptionFactory.sightHasAssignedSightEventsException();
+      throw new SightHasAssignedSightEventsException("Sight has assigned events. Can't delete.");
     } else {
       bo.setActive(false);
     }
