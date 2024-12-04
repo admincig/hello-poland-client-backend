@@ -45,7 +45,7 @@ public class HelloTicket {
   private String url;
 
   private static final String AUTH_TOKEN =
-      "eyJhbGciOiJub25lIn0.eyJzdWIiOiI1RDU1NTEwOURBM0Y5RUQwMEVFRkQyNTY2MDMwRUQ3MjJBNEQ3NzAwREU2MDA2NjQ5NzhBNjIwOTRCNUVFN0Y0In0.";
+      "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJIZWxsbyBQb2xhbmQiLCJhdXRoIjoiUk9MRV9FWFRFUk5BTF9VU0VSIn0.AODtF8AEqe-egeWKn2zPhfo2hWplkSbfFfFrNH6mpfsV9McC89paYns3sR_5LPx_V4pxpPOtgTMK7A0pCsJ3mA";
 
   public JsonStructure book(OrderDetails details, List<OrderEntry> orderEntries) {
     BookingDTO booking = new BookingDTO();
