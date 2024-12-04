@@ -168,7 +168,7 @@ public class UserService extends ServiceSuperclass {
   }
 
   public Optional<User> findUndeletedByEmail(String email) {
-    return em.createQuery("from User where lower(email) = :email and deleted=false", User.class)
+    return em.createQuery("from User u left join fetch u.partner fp where lower(u.email) = :email and u.deleted=false", User.class)
         .setParameter("email", email.toLowerCase()).getResultStream().findFirst();
   }
 
