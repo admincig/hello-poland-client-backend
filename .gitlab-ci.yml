@@ -79,7 +79,7 @@ Deploy on test server:
   script:
     - docker pull $TEST_IMAGE
     - docker ps -aq --filter name=$TEST_CONTAINER_NAME | grep -q . && docker stop $TEST_CONTAINER_NAME && docker rm $TEST_CONTAINER_NAME
-    - docker run -d -p 127.0.0.1:8361:8080 -v HPL_TEST_DMS:/DMS -v ${TEST_RUNTIME_PROPERTIES}:/opt/local.runtime.properties --name $TEST_CONTAINER_NAME $TEST_IMAGE
+    - docker run -d -p 127.0.0.1:8361:8080 -v HPL_TEST_DMS:/DMS -v ${TEST_RUNTIME_PROPERTIES}:/opt/jboss/wildfly/standalone/deployments/local.runtime.properties --name $TEST_CONTAINER_NAME $TEST_IMAGE
   tags:
     - qs1-server
   when: manual
@@ -89,7 +89,7 @@ Deploy on prod server:
   script:
     - docker pull $PROD_IMAGE
     - docker ps -aq --filter name=$PROD_CONTAINER_NAME | grep -q . && docker stop $PROD_CONTAINER_NAME && docker rm $PROD_CONTAINER_NAME
-    - docker run -d -p 127.0.0.1:8280:8080 -v HELLO_DMS:/DMS -v ${PROD_RUNTIME_PROPERTIES}:/opt/local.runtime.properties --name $PROD_CONTAINER_NAME $PROD_IMAGE
+    - docker run -d -p 127.0.0.1:8280:8080 -v HELLO_DMS:/DMS -v ${PROD_RUNTIME_PROPERTIES}:/opt/jboss/wildfly/standalone/deployments/local.runtime.properties --name $PROD_CONTAINER_NAME $PROD_IMAGE
   tags:
     - hpl-prod
   when: manual
