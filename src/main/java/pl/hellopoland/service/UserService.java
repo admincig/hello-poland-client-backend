@@ -167,8 +167,8 @@ public class UserService extends ServiceSuperclass {
         .setParameter("email", email.toLowerCase()).getSingleResult();
   }
 
-  public Optional<User> findUndeletedByEmail(String email) {
-    return em.createQuery("from User where lower(email) = :email and deleted=false", User.class)
+  public Optional<User> findUndeletedAndUnblockedByEmail(String email) {
+    return em.createQuery("from User where lower(email) = :email and deleted=false and (partner is null or partner.blocked=false)", User.class)
         .setParameter("email", email.toLowerCase()).getResultStream().findFirst();
   }
 
@@ -260,7 +260,7 @@ public class UserService extends ServiceSuperclass {
   }
 
   public Set<String> getFlatRoles(String email) {
-    return findUndeletedByEmail(email).get().getRoles().stream().map(UserRole::getRole)
+    return findUndeletedAndUnblockedByEmail(email).get().getRoles().stream().map(UserRole::getRole)
         .map(Role::toString)
         .collect(Collectors.toSet());
   }
