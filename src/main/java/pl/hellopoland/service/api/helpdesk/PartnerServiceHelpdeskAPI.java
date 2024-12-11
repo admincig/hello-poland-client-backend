@@ -65,8 +65,10 @@ public class PartnerServiceHelpdeskAPI {
   public PartnerDTO get(Long id, LanguageVersion lang) {
     Partner bo = service.get(id);
     Address address = transService.translateEntity(bo.getAddress(), lang);
+    Address correspondenceAddress = transService.translateEntity(bo.getCorrespondenceAddress(), lang);
     bo = transService.translateEntity(bo, lang);
     bo.setAddress(address);
+    bo.setCorrespondenceAddress(correspondenceAddress);
     return DtoMapper.getFullDTO(bo);
   }
 
