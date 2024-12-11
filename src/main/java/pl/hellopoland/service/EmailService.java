@@ -60,7 +60,6 @@ public class EmailService extends ServiceSuperclass {
       transport.sendMessage(message, message.getAllRecipients());
     } catch (SMTPSendFailedException e) {
       // Message has been sent.
-      logger.log(Level.INFO, e.getReturnCode());
       logger.log(Level.INFO, e.getLocalizedMessage());
       for (Address addr : e.getValidSentAddresses()) {
         logger.log(Level.INFO, "Email has been sent to " + addr);
