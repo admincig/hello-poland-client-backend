@@ -161,6 +161,7 @@ public class PartnerService extends ServiceSuperclass {
   public Partner get(Long id) {
     Partner partner = em.find(Partner.class, id);
     partner.fetchCollections();
+    partner.fetchSimpleRelations();
     return partner;
   }
 

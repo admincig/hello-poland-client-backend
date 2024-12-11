@@ -460,4 +460,10 @@ public class Partner extends ModelSuperclass implements Translated, HptSubject {
     Optional.ofNullable(this.getSightEvents()).ifPresent(Collection::size);
   }
 
+  public void fetchSimpleRelations() {
+    Optional.ofNullable(this.getAddress()).ifPresent(Address::getStreet);
+    Optional.ofNullable(this.getCorrespondenceAddress()).ifPresent(Address::getStreet);
+    Optional.ofNullable(this.getContactPerson()).ifPresent(ContactPerson::getName);
+    Optional.ofNullable(this.getTechnicalContact()).ifPresent(ContactPerson::getName);
+  }
 }
