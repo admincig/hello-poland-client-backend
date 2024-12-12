@@ -17,8 +17,8 @@ public class ImageVariant extends ModelSuperclass {
   @NotNull
   @Enumerated(EnumType.STRING)
   private Variant variant;
-  @OneToOne(fetch = FetchType.LAZY)
-  private ImageCollector collector;
+//  @OneToOne(fetch = FetchType.LAZY)
+//  private ImageCollector collector;
   @NotNull
   private String path;
   @NotNull
@@ -34,13 +34,13 @@ public class ImageVariant extends ModelSuperclass {
     this.variant = variant;
   }
 
-  public ImageCollector getCollector() {
-    return collector;
-  }
+//  public ImageCollector getCollector() {
+//    return collector;
+//  }
 
-  public void setCollector(ImageCollector collector) {
-    this.collector = collector;
-  }
+//  public void setCollector(ImageCollector collector) {
+//    this.collector = collector;
+//  }
 
   public String getPath() {
     return path;

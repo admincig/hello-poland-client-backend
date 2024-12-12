@@ -143,7 +143,7 @@ public class ImageService extends ServiceSuperclass {
     image.setPath(path);
     image.setHash(hash);
     image.setExtension(extension);
-    image.setCollector(collector);
+//    image.setCollector(collector);
     image.setVariant(variant);
     em.persist(image);
     return image;
@@ -161,7 +161,7 @@ public class ImageService extends ServiceSuperclass {
     image.setPath(path);
     image.setHash(hash);
     image.setExtension(extension);
-    image.setCollector(source.getCollector());
+//    image.setCollector(source.getCollector());
     image.setVariant(ImageVariant.Variant.valueOf(source.getVariant().name() + "_WEBP"));
     em.persist(image);
     return image;
