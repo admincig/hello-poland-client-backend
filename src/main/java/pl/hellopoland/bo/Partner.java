@@ -1,5 +1,6 @@
 package pl.hellopoland.bo;
 
+import org.hibernate.Hibernate;
 import pl.hellopoland.annotation.Multilingual;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.soap.p24.enums.BusinessType;
@@ -461,10 +462,10 @@ public class Partner extends ModelSuperclass implements Translated, HptSubject {
   }
 
   public void fetchSimpleRelations() {
-    Optional.ofNullable(this.getAddress()).ifPresent(Address::getStreet);
-    Optional.ofNullable(this.getCorrespondenceAddress()).ifPresent(Address::getStreet);
-    Optional.ofNullable(this.getContactPerson()).ifPresent(ContactPerson::getName);
-    Optional.ofNullable(this.getTechnicalContact()).ifPresent(ContactPerson::getName);
-    Optional.ofNullable(this.getMainImage()).ifPresent(ImageCollector::getImageURL);
+    Hibernate.initialize(this.getAddress());
+    Hibernate.initialize(this.getCorrespondenceAddress());
+    Hibernate.initialize(this.getContactPerson());
+    Hibernate.initialize(this.getTechnicalContact());
+    Hibernate.initialize(this.getMainImage());
   }
 }

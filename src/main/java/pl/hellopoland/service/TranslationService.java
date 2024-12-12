@@ -1,6 +1,8 @@
 package pl.hellopoland.service;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.proxy.HibernateProxy;
+import org.hibernate.proxy.LazyInitializer;
 import pl.hellopoland.annotation.Multilingual;
 import pl.hellopoland.bo.Translation;
 import pl.hellopoland.dto.DTOSuperclass;
@@ -148,7 +150,12 @@ public class TranslationService extends ServiceSuperclass {
   }
 
   private String getKey(Translated bo) {
-    return bo.getClass().getSimpleName() + Translation.KEY_DELIMITER + bo.getId()
+    Class<?> aClass = bo.getClass();
+    if (bo instanceof HibernateProxy proxy) {
+      LazyInitializer lazyInitializer = proxy.getHibernateLazyInitializer();
+      aClass = lazyInitializer.getPersistentClass();
+    }
+    return aClass.getSimpleName() + Translation.KEY_DELIMITER + bo.getId()
         + Translation.KEY_DELIMITER + "%";
   }
 
