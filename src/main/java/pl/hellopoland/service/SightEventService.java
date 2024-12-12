@@ -65,12 +65,13 @@ public class SightEventService extends ServiceSuperclass {
     if (config.isCurrentPartner()) {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
     }
+    User loggedUser = userService.getLoggedUser();
     if (config.isLoggedUserFavourites()) {
-      config.onlyFavourite(userService.getLoggedUser().getId());
+      config.onlyFavourite(loggedUser.getId());
     }
     List<SightEvent> sightEvents = getQuery(config).getResultList();
     sightEvents.stream().forEach(s -> {
-      s.setFavourite(s.getUsers().contains(userService.getLoggedUser()));
+      s.setFavourite(s.getUsers().contains(loggedUser));
     });
     if (!sightEvents.isEmpty() && config.isFetchCategories()) {
       List<SightEventCategory> categories = catService.getFor(sightEvents);
@@ -322,7 +323,6 @@ public class SightEventService extends ServiceSuperclass {
             .stream()
             .map(Pair::getKey)
             .collect(Collectors.toList());
-
         List<TicketPoolDefinitionDTO> tpds = downloadHptTpds(configurator);
         var tpdsGroupedBySightEventId = tpds.stream()
             .collect(groupingBy(pool -> pool.sightEventId));

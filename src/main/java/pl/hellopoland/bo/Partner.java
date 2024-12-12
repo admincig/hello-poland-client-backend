@@ -71,7 +71,7 @@ public class Partner extends ModelSuperclass implements Translated, HptSubject {
 
   private String bankAccount;
 
-  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.DETACH}, fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY)
   private ContactPerson contactPerson;
 
   private String invoiceEmail;
@@ -95,7 +95,7 @@ public class Partner extends ModelSuperclass implements Translated, HptSubject {
 
   private LocalDateTime created;
 
-  @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY)
   private ContactPerson technicalContact;
 
   @ManyToOne(fetch = FetchType.LAZY)

@@ -68,7 +68,7 @@ public class SightEventServicePartnerAPI {
     config.setLanguage(language);
     PagedEntityCollection<SightEvent> bos = service.getList(config);
     var dtos = bos.items.stream().map(bo -> {
-      var dto = DtoMapper.getDTO(bo);
+      SightEventDTO dto = DtoMapper.getDTO(bo);
       dto.language = bo.getDefaultLanguage().getLanuage();
       return dto;
     }).collect(Collectors.toList());

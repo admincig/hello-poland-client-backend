@@ -181,7 +181,7 @@ public class HelloTicket {
       return dtos;
     } catch (Exception e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
-      return null;
+      return Collections.emptyList();
     }
   }
 
