@@ -4,4 +4,5 @@ COPY configure-elytron.cli /opt/jboss/wildfly/bin/configure-elytron.cli
 RUN wildfly/bin/jboss-cli.sh --file=wildfly/bin/configure-elytron.cli
 
 COPY target/hellopoland.war /opt/jboss/wildfly/standalone/deployments/
+USER root
 CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-Dlocal.runtime.properties=/opt/jboss/wildfly/standalone/deployments/local.runtime.properties", "-b", "0.0.0.0"]

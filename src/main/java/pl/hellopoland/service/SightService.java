@@ -106,7 +106,7 @@ public class SightService extends ServiceSuperclass {
   }
 
   public Sight get(Long id) {
-    Sight bo = em.createQuery("from Sight sight where sight.id=:sightId", Sight.class)
+    Sight bo = em.createQuery("from Sight sight left join fetch sight.partner fp where sight.id=:sightId", Sight.class)
         .setParameter("sightId", id).getSingleResult();
     bo.fetchCollections();
     bo.getSightEvents().forEach(SightEvent::fetchCollections);
