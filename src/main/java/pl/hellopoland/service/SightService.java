@@ -117,7 +117,7 @@ public class SightService extends ServiceSuperclass {
   public List<Sight> getActiveForPartner() {
     Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
     return em.createQuery(
-        "from Sight sight where sight.active=true and sight.partner=:partner order by sight.id desc",
+        "from Sight sight left join fetch sight.mainImage fmi where sight.active=true and sight.partner=:partner order by sight.id desc",
         Sight.class).setParameter("partner", partner).getResultList();
   }
 
