@@ -453,12 +453,17 @@ public class Partner extends ModelSuperclass implements Translated, HptSubject {
   }
 
   public void fetchCollections() {
-    Optional.ofNullable(this.getAgreements()).ifPresent(Collection::size);
-    Optional.ofNullable(this.getAvailableLanguageVersions()).ifPresent(Collection::size);
-    Optional.ofNullable(this.getRepresentatives()).ifPresent(Collection::size);
-    Optional.ofNullable(this.getUsers()).ifPresent(Collection::size);
-    Optional.ofNullable(this.getSight()).ifPresent(Collection::size);
-    Optional.ofNullable(this.getSightEvents()).ifPresent(Collection::size);
+    Hibernate.initialize(this.getAgreements());
+    Hibernate.initialize(this.getAvailableLanguageVersions());
+    Hibernate.initialize(this.getRepresentatives());
+    Hibernate.initialize(this.getUsers());
+    Hibernate.initialize(this.getSightEvents());
+    Hibernate.initialize(this.getSight());
+    if (this.getSight() != null) {
+      for (Sight sight : this.getSight()) {
+        Hibernate.initialize(sight.getMainImage());
+      }
+    }
   }
 
   public void fetchSimpleRelations() {
