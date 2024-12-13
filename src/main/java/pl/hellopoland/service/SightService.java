@@ -108,7 +108,7 @@ public class SightService extends ServiceSuperclass {
   public Sight get(Long id) {
     Sight bo = em.createQuery("from Sight sight left join fetch sight.partner fp where sight.id=:sightId", Sight.class)
         .setParameter("sightId", id).getSingleResult();
-    bo.fetchCollections();
+    bo.fetchRelations();
     bo.getSightEvents().forEach(SightEvent::fetchCollections);
     bo.setFavourite(bo.getUsers().contains(userService.getLoggedUser()));
     return bo;
@@ -195,7 +195,7 @@ public class SightService extends ServiceSuperclass {
     Sight sight = em
         .createQuery("from Sight where id=:id and active=true and partner=:partner", Sight.class)
         .setParameter("id", id).setParameter("partner", getLoggedPartner()).getSingleResult();
-    sight.fetchCollections();
+    sight.fetchRelations();
     sight.getSightEvents().forEach(SightEvent::fetchCollections);
 
     return sight;
@@ -238,7 +238,7 @@ public class SightService extends ServiceSuperclass {
     Sight sight = em.createQuery("from Sight where partner = :partner and id = :id", Sight.class)
         .setParameter("partner", partner).setParameter("id", sightId).getResultStream().findFirst()
         .orElseThrow(ResourceNotFoundException::new);
-    sight.fetchCollections();
+    sight.fetchRelations();
     sight.getSightEvents().forEach(SightEvent::fetchCollections);
     return sight;
   }

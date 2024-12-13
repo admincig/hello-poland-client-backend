@@ -452,7 +452,12 @@ public class Partner extends ModelSuperclass implements Translated, HptSubject {
     this.blocked = blocked;
   }
 
-  public void fetchCollections() {
+  public void fetchRelations() {
+    fetchSimpleRelations();
+    fetchCollections();
+  }
+
+  private void fetchCollections() {
     Hibernate.initialize(this.getAgreements());
     Hibernate.initialize(this.getAvailableLanguageVersions());
     Hibernate.initialize(this.getRepresentatives());
@@ -466,7 +471,7 @@ public class Partner extends ModelSuperclass implements Translated, HptSubject {
     }
   }
 
-  public void fetchSimpleRelations() {
+  private void fetchSimpleRelations() {
     Hibernate.initialize(this.getAddress());
     Hibernate.initialize(this.getCorrespondenceAddress());
     Hibernate.initialize(this.getContactPerson());

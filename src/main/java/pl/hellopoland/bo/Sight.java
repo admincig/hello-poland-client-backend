@@ -1,5 +1,6 @@
 package pl.hellopoland.bo;
 
+import org.hibernate.Hibernate;
 import pl.hellopoland.annotation.Multilingual;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.util.Imaged;
@@ -324,12 +325,12 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
     this.favourite = favourite;
   }
 
-  public void fetchCollections() {
-    Optional.ofNullable(this.getAvailableLanguageVersions())
-        .ifPresent(Collection::size);
-    Optional.ofNullable(this.getAgreements()).ifPresent(Collection::size);
-    Optional.ofNullable(this.getImages()).ifPresent(Collection::size);
-    Optional.ofNullable(this.getOpeningHours()).ifPresent(Collection::size);
+  public void fetchRelations() {
+    Hibernate.initialize(this.getMainImage());
+    Hibernate.initialize(this.getOpeningHours());
+    Hibernate.initialize(this.getImages());
+    Hibernate.initialize(this.getAgreements());
+    Hibernate.initialize(this.getAvailableLanguageVersions());
   }
 
 }
