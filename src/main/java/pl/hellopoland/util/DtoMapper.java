@@ -572,7 +572,6 @@ public class DtoMapper {
   }
 
   public static void copy(PartnerDTO dto, Partner bo) {
-    // bo.setAddress(address);
     bo.setAffiliateCode(dto.affiliateCode);
     bo.setBankAccount(dto.bankAccount);
     bo.setBlocked(dto.blocked);
@@ -580,16 +579,18 @@ public class DtoMapper {
       bo.setBusinessType(BusinessType.getBusinessType(dto.businessType));
     }
     bo.setCommission(dto.commission);
-    // bo.setContactPerson(contactPerson);
-    // bo.setCorrespondenceAddress(correspondenceAddress);
     if (bo.getAddress() == null) {
       bo.setAddress(new Address());
     }
-    bo.getAddress().setCity(dto.location.city);
-    bo.getAddress().setCountry(dto.location.country);
-    bo.getAddress().setPostCode(dto.location.zipCode);
-    bo.getAddress().setStreet(dto.location.street);
-    bo.getAddress().setDirections(dto.location.directions);
+    copy(dto.location, bo.getAddress());
+    if (bo.getContactPerson() == null) {
+      bo.setContactPerson(new ContactPerson());
+    }
+    copy(dto.contactPerson, bo.getContactPerson());
+    if (bo.getTechnicalContact() == null) {
+      bo.setTechnicalContact(new ContactPerson());
+    }
+    copy(dto.technicalContact, bo.getTechnicalContact());
     bo.setDescription(dto.description);
     bo.setEmail(dto.email);
     bo.setInvoiceEmail(dto.invoiceEmail);
@@ -606,7 +607,20 @@ public class DtoMapper {
       logger.log(Level.DEBUG, "social number cant be parsed");
     }
     bo.setTaxNumber(dto.taxNumber);
-    // bo.setTechnicalContact(technicalContact);
+  }
+
+  private static void copy(ContactPersonDTO dto, ContactPerson bo) {
+    bo.setName(dto.name);
+    bo.setEmail(dto.email);
+    bo.setPhone(dto.phone);
+  }
+
+  private static void copy(LocationDTO dto, Address bo) {
+    bo.setCity(dto.city);
+    bo.setCountry(dto.country);
+    bo.setPostCode(dto.zipCode);
+    bo.setStreet(dto.street);
+    bo.setDirections(dto.directions);
   }
 
 }
