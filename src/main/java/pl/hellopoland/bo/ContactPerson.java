@@ -18,7 +18,7 @@ public class ContactPerson extends ModelSuperclass {
   @NotBlank
   private String phone;
 
-  @OneToMany
+  @OneToMany(mappedBy = "contactPerson")
   private List<Partner> partners;
 
   public String getName() {

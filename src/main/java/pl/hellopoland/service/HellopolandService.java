@@ -78,6 +78,9 @@ public class HellopolandService extends ServiceSuperclass {
     if (BooleanUtils.isTrue(partner.affiliation)) {
       partnerBO.setAffiliateCode(RandomStringUtils.randomAlphanumeric(8));
     }
+    em.persist(partnerBO.getContactPerson());
+    em.persist(partnerBO.getTechnicalContact());
+    em.persist(partnerBO);
     String password = RandomStringUtils.randomAlphanumeric(10);
     try {
       Optional<User> user = userService.findUndeletedByEmailWithNullPartner(partner.email);

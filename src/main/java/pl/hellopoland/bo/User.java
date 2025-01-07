@@ -41,7 +41,7 @@ public class User extends ModelSuperclass implements HptSubject {
   private UserDetails details;
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = EAGER)
   private List<UserRole> roles;
-  @ManyToOne(cascade = PERSIST, fetch = LAZY)
+  @ManyToOne(fetch = LAZY)
   private Partner partner;
   private String hptToken;
   private boolean deleted;
