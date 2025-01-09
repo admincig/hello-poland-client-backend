@@ -19,8 +19,9 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
   private boolean currentPartner;
   private boolean loggedUserFavourites;
   private boolean fetchCategories;
+  private boolean joinCategories;
   private boolean fetchTags;
-  private boolean fetchUsers;
+  private boolean joinUsers;
   private LanguageVersion language;
   private Set<Long> excludedIds;
   private Date dateFrom;
@@ -52,7 +53,8 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
         + "join fetch e.sight s "
         + "left join fetch s.mainImage smi "
         + (fetchCategories ? " left join fetch e.categories cs" : "")
-        + (fetchUsers ? " inner join e.users u" : "");
+        + (joinUsers ? " inner join e.users u" : "")
+        + (joinCategories ? " inner join SightEventCategory sec on sec.sightEvent.id=e.id" : "");
   }
 
   public void setSearchQuery(String searchQuery) {
@@ -93,7 +95,7 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
   }
 
   public void onlyFavourite(Long userId) {
-    fetchUsers = true;
+    joinUsers = true;
     addCondition("userId", userId, "u.id=:userId");
   }
 
@@ -121,7 +123,7 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
   }
 
   public void setSameCategorySightEventIds(Set<Long> sameCategorySightEventIds) {
-    setFetchCategories(true);
+    setJoinCategories(true);
     setExcludedIds(sameCategorySightEventIds);
     if (sameCategorySightEventIds != null && !sameCategorySightEventIds.isEmpty()) {
       addCondition("sameCategorySightEventsIds", sameCategorySightEventIds,
@@ -150,6 +152,10 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
 
   public void setFetchCategories(boolean fetchCategories) {
     this.fetchCategories = fetchCategories;
+  }
+
+  public void setJoinCategories(boolean joinCategories) {
+    this.joinCategories = joinCategories;
   }
 
   public boolean isFetchCategories() {
