@@ -114,7 +114,7 @@ public class SightEventService extends ServiceSuperclass {
     if (se == null) {
       throw new ResourceNotFoundException();
     }
-    se.fetchCollections();
+    se.fetchRelations();
     se.setFavourite(se.getUsers().contains(userService.getLoggedUser()));
     return se;
   }
@@ -295,7 +295,7 @@ public class SightEventService extends ServiceSuperclass {
     SightEvent sightEvent =
         em.createQuery("from SightEvent where id=:id and partner=:partner", SightEvent.class)
             .setParameter("id", sightEventId).setParameter("partner", partner).getSingleResult();
-    sightEvent.fetchCollections();
+    sightEvent.fetchRelations();
     return sightEvent;
   }
 
@@ -615,7 +615,7 @@ public class SightEventService extends ServiceSuperclass {
   public SightEvent getByHptId(Long hptId) {
     SightEvent se = em.createQuery("from SightEvent where hptId=:hptId", SightEvent.class)
         .setParameter("hptId", hptId).getSingleResult();
-    se.fetchCollections();
+    se.fetchRelations();
     se.setFavourite(se.getUsers().contains(userService.getLoggedUser()));
     return se;
   }

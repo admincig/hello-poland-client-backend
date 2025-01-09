@@ -1,5 +1,6 @@
 package pl.hellopoland.bo;
 
+import org.hibernate.Hibernate;
 import pl.hellopoland.annotation.Multilingual;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.util.Imaged;
@@ -412,13 +413,15 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
     this.minDiscountPrice = minDiscountPrice;
   }
 
-  public void fetchCollections() {
-    Optional.ofNullable(this.getAvailableLanguageVersions()).ifPresent(Collection::size);
-    Optional.ofNullable(this.getAgreements()).ifPresent(Collection::size);
-    Optional.ofNullable(this.getImages()).ifPresent(Collection::size);
-    Optional.ofNullable(this.getOpeningHours()).ifPresent(Collection::size);
-    Optional.ofNullable(this.getCategories()).ifPresent(Collection::size);
-    Optional.ofNullable(this.getTags()).ifPresent(Collection::size);
+  public void fetchRelations() {
+    Hibernate.initialize(getAvailableLanguageVersions());
+    Hibernate.initialize(getAgreements());
+    Hibernate.initialize(getImages());
+    Hibernate.initialize(getOpeningHours());
+    Hibernate.initialize(getCategories());
+    Hibernate.initialize(getTags());
+    Hibernate.initialize(getPartner());
+    Hibernate.initialize(getPortal());
   }
 
   public void recreateSearchIndex(Set<String> words) {

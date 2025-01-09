@@ -49,9 +49,10 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
         + "left join fetch p.contactPerson pc "
         + "left join fetch p.technicalContact tc "
         + "left join fetch e.portal port "
-        + "join fetch e.sight s"
-        + (fetchUsers ? " inner join e.users u" : "")
-        + (fetchCategories ? " inner join SightEventCategory sec on sec.sightEvent.id=e.id" : "");
+        + "join fetch e.sight s "
+        + "left join fetch s.mainImage smi "
+        + (fetchCategories ? " left join fetch e.categories cs" : "")
+        + (fetchUsers ? " inner join e.users u" : "");
   }
 
   public void setSearchQuery(String searchQuery) {
