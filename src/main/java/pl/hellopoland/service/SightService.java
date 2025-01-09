@@ -53,15 +53,14 @@ public class SightService extends ServiceSuperclass {
     }
     List<Sight> sights = getQuery(config).getResultList();
     User loggedUser = userService.getLoggedUser();
-    List<Long> favourites = sightEventService.getAllFavouritesIdsForLoggedUser(loggedUser);
-    sights.forEach(s -> s.setFavourite(favourites.contains(s.getId())));
+    if (loggedUser != null) {
+      List<Long> favourites = sightEventService.getAllFavouritesIdsForLoggedUser(loggedUser);
+      sights.forEach(s -> s.setFavourite(favourites.contains(s.getId())));
+    }
     if (language != null) {
       sights = translationService.translateEntities(sights, language);
       if (config.isFetchSightEvents()) {
-        sights.stream().forEach(s -> {
-          s.setSightEvents(
-              translationService.translateEntities(s.getSightEvents(), language));
-        });
+        sights.forEach(s -> s.setSightEvents(translationService.translateEntities(s.getSightEvents(), language)));
       }
     }
     Collections.sort(sights, getNamesComparator(Sight::getName, new Locale("pl_PL")));

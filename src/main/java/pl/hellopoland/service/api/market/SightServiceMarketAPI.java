@@ -46,7 +46,7 @@ public class SightServiceMarketAPI {
     config.setOrderColumn("e.name");
     config.setOrderDirection("asc");
     PagedEntityCollection<Sight> bos = service.getList(config, language);
-    var dtos = bos.items.stream().map(bo -> {
+    List<SightDTO> dtos = bos.items.stream().map(bo -> {
       var dto = DtoMapper.getDTO(bo);
       dto.language = bo.getDefaultLanguage().getLanuage();
       return dto;
