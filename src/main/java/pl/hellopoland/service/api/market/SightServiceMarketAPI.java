@@ -171,6 +171,7 @@ public class SightServiceMarketAPI {
   public SightDTO addFavourite(Long id) {
     Sight bo = service.get(id);
     bo.addUser(userService.getLoggedUser());
+    bo.setFavourite(true);
     return DtoMapper.getDTO(bo);
   }
 

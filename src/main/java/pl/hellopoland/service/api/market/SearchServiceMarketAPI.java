@@ -1,5 +1,8 @@
 package pl.hellopoland.service.api.market;
 
+import jakarta.annotation.security.PermitAll;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import pl.hellopoland.bo.*;
 import pl.hellopoland.config.CategoryPagedCollectionConfig;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
@@ -9,16 +12,10 @@ import pl.hellopoland.dto.FilterPriceEntryDTO;
 import pl.hellopoland.dto.SearchResultDTO;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.enums.LanguageVersion;
-import pl.hellopoland.service.CategoryService;
-import pl.hellopoland.service.SightEventService;
-import pl.hellopoland.service.TagService;
-import pl.hellopoland.service.TranslationService;
+import pl.hellopoland.service.*;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.PagedEntityCollection;
 
-import jakarta.annotation.security.PermitAll;
-import jakarta.ejb.Stateless;
-import jakarta.inject.Inject;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,6 +32,10 @@ public class SearchServiceMarketAPI {
   CategoryService catService;
   @Inject
   TagService tagService;
+  @Inject
+  UserService userService;
+  @Inject
+  SightService sightService;
 
   private List<FilterPriceEntryDTO> predefinedPriceFilters;
 
@@ -50,14 +51,12 @@ public class SearchServiceMarketAPI {
   @PermitAll
   public SearchResultDTO search(SightEventPagedCollectionConfig seConfig, Integer minPrice,
       Integer maxPrice) {
-
     seConfig.onlyAvailable();
     seConfig.onlyActive();
     seConfig.onlyPublished();
     seConfig.setOrderColumn("random()");
     seConfig.setFetchCategories(true);
     seConfig.setFetchTags(true);
-
     PagedEntityCollection<SightEvent> bos = seService.getList(seConfig);
     List<SightEvent> ses = bos.items.stream()
         .filter(SightEvent::isAccessible)
@@ -75,8 +74,14 @@ public class SearchServiceMarketAPI {
     Map<Sight, List<SightEvent>> ss =
         ses.stream().collect(groupingBy(SightEvent::getSight));
 
+    List<Long> favouriteSights = List.of();
+    User loggedUser = userService.getLoggedUser();
+    if (loggedUser != null) {
+      favouriteSights = sightService.getAllFavouritesIdsForLoggedUser(loggedUser);
+    }
     LanguageVersion languageVersion = seConfig.getLanguage();
     SearchResultDTO oro = new SearchResultDTO();
+    List<Long> finalFavouriteSights = favouriteSights;
     oro.sights = ss.entrySet().stream().map(entry -> {
       Sight s = tService.translateEntity(entry.getKey(), languageVersion);
       List<SightEvent> se = entry.getValue();
@@ -84,6 +89,7 @@ public class SearchServiceMarketAPI {
       List<Tag> tags = getTags(se);
 
       SightDTO dto = DtoMapper.getDTO(s);
+      dto.favourite = finalFavouriteSights.contains(s.getId());
       dto.sightEvents = se.stream()
           .map(DtoMapper::getDTO)
           .collect(toList());

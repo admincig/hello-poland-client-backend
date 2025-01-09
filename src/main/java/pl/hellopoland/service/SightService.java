@@ -54,7 +54,7 @@ public class SightService extends ServiceSuperclass {
     List<Sight> sights = getQuery(config).getResultList();
     User loggedUser = userService.getLoggedUser();
     if (loggedUser != null) {
-      List<Long> favourites = sightEventService.getAllFavouritesIdsForLoggedUser(loggedUser);
+      List<Long> favourites = getAllFavouritesIdsForLoggedUser(loggedUser);
       sights.forEach(s -> s.setFavourite(favourites.contains(s.getId())));
     }
     if (language != null) {
@@ -66,6 +66,12 @@ public class SightService extends ServiceSuperclass {
     Collections.sort(sights, getNamesComparator(Sight::getName, new Locale("pl_PL")));
 
     return new PagedEntityCollection<>(sights, config);
+  }
+
+  public List<Long> getAllFavouritesIdsForLoggedUser(User user) {
+    return em.createNativeQuery("select distinct sights_id from sight_users where users_id = :id", Long.class)
+          .setParameter("id", user.getId())
+          .getResultList();
   }
 
   public Sight create(SightDTO dto, Partner partner) {
