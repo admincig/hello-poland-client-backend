@@ -51,11 +51,11 @@ public class HellopolandService extends ServiceSuperclass {
     if (StringUtils.isBlank(partner.name)) {
       throw new ConflictingException("The partner name cannot be blank.");
     }
-    if (partner.commission == null) {
-      throw new ConflictingException("The partner commission cannot be blank.");
-    }
-    if (partner.commission.compareTo(BigDecimal.ZERO) == -1
-        || partner.commission.compareTo(new BigDecimal("100")) == 1) {
+//    if (partner.commission == null) {
+//      throw new ConflictingException("The partner commission cannot be blank.");
+//    }
+    if (partner.commission != null && (partner.commission.compareTo(BigDecimal.ZERO) < 0
+        || partner.commission.compareTo(new BigDecimal("100")) > 0)) {
       throw new ConflictingException("The partner commission is out of range: 0 - 100.");
     }
 

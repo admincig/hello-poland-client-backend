@@ -44,8 +44,6 @@ public class Partner extends ModelSuperclass implements Translated, HptSubject {
   @OneToMany(mappedBy = "partner", fetch = FetchType.LAZY)
   private List<Agreement> agreements;
 
-  @NotNull
-  @Column(nullable = false)
   private BigDecimal commission;
 
   @NotNull
