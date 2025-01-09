@@ -33,13 +33,13 @@ public class MerchantRegisterValidator {
       throw new ConflictingException(
           "Brak nr KRS. Obowiązkowe w przypadku rejestracji jednoosobowej działalności gospodarczej.");
     }
-    if (!StringUtils.isNumeric(merchant.phone_number)) {
-      throw new ConflictingException("Brak lub niepoprawny format ne telefonu.");
-    }
-    if (merchant.shop_url == null && merchant.services_description == null) {
-      throw new ConflictingException(
-          "Co najmniej jeden z parametrów 'shop_url' lub 'services_description' jest wymagany.");
-    }
+//    if (!StringUtils.isNumeric(merchant.phone_number)) {
+//      throw new ConflictingException("Brak lub niepoprawny format nr telefonu.");
+//    }
+//    if (merchant.shop_url == null && merchant.services_description == null) {
+//      throw new ConflictingException(
+//          "Co najmniej jeden z parametrów 'shop_url' lub 'services_description' jest wymagany.");
+//    }
   }
 
 }
