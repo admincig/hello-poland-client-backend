@@ -41,6 +41,14 @@ public class HelpdeskPartnerRestService {
     }
   }
 
+  public record EmailWrapper(String email){}
+
+  @PATCH
+  @Path("/{id}/reset")
+  public void updateCredentials(@PathParam("id") Long id, EmailWrapper dto) {
+    service.resetPartner(id, dto.email());
+  }
+
   @GET
   @Path("/{id}")
   public PartnerDTO get(

@@ -1,5 +1,8 @@
 package pl.hellopoland.service;
 
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -8,6 +11,7 @@ import pl.hellopoland.bo.*;
 import pl.hellopoland.bo.UserRole.Role;
 import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.dto.RoleDTO;
+import pl.hellopoland.dto.UserAuthDTO;
 import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
@@ -19,9 +23,6 @@ import pl.hellopoland.soap.p24.service.P24SOAPClient;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.soap.p24.MerchantRegisterValidator;
 
-import jakarta.ejb.LocalBean;
-import jakarta.ejb.Stateless;
-import jakarta.inject.Inject;
 import java.lang.System.Logger.Level;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -43,6 +44,32 @@ public class HellopolandService extends ServiceSuperclass {
 
   final Set<UserRole.Role> excludedRoles = Set.of(UserRole.Role.ROOT, UserRole.Role.ADMIN,
       UserRole.Role.PARTNER, UserRole.Role.SALESMAN);
+
+  public void resetPartnerCredentials(Long id, String email) {
+    Partner partner = em.find(Partner.class, id);
+    partner.setEmail(email);
+    Portal hpt = getPortal("Hello Ticket Cloud");
+    HelloTicket ht = new HelloTicket(hpt.getUrl());
+
+    String newPassword = RandomStringUtils.randomAlphanumeric(10);
+    UserAuthDTO form = new UserAuthDTO();
+    form.login = email;
+    form.password = newPassword;
+    form.passwordConfirmation = newPassword;
+    ht.changePartnerCredentials(form, partner.getHptToken());
+
+    User user = userService.findByPartnerAndRole(partner, Role.PARTNER);
+    user.changePassword(newPassword);
+    user.setEmail(email);
+
+    var emailPassword = new HashMap<String, String>();
+    emailPassword.put(email, newPassword);
+    try {
+      emailService.sendEmail(new Email(email, "Reset konta w Hello Poland.", "Twój login to " + email + ", hasło to " + newPassword));
+    } catch (Exception e) {
+      logger.log(System.Logger.Level.ERROR, e.getLocalizedMessage());
+    }
+  }
 
   public Partner addPartner(PartnerDTO partner) {
     if (StringUtils.isBlank(partner.email)) {

@@ -314,7 +314,7 @@ public class HelloTicket {
     }
   }
 
-  public void changePartnerPassword(UserAuthDTO userAuthDTO, String hptToken) {
+  public void changePartnerCredentials(UserAuthDTO userAuthDTO, String hptToken) {
     try {
       String json = JsonbConfig.getInstance().toJson(userAuthDTO);
       put("/v1/users/me/password", json, hptToken);

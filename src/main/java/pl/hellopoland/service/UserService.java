@@ -184,7 +184,7 @@ public class UserService extends ServiceSuperclass {
       getLoggedUser().changePassword(userAuthDTO.password);
       Portal hpt = getPortal("Hello Ticket Cloud");
       HelloTicket ht = new HelloTicket(hpt.getUrl());
-      ht.changePartnerPassword(userAuthDTO, getLoggedPartner().getHptToken());
+      ht.changePartnerCredentials(userAuthDTO, getLoggedPartner().getHptToken());
     } else {
       throw new ConflictingException("Incorrect old password.");
     }
@@ -198,7 +198,7 @@ public class UserService extends ServiceSuperclass {
     var dto = new UserAuthDTO();
     dto.password = password;
     if (user.getPartner() != null) {
-      ht.changePartnerPassword(dto, user.getPartner().getHptToken());
+      ht.changePartnerCredentials(dto, user.getPartner().getHptToken());
     }
   }
 
@@ -292,4 +292,10 @@ public class UserService extends ServiceSuperclass {
         .getResultList();
   }
 
+  public User findByPartnerAndRole(Partner partner, Role role) {
+    return em.createQuery("select u from User u join u.roles roles where roles.role = :role and u.partner = :partner", User.class)
+        .setParameter("role", role)
+        .setParameter("partner", partner)
+        .getSingleResult();
+  }
 }

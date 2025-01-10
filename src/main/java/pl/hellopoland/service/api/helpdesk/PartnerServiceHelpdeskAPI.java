@@ -34,6 +34,11 @@ public class PartnerServiceHelpdeskAPI {
   }
 
   @RolesAllowed("admin")
+  public void resetPartner(Long id, String email) {
+    hplService.resetPartnerCredentials(id, email);
+  }
+
+  @RolesAllowed("admin")
   public PagedCollection<PartnerDTO> listPartners(PartnerPagedCollectionConfig config,
       LanguageVersion language) {
     PagedEntityCollection<Partner> bos = service.getList(config);
