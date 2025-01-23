@@ -1,5 +1,10 @@
 package pl.hellopoland.service;
 
+import jakarta.ejb.LocalBean;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.json.JsonObject;
+import jakarta.persistence.TypedQuery;
 import pl.hellopoland.bo.*;
 import pl.hellopoland.bo.Order.Status;
 import pl.hellopoland.bo.UserRole.Role;
@@ -11,21 +16,14 @@ import pl.hellopoland.exception.email.EmailSendingException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.rest.dto.OrderIRO;
 import pl.hellopoland.rest.dto.OrderIRO.OrderEntryIRO;
-import pl.hellopoland.soap.p24.enums.Country;
+import pl.hellopoland.tpay.TPayClient;
+import pl.hellopoland.tpay.dto.TransactionCreated;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.PaymentUtils;
 
-import jakarta.ejb.LocalBean;
-import jakarta.ejb.Stateless;
-import jakarta.inject.Inject;
-import jakarta.json.JsonObject;
-import jakarta.persistence.TypedQuery;
-import jakarta.ws.rs.core.MediaType;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.math.BigDecimal;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -42,23 +40,16 @@ public class OrderService extends ServiceSuperclass {
 
   @Inject
   SightEventService seService;
+  @Inject
+  TPayClient tPayClient;
 
-  public PassageCart create(OrderIRO iro) {
+  public Order create(OrderIRO iro) {
     throwIfExpiredTickets(iro);
     throwIfTicketPricesDontMatch(iro);
     writeSomeLogs(iro);
     Order o = new Order();
     o.setUser(getLoggedUser());
     iro.details.setUserLogged(o.getUser() != null);
-
-    Country country = Country.PL;
-    try {
-      country = Country.valueOf(iro.details.getCountry());
-    } catch (IllegalArgumentException e) {
-      logger.log(Level.WARNING, "Setting country to PL: " + e.getMessage());
-    }
-    iro.details.setCountry(country.name());
-    iro.details.setLanguage(country.getP24Language());
 
     o.setDetails(iro.details);
     em.persist(o);
@@ -127,10 +118,34 @@ public class OrderService extends ServiceSuperclass {
     } catch (Exception e) {
       throw new ConflictingException("Nie udało się złożyć zamówienia w zewnętrznym systemie", e);
     }
-    var cart = getP24PassageCart(o);
-    logger.log(Level.INFO, "Returned order id=" + o.getId() + "; p24cart id=" + cart.getId());
+    TransactionCreated transactionCreated = createPayment(o);
+    o.setTPayPaymentId(transactionCreated.transactionId);
+    o.setTPayPaymentStatement(transactionCreated.title);
+    o.setTPayPaymentUrl(transactionCreated.transactionPaymentUrl);
+    logger.log(Level.INFO, "Returned order id=" + o.getId() + "; payment= " + transactionCreated.transactionPaymentUrl);
     logger.log(Level.INFO, "-------End creating order --------");
-    return cart;
+    return o;
+  }
+
+  private String getAckPaymentURL(Order o) {
+    var url = properties.getProperty("base.url");
+    if (!url.endsWith("/")) {
+      url = url.concat("/");
+    }
+    return url.concat("market/orders/" + o.getHash() + "/ackPayment");
+  }
+
+  private TransactionCreated createPayment(Order o) {
+    var amount = gatherOrderEntries(o.getEntries()).stream()
+        .collect(Collectors.summingInt(oe -> oe.getRealPrice() * oe.getQuantity()));
+    if (amount > 0) {
+      BigDecimal totalPrice = new BigDecimal(amount).divide(new BigDecimal(100));
+      String description = "Zamówienie nr " + o.getId();
+      User user = o.getUser();
+      String ackUrl = getAckPaymentURL(o);
+      return tPayClient.createTransaction(description, o.getHash(), ackUrl, totalPrice, user.getEmail(), user.getName());
+    }
+    return new TransactionCreated();
   }
 
   private void writeSomeLogs(OrderIRO iro) {
@@ -231,41 +246,6 @@ public class OrderService extends ServiceSuperclass {
         .collect(groupingBy(ose -> ose.getSightEvent().getPortal()));
   }
 
-  private PassageCart getP24PassageCart(Order o) {
-    var passageCart = new PassageCart(o);
-    passageCart.setSandbox(Boolean.parseBoolean(properties.getProperty("przelewy24.isSandbox")));
-    List<OrderEntry> orderEntries = gatherOrderEntries(o.getEntries());
-    var amount = orderEntries.stream()
-        .collect(Collectors.summingInt(oe -> oe.getRealPrice() * oe.getQuantity()));
-    passageCart.setAmount(amount);
-    passageCart.setCountry(o.getDetails().getCountry());
-    passageCart.setLanguage(o.getDetails().getLanguage());
-    var currency = "PLN";
-    passageCart.setCurrency(currency);
-    passageCart.setDescription("Hello Poland, " + o.getHash());
-    var merchantId = Integer.valueOf(properties.getProperty("przelewy24.merchantId"));
-    passageCart.setMerchantId(merchantId);
-    passageCart.setSign(getP24Sign(o.getHash(), merchantId, amount, currency));
-    passageCart.setUrlStatus(getAckPaymentURL(o));
-    var passageCartEntries = new HashSet<PassageCartEntry>();
-    orderEntries.forEach(oe -> {
-      var cartEntry = new PassageCartEntry(oe);
-      cartEntry.setPassageCart(passageCart);
-      cartEntry.setDescription("Hello Poland, " + o.getHash());
-      if (cartEntry.getTargetAmount() > 0) {
-        passageCartEntries.add(cartEntry);
-      }
-    });
-    passageCart.setCartEntries(passageCartEntries);
-    var hpCommissionEntry = getHpCommissionEntry(amount, passageCart.getCartEntries(), o.getHash());
-    if (hpCommissionEntry.getTargetAmount() > 0) {
-      hpCommissionEntry.setPassageCart(passageCart);
-      passageCart.setHpCommissionEntry(hpCommissionEntry);
-    }
-    em.persist(passageCart);
-    return passageCart;
-  }
-
   public void sudoAck(String hash) {
     Order order = findByHash(hash);
     confirm(order);
@@ -279,41 +259,6 @@ public class OrderService extends ServiceSuperclass {
       }
     }
     return orderEntries;
-  }
-
-  private String getAckPaymentURL(Order o) {
-    var url = properties.getProperty("base.url");
-    if (!url.endsWith("/")) {
-      url = url.concat("/");
-    }
-    return url.concat("market/orders/" + o.getHash() + "/ackPayment");
-  }
-
-  private String getP24Sign(String orderHash, Integer merchantId, Integer amount, String currency) {
-    var delimiter = "|";
-    var signBuilder = new StringBuilder();
-    signBuilder.append(orderHash).append(delimiter);
-    signBuilder.append(merchantId).append(delimiter);
-    signBuilder.append(amount).append(delimiter);
-    signBuilder.append(currency).append(delimiter);
-    signBuilder.append(properties.getProperty("przelewy24.crc"));
-    return PaymentUtils.MD5(signBuilder.toString());
-  }
-
-  private PassageCartEntry getHpCommissionEntry(Integer amount,
-      Set<PassageCartEntry> passageCartEntries, String orderHash) {
-    var hpCommission = new PassageCartEntry();
-    hpCommission.setName("Hello-Poland prowizja");
-    hpCommission.setDescription("HP prowizja do zamówienia " + orderHash);
-    hpCommission.setNumber(0l);
-    hpCommission.setQuantity(1);
-    Integer targetAmount = amount
-        - passageCartEntries.stream().collect(Collectors.summingInt(f -> f.getTargetAmount()));
-    hpCommission.setTargetAmount(targetAmount);
-    hpCommission.setPrice(targetAmount);
-    hpCommission.setTargetPosId(Integer.parseInt(properties.getProperty("przelewy24.posId")));
-    hpCommission.setCommission(BigDecimal.ZERO);
-    return hpCommission;
   }
 
   public void confirmInExternalAPI(Order o) {
@@ -379,8 +324,8 @@ public class OrderService extends ServiceSuperclass {
   public List<OrderDateEntry> getOrderSightDateEntriesInTheFutureForLoggedUser() {
     Date nowPlusOneDay = new Date(new Date().getTime() - TimeUnit.DAYS.toMillis(1));
     List<OrderDateEntry> osdes = em.createQuery(
-        "from OrderDateEntry osde join fetch osde.sightEntry ose join fetch ose.sightEvent s join fetch ose.order o where osde.deleted=false and o.user=:user and o.status=:status and osde.date>=:date order by osde.date asc",
-        OrderDateEntry.class)
+            "from OrderDateEntry osde join fetch osde.sightEntry ose join fetch ose.sightEvent s join fetch ose.order o where osde.deleted=false and o.user=:user and o.status=:status and osde.date>=:date order by osde.date asc",
+            OrderDateEntry.class)
         .setParameter("user", getLoggedUser())
         .setParameter("status", Order.Status.CONFIRMED)
         .setParameter("date", nowPlusOneDay)
@@ -392,8 +337,8 @@ public class OrderService extends ServiceSuperclass {
   public List<OrderDateEntry> getOrderSightDateEntriesInThePastForLoggedUser() {
     Date nowPlusOneDay = new Date(new Date().getTime() - TimeUnit.DAYS.toMillis(1));
     List<OrderDateEntry> osdes = em.createQuery(
-        "from OrderDateEntry osde join fetch osde.sightEntry ose join fetch ose.sightEvent s join fetch ose.order o where osde.deleted=false and o.user=:user and o.status=:status and osde.date<:date order by osde.date asc",
-        OrderDateEntry.class)
+            "from OrderDateEntry osde join fetch osde.sightEntry ose join fetch ose.sightEvent s join fetch ose.order o where osde.deleted=false and o.user=:user and o.status=:status and osde.date<:date order by osde.date asc",
+            OrderDateEntry.class)
         .setParameter("user", getLoggedUser())
         .setParameter("status", Order.Status.CONFIRMED)
         .setParameter("date", nowPlusOneDay)
@@ -404,48 +349,6 @@ public class OrderService extends ServiceSuperclass {
 
   public void deleteOrderDateEntryForLoggedUser(long id) {
     getOrderDateEntryForLoggedUser(id).setDeleted(true);
-  }
-
-  public void ack(String hash, String ack) throws Exception {
-    logger.log(Logger.Level.INFO, "Got ack from P24");
-    Map<String, String> ackMap = PaymentUtils.queryToMap(ack);
-
-    // TODO fill statement title or something
-    // p24_order_id, p24_statement
-
-    logger.log(Logger.Level.INFO, "confirming payment");
-    StringBuilder signBuilder = new StringBuilder();
-    signBuilder.append(ackMap.get("p24_session_id")).append("|");
-    signBuilder.append(ackMap.get("p24_order_id")).append("|");
-    signBuilder.append(ackMap.get("p24_amount")).append("|");
-    signBuilder.append(ackMap.get("p24_currency")).append("|");
-    signBuilder.append(properties.getProperty("przelewy24.crc"));
-    String p24_sign = PaymentUtils.MD5(signBuilder.toString());
-    String p24_statement = ackMap.get("p24_statement");
-    ackMap.remove("p24_method");
-    ackMap.remove("p24_statement");
-    ackMap.put("p24_sign", p24_sign);
-
-    URL url = new URL(properties.getProperty("przelewy24.confirmation.endpoint"));
-    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-    conn.addRequestProperty("Accept", MediaType.APPLICATION_FORM_URLENCODED);
-    conn.addRequestProperty("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
-    conn.setDoOutput(true);
-    conn.getOutputStream().write(PaymentUtils.mapToQuery(ackMap).getBytes());
-    logger.log(Logger.Level.INFO, "" + conn.getResponseCode());
-    String resp = conn.getResponseMessage();
-    logger.log(Logger.Level.INFO, resp);
-    Order order = findByHash(hash);
-    if (resp.equals("OK")) {
-      logger.log(Logger.Level.INFO, "transaction confirmed. successful");
-      order.setP24OrderId(ackMap.get("p24_order_id"));
-      order.setP24Currency(ackMap.get("p24_currency"));
-      order.setP24Statement(p24_statement);
-      confirm(order);
-    } else {
-      logger.log(Logger.Level.WARNING, "transaction problem.");
-      problem(order);
-    }
   }
 
   private void cancelInExternalAPI(Order order) {
@@ -536,12 +439,12 @@ public class OrderService extends ServiceSuperclass {
     if (report.validUnsentAddresses != null && report.validUnsentAddresses.length > 0) {
       Arrays.stream(report.validUnsentAddresses).filter(address -> clientEmail.equals(address))
           .findAny().orElseThrow(() -> new EmailSendingException(
-          "Wystąpił błąd podczas wysyłania kopii biletów do " + clientEmail));
+              "Wystąpił błąd podczas wysyłania kopii biletów do " + clientEmail));
     }
     if (report.invalidAddresses != null && report.invalidAddresses.length > 0) {
       Arrays.stream(report.invalidAddresses).filter(address -> clientEmail.equals(address))
           .findAny().orElseThrow(() -> new EmailSendingException(
-          "Wystąpił błąd podczas wysyłania kopii biletów do " + clientEmail));
+              "Wystąpił błąd podczas wysyłania kopii biletów do " + clientEmail));
     }
     return report;
   }
@@ -571,7 +474,7 @@ public class OrderService extends ServiceSuperclass {
 
   public void anonymizeOrdersForUser(User user) {
     em.createQuery("from Order where user=:user",
-        Order.class)
+            Order.class)
         .setParameter("user", user).getResultStream()
         .forEach(o -> {
           OrderDetails details = o.getDetails();
@@ -584,4 +487,20 @@ public class OrderService extends ServiceSuperclass {
         });
   }
 
+  public void ack(String hash, String ack) throws Exception {
+    logger.log(Logger.Level.INFO, "Got ack from TPay");
+    Map<String, String> ackMap = PaymentUtils.queryToMap(ack);
+    boolean success = Boolean.parseBoolean(ackMap.get("tr_status"));
+    String crc = ackMap.get("tr_crc");
+    if (crc.equals(hash)) {
+      Order order = findByHash(hash);
+      if (success) {
+        logger.log(Logger.Level.INFO, "confirming payment");
+        confirm(order);
+      } else {
+        logger.log(Logger.Level.INFO, "payment problem");
+        problem(order);
+      }
+    }
+  }
 }

@@ -88,13 +88,10 @@ public class HelloTicket {
 
   public JsonStructure confirm(String serialNumber, List<OrderEntry> orderEntries) {
     try {
-      var p24OrderId = Optional.ofNullable(orderEntries.get(0)).map(OrderEntry::getDateEntry)
+      var tPayPaymentId = Optional.ofNullable(orderEntries.get(0)).map(OrderEntry::getDateEntry)
           .map(OrderDateEntry::getSightEntry).map(OrderSightEntry::getOrder)
-          .map(Order::getP24OrderId).orElse("");
-      var p24Currency = Optional.ofNullable(orderEntries.get(0)).map(OrderEntry::getDateEntry)
-          .map(OrderDateEntry::getSightEntry).map(OrderSightEntry::getOrder)
-          .map(Order::getP24Currency).orElse("");
-      var resp = put("/v1/bookings/buy/" + serialNumber + "/" + p24OrderId + "/" + p24Currency,
+          .map(Order::getTPayPaymentId).orElse("-----");
+      var resp = put("/v1/bookings/buy/" + serialNumber + "/" + tPayPaymentId + "/PLN",
           null, AUTH_TOKEN);
       BookingDTO booking = JsonbConfig.getInstance().fromJson(resp.toString(), BookingDTO.class);
       for (var oe : orderEntries) {

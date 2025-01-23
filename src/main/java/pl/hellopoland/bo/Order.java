@@ -2,6 +2,7 @@ package pl.hellopoland.bo;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+
 import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
@@ -35,9 +36,9 @@ public class Order extends ModelSuperclass {
   private Status status = Status.NEW;
   @NotNull
   private Date date = new Date();
-  private String p24OrderId;
-  private String p24Currency;
-  private String p24Statement;
+  private String tPayPaymentId;
+  private String tPayPaymentUrl;
+  private String tPayPaymentStatement;
 
   public Collection<OrderSightEntry> getEntries() {
     return entries;
@@ -87,28 +88,28 @@ public class Order extends ModelSuperclass {
     this.date = date;
   }
 
-  public String getP24OrderId() {
-    return p24OrderId;
+  public String getTPayPaymentId() {
+    return tPayPaymentId;
   }
 
-  public void setP24OrderId(String p24OrderId) {
-    this.p24OrderId = p24OrderId;
+  public void setTPayPaymentId(String tPayPaymentId) {
+    this.tPayPaymentId = tPayPaymentId;
   }
 
-  public String getP24Currency() {
-    return p24Currency;
+  public String getTPayPaymentUrl() {
+    return tPayPaymentUrl;
   }
 
-  public void setP24Currency(String p24Currency) {
-    this.p24Currency = p24Currency;
+  public void setTPayPaymentUrl(String tPayPaymentUrl) {
+    this.tPayPaymentUrl = tPayPaymentUrl;
   }
 
-  public String getP24Statement() {
-    return p24Statement;
+  public String getTPayPaymentStatement() {
+    return tPayPaymentStatement;
   }
 
-  public void setP24Statement(String p24Statement) {
-    this.p24Statement = p24Statement;
+  public void setTPayPaymentStatement(String tPayPaymentStatement) {
+    this.tPayPaymentStatement = tPayPaymentStatement;
   }
 
   public void generateHash() {

@@ -3,7 +3,6 @@ package pl.hellopoland.util;
 import pl.hellopoland.bo.*;
 import pl.hellopoland.dto.*;
 import pl.hellopoland.enums.LanguageVersion;
-import pl.hellopoland.soap.p24.enums.BusinessType;
 
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
@@ -348,64 +347,6 @@ public class DtoMapper {
     copyLocation(source.location, target);
   }
 
-  public static P24PassageCartDTO getDTO(PassageCart p24PassageCart) {
-    var dto = new P24PassageCartDTO();
-    dto.orderId = p24PassageCart.getOrder().getId();
-    dto.orderHash = p24PassageCart.getOrder().getHash();
-    dto.requiresPayment = !p24PassageCart.getOrder().sumIsZero();
-    dto.isSandbox = p24PassageCart.isSandbox();
-    dto.transactionParams = getParams(p24PassageCart);
-    return dto;
-  }
-
-  private static P24PassageTransactionParamsDTO getParams(PassageCart p24PassageCart) {
-    var o = p24PassageCart.getOrder();
-    OrderDetails od = o.getDetails();
-
-    var dto = new P24PassageTransactionParamsDTO();
-    dto.encoding = "UTF-8";
-    dto.amount = p24PassageCart.getAmount();
-    dto.country = p24PassageCart.getCountry();
-    dto.currency = p24PassageCart.getCurrency();
-    dto.description = p24PassageCart.getDescription();
-    dto.language = p24PassageCart.getLanguage();
-    dto.merchantId = p24PassageCart.getMerchantId();
-    dto.sign = p24PassageCart.getSign();
-    dto.urlStatus = p24PassageCart.getUrlStatus();
-    dto.address = od.getStreet() != null ? od.getStreet() : "";
-    dto.city = od.getCity() != null ? od.getCity() : "";
-    dto.client = (od.getFirstName() == null && od.getLastName() == null) ? ""
-        : od.getFirstName() + " " + od.getLastName();
-    dto.email = od.getEmail() != null ? od.getEmail() : "";
-    dto.phone = od.getPhone() != null ? od.getPhone() : "";
-    dto.sessionId = o.getHash();
-    dto.zip = od.getZipCode() != null ? od.getZipCode() : "";
-
-    var passageCartEntries = new ArrayList<P24PassageCartEntryDTO>();
-    p24PassageCart.getCartEntries().forEach(ce -> {
-      passageCartEntries.add(getP24PassageCartEntryDTO(ce));
-    });
-    if (p24PassageCart.getHpCommissionEntry() != null) {
-      passageCartEntries.add(getP24PassageCartEntryDTO(p24PassageCart.getHpCommissionEntry()));
-    }
-
-    dto.passageCart = passageCartEntries;
-    return dto;
-  }
-
-  private static P24PassageCartEntryDTO getP24PassageCartEntryDTO(
-      PassageCartEntry passageCartEntry) {
-    var dto = new P24PassageCartEntryDTO();
-    dto.description = passageCartEntry.getDescription();
-    dto.name = passageCartEntry.getName();
-    dto.number = passageCartEntry.getNumber();
-    dto.price = passageCartEntry.getPrice();
-    dto.quantity = passageCartEntry.getQuantity();
-    dto.targetAmount = passageCartEntry.getTargetAmount();
-    dto.targetPosId = passageCartEntry.getTargetPosId();
-    return dto;
-  }
-
   public static AgreementDTO getDTO(Agreement bo) {
     var dto = new AgreementDTO();
     dto.id = bo.getId();
@@ -435,12 +376,10 @@ public class DtoMapper {
     var dto = new PartnerDTO();
     dto.id = bo.getId();
     dto.name = bo.getName();
-    dto.p24MerchantId = bo.getP24Id();
     dto.commission = bo.getCommission();
     dto.email = bo.getEmail();
     dto.affiliateCode = bo.getAffiliateCode();
     dto.bankAccount = bo.getBankAccount();
-    dto.businessType = bo.getBusinessType() != null ? bo.getBusinessType().getValue() : null;
     dto.invoiceEmail = bo.getInvoiceEmail();
     dto.krs = bo.getKrs();
     dto.taxNumber = bo.getTaxNumber();
@@ -575,9 +514,6 @@ public class DtoMapper {
     bo.setAffiliateCode(dto.affiliateCode);
     bo.setBankAccount(dto.bankAccount);
     bo.setBlocked(dto.blocked);
-    if (dto.businessType != null) {
-      bo.setBusinessType(BusinessType.getBusinessType(dto.businessType));
-    }
     bo.setCommission(dto.commission);
     if (bo.getAddress() == null) {
       bo.setAddress(new Address());
@@ -596,7 +532,6 @@ public class DtoMapper {
     bo.setInvoiceEmail(dto.invoiceEmail);
     bo.setKrs(dto.krs);
     bo.setName(dto.name);
-    bo.setP24Id(dto.p24MerchantId);
     bo.setPhone(dto.phone);
     bo.setRegon(dto.regon);
     bo.setServicesDescription(dto.servicesDescription);

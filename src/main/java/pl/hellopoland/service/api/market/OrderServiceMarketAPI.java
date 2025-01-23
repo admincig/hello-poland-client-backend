@@ -1,21 +1,17 @@
 package pl.hellopoland.service.api.market;
 
-import pl.hellopoland.bo.Order;
-import pl.hellopoland.bo.Order.Status;
-import pl.hellopoland.bo.OrderDateEntry;
-import pl.hellopoland.bo.PassageCart;
-import pl.hellopoland.dto.P24PassageCartDTO;
-import pl.hellopoland.rest.dto.OrderDateEntryORO;
-import pl.hellopoland.rest.dto.OrderDateEntryOnListingORO;
-import pl.hellopoland.rest.dto.OrderIRO;
-import pl.hellopoland.service.OrderService;
-import pl.hellopoland.util.DtoMapper;
-
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
-import java.lang.System.Logger.Level;
+import pl.hellopoland.bo.Order;
+import pl.hellopoland.bo.Order.Status;
+import pl.hellopoland.bo.OrderDateEntry;
+import pl.hellopoland.rest.dto.OrderDateEntryORO;
+import pl.hellopoland.rest.dto.OrderDateEntryOnListingORO;
+import pl.hellopoland.rest.dto.OrderIRO;
+import pl.hellopoland.service.OrderService;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,16 +24,14 @@ public class OrderServiceMarketAPI {
   OrderService service;
 
   @PermitAll
-  public P24PassageCartDTO create(OrderIRO iro) {
-    PassageCart pc = service.create(iro);
-    Order order = pc.getOrder();
+  public String create(OrderIRO iro) {
+    Order order = service.create(iro);
     if (order.sumIsZero()) {
-      order.setP24OrderId("----");
-      order.setP24Currency("PLN");
-      order.setP24Statement("----");
       service.confirm(order);
+      return null;
+    } else {
+      return order.getTPayPaymentUrl();
     }
-    return DtoMapper.getDTO(pc);
   }
 
   @PermitAll
@@ -45,7 +39,7 @@ public class OrderServiceMarketAPI {
     try {
       service.ack(hash, ack);
     } catch (Exception e) {
-      logger.log(Level.WARNING, "Failed to ack payment", e);
+      logger.log(System.Logger.Level.WARNING, "Failed to ack payment", e);
     }
   }
 

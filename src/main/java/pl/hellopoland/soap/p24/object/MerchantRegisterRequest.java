@@ -1,7 +1,6 @@
 package pl.hellopoland.soap.p24.object;
 
 import pl.hellopoland.dto.PartnerDTO;
-import pl.hellopoland.soap.p24.enums.Trade;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -16,7 +15,6 @@ public class MerchantRegisterRequest {
   public MerchantRegisterRequest() {}
 
   public MerchantRegisterRequest(PartnerDTO partner) {
-    // acceptance = true;
     address = partner.location != null ? new Address(partner.location) : null;
     bank_account = partner.bankAccount;
     business_type = partner.businessType;
@@ -43,7 +41,6 @@ public class MerchantRegisterRequest {
     technical_contact =
         partner.technicalContact != null ? new TechnicalContact(partner.technicalContact)
             : (partner.contactPerson != null ? new TechnicalContact(partner.contactPerson) : null);
-    trade = Trade.SPORT_LEISURE.getValue();
   }
 
   @NotNull

@@ -3,8 +3,6 @@ package pl.hellopoland.bo;
 import org.hibernate.Hibernate;
 import pl.hellopoland.annotation.Multilingual;
 import pl.hellopoland.enums.LanguageVersion;
-import pl.hellopoland.soap.p24.enums.BusinessType;
-import pl.hellopoland.soap.p24.enums.Trade;
 import pl.hellopoland.util.Translated;
 
 import jakarta.persistence.*;
@@ -17,10 +15,6 @@ import java.util.*;
 public class Partner extends ModelSuperclass implements Translated, HptSubject {
 
   private static final long serialVersionUID = 6118414827783500940L;
-
-  @NotNull
-  @Column(nullable = false)
-  private Integer p24Id;
 
   @NotNull
   @Column(nullable = false)
@@ -51,12 +45,6 @@ public class Partner extends ModelSuperclass implements Translated, HptSubject {
   private String email;
 
   private String affiliateCode;
-
-  @Enumerated(EnumType.STRING)
-  private BusinessType businessType;
-
-  @Enumerated(EnumType.STRING)
-  private Trade trade;
 
   @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.DETACH}, fetch = FetchType.LAZY)
   private List<PartnerRepresentative> representatives;
@@ -129,14 +117,6 @@ public class Partner extends ModelSuperclass implements Translated, HptSubject {
 
   public void setHptId(Long hptId) {
     this.hptId = hptId;
-  }
-
-  public Integer getP24Id() {
-    return p24Id;
-  }
-
-  public void setP24Id(Integer p24Id) {
-    this.p24Id = p24Id;
   }
 
   public String getName() {
@@ -218,22 +198,6 @@ public class Partner extends ModelSuperclass implements Translated, HptSubject {
 
   public void setSightEvents(List<SightEvent> sightEvents) {
     this.sightEvents = sightEvents;
-  }
-
-  public BusinessType getBusinessType() {
-    return businessType;
-  }
-
-  public void setBusinessType(BusinessType businessType) {
-    this.businessType = businessType;
-  }
-
-  public Trade getTrade() {
-    return trade;
-  }
-
-  public void setTrade(Trade trade) {
-    this.trade = trade;
   }
 
   public List<PartnerRepresentative> getRepresentatives() {

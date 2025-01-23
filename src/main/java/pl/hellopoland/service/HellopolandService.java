@@ -16,10 +16,7 @@ import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.email.EmailSendingRollbackException;
-import pl.hellopoland.soap.p24.enums.BusinessType;
-import pl.hellopoland.soap.p24.enums.Trade;
 import pl.hellopoland.soap.p24.object.MerchantRegisterRequest;
-import pl.hellopoland.soap.p24.service.P24SOAPClient;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.soap.p24.MerchantRegisterValidator;
 
@@ -37,8 +34,6 @@ public class HellopolandService extends ServiceSuperclass {
   private UserService userService;
   @Inject
   private EmailService emailService;
-  @Inject
-  private P24SOAPClient p24SOAPClient;
   @Inject
   private TranslationService translationService;
 
@@ -89,14 +84,6 @@ public class HellopolandService extends ServiceSuperclass {
     var merchant = new MerchantRegisterRequest(partner);
     MerchantRegisterValidator.validate(merchant);
     Partner partnerBO = getPartnerFromMerchantRegisterRequest(merchant);
-
-    // 1. creating a partner in p24:
-    if (true/*partner.skipP24*/) {
-      partnerBO.setP24Id(-1);
-    } else {
-      Integer merchantId = p24SOAPClient.merchantRegistration(merchant);
-      partnerBO.setP24Id(merchantId);
-    }
 
     // 2. creating a partner and the user in hpl:
     partnerBO.setCreated(LocalDateTime.now());
@@ -196,8 +183,6 @@ public class HellopolandService extends ServiceSuperclass {
 
   private Partner getPartnerFromMerchantRegisterRequest(MerchantRegisterRequest merchant) {
     var partnerBO = new Partner();
-    partnerBO.setBusinessType(BusinessType.getBusinessType(merchant.business_type));
-    partnerBO.setTrade(Trade.SPORT_LEISURE);
     partnerBO.setBankAccount(merchant.bank_account);
     partnerBO.setName(merchant.name);
     partnerBO.setEmail(merchant.email);
