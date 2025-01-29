@@ -2,6 +2,7 @@ package pl.hellopoland.bo;
 
 import org.hibernate.Hibernate;
 import pl.hellopoland.annotation.Multilingual;
+import pl.hellopoland.enums.BusinessType;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.util.Translated;
 
@@ -39,6 +40,9 @@ public class Partner extends ModelSuperclass implements Translated, HptSubject {
   private List<Agreement> agreements;
 
   private BigDecimal commission;
+
+  @Enumerated(EnumType.STRING)
+  private BusinessType businessType;
 
   @NotNull
   @Column(nullable = false)
@@ -358,6 +362,14 @@ public class Partner extends ModelSuperclass implements Translated, HptSubject {
 
   public void setTags(List<Tag> tags) {
     this.tags = tags;
+  }
+
+  public BusinessType getBusinessType() {
+    return businessType;
+  }
+
+  public void setBusinessType(BusinessType businessType) {
+    this.businessType = businessType;
   }
 
   @Override

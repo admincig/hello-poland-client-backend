@@ -13,6 +13,7 @@ import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.dto.RoleDTO;
 import pl.hellopoland.dto.UserAuthDTO;
 import pl.hellopoland.dto.UserDTO;
+import pl.hellopoland.enums.BusinessType;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.email.EmailSendingRollbackException;
@@ -195,6 +196,7 @@ public class HellopolandService extends ServiceSuperclass {
     partnerBO.setRegon(merchant.regon);
     partnerBO.setServicesDescription(merchant.services_description);
     partnerBO.setShopUrl(merchant.shop_url);
+    partnerBO.setBusinessType(BusinessType.getBusinessType(merchant.business_type));
     var address = new Address();
     address.setCountry(merchant.address.country);
     address.setCity(merchant.address.city);

@@ -390,6 +390,7 @@ public class DtoMapper {
     dto.shopUrl = bo.getShopUrl();
     dto.description = bo.getDescription();
     dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
+    dto.businessType = bo.getBusinessType() != null ? bo.getBusinessType().getValue() : null;
     dto.language = bo.getCurrentLanguage() == null ? dto.defaultLanguage
         : bo.getCurrentLanguage().getLanuage();
     dto.blocked = bo.isBlocked();
