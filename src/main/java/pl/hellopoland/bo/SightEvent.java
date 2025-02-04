@@ -422,6 +422,7 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
     Hibernate.initialize(getTags());
     Hibernate.initialize(getPartner());
     Hibernate.initialize(getPortal());
+    Hibernate.initialize(getMainImage());
   }
 
   public void recreateSearchIndex(Set<String> words) {
