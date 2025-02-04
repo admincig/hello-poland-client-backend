@@ -443,6 +443,11 @@ public class Partner extends ModelSuperclass implements Translated, HptSubject {
         Hibernate.initialize(sight.getMainImage());
       }
     }
+    if (this.getSightEvents() != null) {
+      for (SightEvent sightEvent : this.getSightEvents()) {
+        Hibernate.initialize(sightEvent.getMainImage());
+      }
+    }
   }
 
   private void fetchSimpleRelations() {

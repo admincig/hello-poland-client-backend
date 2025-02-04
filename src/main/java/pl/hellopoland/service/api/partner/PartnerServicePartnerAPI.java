@@ -25,6 +25,7 @@ public class PartnerServicePartnerAPI {
   public MarketPartnerDTO getCard(LanguageVersion parseLang) {
     Long loggedPartnerId = service.getLoggedPartner().getId();
     Partner partner = service.getPartnerWithCategoriesAndTagsAndCities(loggedPartnerId);
+    partner.fetchRelations();
     Address address = transService.translateEntity(partner.getAddress(), parseLang);
     partner = transService.translateEntity(partner, parseLang);
     partner.setAddress(address);

@@ -32,8 +32,6 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
   @Inject
   SightEventService sightEventService;
   @Inject
-  TicketDefinitionService ticketService;
-  @Inject
   PartnerService partnerService;
 
   public TicketPoolDefinitionDTO add(TicketPoolDefinitionDTO dto) {
