@@ -87,19 +87,23 @@ public class ImageService extends ServiceSuperclass {
     collector.setName(name);
     collector.setImageURL(url);
     em.persist(collector);
-    var qvga = storeImageVariant(scaleImage(buffImage, 320), extension, ImageVariant.Variant.QVGA,
+    String standardVariantExtension = "jpg";
+    if ("png".equals(extension)) {
+      standardVariantExtension = extension;
+    }
+    var qvga = storeImageVariant(scaleImage(buffImage, 320), standardVariantExtension, ImageVariant.Variant.QVGA,
         collector);
-    var vga = storeImageVariant(scaleImage(buffImage, 640), extension, ImageVariant.Variant.VGA,
+    var vga = storeImageVariant(scaleImage(buffImage, 640), standardVariantExtension, ImageVariant.Variant.VGA,
         collector);
-    var xga = storeImageVariant(scaleImage(buffImage, 1024), extension, ImageVariant.Variant.XGA,
+    var xga = storeImageVariant(scaleImage(buffImage, 1024), standardVariantExtension, ImageVariant.Variant.XGA,
         collector);
-    var sxga = storeImageVariant(scaleImage(buffImage, 1280), extension, ImageVariant.Variant.SXGA,
+    var sxga = storeImageVariant(scaleImage(buffImage, 1280), standardVariantExtension, ImageVariant.Variant.SXGA,
         collector);
-    var hd = storeImageVariant(scaleImage(buffImage, 720), extension, ImageVariant.Variant.HD,
+    var hd = storeImageVariant(scaleImage(buffImage, 720), standardVariantExtension, ImageVariant.Variant.HD,
         collector);
-    var fhd = storeImageVariant(scaleImage(buffImage, 1920), extension, ImageVariant.Variant.FHD,
+    var fhd = storeImageVariant(scaleImage(buffImage, 1920), standardVariantExtension, ImageVariant.Variant.FHD,
         collector);
-    var fourK = storeImageVariant(scaleImage(buffImage, 3840), extension,
+    var fourK = storeImageVariant(scaleImage(buffImage, 3840), standardVariantExtension,
         ImageVariant.Variant.FOURK, collector);
     var orginal = storeImageVariant(buffImage, extension, ImageVariant.Variant.ORIGINAL, collector);
     collector.setQvga(qvga);
