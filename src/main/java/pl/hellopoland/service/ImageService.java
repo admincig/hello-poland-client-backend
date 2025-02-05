@@ -105,7 +105,13 @@ public class ImageService extends ServiceSuperclass {
         collector);
     var fourK = storeImageVariant(scaleImage(buffImage, 3840), standardVariantExtension,
         ImageVariant.Variant.FOURK, collector);
+
     var orginal = storeImageVariant(buffImage, extension, ImageVariant.Variant.ORIGINAL, collector);
+    ImageVariant originalWebp = orginal;
+    if (!"webp".equals(extension)) {
+      originalWebp = storeWebpImageVariant(orginal);
+    }
+    collector.setOrginalWebp(originalWebp);
     collector.setQvga(qvga);
     collector.setVga(vga);
     collector.setXga(xga);
@@ -121,7 +127,6 @@ public class ImageService extends ServiceSuperclass {
     collector.setHdWebp(storeWebpImageVariant(hd));
     collector.setFhdWebp(storeWebpImageVariant(fhd));
     collector.setFourKWebp(storeWebpImageVariant(fourK));
-    collector.setOrginalWebp(storeWebpImageVariant(orginal));
     return collector;
   }
 
