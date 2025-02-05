@@ -71,7 +71,7 @@ public class PartnerRestService {
 
   @PUT
   @Path("/company/mainImage")
-  @Consumes({"image/jpeg", "image/jpg"})
+  @Consumes({"image/jpeg", "image/jpg", "image/webp"})
   public MarketPartnerDTO uploadIcon(byte[] icon) {
     return service.uploadMainImage(icon);
   }
