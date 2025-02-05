@@ -87,7 +87,7 @@ public class HelpdeskPartnerRestService {
 
   @PUT
   @Path("/{id}/mainImage")
-  @Consumes({"image/jpeg", "image/jpg"})
+  @Consumes({"image/jpeg", "image/jpg", "image/webp", "image/png"})
   public PartnerDTO uploadIcon(@PathParam("id") Long id, byte[] icon) {
     return service.uploadMainImage(id, icon);
   }

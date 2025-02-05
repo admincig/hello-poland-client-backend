@@ -89,12 +89,14 @@ public class HelpdeskCategoryRestService {
 
   @PUT
   @Path("/{id}/icon")
-  @Consumes({"image/jpeg", "image/jpg", "image/png"})
+  @Consumes({"image/jpeg", "image/jpg", "image/webp", "image/png"})
   public CategoryDTO uploadIcon(@PathParam("id") Long id, byte[] bytes,
       @HeaderParam("Content-Type") String contentType) {
     String extension = "jpeg";
     if ("image/png".equals(contentType)) {
       extension = "png";
+    } else if ("image/webp".equals(contentType)) {
+      extension = "webp";
     }
     return service.uploadIcon(id, bytes, extension);
   }

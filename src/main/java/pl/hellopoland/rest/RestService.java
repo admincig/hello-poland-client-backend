@@ -37,7 +37,7 @@ public class RestService {
 
   @GET
   @Path("/images/{name}")
-  @Produces({MediaType.APPLICATION_JSON, "image/png", "image/jpg"})
+  @Produces({MediaType.APPLICATION_JSON, "image/png", "image/jpg", "image/webp"})
   public Response download(@PathParam("name") String name) {
     File file = imageService.getImage(name);
     CacheControl cc = new CacheControl();
