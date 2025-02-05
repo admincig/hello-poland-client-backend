@@ -93,9 +93,9 @@ public class PartnerServiceHelpdeskAPI {
   }
 
   @RolesAllowed("admin")
-  public PartnerDTO uploadMainImage(Long id, byte[] icon) {
+  public PartnerDTO uploadMainImage(Long id, byte[] icon, String extension) {
     Partner bo = service.get(id);
-    service.uploadMainImage(bo, icon);
+    service.uploadMainImage(bo, icon, extension);
     return get(id, bo.getDefaultLanguage());
   }
 

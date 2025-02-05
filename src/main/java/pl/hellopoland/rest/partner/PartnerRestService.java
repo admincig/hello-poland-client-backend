@@ -72,8 +72,14 @@ public class PartnerRestService {
   @PUT
   @Path("/company/mainImage")
   @Consumes({"image/jpeg", "image/jpg", "image/webp", "image/png"})
-  public MarketPartnerDTO uploadIcon(byte[] icon) {
-    return service.uploadMainImage(icon);
+  public MarketPartnerDTO uploadIcon(byte[] icon, @HeaderParam("Content-Type") String contentType) {
+    String extension = "jpeg";
+    if ("image/png".equals(contentType)) {
+      extension = "png";
+    } else if ("image/webp".equals(contentType)) {
+      extension = "webp";
+    }
+    return service.uploadMainImage(icon, extension);
   }
 
   @GET

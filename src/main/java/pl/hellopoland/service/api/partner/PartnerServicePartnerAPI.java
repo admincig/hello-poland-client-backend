@@ -33,9 +33,9 @@ public class PartnerServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
-  public MarketPartnerDTO uploadMainImage(byte[] icon) {
+  public MarketPartnerDTO uploadMainImage(byte[] icon, String extension) {
     Partner bo = service.getLoggedPartner();
-    bo = service.uploadMainImage(bo, icon);
+    bo = service.uploadMainImage(bo, icon, extension);
     return getCard(bo.getDefaultLanguage());
   }
 

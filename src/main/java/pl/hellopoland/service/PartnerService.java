@@ -79,9 +79,9 @@ public class PartnerService extends ServiceSuperclass {
     return partner;
   }
 
-  public Partner uploadMainImage(Partner bo, byte[] icon) {
+  public Partner uploadMainImage(Partner bo, byte[] icon, String extension) {
     bo.setMainImage(
-        iService.validateAndStoreImageCollector(new ByteArrayInputStream(icon), "jpeg"));
+        iService.validateAndStoreImageCollector(new ByteArrayInputStream(icon), extension));
     em.flush();
     return bo;
   }

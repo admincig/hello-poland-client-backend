@@ -88,8 +88,14 @@ public class HelpdeskPartnerRestService {
   @PUT
   @Path("/{id}/mainImage")
   @Consumes({"image/jpeg", "image/jpg", "image/webp", "image/png"})
-  public PartnerDTO uploadIcon(@PathParam("id") Long id, byte[] icon) {
-    return service.uploadMainImage(id, icon);
+  public PartnerDTO uploadIcon(@PathParam("id") Long id, byte[] icon, @HeaderParam("Content-Type") String contentType) {
+    String extension = "jpeg";
+    if ("image/png".equals(contentType)) {
+      extension = "png";
+    } else if ("image/webp".equals(contentType)) {
+      extension = "webp";
+    }
+    return service.uploadMainImage(id, icon, extension);
   }
 
   @PUT
