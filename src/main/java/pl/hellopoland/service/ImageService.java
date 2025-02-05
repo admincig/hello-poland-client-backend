@@ -58,8 +58,8 @@ public class ImageService extends ServiceSuperclass {
       BufferedImage imageIO = ImageIO.read(is);
       logger.log(Level.INFO,
           "image width: " + imageIO.getWidth() + ", height: " + imageIO.getHeight());
-      if (imageIO.getWidth() < 2000) {
-        throw new ConflictingException("Image width must be a minimum of 2000px");
+      if (imageIO.getWidth() < 1000) {
+        throw new ConflictingException("Image width must be a minimum of 1000px");
       }
       return imageIO;
     } catch (IOException e) {
