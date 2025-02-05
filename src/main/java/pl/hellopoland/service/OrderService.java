@@ -404,7 +404,7 @@ public class OrderService extends ServiceSuperclass {
     if (toDate == null) {
       return getOrderForSightEventInDate(fromDate, partner);
     }
-    String query = "from OrderEntry oe join fetch oe.dateEntry.sightEntry.order o "
+    String query = "from OrderEntry oe join oe.dateEntry.sightEntry.order o "
         + "where (:fromDate <= o.date and :toDate > o.date) "
         + (partner != null ? "and oe.dateEntry.sightEntry.sightEvent.partner =:partner " : "")
         + "order by o.date asc, o.id asc";
@@ -413,7 +413,7 @@ public class OrderService extends ServiceSuperclass {
 
   private List<OrderEntry> getOrderForSightEventInDate(Date fromDate, Partner partner) {
     var toDate = new Date(fromDate.getTime());
-    String query = "from OrderEntry oe join fetch oe.dateEntry.sightEntry.order o "
+    String query = "from OrderEntry oe join oe.dateEntry.sightEntry.order o "
         + "where (:fromDate <= oe.dateEntry.date and :toDate > oe.dateEntry.date) "
         + (partner != null ? "and oe.dateEntry.sightEntry.sightEvent.partner =:partner " : "")
         + "order by o.date asc, o.id asc";
