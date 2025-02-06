@@ -106,6 +106,7 @@ public class SightServiceMarketAPI {
     SightPagedCollectionConfig config = prepareConfigForRandom(6);
     config.setPartner(bo.getPartner().getId());
     config.setExcludedIds(Set.of(bo.getId()));
+    config.fetchSightEvents(true);
     Collection<Sight> sights = service.getList(config, language).items;
     fetchSightEventPrices(sights);
     return sights.stream()

@@ -32,7 +32,7 @@ public class SightPagedCollectionConfig extends PagedCollectionConfig<Sight> {
         + "join fetch e.partner p "
         + "left join fetch p.contactPerson pc "
         + "left join fetch p.technicalContact tc"
-        + (fetchSightEvents ? " left join fetch e.sightEvents ses" : "")
+        + (fetchSightEvents ? " left join fetch e.sightEvents ses left join fetch ses.mainImage sesMis" : "")
         + (fetchUsers ? " inner join e.users u" : "");
   }
 
