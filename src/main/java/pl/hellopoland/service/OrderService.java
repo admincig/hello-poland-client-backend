@@ -16,6 +16,7 @@ import pl.hellopoland.exception.email.EmailSendingException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.rest.dto.OrderIRO;
 import pl.hellopoland.rest.dto.OrderIRO.OrderEntryIRO;
+import pl.hellopoland.security.JwtVerificator;
 import pl.hellopoland.tpay.TPayClient;
 import pl.hellopoland.tpay.dto.TransactionCreated;
 import pl.hellopoland.util.HelloTicket;
@@ -42,6 +43,8 @@ public class OrderService extends ServiceSuperclass {
   SightEventService seService;
   @Inject
   TPayClient tPayClient;
+  @Inject
+  JwtVerificator jwtVerificator;
 
   public Order create(OrderIRO iro) {
     throwIfExpiredTickets(iro);
@@ -487,12 +490,11 @@ public class OrderService extends ServiceSuperclass {
         });
   }
 
-  public void ack(String hash, String ack) throws Exception {
+  public void ack(String hash, String ack, String jws) throws Exception {
     logger.log(Logger.Level.INFO, "Got ack from TPay");
     Map<String, String> ackMap = PaymentUtils.queryToMap(ack);
     boolean success = Boolean.parseBoolean(ackMap.get("tr_status"));
-    String crc = ackMap.get("tr_crc");
-    if (crc.equals(hash)) {
+    if (jwtVerificator.verify(jws, ack)) {
       Order order = findByHash(hash);
       if (success) {
         logger.log(Logger.Level.INFO, "confirming payment");
@@ -503,4 +505,5 @@ public class OrderService extends ServiceSuperclass {
       }
     }
   }
+
 }

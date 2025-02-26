@@ -35,9 +35,9 @@ public class OrderServiceMarketAPI {
   }
 
   @PermitAll
-  public void ack(String hash, String ack) {
+  public void ack(String hash, String ack, String jws) {
     try {
-      service.ack(hash, ack);
+      service.ack(hash, ack, jws);
     } catch (Exception e) {
       logger.log(System.Logger.Level.WARNING, "Failed to ack payment", e);
     }
