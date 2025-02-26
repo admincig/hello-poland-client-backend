@@ -43,6 +43,7 @@ public class TPayClient extends ServiceSuperclass {
     String transactionUrl = apiUrl + "/transactions";
     CreateTransaction requestJson = prepareRequestJson(description, hash, ackUrl, totalPrice, email, name);
     String requestJsonString = om.writeValueAsString(requestJson);
+    logger.log(System.Logger.Level.INFO, requestJsonString);
     HttpRequest request = HttpRequest.newBuilder()
         .uri(URI.create(transactionUrl))
         .POST(HttpRequest.BodyPublishers.ofString(requestJsonString))
@@ -50,7 +51,9 @@ public class TPayClient extends ServiceSuperclass {
         .header("Authorization", "Bearer " + accessToken)
         .build();
     HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-    return om.readValue(response.body(), TransactionCreated.class);
+    String responseBodyString = response.body();
+    logger.log(System.Logger.Level.INFO, responseBodyString);
+    return om.readValue(responseBodyString, TransactionCreated.class);
   }
 
   private CreateTransaction prepareRequestJson(String description, String hash, String ackUrl, BigDecimal totalPrice, String email, String name) {
