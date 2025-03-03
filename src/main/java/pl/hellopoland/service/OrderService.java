@@ -144,9 +144,9 @@ public class OrderService extends ServiceSuperclass {
     if (amount > 0) {
       BigDecimal totalPrice = new BigDecimal(amount).divide(new BigDecimal(100));
       String description = "Zamówienie nr " + o.getId();
-      User user = o.getUser();
       String ackUrl = getAckPaymentURL(o);
-      return tPayClient.createTransaction(description, o.getHash(), ackUrl, totalPrice, user.getEmail(), user.getName());
+      OrderDetails details = o.getDetails();
+      return tPayClient.createTransaction(description, o.getHash(), ackUrl, totalPrice, details.getEmail(), details.getFirstName() + " " + details.getLastName());
     }
     return new TransactionCreated();
   }
