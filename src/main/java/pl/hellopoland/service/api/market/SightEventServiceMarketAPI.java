@@ -198,7 +198,9 @@ public class SightEventServiceMarketAPI {
             .toInstant()));
     AvailableDatesORO oro = new AvailableDatesORO();
     for (var tpd : asos.ticketPoolDefinitions) {
-      oro.availableDates.addAll(tpdService.getStartDates(tpd.id, date, halfYearFromNow));
+      if (tpd.availableTicketsNumber != 0) {
+        oro.availableDates.addAll(tpdService.getStartDates(tpd.id, date, halfYearFromNow));
+      }
     }
     asos.ticketPools.stream().forEach(tp -> {
       LocalDate ld = tp.startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
