@@ -6,6 +6,7 @@ import jakarta.inject.Inject;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonStructure;
 import jakarta.json.JsonValue;
+import jakarta.json.bind.JsonbException;
 import jakarta.persistence.TypedQuery;
 import pl.hellopoland.bo.*;
 import pl.hellopoland.bo.Order.Status;
@@ -122,17 +123,17 @@ public class OrderService extends ServiceSuperclass {
     try {
       placeInExternalAPI(o);
     } catch (Exception e) {
+      logger.log(Level.ERROR, e.getMessage());
       try {
-        var wrappedError = JsonbConfig.getInstance().fromJson(e.getMessage(), JsonStructure.class);
-        logger.log(Level.ERROR, e.getMessage());
-        JsonValue message = wrappedError.getValue("/message");
+        var hptJsonError = JsonbConfig.getInstance().fromJson(e.getMessage(), JsonStructure.class);
+        JsonValue message = hptJsonError.getValue("/message");
         if (message != null) {
           throw new ConflictingException(message.toString());
         }
-      } catch (Exception ex) {
+      } catch (JsonbException ex) {
         logger.log(Level.ERROR, ex.getMessage());
-        throw new ConflictingException("Nie udało się złożyć zamówienia");
       }
+      throw new ConflictingException("Nie udało się złożyć zamówienia");
     }
     TransactionCreated transactionCreated = createPayment(o);
     o.setTPayPaymentId(transactionCreated.transactionId);
