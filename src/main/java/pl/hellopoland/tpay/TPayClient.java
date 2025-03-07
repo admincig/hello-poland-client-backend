@@ -67,7 +67,7 @@ public class TPayClient extends ServiceSuperclass {
     createTransaction.callbacks.notification.email = notificationEmail;
     createTransaction.callbacks.notification.url = ackUrl;
     createTransaction.callbacks.payerUrls = new PayerUrls();
-    createTransaction.callbacks.payerUrls.success = redirectUrl;
+    createTransaction.callbacks.payerUrls.success = redirectUrl + "/zamowienie?id=" + hash;
     createTransaction.callbacks.payerUrls.error = redirectUrl;
     return createTransaction;
   }
