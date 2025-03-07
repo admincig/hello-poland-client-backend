@@ -125,7 +125,7 @@ public class OrderService extends ServiceSuperclass {
       try {
         var wrappedError = JsonbConfig.getInstance().fromJson(e.getMessage(), JsonStructure.class);
         logger.log(Level.ERROR, e.getMessage());
-        JsonValue message = wrappedError.getValue("message");
+        JsonValue message = wrappedError.getValue("/message");
         if (message != null) {
           throw new ConflictingException(message.toString());
         }
