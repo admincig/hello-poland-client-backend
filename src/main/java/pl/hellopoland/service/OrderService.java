@@ -119,7 +119,7 @@ public class OrderService extends ServiceSuperclass {
     try {
       placeInExternalAPI(o);
     } catch (Exception e) {
-      throw new ConflictingException("Nie udało się złożyć zamówienia w zewnętrznym systemie", e);
+      throw new ConflictingException(e.getMessage());
     }
     TransactionCreated transactionCreated = createPayment(o);
     o.setTPayPaymentId(transactionCreated.transactionId);
