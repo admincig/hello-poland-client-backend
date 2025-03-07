@@ -4,6 +4,8 @@ import jakarta.ejb.LocalBean;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonStructure;
+import jakarta.json.JsonValue;
 import jakarta.persistence.TypedQuery;
 import pl.hellopoland.bo.*;
 import pl.hellopoland.bo.Order.Status;
@@ -14,6 +16,7 @@ import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.email.EmailSendingException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
+import pl.hellopoland.rest.JsonbConfig;
 import pl.hellopoland.rest.dto.OrderIRO;
 import pl.hellopoland.rest.dto.OrderIRO.OrderEntryIRO;
 import pl.hellopoland.security.JwtVerificator;
@@ -119,7 +122,17 @@ public class OrderService extends ServiceSuperclass {
     try {
       placeInExternalAPI(o);
     } catch (Exception e) {
-      throw new ConflictingException(e.getMessage());
+      try {
+        var wrappedError = JsonbConfig.getInstance().fromJson(e.getMessage(), JsonStructure.class);
+        logger.log(Level.ERROR, e.getMessage());
+        JsonValue message = wrappedError.getValue("message");
+        if (message != null) {
+          throw new ConflictingException(message.toString());
+        }
+      } catch (Exception ex) {
+        logger.log(Level.ERROR, ex.getMessage());
+        throw new ConflictingException("Nie udało się złożyć zamówienia");
+      }
     }
     TransactionCreated transactionCreated = createPayment(o);
     o.setTPayPaymentId(transactionCreated.transactionId);
@@ -295,7 +308,7 @@ public class OrderService extends ServiceSuperclass {
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     JsonObject resp = (JsonObject) hpt.book(details, orderEntries);
     if (resp == null) {
-      throw new ConflictingException("Placing order in HPT returned respons null.");
+      throw new ConflictingException("Placing order in HPT returned null response.");
     }
     Integer externalOrderId = resp.getInt("id");
     entry.getValue().forEach(ose -> ose.setExternalId(externalOrderId.longValue()));
