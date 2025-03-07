@@ -81,6 +81,9 @@ public class AnalyticsService extends ServiceSuperclass {
   }
 
   private BigDecimal calculateCommission(BigDecimal commissionPercent, OrderEntry oe) {
+    if (commissionPercent == null) {
+      return new BigDecimal(0);
+    }
     var originalTotal = new BigDecimal(oe.getUnitPrice() * oe.getQuantity());
     BigDecimal commissionVal =
         originalTotal.multiply(commissionPercent).divide(HUNDRED).setScale(2,
