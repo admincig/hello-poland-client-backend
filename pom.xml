@@ -166,6 +166,24 @@
 					</webResources>
 				</configuration>
 			</plugin>
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>4.9.10</version>
+                <executions>
+                    <execution>
+                        <id>get-the-git-infos</id>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                    <gitPropertiesPath>${project.build.outputDirectory}</gitPropertiesPath>
+                </configuration>
+            </plugin>
 		</plugins>
 		<resources>
 			<resource>
@@ -188,14 +206,14 @@
 	</build>
 
 	<repositories>
-		<repository>
+		<!--<repository>
 			<id>fream-nexus-snapshots</id>
 			<url>https://packages.fream.pl/repository/maven-fream-snapshots</url>
 		</repository>
 		<repository>
 			<id>fream-nexus-releases</id>
 			<url>https://packages.fream.pl/repository/maven-fream-releases</url>
-		</repository>
+		</repository>-->
 		<repository>
 			<id>redhat ga</id>
 			<url>https://maven.repository.redhat.com/ga</url>
