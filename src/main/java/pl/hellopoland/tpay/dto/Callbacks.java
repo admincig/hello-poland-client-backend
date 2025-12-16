@@ -5,4 +5,5 @@ public class Callbacks {
   public PayerUrls payerUrls;
   public Notification notification;
 
+  public String notificationUrl;
 }

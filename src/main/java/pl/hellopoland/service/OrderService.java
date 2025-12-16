@@ -152,18 +152,35 @@ public class OrderService extends ServiceSuperclass {
     return url.concat("market/orders/" + o.getHash() + "/ackPayment");
   }
 
-  private TransactionCreated createPayment(Order o) {
-    var amount = gatherOrderEntries(o.getEntries()).stream()
-        .collect(Collectors.summingInt(oe -> oe.getRealPrice() * oe.getQuantity()));
-    if (amount > 0) {
-      BigDecimal totalPrice = new BigDecimal(amount).divide(new BigDecimal(100));
-      String description = "Zamówienie nr " + o.getId();
-      String ackUrl = getAckPaymentURL(o);
-      OrderDetails details = o.getDetails();
-      return tPayClient.createTransaction(description, o.getHash(), ackUrl, totalPrice, details.getEmail(), details.getFirstName() + " " + details.getLastName());
+    private TransactionCreated createPayment(Order o) {
+        var entries = gatherOrderEntries(o.getEntries());
+
+        int amount = entries.stream()
+                .collect(Collectors.summingInt(oe -> (oe.getRealPrice() == null ? 0 : oe.getRealPrice()) *
+                        (oe.getQuantity() == null ? 0 : oe.getQuantity())));
+
+        logger.log(Logger.Level.INFO,"TPAY createPayment: orderId=" + o.getId()
+                + " sightEntries=" + (o.getEntries() == null ? -1 : o.getEntries().size())
+                + " orderEntries=" + entries.size()
+                + " amount=" + amount);
+
+        entries.stream().limit(5).forEach(oe ->
+                logger.log(Logger.Level.INFO,"TPAY entry: id=" + oe.getId()
+                        + " qty=" + oe.getQuantity()
+                        + " realPrice=" + oe.getRealPrice()
+                        + " unitPrice=" + oe.getUnitPrice())
+        );
+
+        if (amount > 0) {
+            BigDecimal totalPrice = new BigDecimal(amount).divide(new BigDecimal(100));
+            String description = "Zamówienie nr " + o.getId();
+            String ackUrl = getAckPaymentURL(o);
+            OrderDetails details = o.getDetails();
+            return tPayClient.createTransaction(description, o.getHash(), ackUrl, totalPrice,
+                    details.getEmail(), details.getFirstName() + " " + details.getLastName());
+        }
+        return new TransactionCreated();
     }
-    return new TransactionCreated();
-  }
 
   private void writeSomeLogs(OrderIRO iro) {
     logger.log(Level.INFO, "-------Start creating order --------");
@@ -203,13 +220,20 @@ public class OrderService extends ServiceSuperclass {
   }
 
   private void throwIfExpiredTickets(OrderIRO iro) {
-    var expiredIds = new HashMap<Long, OrderEntryIRO>();
-    iro.entries.forEach(entry -> {
-      if (entry.date.before(new Date())) {
-        expiredIds.put(entry.id, entry);
+      var expiredIds = new HashMap<Long, OrderEntryIRO>();
+
+    if (iro == null || iro.entries == null || iro.entries.isEmpty()) {
+          throw new IllegalArgumentException("Order entries must not be null or empty");
       }
-    });
+
+    iro.entries.forEach(entry -> {
+          if (entry.date.before(new Date())) {
+              expiredIds.put(entry.id, entry);
+          }
+      });
+
     List<TicketDefinitionDTO> expiredTickets = Collections.emptyList();
+
     if (expiredIds.size() > 0) {
       HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
       expiredTickets = hpt.getTicketDefinitions(expiredIds.keySet());

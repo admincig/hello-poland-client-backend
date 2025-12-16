@@ -5,6 +5,7 @@ import pl.hellopoland.config.PartnerPagedCollectionConfig;
 import pl.hellopoland.dto.MarketPartnerDTO;
 import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.enums.BusinessType;
 import pl.hellopoland.util.BeanUtils;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.Located;
@@ -116,6 +117,7 @@ public class PartnerService extends ServiceSuperclass {
       bo.getAddress().setDirections(dto.location.directions);
       em.flush();
     }
+
     translationService.updateEntityLanguageVersion(bo.getAddress(), dto.location, lang);
     return translationService.updateEntityLanguageVersion(bo, dto, lang);
   }
@@ -129,6 +131,11 @@ public class PartnerService extends ServiceSuperclass {
       bo = em.merge(bo);
       translationService.createEntityLanguageVersion(bo, dto, lang);
     }
+
+    if (dto.businessType != null) {
+          bo.setBusinessType(BusinessType.getBusinessType(dto.businessType));
+    }
+
     if (bo.getDefaultLanguage().equals(lang)) {
       DtoMapper.copy(dto, bo);
       bo.getAddress().setDirections(dto.location.directions);
