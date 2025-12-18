@@ -35,6 +35,8 @@ public class FileDescriptor extends ModelSuperclass {
   private String path;
   @NotNull
   private LocalDateTime created;
+  @Column(name = "original_name", length = 250)
+  private String originalName;
 
   public FileDescriptor() {}
 
@@ -71,6 +73,14 @@ public class FileDescriptor extends ModelSuperclass {
 
   public void setCreated(LocalDateTime created) {
     this.created = created;
+  }
+
+  public String getOriginalName() {
+        return originalName;
+  }
+
+  public void setOriginalName(String originalName) {
+        this.originalName = originalName;
   }
 
   private @NotNull MimeType guessMimeType(File file) {

@@ -42,7 +42,7 @@ public class LibraryFileService extends ServiceSuperclass {
             result.images.add(DtoMapper.getDTO(ic));
           } else {
             FileDescriptor fd =
-                fileDescriptorService.storeLibraryFile(bais, extension, partner);
+                fileDescriptorService.storeLibraryFile(bais, extension,name, partner);
             result.files.add(DtoMapper.getDTO(fd));
           }
         });

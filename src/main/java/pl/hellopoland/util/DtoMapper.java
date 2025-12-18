@@ -185,7 +185,9 @@ public class DtoMapper {
     dto.created = bo.getCreated();
     dto.type = bo.getMimeType().toString();
     dto.name = bo.getFileName();
+    dto.originalName = bo.getOriginalName();
     return dto;
+
   }
 
   public static FileDescriptorDTO getFullDTO(FileDescriptor bo) {

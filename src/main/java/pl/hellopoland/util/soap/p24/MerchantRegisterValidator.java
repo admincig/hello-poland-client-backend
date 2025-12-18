@@ -29,7 +29,7 @@ public class MerchantRegisterValidator {
       throw new ConflictingException(
           "Brak nr REGON. Obowiązkowe w przypadku rejestracji działalności innej niż osoba fizyczna.");
     }
-    if (intBusinesType > 3 && StringUtils.isBlank(merchant.krs)) {
+    if (intBusinesType > 3 && intBusinesType != 11 && intBusinesType!= 12 && StringUtils.isBlank(merchant.krs)) {
       throw new ConflictingException(
           "Brak nr KRS. Obowiązkowe w przypadku rejestracji jednoosobowej działalności gospodarczej.");
     }

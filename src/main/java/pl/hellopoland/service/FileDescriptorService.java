@@ -18,10 +18,13 @@ import java.util.UUID;
 @Stateless
 public class FileDescriptorService extends ServiceSuperclass {
 
-  public FileDescriptor storeLibraryFile(ByteArrayInputStream bais, String extension,
-      Partner partner) {
+  public FileDescriptor storeLibraryFile(ByteArrayInputStream bais,
+                                         String extension,
+                                         String originalName,
+                                         Partner partner) {
     File file = storeLibraryFileOnDisc(bais, extension, partner.getId());
     FileDescriptor fd = new FileDescriptor(file, partner);
+    fd.setOriginalName(originalName);
     em.persist(fd);
     return fd;
   }
