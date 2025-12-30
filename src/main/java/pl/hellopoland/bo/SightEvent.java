@@ -426,7 +426,20 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
     Hibernate.initialize(getPdfAttachment());
   }
 
-  public void recreateSearchIndex(Set<String> words) {
+  @Transient
+  public String getCommune() { return location == null ? null : location.getCommune(); }
+  public void setCommune(String v) { if (location == null) location = new Location(); location.setCommune(v); }
+
+  @Transient
+  public String getCounty() { return location == null ? null : location.getCounty(); }
+  public void setCounty(String v) { if (location == null) location = new Location(); location.setCounty(v); }
+
+  @Transient
+  public String getVoivodeship() { return location == null ? null : location.getVoivodeship(); }
+  public void setVoivodeship(String v) { if (location == null) location = new Location(); location.setVoivodeship(v); }
+
+
+    public void recreateSearchIndex(Set<String> words) {
     this.searchIndex =
         Stream.of(
             words.stream(),

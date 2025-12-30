@@ -28,7 +28,14 @@ public class OrderDetails {
   private boolean invoice;
   @Column(columnDefinition = "varchar")
   private String buyerNotes;
+  @Column(length = 255)
+  private String commune;
 
+  @Column(length = 255)
+  private String county;
+
+  @Column(length = 255)
+  private String voivodeship;
 
   public String getFirstName() {
     return firstName;
@@ -133,4 +140,28 @@ public class OrderDetails {
   public void setBuyerNotes(String buyerNotes) {
     this.buyerNotes = buyerNotes;
   }
+
+    public String getCommune() {
+        return commune;
+    }
+
+    public void setCommune(String commune) {
+        this.commune = commune;
+    }
+
+    public String getCounty() {
+        return county;
+    }
+
+    public void setCounty(String county) {
+        this.county = county;
+    }
+
+    public String getVoivodeship() {
+        return voivodeship;
+    }
+
+    public void setVoivodeship(String voivodeship) {
+        this.voivodeship = voivodeship;
+    }
 }

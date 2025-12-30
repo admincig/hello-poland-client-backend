@@ -49,6 +49,35 @@ public class OrderService extends ServiceSuperclass {
   TPayClient tPayClient;
   @Inject
   JwtVerificator jwtVerificator;
+  @Inject
+  PostalCodeDictionaryLookup pcd;
+
+    private void enrichOrderDetails(OrderDetails d) {
+        if (d == null) return;
+
+        boolean missing =
+                (d.getVoivodeship() == null || d.getVoivodeship().isBlank()) ||
+                        (d.getCounty() == null || d.getCounty().isBlank()) ||
+                        (d.getCommune() == null || d.getCommune().isBlank());
+
+        if (!missing) return;
+
+        if (d.getZipCode() == null || d.getZipCode().isBlank()) return;
+        if (d.getCity() == null || d.getCity().isBlank()) return;
+
+        pcd.findByZipAndCity(d.getZipCode(), d.getCity()).ifPresent(ad -> {
+            if (d.getCommune() == null || d.getCommune().isBlank()) {
+                d.setCommune(ad.commune());
+            }
+            if (d.getCounty() == null || d.getCounty().isBlank()) {
+                d.setCounty(ad.county());
+            }
+            if (d.getVoivodeship() == null || d.getVoivodeship().isBlank()) {
+                d.setVoivodeship(ad.voivodeship());
+            }
+        });
+    }
+
 
   public Order create(OrderIRO iro) {
     throwIfExpiredTickets(iro);
@@ -58,6 +87,8 @@ public class OrderService extends ServiceSuperclass {
     o.setUser(getLoggedUser());
     iro.details.setUserLogged(o.getUser() != null);
 
+    enrichOrderDetails(iro.details);
+    o.setDetails(iro.details);
     o.setDetails(iro.details);
     em.persist(o);
     Set<Long> atnaIds =

@@ -1,5 +1,6 @@
 package pl.hellopoland.rest.helpdesk;
 
+import jakarta.validation.Valid;
 import pl.hellopoland.config.PartnerPagedCollectionConfig;
 import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.enums.LanguageVersion;
@@ -32,7 +33,7 @@ public class HelpdeskPartnerRestService {
   @POST
   public PartnerDTO createLanguageVersion(
       @HeaderParam("Content-Language") String contentLanguage,
-      PartnerDTO dto) {
+      @Valid PartnerDTO dto) {
     LanguageVersion lang = RestService.parseLang(contentLanguage);
     if (dto.id != null) {
       return service.createLanguageVersion(dto, lang);
@@ -62,7 +63,7 @@ public class HelpdeskPartnerRestService {
   public PartnerDTO setBlocked(
       @HeaderParam("Content-Language") String contentLanguage,
       @PathParam("id") Long id,
-      PartnerDTO dto) {
+      @Valid PartnerDTO dto) {
     return service.setBlocked(id, dto.blocked, RestService.parseLang(contentLanguage));
   }
 
@@ -101,8 +102,7 @@ public class HelpdeskPartnerRestService {
   @PUT
   @Path("/{id}/languageVersion/{language}")
   public PartnerDTO update(@PathParam("id") Long id,
-      @PathParam("language") String language,
-      PartnerDTO dto) {
+      @PathParam("language") String language,@Valid PartnerDTO dto) {
     LanguageVersion lang = RestService.parseLang(language);
     dto.id = id;
     return service.update(dto, lang);

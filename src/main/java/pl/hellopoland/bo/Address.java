@@ -21,7 +21,40 @@ public class Address extends ModelSuperclass implements Translated {
 
   private String street;
 
+  @Column(length = 255)
+  private String commune;      // gmina
+
+    public String getCommune() {
+        return commune;
+    }
+
+    public void setCommune(String commune) {
+        this.commune = commune;
+    }
+
+    public String getCounty() {
+        return county;
+    }
+
+    public void setCounty(String county) {
+        this.county = county;
+    }
+
+    public String getVoivodeship() {
+        return voivodeship;
+    }
+
+    public void setVoivodeship(String voivodeship) {
+        this.voivodeship = voivodeship;
+    }
+
+    @Column(length = 255)
+  private String county;       // powiat
+  @Column(length = 255)
+  private String voivodeship;  // wojewodztwo
+
   @Multilingual
+  @Column(length = 1000)
   private String directions;
 
   @Column(length = 5)

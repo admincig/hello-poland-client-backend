@@ -12,6 +12,13 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+
 @RequestScoped
 @Path("/helpdesk/tags")
 @Produces(MediaType.APPLICATION_JSON)
@@ -68,17 +75,34 @@ public class HelpdeskTagRestService {
     return service.update(dto, lang);
   }
 
-  @PUT
-  @Path("/{id}/icon")
-  @Consumes({"image/jpeg", "image/jpg", "image/png"})
-  public TagDTO uploadIcon(@PathParam("id") Long id, byte[] bytes,
-      @HeaderParam("Content-Type") String contentType) {
-    String extension = "jpeg";
-    if ("image/png".equals(contentType)) {
-      extension = "png";
+    @PUT
+    @Path("/{id}/icon")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public TagDTO uploadIcon(@PathParam("id") Long id, MultipartFormDataInput input) throws Exception {
+
+        Map<String, List<InputPart>> form = input.getFormDataMap();
+
+        // FE zwykle wysyła pole "file" (czasem "icon")
+        InputPart part = null;
+        if (form.containsKey("file") && !form.get("file").isEmpty()) part = form.get("file").get(0);
+        else if (form.containsKey("icon") && !form.get("icon").isEmpty()) part = form.get("icon").get(0);
+        else throw new BadRequestException("Missing multipart field: file/icon");
+
+        String contentType =
+                part.getMediaType() != null ? part.getMediaType().toString().toLowerCase() : "image/jpeg";
+
+        try (InputStream is = part.getBody(InputStream.class, null)) {
+            byte[] bytes = is.readAllBytes();
+
+            String extension = "jpeg";
+            if (contentType.startsWith("image/png")) extension = "png";
+            else if (contentType.startsWith("image/svg+xml")) extension = "svg";
+            else if (contentType.startsWith("image/jpg") || contentType.startsWith("image/jpeg")) extension = "jpeg";
+            else throw new NotSupportedException("Unsupported content type: " + contentType);
+
+            return service.uploadIcon(id, bytes, extension);
+        }
     }
-    return service.uploadIcon(id, bytes, extension);
-  }
 
   @DELETE
   @Path("/{id}/languageVersion/{language}")

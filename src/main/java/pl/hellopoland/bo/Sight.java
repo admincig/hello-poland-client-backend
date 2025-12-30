@@ -53,6 +53,21 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
   private Set<Agreement> agreements = new HashSet<>();
   private boolean published;
   private boolean blocked;
+  @Column(name = "animals_allowed")
+  private boolean animalsAllowed; // null w DB -> false po stronie BO
+
+  @Column(name = "car_park_available")
+  private boolean carParkAvailable;
+  @Column(name = "disabled_access_hearing")
+  private boolean disabledAccessHearing;
+  @Column(name = "disabled_access_movement")
+  private boolean disabledAccessMovement;
+  @Column(name = "disabled_access_vision")
+  private boolean disabledAccessVision;
+  @Column(name = "food_and_drink_available")
+  private boolean foodAndDrinkAvailable;
+
+
   @NotNull
   @Column(length = 5, nullable = false)
   @Enumerated(EnumType.STRING)
@@ -325,7 +340,50 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
     this.favourite = favourite;
   }
 
-  public void fetchRelations() {
+  @Transient
+  public String getCommune() { return location == null ? null : location.getCommune(); }
+  public void setCommune(String v) { if (location == null) location = new Location(); location.setCommune(v); }
+
+
+  @Transient
+  public String getCounty() { return location == null ? null : location.getCounty(); }
+  public void setCounty(String v) { if (location == null) location = new Location(); location.setCounty(v); }
+
+  @Transient
+  public String getVoivodeship() { return location == null ? null : location.getVoivodeship(); }
+  public void setVoivodeship(String v) { if (location == null) location = new Location(); location.setVoivodeship(v); }
+
+  public boolean isAnimalsAllowed() { return animalsAllowed; }
+  public void setAnimalsAllowed(boolean animalsAllowed) { this.animalsAllowed = animalsAllowed; }
+
+  public boolean isCarParkAvailable() { return carParkAvailable; }
+
+  public void setCarParkAvailable(boolean carParkAvailable) { this.carParkAvailable = carParkAvailable; }
+
+  public boolean isDisabledAccessHearing() { return disabledAccessHearing; }
+
+  public void setDisabledAccessHearing(boolean disabledAccessHearing) { this.disabledAccessHearing = disabledAccessHearing; }
+
+  public boolean isDisabledAccessMovement() { return disabledAccessMovement; }
+  public void setDisabledAccessMovement(boolean disabledAccessMovement) { this.disabledAccessMovement = disabledAccessMovement; }
+
+    public boolean isDisabledAccessVision() {
+        return disabledAccessVision;
+    }
+
+    public void setDisabledAccessVision(boolean disabledAccessVision) {
+        this.disabledAccessVision = disabledAccessVision;
+    }
+
+    public boolean isFoodAndDrinkAvailable() {
+        return foodAndDrinkAvailable;
+    }
+
+    public void setFoodAndDrinkAvailable(boolean foodAndDrinkAvailable) {
+        this.foodAndDrinkAvailable = foodAndDrinkAvailable;
+    }
+
+    public void fetchRelations() {
     Hibernate.initialize(this.getMainImage());
     Hibernate.initialize(this.getOpeningHours());
     Hibernate.initialize(this.getImages());

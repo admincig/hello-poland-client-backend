@@ -1,5 +1,6 @@
 package pl.hellopoland.bo;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
 @Embeddable
@@ -11,7 +12,19 @@ public class Location {
   private String zipCode;
   private String city;
   private String country;
+
+  @Column(length = 1000)
   private String directions;
+
+  @Column(length = 255)
+  private String commune;
+
+  @Column(length = 255)
+  private String county;
+
+  @Column(length = 255)
+  private String voivodeship;
+
 
   public Double getLatitude() {
     return latitude;
@@ -68,5 +81,16 @@ public class Location {
   public void setDirections(String directions) {
     this.directions = directions;
   }
+
+  public String getCommune() { return commune; }
+  public void setCommune(String commune) {this.commune = commune; }
+  public String getCounty() { return county; }
+  public void setCounty(String county) { this.county = county; }
+  public String getVoivodeship() { return voivodeship; }
+
+    public void setVoivodeship(String voivodeship) {
+        this.voivodeship = voivodeship;
+    }
+
 
 }

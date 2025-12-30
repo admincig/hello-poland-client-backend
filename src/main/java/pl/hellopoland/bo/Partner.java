@@ -16,6 +16,8 @@ import java.util.*;
 public class Partner extends ModelSuperclass implements Translated, HptSubject {
 
   private static final long serialVersionUID = 6118414827783500940L;
+  private static final int DESCRIPTION_MAX = 1000;
+  private static final int SERVICES_DESCRIPTION_MAX = 1000;
 
   @NotNull
   @Column(nullable = false)
@@ -76,11 +78,13 @@ public class Partner extends ModelSuperclass implements Translated, HptSubject {
 
   private String regon;
 
+  @Column(length = 1000)
   private String servicesDescription;
 
   private String shopUrl;
 
   @Multilingual
+  @Column(length = 1000)
   private String description;
 
   private LocalDateTime created;
@@ -296,10 +300,6 @@ public class Partner extends ModelSuperclass implements Translated, HptSubject {
     return servicesDescription;
   }
 
-  public void setServicesDescription(String servicesDescription) {
-    this.servicesDescription = servicesDescription;
-  }
-
   public String getShopUrl() {
     return shopUrl;
   }
@@ -337,9 +337,18 @@ public class Partner extends ModelSuperclass implements Translated, HptSubject {
   }
 
   public void setDescription(String description) {
-    this.description = description;
+        this.description = cut(description, DESCRIPTION_MAX);
+    }
+
+  public void setServicesDescription(String servicesDescription) {
+        this.servicesDescription = cut(servicesDescription, SERVICES_DESCRIPTION_MAX);
   }
 
+  private static String cut(String s, int max) {
+        if (s == null) return null;
+        if (s.length() <= max) return s;
+        return s.substring(0, max);
+  }
   public List<Category> getCategories() {
     return categories;
   }

@@ -46,7 +46,31 @@ public class SightService extends ServiceSuperclass {
   @Inject
   private UserService userService;
 
-  public PagedEntityCollection<Sight> getList(SightPagedCollectionConfig config,
+  @Inject
+  PostalCodeDictionaryLookup pcd;
+
+  private void enrichLocation(Location loc) {
+        if (loc == null) return;
+
+        boolean missing =
+                (loc.getVoivodeship() == null || loc.getVoivodeship().isBlank()) ||
+                        (loc.getCounty() == null || loc.getCounty().isBlank()) ||
+                        (loc.getCommune() == null || loc.getCommune().isBlank());
+
+        if (!missing) return;
+        if (loc.getZipCode() == null || loc.getZipCode().isBlank()) return;
+        if (loc.getCity() == null || loc.getCity().isBlank()) return;
+
+        pcd.findByZipAndCity(loc.getZipCode(), loc.getCity()).ifPresent(ad -> {
+            if (loc.getCommune() == null || loc.getCommune().isBlank()) loc.setCommune(ad.commune());
+            if (loc.getCounty() == null || loc.getCounty().isBlank()) loc.setCounty(ad.county());
+            if (loc.getVoivodeship() == null || loc.getVoivodeship().isBlank())
+                loc.setVoivodeship(ad.voivodeship());
+        });
+  }
+
+
+    public PagedEntityCollection<Sight> getList(SightPagedCollectionConfig config,
       LanguageVersion language) {
     if (config.isCurrentPartner()) {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
@@ -77,6 +101,7 @@ public class SightService extends ServiceSuperclass {
   public Sight create(SightDTO dto, Partner partner) {
     Sight bo = new Sight();
     DtoMapper.copy(dto, bo);
+    enrichLocation(bo.getLocation());
     if (bo.isBlocked()) {
       bo.setPublished(false);
     }
@@ -147,6 +172,7 @@ public class SightService extends ServiceSuperclass {
     }
     if (bo.getDefaultLanguage().equals(language)) {
       DtoMapper.copy(dto, bo);
+      enrichLocation(bo.getLocation());
       if (bo.isBlocked()) {
         bo.setPublished(false);
       }

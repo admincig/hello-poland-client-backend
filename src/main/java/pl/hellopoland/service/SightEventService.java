@@ -50,6 +50,29 @@ public class SightEventService extends ServiceSuperclass {
   @Inject
   TagService tagService;
 
+    @Inject
+    PostalCodeDictionaryLookup pcd;
+
+    private void enrichLocation(Location loc) {
+        if (loc == null) return;
+
+        boolean missing =
+                (loc.getVoivodeship() == null || loc.getVoivodeship().isBlank()) ||
+                        (loc.getCounty() == null || loc.getCounty().isBlank()) ||
+                        (loc.getCommune() == null || loc.getCommune().isBlank());
+
+        if (!missing) return;
+        if (loc.getZipCode() == null || loc.getZipCode().isBlank()) return;
+        if (loc.getCity() == null || loc.getCity().isBlank()) return;
+
+        pcd.findByZipAndCity(loc.getZipCode(), loc.getCity()).ifPresent(ad -> {
+            if (loc.getCommune() == null || loc.getCommune().isBlank()) loc.setCommune(ad.commune());
+            if (loc.getCounty() == null || loc.getCounty().isBlank()) loc.setCounty(ad.county());
+            if (loc.getVoivodeship() == null || loc.getVoivodeship().isBlank())
+                loc.setVoivodeship(ad.voivodeship());
+        });
+    }
+
   public List<Long> getAllActiveAndPublishedAndNotBlocked() {
     return em.createQuery(
         "select hptId from SightEvent where active is true and published is true and blocked is false",
@@ -158,6 +181,7 @@ public class SightEventService extends ServiceSuperclass {
     dto.availableLanguageVersions = availableLanguageVersions;
     SightEvent bo = new SightEvent();
     DtoMapper.copy(dto, bo);
+    enrichLocation(bo.getLocation());
     bo.setPartner(partner);
     iService.handleImagesUpdate(bo, dto);
     handleAttachmentUpdate(bo, dto);
@@ -249,6 +273,7 @@ public class SightEventService extends ServiceSuperclass {
         dto.pdfAttachment = pdf;
       }
       DtoMapper.copy(dto, bo);
+        enrichLocation(bo.getLocation());
       oHoursService.remove(bo.getOpeningHours());
       ArrayList<OpeningHours> oHoursList = getOpeningHoursCollectionFromDTO(dto);
       if (oHoursList != null && !oHoursList.isEmpty()) {

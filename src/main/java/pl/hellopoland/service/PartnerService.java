@@ -29,8 +29,30 @@ public class PartnerService extends ServiceSuperclass {
   ImageService iService;
   @Inject
   TranslationService translationService;
+  @Inject
+  PostalCodeDictionaryLookup pcd;
 
-  public Partner findByUserEmail(String email) {
+
+  private void enrichLocationDto(pl.hellopoland.dto.LocationDTO loc) {
+       if (loc == null) return;
+
+        // Fill only when missing, so UI can override if you want
+      boolean missing =
+                (loc.voivodeship == null || loc.voivodeship.isBlank()) ||
+                        (loc.county == null || loc.county.isBlank()) ||
+                        (loc.commune == null || loc.commune.isBlank());
+
+        if (!missing) return;
+
+        pcd.findByZipAndCity(loc.zipCode, loc.city).ifPresent(ad -> {
+            if (loc.commune == null || loc.commune.isBlank()) loc.commune = ad.commune();
+            if (loc.county == null || loc.county.isBlank()) loc.county = ad.county();
+            if (loc.voivodeship == null || loc.voivodeship.isBlank()) loc.voivodeship = ad.voivodeship();
+        });
+    }
+
+
+    public Partner findByUserEmail(String email) {
     return em.createQuery(
         "select partner from User user join user.partner partner where lower(user.email) = :email",
         Partner.class).setParameter("email", email.toLowerCase()).getSingleResult();
@@ -101,33 +123,58 @@ public class PartnerService extends ServiceSuperclass {
     return bo;
   }
 
-  public Partner update(Partner bo, MarketPartnerDTO dto, LanguageVersion lang) {
-    if (!translationService.isTranslated(bo.getAddress(), lang)) {
-      translationService.createEntityLanguageVersion(bo.getAddress(), dto, lang);
-    }
-    if (!translationService.isTranslated(bo, lang)) {
-      bo = em.merge(bo);
-      translationService.createEntityLanguageVersion(bo, dto, lang);
-    }
-    if (bo.getDefaultLanguage().equals(lang)) {
-      DtoMapper.copy(dto, bo);
-      if (bo.getAddress() == null) {
-        bo.setAddress(new Address());
-      }
-      bo.getAddress().setDirections(dto.location.directions);
-      em.flush();
+    public Partner update(Partner bo, MarketPartnerDTO dto, LanguageVersion lang) {
+        if (dto.location != null) {
+            enrichLocationDto(dto.location);
+        }
+        if (bo.getAddress() == null) {
+            bo.setAddress(new Address());
+        }
+
+        if (dto.location != null && !translationService.isTranslated(bo.getAddress(), lang)) {
+            translationService.createEntityLanguageVersion(bo.getAddress(), dto.location, lang);
+        }
+        if (!translationService.isTranslated(bo, lang)) {
+            bo = em.merge(bo);
+            translationService.createEntityLanguageVersion(bo, dto, lang);
+        }
+
+        if (bo.getDefaultLanguage().equals(lang)) {
+            DtoMapper.copy(dto, bo);
+            if (dto.location != null) {
+                bo.getAddress().setDirections(dto.location.directions);
+            }
+            em.flush();
+        }
+
+        if (dto.location != null) {
+            translationService.updateEntityLanguageVersion(bo.getAddress(), dto.location, lang);
+        }
+        return translationService.updateEntityLanguageVersion(bo, dto, lang);
     }
 
-    translationService.updateEntityLanguageVersion(bo.getAddress(), dto.location, lang);
-    return translationService.updateEntityLanguageVersion(bo, dto, lang);
-  }
 
   public Partner update(Partner bo, PartnerDTO dto, LanguageVersion lang) {
-    if (!translationService.isTranslated(bo.getAddress(), lang)) {
-      translationService.createEntityLanguageVersion(bo.getAddress(), dto.location, lang);
+    enrichLocationDto(dto.location);
+    enrichLocationDto(dto.correspondenceAddress);
+    if (bo.getAddress() == null) {
+          bo.setAddress(new Address());
+    }
+    if (dto.correspondenceAddress != null && bo.getCorrespondenceAddress() == null) {
+          bo.setCorrespondenceAddress(new Address());
     }
 
-    if (!translationService.isTranslated(bo, lang)) {
+    if (dto.location != null && !translationService.isTranslated(bo.getAddress(), lang)) {
+      translationService.createEntityLanguageVersion(bo.getAddress(), dto.location, lang);
+    }
+    if (dto.correspondenceAddress != null
+              && !translationService.isTranslated(bo.getCorrespondenceAddress(), lang)) {
+          translationService.createEntityLanguageVersion(
+                  bo.getCorrespondenceAddress(), dto.correspondenceAddress, lang);
+    }
+
+
+      if (!translationService.isTranslated(bo, lang)) {
       bo = em.merge(bo);
       translationService.createEntityLanguageVersion(bo, dto, lang);
     }
@@ -136,31 +183,56 @@ public class PartnerService extends ServiceSuperclass {
           bo.setBusinessType(BusinessType.getBusinessType(dto.businessType));
     }
 
-    if (bo.getDefaultLanguage().equals(lang)) {
-      DtoMapper.copy(dto, bo);
-      bo.getAddress().setDirections(dto.location.directions);
-      em.flush();
-    }
-    translationService.updateEntityLanguageVersion(bo.getAddress(), dto.location, lang);
-    return translationService.updateEntityLanguageVersion(bo, dto, lang);
+      if (bo.getDefaultLanguage().equals(lang)) {
+          DtoMapper.copy(dto, bo);
+          bo.getAddress().setDirections(dto.location != null ? dto.location.directions : null);
+          if (dto.correspondenceAddress != null) {
+              bo.getCorrespondenceAddress().setDirections(dto.correspondenceAddress.directions);
+          }
+          em.flush();
+      }
+
+      if (dto.location != null) {
+          translationService.updateEntityLanguageVersion(bo.getAddress(), dto.location, lang);
+      }
+      if (dto.correspondenceAddress != null) {
+          translationService.updateEntityLanguageVersion(
+                  bo.getCorrespondenceAddress(), dto.correspondenceAddress, lang);
+      }
+      return translationService.updateEntityLanguageVersion(bo, dto, lang);
+
   }
 
   public Partner createLanguageVersion(MarketPartnerDTO dto, LanguageVersion language) {
+    enrichLocationDto(dto.location);
+
     Partner bo = get(dto.id);
     if (bo.getAddress() == null) {
       bo.setAddress(new Address());
     }
-    translationService.createEntityLanguageVersion(bo.getAddress(), dto.location, language);
+      if (dto.location != null) {
+          translationService.createEntityLanguageVersion(bo.getAddress(), dto.location, language);
+      }
+
     bo = em.merge(bo);
     return translationService.createEntityLanguageVersion(bo, dto, language);
   }
 
   public Partner createLanguageVersion(PartnerDTO dto, LanguageVersion language) {
+    enrichLocationDto(dto.location);
+    enrichLocationDto(dto.correspondenceAddress);
     Partner bo = get(dto.id);
     if (bo.getAddress() == null) {
       bo.setAddress(new Address());
     }
     translationService.createEntityLanguageVersion(bo.getAddress(), dto.location, language);
+      if (dto.correspondenceAddress != null) {
+          if (bo.getCorrespondenceAddress() == null) {
+              bo.setCorrespondenceAddress(new Address());
+          }
+          translationService.createEntityLanguageVersion(
+                  bo.getCorrespondenceAddress(), dto.correspondenceAddress, language);
+      }
     bo = em.merge(bo);
     return translationService.createEntityLanguageVersion(bo, dto, language);
   }

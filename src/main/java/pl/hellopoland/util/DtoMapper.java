@@ -41,7 +41,17 @@ public class DtoMapper {
     if (source.published != null) {
       target.setPublished(source.published);
     }
+      target.setAnimalsAllowed(Boolean.TRUE.equals(source.animalsAllowed));
+      target.setCarParkAvailable(Boolean.TRUE.equals(source.carParkAvailable));
+      target.setFoodAndDrinkAvailable(Boolean.TRUE.equals(source.foodAndDrinkAvailable));
+
+      target.setDisabledAccessHearing(Boolean.TRUE.equals(source.disabledAccessHearing));
+      target.setDisabledAccessMovement(Boolean.TRUE.equals(source.disabledAccessMovement));
+      target.setDisabledAccessVision(Boolean.TRUE.equals(source.disabledAccessVision));
+
+
     copyLocation(source.location, target);
+
   }
 
   public static OpeningHours copy(OpeningHoursDTO source, OpeningHours target) {
@@ -79,6 +89,14 @@ public class DtoMapper {
     dto.score = bo.getScore();
     dto.blocked = bo.isBlocked();
     dto.published = bo.isPublished();
+    dto.animalsAllowed = bo.isAnimalsAllowed();
+    dto.carParkAvailable = bo.isCarParkAvailable();
+    dto.foodAndDrinkAvailable = bo.isFoodAndDrinkAvailable();
+
+    dto.disabledAccessHearing = bo.isDisabledAccessHearing();
+    dto.disabledAccessMovement = bo.isDisabledAccessMovement();
+    dto.disabledAccessVision = bo.isDisabledAccessVision();
+
     dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
     dto.language = bo.getCurrentLanguage() == null ? dto.defaultLanguage
         : bo.getCurrentLanguage().getLanuage();
@@ -216,6 +234,9 @@ public class DtoMapper {
     dto.city = bo.getCity();
     dto.country = bo.getCountry();
     dto.directions = bo.getDirections();
+    dto.voivodeship = bo.getVoivodeship();
+    dto.county = bo.getCounty();
+    dto.commune = bo.getCommune();
     return dto;
   }
 
@@ -227,6 +248,10 @@ public class DtoMapper {
       dto.city = address.getCity();
       dto.country = address.getCountry();
       dto.directions = address.getDirections();
+      dto.commune = address.getCommune();
+      dto.county = address.getCounty();
+      dto.voivodeship = address.getVoivodeship();
+
       return dto;
     }
     return null;
@@ -302,6 +327,9 @@ public class DtoMapper {
       location.setCity(source.city);
       location.setCountry(source.country);
       location.setDirections(source.directions);
+      location.setVoivodeship(source.voivodeship);
+      location.setCounty(source.county);
+      location.setCommune(source.commune);
       target.setLocation(location);
     } else {
       target.setLocation(null);
@@ -559,6 +587,9 @@ public class DtoMapper {
     bo.setPostCode(dto.zipCode);
     bo.setStreet(dto.street);
     bo.setDirections(dto.directions);
+    bo.setCommune(dto.commune);
+    bo.setCounty(dto.county);
+    bo.setVoivodeship(dto.voivodeship);
   }
 
 }

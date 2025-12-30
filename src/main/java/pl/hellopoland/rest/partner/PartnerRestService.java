@@ -17,6 +17,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
+import jakarta.validation.Valid;
 
 @Path("/partner")
 @RequestScoped
@@ -39,7 +40,7 @@ public class PartnerRestService {
 
   @POST
   @Path("/ushers")
-  public Response createUsher(UserDTO usher) {
+  public Response createUsher(@Valid UserDTO usher) {
     return Response.ok(userService.createUsher(usher)).build();
   }
 
@@ -57,7 +58,7 @@ public class PartnerRestService {
 
   @PATCH
   @Path("/ushers/{id}")
-  public Response updateUsher(@PathParam("id") long usherId, UserDTO usher) {
+  public Response updateUsher(@PathParam("id") long usherId, @Valid UserDTO usher) {
     usher.id = usherId;
     return Response.ok(userService.updateUsher(usher)).build();
   }
@@ -92,7 +93,7 @@ public class PartnerRestService {
   @Path("/company/card")
   public MarketPartnerDTO createLanguageVersion(
       @HeaderParam("Content-Language") String contentLanguage,
-      MarketPartnerDTO dto) {
+      @Valid MarketPartnerDTO dto) {
     LanguageVersion lang = RestService.parseLang(contentLanguage);
     return service.createLanguageVersion(dto, lang);
   }
@@ -108,7 +109,7 @@ public class PartnerRestService {
   @PUT
   @Path("/company/card/languageVersion/{language}")
   public MarketPartnerDTO update(@PathParam("language") String language,
-      MarketPartnerDTO dto) {
+      @Valid MarketPartnerDTO dto) {
     LanguageVersion lang = RestService.parseLang(language);
     return service.update(dto, lang);
   }

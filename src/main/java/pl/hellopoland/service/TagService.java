@@ -14,6 +14,7 @@ import pl.hellopoland.util.PagedEntityCollection;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import java.io.ByteArrayInputStream;
+import pl.hellopoland.service.FileDescriptorService;
 import java.util.*;
 
 @Stateless
@@ -23,6 +24,9 @@ public class TagService extends ServiceSuperclass {
   private TranslationService tService;
   @Inject
   private ImageService iService;
+
+  @Inject
+  FileDescriptorService fileDescriptorService;
 
   public Tag create(TagDTO dto) {
     Tag tag = new Tag();
@@ -95,11 +99,37 @@ public class TagService extends ServiceSuperclass {
         .setParameter("sightEvents", sightEvents).getResultList();
   }
 
-  public Tag uploadIcon(Long id, byte[] bytes, String extension) {
-    Tag tag = get(id);
-    ImageCollector ic =
-        iService.storeImageCollector(new ByteArrayInputStream(bytes), extension);
-    tag.setIconUrl(ic.getQvga().getDownloadUrl());
-    return tag;
-  }
+    public Tag uploadIcon(Long id, byte[] bytes, String extension) {
+        Tag tag = get(id);
+
+        // SVG: zapisujemy "as-is" i ustawiamy iconUrl na bezpośredni plik
+        if ("svg".equalsIgnoreCase(extension)) {
+            String hash = java.util.UUID.randomUUID().toString().replace('-', 'x');
+            String basePath = properties.getProperty("dms.root.path")
+                    + java.io.File.separator + "icons"
+                    + java.io.File.separator + hash.substring(0, 1)
+                    + java.io.File.separator + hash.substring(1, 2)
+                    + java.io.File.separator;
+
+            java.io.File file =
+                    fileDescriptorService.createEmptyFileOnDisc(basePath + hash + ".svg");
+            try {
+                java.nio.file.Files.write(file.toPath(), bytes);
+            } catch (java.io.IOException e) {
+                throw new RuntimeException("Icon SVG NOT stored: " + e.getMessage(), e);
+            }
+
+            tag.setIconUrl(System.getProperty("base.url") + "/images/" + hash + ".svg");
+
+            em.flush();
+            return tag;
+        }
+
+        // PNG/JPG: zostaje jak było
+        ImageCollector ic = iService.storeImageCollector(new java.io.ByteArrayInputStream(bytes), extension);
+        tag.setIconUrl(ic.getQvga().getDownloadUrl());
+        em.flush();
+        return tag;
+    }
+
 }
