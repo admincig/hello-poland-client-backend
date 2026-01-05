@@ -190,13 +190,14 @@ public class HelloTicket {
       return jsonb.fromJson(json.toString(), TicketPoolDefinitionDTO.class);
     } catch (Exception e) {
       logger.log(System.Logger.Level.WARNING, "Failed", e);
-      if (e.getMessage() != null && e.getMessage().contains("400")) {
-        throw new BadRequestException("TicketPoolDefinition must have tickets definitions.");
-      }
-      if (e.getMessage() != null && e.getMessage().contains("409")) {
-        throw new ConflictingException("Bad availableTicketsNumber limit combination.");
-      }
-      return null;
+        if (e.getMessage() != null && e.getMessage().contains("400")) {
+            throw new BadRequestException("TicketPoolDefinition must have tickets definitions.");
+        }
+        if (e.getMessage() != null && e.getMessage().contains("409")) {
+            throw new ConflictingException("Bad availableTicketsNumber limit combination.");
+        }
+        throw new ExternalSystemException("HelloTicket addTicketPoolDefinition failed: " + e.getMessage());
+
     }
   }
 
@@ -526,17 +527,21 @@ public class HelloTicket {
     printWriter.append(json);
     printWriter.close();
     var respCode = conn.getResponseCode();
-    InputStream is = conn.getErrorStream();
-    if (is != null) {
-      String respString = IOUtils.toString(is);
-      try {
-        var resp = JsonbConfig.getInstance().fromJson(respString, JsonStructure.class);
-        throw new ExternalSystemException(((JsonString) resp.getValue("/message")).getString());
-      } catch (Exception e) {
-        logger.log(Level.WARNING, respString);
-        throw new ExternalSystemException(respString);
+      InputStream is = conn.getErrorStream();
+      if (is != null) {
+          String respString = IOUtils.toString(is);
+          String msg;
+
+          try {
+              var resp = JsonbConfig.getInstance().fromJson(respString, JsonStructure.class);
+              msg = ((JsonString) resp.getValue("/message")).getString();
+          } catch (Exception e) {
+              msg = respString;
+          }
+
+          throw new ExternalSystemException("HTTP " + respCode + ": " + msg);
       }
-    }
+
     is = conn.getInputStream();
     var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
     logger.log(System.Logger.Level.INFO, "Server responded with code: " + respCode);

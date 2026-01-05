@@ -40,6 +40,11 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
 
   public TicketPoolDefinitionDTO add(TicketPoolDefinitionDTO dto, Partner partner) {
     final Long sightEventId = dto.sightEventId;
+    if (dto.ticketDefinitions == null || dto.ticketDefinitions.isEmpty()) {
+          throw new ConflictingException(
+                  "Brak ticketDefinitions (dodaj przynajmniej 1 bilet)");
+    }
+
     SightEvent se = sightEventService.get(dto.sightEventId);
     if (se == null) {
       throw new ResourceNotFoundException();
@@ -51,9 +56,12 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     dto.sightEventId = se.getHptId();
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
-    dto = hpt.addTicketPoolDefinition(dto, partner.getHptToken());
-    dto.sightEventId = sightEventId;
-    return dto;
+    TicketPoolDefinitionDTO resp = hpt.addTicketPoolDefinition(dto, partner.getHptToken());
+    if (resp == null) {
+          throw new ConflictingException("HelloTicket rejected TicketPoolDefinition (null response)");
+    }
+    resp.sightEventId = sightEventId;
+    return resp;
   }
 
   private void validateDates(TicketPoolDefinitionDTO tpdDTO) {
