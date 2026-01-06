@@ -186,13 +186,35 @@ public class SightServiceMarketAPI {
     bo.removeUser(userService.getLoggedUser());
   }
 
-  @RolesAllowed("user")
-  public PagedCollection<SightDTO> favourites(SightPagedCollectionConfig config,
-      String contentLanguageSymbol) {
-    if (userService.getLoggedUser() != null) {
-      config.onlyFavourite(userService.getLoggedUser().getId());
+    @RolesAllowed("user")
+    public PagedCollection<SightDTO> favourites(SightPagedCollectionConfig config,
+                                                String contentLanguageSymbol) {
+
+        if (userService.getLoggedUser() != null) {
+            config.onlyFavourite(userService.getLoggedUser().getId());
+        }
+
+        LanguageVersion language = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
+
+        // żeby dało się policzyć minPrice/minDiscountPrice:
+        config.fetchSightEvents(true);
+        config.setOrderColumn("e.name");
+        config.setOrderDirection("asc");
+
+        PagedEntityCollection<Sight> bos = service.getList(config, language);
+
+        // dociąga ceny z HelloTicket i podstawia je do sightEvents
+        fetchSightEventPrices(bos.items);
+
+        List<SightDTO> dtos = bos.items.stream()
+                .map(minPriceMapper)   // ten mapper ustawia dto.minPrice / dto.minDiscountPrice
+                .collect(Collectors.toList());
+
+        if (language != null) {
+            dtos.forEach(dto -> dto.language = language.getLanuage());
+        }
+
+        return new PagedCollection<>(dtos, bos.config);
     }
-    return getList(config, contentLanguageSymbol);
-  }
 
 }
