@@ -74,13 +74,17 @@ public class TranslationService extends ServiceSuperclass {
         continue;
       }
     }
-    return translateEntity(bo, language);
+    //return translateEntity(bo, language);
+      return bo;
   }
 
   public <T extends Translated> T translateEntity(T bo, LanguageVersion language) {
     if (bo == null) {
       return null;
     }
+    if (language != null && language.equals(bo.getDefaultLanguage())) {
+          return bo;
+     }
     var translations = getTranslations(bo, language);
     em.clear();
     for (Translation translation : translations) {

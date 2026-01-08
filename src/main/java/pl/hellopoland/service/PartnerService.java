@@ -155,6 +155,10 @@ public class PartnerService extends ServiceSuperclass {
 
 
   public Partner update(Partner bo, PartnerDTO dto, LanguageVersion lang) {
+
+    if (!em.contains(bo)) {
+          bo = em.merge(bo);
+    }
     enrichLocationDto(dto.location);
     enrichLocationDto(dto.correspondenceAddress);
     if (bo.getAddress() == null) {
@@ -182,7 +186,6 @@ public class PartnerService extends ServiceSuperclass {
     if (dto.businessType != null) {
           bo.setBusinessType(BusinessType.getBusinessType(dto.businessType));
     }
-
       if (bo.getDefaultLanguage().equals(lang)) {
           DtoMapper.copy(dto, bo);
           bo.getAddress().setDirections(dto.location != null ? dto.location.directions : null);
@@ -190,14 +193,14 @@ public class PartnerService extends ServiceSuperclass {
               bo.getCorrespondenceAddress().setDirections(dto.correspondenceAddress.directions);
           }
           em.flush();
+          return bo;
       }
 
       if (dto.location != null) {
           translationService.updateEntityLanguageVersion(bo.getAddress(), dto.location, lang);
       }
       if (dto.correspondenceAddress != null) {
-          translationService.updateEntityLanguageVersion(
-                  bo.getCorrespondenceAddress(), dto.correspondenceAddress, lang);
+          translationService.updateEntityLanguageVersion(bo.getCorrespondenceAddress(), dto.correspondenceAddress, lang);
       }
       return translationService.updateEntityLanguageVersion(bo, dto, lang);
 
