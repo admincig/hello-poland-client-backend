@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class SightEventPagedCollectionConfig extends PagedCollectionConfig<SightEvent> {
 
@@ -57,20 +58,29 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
         + (joinCategories ? " inner join SightEventCategory sec on sec.sightEvent.id=e.id" : "");
   }
 
-  public void setSearchQuery(String searchQuery) {
-      if (searchQuery != null) {
-      addCondition("searchQuery",
-          WordUtils.capitalizeFully(searchQuery),
-          "tsearch('polish_hunspell', e.searchIndex, :searchQuery) = true");
+    public void setSearchQuery(String searchQuery) {
+        if (searchQuery != null && !searchQuery.isBlank()) {
 
-      /*
-       * "%" + searchQuery.toLowerCase() + "%",
-       * "((unaccent(lower(e.name)) like unaccent(:searchQuery))" +
-       * " or (unaccent(lower(e.lead)) like unaccent(:searchQuery))" +
-       * " or (unaccent(lower(e.location.city)) like unaccent(:searchQuery)))");
-       */
+            String normalized = searchQuery
+                    .replaceAll("[^a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]", " ")
+                    .trim();
+
+            String tsQuery = Arrays.stream(normalized.split("\\s+"))
+                    .filter(s -> !s.isBlank())
+                    .map(s -> s + ":*")
+                    .collect(Collectors.joining(" & "));
+
+            addCondition(
+                    "searchQuery",
+                    tsQuery,
+                    "tsearch('polish_hunspell', e.searchIndex, :searchQuery)"
+            );
+
+
+        }
     }
-  }
+
+
 
   public void onlyAvailable() {
     addCondition("available", true, "e.available=:available");
@@ -105,7 +115,8 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
 
   public void setCity(String city) {
     if (city != null) {
-      addCondition("city", WordUtils.capitalizeFully(city), "e.location.city=:city");
+        addCondition("city", city, "lower(e.location.city)=lower(:city)");
+
     }
   }
 

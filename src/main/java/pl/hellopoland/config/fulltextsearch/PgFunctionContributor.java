@@ -11,6 +11,14 @@ public class PgFunctionContributor implements FunctionContributor {
 		BasicType<Boolean>
 				resolveType = functionContributions.getTypeConfiguration().getBasicTypeRegistry().resolve(
 				StandardBasicTypes.BOOLEAN);
-		functionContributions.getFunctionRegistry().registerPattern("tsearch","to_tsvector(?1, ?2) @@ plainto_tsquery(?1, ?3)",resolveType);
+		//functionContributions.getFunctionRegistry().registerPattern("tsearch","to_tsvector(?1, ?2) @@ plainto_tsquery(?1, ?3)",resolveType);
+        functionContributions.getFunctionRegistry().registerPattern(
+                "tsearch",
+                "CASE WHEN to_tsvector(?1, ?2) @@ to_tsquery(?1, ?3) THEN true ELSE false END",
+                resolveType
+        );
+
+
+
 	}
 }

@@ -92,34 +92,40 @@ public class SightEventService extends ServiceSuperclass {
     if (config.isLoggedUserFavourites()) {
       config.onlyFavourite(loggedUser.getId());
     }
-    List<SightEvent> sightEvents = getQuery(config).getResultList();
-    sightEvents.stream().forEach(s -> {
-      s.setFavourite(s.getUsers().contains(loggedUser));
-    });
+      List<SightEvent> sightEvents = Optional.ofNullable(getQuery(config).getResultList()).orElseGet(ArrayList::new);
+
+    sightEvents.forEach(s -> s.setFavourite( Optional.ofNullable(s.getUsers()).map(u -> u.contains(loggedUser)).orElse(false)));
     if (!sightEvents.isEmpty() && config.isFetchCategories()) {
       List<SightEventCategory> categories = catService.getFor(sightEvents);
       Map<SightEvent, Set<SightEventCategory>> grouped = categories.stream()
           .collect(groupingBy(SightEventCategory::getSightEvent, toSet()));
-      sightEvents.forEach(se -> se.setCategories(grouped.get(se)));
+        sightEvents.forEach(se -> se.setCategories(grouped.getOrDefault(se, Collections.emptySet())));
+
     }
     if (!sightEvents.isEmpty() && config.isFetchTags()) {
       List<SightEventTag> tags = tagService.getFor(sightEvents);
       Map<SightEvent, Set<SightEventTag>> grouped = tags.stream()
           .collect(groupingBy(SightEventTag::getSightEvent, toSet()));
-      sightEvents.forEach(se -> se.setTags(grouped.get(se)));
+        sightEvents.forEach(se -> se.setTags(grouped.getOrDefault(se, Collections.emptySet())));
+
     }
-    if (config.getLanguage() != null) {
-      sightEvents = translationService.translateEntities(sightEvents, config.getLanguage());
-    }
-    if (config.getDateFrom() != null || config.getDateTo() != null) {
-      HelloTicket hptClient = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
-      sightEvents = hptClient.getSightEventsInDateRange(new ArrayList<SightEvent>(sightEvents),
-          config.getDateFrom(), config.getDateTo());
-    }
-    // List<SightEvent> sightEvents = getQuery(config).getResultList().stream()
-    // .sorted(sightEventDatesComparator()).collect(toList());
-    Collections.sort(sightEvents, sightEventPromotionComparator()
-        .thenComparing(sightEventNamesComparator()));
+      if (config.getLanguage() != null) {
+          var translated = translationService.translateEntities(sightEvents, config.getLanguage());
+          if (translated != null) {
+              sightEvents = translated;
+          }
+      }
+
+      if (config.getDateFrom() != null || config.getDateTo() != null) {
+          HelloTicket hptClient = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
+          var inRange = hptClient.getSightEventsInDateRange(new ArrayList<>(sightEvents),
+                  config.getDateFrom(), config.getDateTo());
+          if (inRange != null) {
+              sightEvents = inRange;
+          }
+      }
+
+      sightEvents.sort(sightEventPromotionComparator().thenComparing(sightEventNamesComparator()));
     return new PagedEntityCollection<>(sightEvents, config);
   }
 

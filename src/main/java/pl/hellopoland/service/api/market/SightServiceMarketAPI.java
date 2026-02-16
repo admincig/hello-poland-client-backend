@@ -59,47 +59,83 @@ public class SightServiceMarketAPI {
 
   @PermitAll
   public SightDTO get(Long id, String contentLanguageSymbol) {
-    LanguageVersion language = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
-    Sight bo = service.get(id);
-    if (bo.isPublished()) {
-      bo.setSightEvents(bo.getSightEvents().stream()
-          .filter(SightEvent::isAccessible)
-          .collect(Collectors.toList()));
-      bo.setCategories(bo.getSightEvents().stream().flatMap(se -> se.getCategories().stream())
-          .map(SightEventCategory::getCategory).collect(Collectors.toSet()));
-      bo.setTags(bo.getSightEvents().stream().flatMap(se -> se.getTags().stream())
-          .map(SightEventTag::getTag).collect(Collectors.toSet()));
-      if (language != null) {
-        bo = translationService.translateEntity(bo, language);
-        translationService.translateEntities(bo.getCategories(), language);
-        var sightEvents = bo.getSightEvents();
-        if (sightEvents != null && !sightEvents.isEmpty()) {
-          bo.setSightEvents(translationService.translateEntities(sightEvents, language));
+        LanguageVersion language = LanguageVersion.getForTranslationEntity(contentLanguageSymbol);
+        Sight bo = service.get(id);
+
+        if (!bo.isPublished()) {
+            return null;
         }
-      } else {
-        language = bo.getDefaultLanguage();
-      }
-      var dto = DtoMapper.getFullDTO(bo);
-      dto.language = language.getLanuage();
-      sightEventService.fetchTicketPoolDefinitions(bo.getSightEvents(), dto.sightEvents, false,
-          true);
-      dto.sightEvents = dto.sightEvents.stream()
-          .filter(se -> sightEventService.isAvailable(se, null, null)).map(se -> {
-            se.ticketPoolDefinitions = null;
-            se.partnerAffiliateCode = null;
-            return se;
-          }).collect(Collectors.toList());
-      var cheapestSE = dto.sightEvents.stream().min(Comparator.comparing(seDto -> seDto.minPrice)).orElse(null);
-      if (cheapestSE != null) {
-        dto.minPrice = cheapestSE.minPrice;
-        dto.minDiscountPrice = cheapestSE.minDiscountPrice;
-      }
-      dto.similar = getSimilar(bo, language);
-      // hiding
-      dto.sightEvents.stream().forEach(seDto -> seDto.pdfAttachment = null);
-      return dto;
-    }
-    return null;
+
+        // tłumaczenie (może podmienić relacje)
+        if (language != null) {
+            bo = translationService.translateEntity(bo, language);
+
+            var sightEvents = bo.getSightEvents();
+            if (sightEvents != null && !sightEvents.isEmpty()) {
+                bo.setSightEvents(translationService.translateEntities(sightEvents, language));
+            }
+        } else {
+            language = bo.getDefaultLanguage();
+        }
+
+        // >>> KLUCZ: filtrujemy PO tłumaczeniu <<<
+        if (bo.getSightEvents() != null) {
+            bo.setSightEvents(
+                    bo.getSightEvents().stream()
+                            .filter(SightEvent::isAccessible)
+                            .collect(Collectors.toList())
+            );
+        } else {
+            bo.setSightEvents(Collections.emptyList());
+        }
+
+        // categories/tags liczone z przefiltrowanych eventów
+        bo.setCategories(bo.getSightEvents().stream()
+                .flatMap(se -> se.getCategories().stream())
+                .map(SightEventCategory::getCategory)
+                .collect(Collectors.toSet()));
+
+        bo.setTags(bo.getSightEvents().stream()
+                .flatMap(se -> se.getTags().stream())
+                .map(SightEventTag::getTag)
+                .collect(Collectors.toSet()));
+
+        // tłumaczenie kategorii/tagów dopiero teraz (na finalnym zbiorze)
+        if (language != null) {
+            translationService.translateEntities(bo.getCategories(), language);
+            translationService.translateEntities(bo.getTags(), language);
+        }
+
+        var dto = DtoMapper.getFullDTO(bo);
+        dto.language = language.getLanuage();
+
+        sightEventService.fetchTicketPoolDefinitions(bo.getSightEvents(), dto.sightEvents, false, true);
+
+        dto.sightEvents = dto.sightEvents.stream()
+                .filter(se -> sightEventService.isAvailable(se, null, null))
+                .map(se -> {
+                    se.ticketPoolDefinitions = null;
+                    se.partnerAffiliateCode = null;
+                    return se;
+                })
+                .collect(Collectors.toList());
+
+        var cheapestSE = dto.sightEvents.stream()
+                .min(Comparator.comparing(seDto -> seDto.minPrice))
+                .orElse(null);
+
+        if (cheapestSE != null) {
+            dto.minPrice = cheapestSE.minPrice;
+            dto.minDiscountPrice = cheapestSE.minDiscountPrice;
+        }
+
+        dto.similar = getSimilar(bo, language);
+
+        if (dto.sightEvents != null) {
+            dto.sightEvents.forEach(seDto -> seDto.pdfAttachment = null);
+        }
+
+        return dto;
   }
 
   private List<SightDTO> getSimilar(Sight bo, LanguageVersion language) {

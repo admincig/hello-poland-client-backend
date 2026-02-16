@@ -443,12 +443,12 @@ public class SightEvent extends ModelSuperclass implements Located, Imaged, Tran
     this.searchIndex =
         Stream.of(
             words.stream(),
-            Stream.of(email, phone, name, location.getStreet(), partner.getName()),
+            Stream.of(email, phone, name, location.getStreet(),location.getCity(), partner.getName()),
             Stream.of(sight.getSearchIndex().split(",")))
             .flatMap(s -> s)
             .filter(Objects::nonNull)
             .flatMap(s -> Stream.of(s.split(" ")))
-            .map(w -> w.replaceAll("[^a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]", ""))
+            .map(w -> w.replaceAll("[^a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]", " "))
             .distinct()
             .filter(w -> !w.isBlank())
             .collect(Collectors.joining(","));

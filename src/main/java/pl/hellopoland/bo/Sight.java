@@ -294,11 +294,11 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
   public void recreateSearchIndex(Set<String> words) {
     this.searchIndex =
         Stream.concat(
-            Stream.of(email, name, phone),
+            Stream.of(email, name, phone,location.getStreet(),location.getCity(), partner.getName()),
             words.stream())
             .filter(Objects::nonNull)
             .flatMap(s -> Stream.of(s.split(" ")))
-            .map(w -> w.replaceAll("[^a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]", ""))
+            .map(w -> w.replaceAll("[^a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]", " "))
             .distinct()
             .filter(w -> !w.isBlank())
             .collect(Collectors.joining(","));

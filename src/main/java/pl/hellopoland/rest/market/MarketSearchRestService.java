@@ -5,6 +5,8 @@ import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.FilterDTO;
 import pl.hellopoland.dto.SearchResultDTO;
 import pl.hellopoland.rest.RestService;
+import pl.hellopoland.service.SightEventService;
+import pl.hellopoland.service.SightService;
 import pl.hellopoland.service.api.market.SearchServiceMarketAPI;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -21,6 +23,11 @@ public class MarketSearchRestService {
 
   @Inject
   SearchServiceMarketAPI service;
+    @Inject
+    SightService sightService;
+
+    @Inject
+    SightEventService sightEventService;
 
   @GET
   public SearchResultDTO search(
@@ -53,4 +60,13 @@ public class MarketSearchRestService {
       @HeaderParam("Content-Language") String contentLanguage) {
     return service.filters(RestService.parseLang(contentLanguage));
   }
+
+    @GET
+    @Path("/admin/reindex")
+    public String reindex() {
+        sightService.rebuildSearchIndices();
+        sightEventService.rebuildSearchIndices();
+        return "OK";
+    }
+
 }
