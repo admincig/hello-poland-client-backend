@@ -34,6 +34,8 @@ import java.util.stream.Collectors;
 
 import static jakarta.ws.rs.core.Response.Status.NO_CONTENT;
 import static jakarta.ws.rs.core.Response.Status.OK;
+import static java.lang.System.Logger.Level.WARNING;
+import static java.util.stream.Collectors.joining;
 
 public class HelloTicket {
 
@@ -42,7 +44,10 @@ public class HelloTicket {
   }
 
   private System.Logger logger = System.getLogger(HelloTicket.class.getName());
+
   private String url;
+  private static final int CONNECT_TIMEOUT_MS = 5000;
+  private static final int READ_TIMEOUT_MS = 15000;
 
   private static final String AUTH_TOKEN =
       "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJIZWxsbyBQb2xhbmQiLCJhdXRoIjoiUk9MRV9FWFRFUk5BTF9VU0VSIn0.AODtF8AEqe-egeWKn2zPhfo2hWplkSbfFfFrNH6mpfsV9McC89paYns3sR_5LPx_V4pxpPOtgTMK7A0pCsJ3mA";
@@ -81,7 +86,7 @@ public class HelloTicket {
       }
       return resp;
     } catch (IOException e) {
-      logger.log(System.Logger.Level.WARNING, e);
+      logger.log(WARNING, e);
       return null;
     }
   }
@@ -104,7 +109,7 @@ public class HelloTicket {
       }
       return resp;
     } catch (IOException e) {
-      logger.log(System.Logger.Level.WARNING, e);
+      logger.log(WARNING, e);
       return null;
     }
   }
@@ -165,7 +170,7 @@ public class HelloTicket {
       if (sightEventIds != null) {
         url += "?sightEventIds=";
         url += sightEventIds.stream().map(Objects::toString)
-            .collect(Collectors.joining("&sightEventIds="));
+            .collect(joining("&sightEventIds="));
       }
       final Jsonb jsonb = JsonbConfig.getInstance();
       JsonStructure json = get(url, authToken);
@@ -177,7 +182,7 @@ public class HelloTicket {
       });
       return dtos;
     } catch (Exception e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      logger.log(WARNING, "Failed", e);
       return Collections.emptyList();
     }
   }
@@ -189,7 +194,7 @@ public class HelloTicket {
       JsonStructure json = post("/v1/ticket-pool-definitions", jsonb.toJson(dto), partnerAuthToken);
       return jsonb.fromJson(json.toString(), TicketPoolDefinitionDTO.class);
     } catch (Exception e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      logger.log(WARNING, "Failed", e);
         if (e.getMessage() != null && e.getMessage().contains("400")) {
             throw new BadRequestException("TicketPoolDefinition must have tickets definitions.");
         }
@@ -207,7 +212,7 @@ public class HelloTicket {
           get("/v1/ticket-pool-definitions/" + id, hptToken).toString(),
           TicketPoolDefinitionDTO.class);
     } catch (JsonbException | IOException e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      logger.log(WARNING, "Failed", e);
       return null;
     }
   }
@@ -242,7 +247,7 @@ public class HelloTicket {
       });
       return dtos;
     } catch (Exception e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      logger.log(WARNING, "Failed", e);
       return null;
     }
   }
@@ -253,7 +258,7 @@ public class HelloTicket {
       JsonStructure json = get("/v1/ticket-definitions/" + id, partnerAuthToken);
       return jsonb.fromJson(json.toString(), TicketDefinitionDTO.class);
     } catch (Exception e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      logger.log(WARNING, "Failed", e);
       return null;
     }
   }
@@ -272,7 +277,7 @@ public class HelloTicket {
                   .toString(),
               AvailableTicketNumberAssociationDTO.class);
     } catch (JsonbException | IOException e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      logger.log(WARNING, "Failed", e);
       throw new ConflictingException(e.getLocalizedMessage());
     }
   }
@@ -283,7 +288,7 @@ public class HelloTicket {
       JsonStructure json = post("/v1/helpdesk/partners", jsonb.toJson(dto), hptToken);
       return jsonb.fromJson(json.toString(), PartnerDTO.class);
     } catch (Exception e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      logger.log(WARNING, "Failed", e);
       return null;
     }
   }
@@ -292,7 +297,7 @@ public class HelloTicket {
     try {
       delete("/v1/helpdesk/partners/" + partnerEmail, hptToken);
     } catch (Exception e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      logger.log(WARNING, "Failed", e);
     }
   }
 
@@ -304,7 +309,7 @@ public class HelloTicket {
           + dateString, hptToken);
     } catch (Exception e) {
       logger
-          .log(System.Logger.Level.WARNING,
+          .log(WARNING,
               "Failed: cannot find sight event for id=" + sightEventHptId + ", ticketPoolDefId="
                   + ticketPoolDefId + " and date=" + SimpleDateFormat.getInstance().format(date),
               e);
@@ -317,7 +322,7 @@ public class HelloTicket {
       String json = JsonbConfig.getInstance().toJson(userAuthDTO);
       put("/v1/users/me/password", json, hptToken);
     } catch (Exception e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      logger.log(WARNING, "Failed", e);
       throw new ConflictingException("Zmiana hasła w zewnętrznym systemie nie powiodła się");
     }
   }
@@ -327,7 +332,7 @@ public class HelloTicket {
       String json = JsonbConfig.getInstance().toJson(userAuthDTO);
       put("/v1/users/" + usherId + "/password", json, hptToken);
     } catch (Exception e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      logger.log(WARNING, "Failed", e);
       throw new ConflictingException("Zmiana hasła w zewnętrznym systemie nie powiodła się");
     }
   }
@@ -344,7 +349,7 @@ public class HelloTicket {
       });
       return dtos;
     } catch (Exception e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      logger.log(WARNING, "Failed", e);
       return null;
     }
   }
@@ -354,7 +359,7 @@ public class HelloTicket {
       return JsonbConfig.getInstance().fromJson(
           get("/v1/partners/ushers/" + usherId, partnerAuthToken).toString(), UserDTO.class);
     } catch (Exception e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      logger.log(WARNING, "Failed", e);
       throw new ResourceNotFoundException();
     }
   }
@@ -379,7 +384,7 @@ public class HelloTicket {
               .toString(),
           EmailSendingReportDTO.class);
     } catch (Exception e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      logger.log(WARNING, "Failed", e);
       throw new EmailSendingException();
     }
   }
@@ -390,7 +395,7 @@ public class HelloTicket {
           get("/v1/helpdesk/bookings/" + serialNumber + "/sendTicketCopy", hptToken).toString(),
           EmailSendingReportDTO.class);
     } catch (Exception e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      logger.log(WARNING, "Failed", e);
       throw new EmailSendingException();
     }
   }
@@ -404,7 +409,7 @@ public class HelloTicket {
               .toString(),
           SightEventDTO.class);
     } catch (IOException e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      logger.log(WARNING, "Failed", e);
       throw new ConflictingException(
           "Wystąpił problem podczas zapisu pdf'a w zewnętrznym systemie.");
     }
@@ -416,7 +421,7 @@ public class HelloTicket {
     try {
       delete("/v1/sight-events/" + sightEvent.getHptId() + "/pdf/" + pdfName, partnerAuthToken);
     } catch (IOException e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      logger.log(WARNING, "Failed", e);
       throw new ConflictingException(
           "Wystąpił problem podczas usówania pdf'a w zewnętrznym systemie.");
     }
@@ -428,7 +433,7 @@ public class HelloTicket {
       return JsonbConfig.getInstance().fromJson(
           post("/v1/partners/ushers", jsonString, partnerAuthToken).toString(), UserDTO.class);
     } catch (Exception e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      logger.log(WARNING, "Failed", e);
       throw new ConflictingException(
           "Nie udało się utworzyć biletera w zewnętrznym systemie." + e.getLocalizedMessage());
     }
@@ -447,7 +452,7 @@ public class HelloTicket {
       });
       return resp;
     } catch (Exception e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      logger.log(WARNING, "Failed", e);
       return null;
     }
   }
@@ -473,7 +478,7 @@ public class HelloTicket {
         }
       });
     } catch (Exception e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      logger.log(WARNING, "Failed", e);
     }
     return result;
   }
@@ -508,7 +513,7 @@ public class HelloTicket {
           .filter(Objects::nonNull)
           .collect(Collectors.toList());
     } catch (Exception e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      logger.log(WARNING, "Failed", e);
       return null;
     }
   }
@@ -516,7 +521,10 @@ public class HelloTicket {
   private JsonStructure post(String path, String json, String authToken) throws IOException {
     URL url = new URL(this.url + path);
     var conn = (HttpURLConnection) url.openConnection();
-    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+    conn.setConnectTimeout(CONNECT_TIMEOUT_MS);
+    conn.setReadTimeout(READ_TIMEOUT_MS);
+
+      conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
     logger.log(System.Logger.Level.INFO, "Sending POST request to url: " + url);
     logger.log(System.Logger.Level.DEBUG,
         "Sending POST request to url: " + url + " with body: " + json);
@@ -526,10 +534,13 @@ public class HelloTicket {
     PrintWriter printWriter = new PrintWriter(os);
     printWriter.append(json);
     printWriter.close();
-    var respCode = conn.getResponseCode();
-      InputStream is = conn.getErrorStream();
-      if (is != null) {
-          String respString = IOUtils.toString(is);
+      var respCode = conn.getResponseCode();
+
+      InputStream is;
+      if (respCode >= 400) {
+          is = conn.getErrorStream();
+          String respString = (is != null) ? IOUtils.toString(is) : "";
+          if (is != null) is.close();
           String msg;
 
           try {
@@ -542,8 +553,9 @@ public class HelloTicket {
           throw new ExternalSystemException("HTTP " + respCode + ": " + msg);
       }
 
-    is = conn.getInputStream();
-    var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
+      is = conn.getInputStream();
+      var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
+      is.close();
     logger.log(System.Logger.Level.INFO, "Server responded with code: " + respCode);
     logger.log(System.Logger.Level.DEBUG, "Server responded with body: " + resp);
     return resp;
@@ -552,6 +564,9 @@ public class HelloTicket {
   private JsonStructure put(String path, String json, String authToken) throws IOException {
     URL url = new URL(this.url + path);
     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+      conn.setConnectTimeout(CONNECT_TIMEOUT_MS);
+      conn.setReadTimeout(READ_TIMEOUT_MS);
+
     conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
     logger.log(System.Logger.Level.INFO, "Sending PUT request to url: " + url);
     logger.log(System.Logger.Level.DEBUG,
@@ -565,18 +580,24 @@ public class HelloTicket {
       printWriter.append(json);
       printWriter.close();
     }
-    var respCode = conn.getResponseCode();
-    InputStream is = conn.getErrorStream();
-    if (is != null) {
-      var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
-      try {
-        throw new ExternalSystemException(((JsonString) resp.getValue("/message")).getString());
-      } catch (JsonException e) {
-        throw new ExternalSystemException(resp.toString());
+      var respCode = conn.getResponseCode();
+
+      InputStream is;
+      if (respCode >= 400) {
+          is = conn.getErrorStream();
+          String respString = (is != null) ? IOUtils.toString(is) : "";
+          if (is != null) is.close();
+          try {
+              var resp = JsonbConfig.getInstance().fromJson(respString, JsonStructure.class);
+              throw new ExternalSystemException(((JsonString) resp.getValue("/message")).getString());
+          } catch (Exception e) {
+              throw new ExternalSystemException(respString);
+          }
       }
-    }
-    is = conn.getInputStream();
-    var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
+
+      is = conn.getInputStream();
+      var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
+      is.close();
     logger.log(System.Logger.Level.INFO, "Server responded with code: " + respCode);
     logger.log(System.Logger.Level.DEBUG, "Server responded with body: " + resp);
     return resp;
@@ -585,25 +606,34 @@ public class HelloTicket {
   private int delete(String path, String authToken) throws IOException {
     URL url = new URL(this.url + path);
     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+      conn.setConnectTimeout(CONNECT_TIMEOUT_MS);
+      conn.setReadTimeout(READ_TIMEOUT_MS);
+
+      conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
     logger.log(System.Logger.Level.INFO, "Sending DELETE request to url: " + url);
     conn.setRequestMethod("DELETE");
     conn.setRequestProperty("Authorization", "Bearer " + authToken);
-    conn.setDoOutput(true);
+      //conn.setDoOutput(true);
     conn.connect();
-    var respCode = conn.getResponseCode();
-    InputStream is = conn.getErrorStream();
-    if (is != null) {
-      var resp = JsonbConfig.getInstance().fromJson(is, JsonStructure.class);
-      try {
-        throw new ExternalSystemException(((JsonString) resp.getValue("/message")).getString());
-      } catch (JsonException e) {
-        throw new ExternalSystemException(resp.toString());
+      var respCode = conn.getResponseCode();
+
+      InputStream is;
+      if (respCode >= 400) {
+          is = conn.getErrorStream();
+          String respString = (is != null) ? IOUtils.toString(is) : "";
+          if (is != null) is.close();
+          try {
+              var resp = JsonbConfig.getInstance().fromJson(respString, JsonStructure.class);
+              throw new ExternalSystemException(((JsonString) resp.getValue("/message")).getString());
+          } catch (Exception e) {
+              throw new ExternalSystemException(respString);
+          }
       }
-    }
-    is = conn.getInputStream();
-    logger.log(System.Logger.Level.INFO, "Server responded with code: " + respCode);
-    is.close();
+
+      is = conn.getInputStream();
+      logger.log(System.Logger.Level.INFO, "Server responded with code: " + respCode);
+      is.close();
+
 
     if (respCode != NO_CONTENT.getStatusCode() && respCode != OK.getStatusCode()) {
       throw new CannotDeleteSightEventFromExternalSystemException();
@@ -614,23 +644,31 @@ public class HelloTicket {
   private JsonStructure get(String path, String authToken) throws IOException {
     URL url = new URL(this.url + path);
     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+      conn.setConnectTimeout(CONNECT_TIMEOUT_MS);
+      conn.setReadTimeout(READ_TIMEOUT_MS);
+
+      conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
     logger.log(System.Logger.Level.INFO, "Sending GET request to url: " + url);
     conn.setRequestMethod("GET");
     if (authToken != null) {
       conn.setRequestProperty("Authorization", "Bearer " + authToken);
     }
-    conn.setDoOutput(true);
+    //conn.setDoOutput(true);
     conn.connect();
-    var respCode = conn.getResponseCode();
-    logger.log(System.Logger.Level.INFO, "Server responded with code: " + respCode);
-    InputStream is = conn.getErrorStream();
-    if (is != null) {
+      var respCode = conn.getResponseCode();
+      logger.log(System.Logger.Level.INFO, "Server responded with code: " + respCode);
+
+      InputStream is;
+      if (respCode >= 400) {
+          is = conn.getErrorStream();
+          String resp = (is != null) ? IOUtils.toString(is) : "";
+          if (is != null) is.close();
+          throw new ExternalSystemException(resp);
+      }
+
+      is = conn.getInputStream();
       String resp = IOUtils.toString(is);
-      throw new ExternalSystemException(resp);
-    }
-    is = conn.getInputStream();
-    String resp = IOUtils.toString(is);
+      is.close();
     logger.log(System.Logger.Level.DEBUG, "Server responded with body: " + resp);
     return JsonbConfig.getInstance().fromJson(resp, JsonStructure.class);
   }
@@ -643,7 +681,7 @@ public class HelloTicket {
       Collection<String> coll = JsonbConfig.getInstance().fromJson(resp, Collection.class);
       return coll.stream().map(LocalDate::parse).collect(Collectors.toList());
     } catch (JsonbException | IOException e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      logger.log(WARNING, "Failed", e);
       throw new ConflictingException(e.getLocalizedMessage());
     }
   }
@@ -661,7 +699,7 @@ public class HelloTicket {
 
       return jsonb.fromJson(json.toString(), TicketPoolDefinitionDTO.class);
     } catch (Exception e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      logger.log(WARNING, "Failed", e);
       if (e.getMessage() != null && e.getMessage().contains("400")) {
         throw new BadRequestException("TicketPoolDefinition must have tickets definitions.");
       }
@@ -685,7 +723,7 @@ public class HelloTicket {
           put("/v1/ticket-definitions/" + dto.id, jsonb.toJson(dto), partnerAuthToken);
       return jsonb.fromJson(json.toString(), ListOfTicketDefinitionDTOs.class);
     } catch (Exception e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      logger.log(WARNING, "Failed", e);
       if (e.getMessage() != null && e.getMessage().contains("400")) {
         throw new BadRequestException("TicketPoolDefinition must have tickets definitions.");
       }
@@ -700,7 +738,7 @@ public class HelloTicket {
     String url = "/v1/ticket-definitions";
     if (atnaIds != null) {
       url += "?atnaIds=";
-      url += atnaIds.stream().map(Objects::toString).collect(Collectors.joining("&atnaIds="));
+      url += atnaIds.stream().map(Objects::toString).collect(joining("&atnaIds="));
     }
     try {
       final Jsonb jsonb = JsonbConfig.getInstance();
@@ -713,9 +751,27 @@ public class HelloTicket {
       });
       return dtos;
     } catch (Exception e) {
-      logger.log(System.Logger.Level.WARNING, "Failed", e);
+      logger.log(WARNING, "Failed", e);
       return null;
     }
   }
+
+    public List<TicketDefinitionDTO> getTicketDefinitionsMarket(Set<Long> atnaIds) {
+        String url = "/v1/ticket-definitions/market";
+        if (atnaIds != null) {
+            url += "?atnaIds=" + atnaIds.stream().map(Objects::toString).collect(joining("&atnaIds="));
+        }
+        try {
+            JsonStructure json = get(url, null);
+            JsonArray arr = (JsonArray) json;
+            List<TicketDefinitionDTO> dtos = new ArrayList<>();
+            final Jsonb jsonb = JsonbConfig.getInstance();
+            arr.forEach(p -> dtos.add(jsonb.fromJson(p.toString(), TicketDefinitionDTO.class)));
+            return dtos;
+        } catch (Exception e) {
+            logger.log(WARNING, "getTicketDefinitionsMarket failed: " + url, e);
+            return null;
+        }
+    }
 
 }

@@ -95,7 +95,7 @@ public class OrderService extends ServiceSuperclass {
         iro.entries.stream().filter(oe -> oe.quantity != null && oe.quantity.compareTo(0) > 0)
             .collect(groupingBy(oeIRO -> oeIRO.id)).keySet();
     HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
-    List<TicketDefinitionDTO> tds = hpt.getTicketDefinitions(atnaIds);
+    List<TicketDefinitionDTO> tds = hpt.getTicketDefinitionsMarket(atnaIds);
     Map<Long, List<TicketDefinitionDTO>> ticketsGroupedBySight =
         tds.stream().collect(Collectors.groupingBy(td -> td.sightEventId));
     for (Map.Entry<Long, List<TicketDefinitionDTO>> entry : ticketsGroupedBySight.entrySet()) {
@@ -225,30 +225,36 @@ public class OrderService extends ServiceSuperclass {
     logger.log(Level.INFO, "Order entries: " + orderEntriesLog.toString());
   }
 
-  private void throwIfTicketPricesDontMatch(OrderIRO iro) {
-    List<OrderEntryIRO> entriesWithPrice = iro.entries.stream()
-        .filter(oe -> oe.price != null)
-        .collect(Collectors.toList());
-    Set<Long> ids = entriesWithPrice.stream()
-        .map(oe -> oe.id)
-        .collect(Collectors.toSet());
+    private void throwIfTicketPricesDontMatch(OrderIRO iro) {
+        List<OrderEntryIRO> entriesWithPrice = iro.entries.stream()
+                .filter(oe -> oe.price != null)
+                .filter(oe -> oe.quantity != null && oe.quantity > 0)   // <-- KLUCZOWE
+                .collect(Collectors.toList());
 
-    if (!ids.isEmpty()) {
-      HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
-      List<TicketDefinitionDTO> tds = hpt.getTicketDefinitions(ids);
-      for (TicketDefinitionDTO td : tds) {
-        for (OrderEntryIRO oe : iro.entries) {
-          if (oe.id.equals(td.atnaId)) {
-            if (!oe.price.equals(td.price)) {
-              throw new ConflictingException(
-                  "Cena biletu " + td.atnaId + ": " + td.name + " uległa zmianie.");
+        Set<Long> ids = entriesWithPrice.stream()
+                .map(oe -> oe.id)
+                .collect(Collectors.toSet());
+
+        if (!ids.isEmpty()) {
+            HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
+            List<TicketDefinitionDTO> tds = hpt.getTicketDefinitionsMarket(ids);
+
+            if (tds == null) { // <-- zabezpieczenie na null z HT
+                throw new ConflictingException("Nie udało się zweryfikować cen biletów (brak danych z HelloTicket).");
             }
-            break;
-          }
+
+            for (TicketDefinitionDTO td : tds) {
+                for (OrderEntryIRO oe : entriesWithPrice) {             // <-- iteruj tylko po kupowanych
+                    if (oe.id.equals(td.atnaId)) {
+                        if (!oe.price.equals(td.price)) {
+                            throw new ConflictingException("Cena biletu " + td.atnaId + ": " + td.name + " uległa zmianie.");
+                        }
+                        break;
+                    }
+                }
+            }
         }
-      }
     }
-  }
 
   private void throwIfExpiredTickets(OrderIRO iro) {
       var expiredIds = new HashMap<Long, OrderEntryIRO>();
