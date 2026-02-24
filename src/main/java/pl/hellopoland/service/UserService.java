@@ -298,4 +298,83 @@ public class UserService extends ServiceSuperclass {
         .setParameter("partner", partner)
         .getSingleResult();
   }
+
+    public void createPasswordResetToken(User user, String token) {
+        UserPasswordResetToken prt = new UserPasswordResetToken();
+        int ttl = Integer.parseInt(
+                properties.getProperty("password.reset.token.ttl.minutes", "30")
+        );
+
+        prt.setToken(token);
+        prt.setUser(user);
+        prt.setExpiryDate(java.time.LocalDateTime.now().plusMinutes(ttl));
+        prt.setUsed(false);
+
+        em.persist(prt);
+
+        String portalUrl = properties.getProperty(
+                "portal.url",
+                "https://portal.hello-poland.pl"
+        );
+
+        String resetUrl = portalUrl + "/reset-password?token=" + token;
+
+        String subject = properties.getProperty(
+                "password.reset.mail.subject",
+                "Reset hasła - Hello Poland"
+        );
+
+        String bodyTemplate = properties.getProperty("password.reset.mail.body", "");
+
+        String body = bodyTemplate
+                .replace("{resetUrl}", resetUrl)
+                .replace("{ttlMinutes}", String.valueOf(ttl));
+        body = body.replace("\\n", System.lineSeparator());
+
+        try {
+            emailService.sendEmail(
+                    new Email(
+                            user.getEmail(),
+                            subject,
+                            body
+                    )
+            );
+        } catch (Exception e) {
+            logger.log(System.Logger.Level.ERROR,
+                    "Failed to send password reset email for user[id:" + user.getId() + "]",
+                    e);
+        }
+    }
+
+    public UserPasswordResetToken findValidPasswordResetToken(String token) {
+
+        return em.createQuery("""
+            from UserPasswordResetToken t
+            where t.token = :token
+              and t.used = false
+              and t.expiryDate > :now
+            """, UserPasswordResetToken.class)
+                .setParameter("token", token)
+                .setParameter("now", java.time.LocalDateTime.now())
+                .getResultStream()
+                .findFirst()
+                .orElse(null);
+    }
+
+    public boolean confirmPasswordReset(String token, String newPassword) {
+
+        UserPasswordResetToken tokenEntity =
+                findValidPasswordResetToken(token);
+
+        if (tokenEntity == null) {
+            return false;
+        }
+        User user = tokenEntity.getUser();
+        // zmiana hasla
+        user.changePassword(newPassword);
+        // oznaczenie tokena jako uzyty
+        tokenEntity.setUsed(true);
+
+        return true;
+    }
 }

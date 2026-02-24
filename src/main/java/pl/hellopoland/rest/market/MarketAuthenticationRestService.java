@@ -1,5 +1,11 @@
 package pl.hellopoland.rest.market;
 
+import jakarta.annotation.security.PermitAll;
+import jakarta.persistence.PersistenceContext;
+import pl.hellopoland.bo.User;
+import pl.hellopoland.bo.UserPasswordResetToken;
+import pl.hellopoland.rest.dto.PasswordResetConfirmDTO;
+import pl.hellopoland.rest.dto.PasswordResetRequestDTO;
 import pl.hellopoland.security.CurrentUser;
 
 import jakarta.annotation.security.DeclareRoles;
@@ -11,6 +17,9 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import pl.hellopoland.service.UserService;
+
+import java.util.Optional;
 
 import static jakarta.ws.rs.core.Response.Status.UNAUTHORIZED;
 import static pl.hellopoland.security.UserAuthDTO.ofCurrentUser;
@@ -26,6 +35,13 @@ public class MarketAuthenticationRestService {
 
   @Inject
   private CurrentUser currentUser;
+
+  @Inject
+  private UserService userService;
+
+  @PersistenceContext
+  private jakarta.persistence.EntityManager em;
+
 
   @POST
   @Path("/login")
@@ -52,4 +68,46 @@ public class MarketAuthenticationRestService {
   public Response logout() {
     return Response.ok().build();
   }
+
+  @POST
+  @Path("/password-reset")
+  @PermitAll
+  public Response requestPasswordReset(PasswordResetRequestDTO dto) {
+
+        Optional<User> userOpt = Optional.empty();
+
+        if (dto != null && dto.email != null) {
+            userOpt = userService.findUndeletedByEmail(dto.email);
+
+            if (userOpt.isPresent()) {
+                String token = java.util.UUID.randomUUID().toString()
+                        + java.util.UUID.randomUUID().toString();
+                User user = userOpt.get();
+
+                userService.createPasswordResetToken(user, token);
+            }
+        }
+
+        return Response.ok().build();
+  }
+
+    @POST
+    @Path("/password-reset/confirm")
+    @PermitAll
+    public Response confirmPasswordReset(PasswordResetConfirmDTO dto) {
+
+        if (dto == null || dto.token == null || dto.newPassword == null) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+        boolean success =
+                userService.confirmPasswordReset(dto.token, dto.newPassword);
+
+        if (!success) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+        return Response.ok().build();
+    }
+
 }

@@ -13,6 +13,7 @@ import jakarta.security.enterprise.identitystore.CredentialValidationResult;
 import jakarta.security.enterprise.identitystore.IdentityStore;
 import java.util.Optional;
 import java.util.Set;
+import static java.util.stream.Collectors.toSet;
 
 import static jakarta.security.enterprise.identitystore.CredentialValidationResult.NOT_VALIDATED_RESULT;
 
@@ -31,11 +32,14 @@ public class Authentication implements IdentityStore {
       UsernamePasswordCredential usernamePassword = (UsernamePasswordCredential) credential;
 
       Optional<User> user = userDao.findUndeletedByEmail(usernamePassword.getCaller());
-
       if (user.isPresent()
           && (user.get().getPartner() == null || !user.get().getPartner().isBlocked())
           && passwordEncoder.matches(
               new String(usernamePassword.getPassword().getValue()), user.get().getPassword())) {
+          Set<String> groups = user.get().getRoles().stream()
+                  .map(ur -> ur.getRole().toString())
+                  .collect(toSet());
+
         return new CredentialValidationResult(usernamePassword.getCaller());
       }
     }
