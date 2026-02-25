@@ -18,6 +18,7 @@ import jakarta.persistence.NoResultException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
 import java.lang.System.Logger.Level;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -75,12 +76,14 @@ public class UserService extends ServiceSuperclass {
     }
     bo.setEmail(email.toLowerCase());
     bo.changePassword(decodedPassword);
+    bo.setEmailVerified(false);
 
     UserDetails details = new UserDetails();
     details.setTosAgreement(tosAgreement);
     bo.setDetails(details);
 
     em.persist(bo);
+    createEmailVerificationToken(bo);
     return bo;
   }
 
@@ -300,17 +303,18 @@ public class UserService extends ServiceSuperclass {
   }
 
     public void createPasswordResetToken(User user, String token) {
-        UserPasswordResetToken prt = new UserPasswordResetToken();
         int ttl = Integer.parseInt(
                 properties.getProperty("password.reset.token.ttl.minutes", "30")
         );
 
-        prt.setToken(token);
-        prt.setUser(user);
-        prt.setExpiryDate(java.time.LocalDateTime.now().plusMinutes(ttl));
-        prt.setUsed(false);
+        UserToken ut = new UserToken();
+        ut.setToken(token);
+        ut.setUser(user);
+        ut.setType(UserToken.Type.PASSWORD_RESET);
+        ut.setExpiryDate(LocalDateTime.now().plusMinutes(ttl));
+        ut.setUsed(false);
 
-        em.persist(prt);
+        em.persist(ut);
 
         String portalUrl = properties.getProperty(
                 "portal.url",
@@ -346,16 +350,18 @@ public class UserService extends ServiceSuperclass {
         }
     }
 
-    public UserPasswordResetToken findValidPasswordResetToken(String token) {
+    public UserToken findValidPasswordResetToken(String token) {
 
         return em.createQuery("""
-            from UserPasswordResetToken t
+            from UserToken t
             where t.token = :token
+              and t.type = :type
               and t.used = false
               and t.expiryDate > :now
-            """, UserPasswordResetToken.class)
+            """, UserToken.class)
                 .setParameter("token", token)
-                .setParameter("now", java.time.LocalDateTime.now())
+                .setParameter("type", UserToken.Type.PASSWORD_RESET)
+                .setParameter("now", LocalDateTime.now())
                 .getResultStream()
                 .findFirst()
                 .orElse(null);
@@ -363,17 +369,92 @@ public class UserService extends ServiceSuperclass {
 
     public boolean confirmPasswordReset(String token, String newPassword) {
 
-        UserPasswordResetToken tokenEntity =
-                findValidPasswordResetToken(token);
+        UserToken ut = findValidPasswordResetToken(token);
 
-        if (tokenEntity == null) {
+        if (ut == null) {
             return false;
         }
-        User user = tokenEntity.getUser();
+        User user = ut.getUser();
         // zmiana hasla
         user.changePassword(newPassword);
         // oznaczenie tokena jako uzyty
-        tokenEntity.setUsed(true);
+        ut.setUsed(true);
+
+        return true;
+    }
+
+    public void createEmailVerificationToken(User user) {
+
+        int ttl = Integer.parseInt(
+                properties.getProperty("email.verification.token.ttl.minutes", "60")
+        );
+
+        String token = java.util.UUID.randomUUID().toString()
+                + java.util.UUID.randomUUID().toString();
+
+        UserToken ut = new UserToken();
+        ut.setToken(token);
+        ut.setUser(user);
+        ut.setType(UserToken.Type.EMAIL_VERIFICATION);
+        ut.setExpiryDate(LocalDateTime.now().plusMinutes(ttl));
+        ut.setUsed(false);
+
+        em.persist(ut);
+
+        String portalUrl = properties.getProperty(
+                "portal.url",
+                "https://portal.hello-poland.pl"
+        );
+
+        String activationUrl = portalUrl + "/activate-account?token=" + token;
+
+        String subject = properties.getProperty(
+                "email.verification.mail.subject",
+                "Aktywacja konta - Hello Poland"
+        );
+
+        String bodyTemplate =
+                properties.getProperty("email.verification.mail.body", "");
+
+        String body = bodyTemplate
+                .replace("{activationUrl}", activationUrl)
+                .replace("{ttlMinutes}", String.valueOf(ttl))
+                .replace("\\n", System.lineSeparator());
+
+        try {
+            emailService.sendEmail(
+                    new Email(user.getEmail(), subject, body)
+            );
+        } catch (Exception e) {
+            logger.log(System.Logger.Level.ERROR,
+                    "Failed to send activation email for user[id:" + user.getId() + "]",
+                    e);
+        }
+    }
+
+    public boolean confirmEmailVerification(String token) {
+
+        UserToken ut = em.createQuery("""
+        from UserToken t
+        where t.token = :token
+          and t.type = :type
+          and t.used = false
+          and t.expiryDate > :now
+        """, UserToken.class)
+                .setParameter("token", token)
+                .setParameter("type", UserToken.Type.EMAIL_VERIFICATION)
+                .setParameter("now", LocalDateTime.now())
+                .getResultStream()
+                .findFirst()
+                .orElse(null);
+
+        if (ut == null) {
+            return false;
+        }
+
+        User user = ut.getUser();
+        user.setEmailVerified(true);
+        ut.setUsed(true);
 
         return true;
     }

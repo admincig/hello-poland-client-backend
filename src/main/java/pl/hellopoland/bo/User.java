@@ -45,6 +45,9 @@ public class User extends ModelSuperclass implements HptSubject {
   private Partner partner;
   private String hptToken;
   private boolean deleted;
+
+  @Column(name = "email_verified", nullable = false)
+  private boolean emailVerified;
   @ManyToMany(mappedBy = "users")
   private Set<Sight> sights;
   @ManyToMany(mappedBy = "users")
@@ -154,4 +157,11 @@ public class User extends ModelSuperclass implements HptSubject {
   public boolean hasSight(Sight sight) {
     return sights.stream().anyMatch(s -> s.getId().equals(sight.getId()));
   }
+    public boolean isEmailVerified() {
+        return emailVerified;
+    }
+
+    public void setEmailVerified(boolean emailVerified) {
+        this.emailVerified = emailVerified;
+    }
 }

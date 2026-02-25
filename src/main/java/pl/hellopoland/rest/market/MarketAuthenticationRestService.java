@@ -3,7 +3,6 @@ package pl.hellopoland.rest.market;
 import jakarta.annotation.security.PermitAll;
 import jakarta.persistence.PersistenceContext;
 import pl.hellopoland.bo.User;
-import pl.hellopoland.bo.UserPasswordResetToken;
 import pl.hellopoland.rest.dto.PasswordResetConfirmDTO;
 import pl.hellopoland.rest.dto.PasswordResetRequestDTO;
 import pl.hellopoland.security.CurrentUser;
@@ -102,6 +101,23 @@ public class MarketAuthenticationRestService {
 
         boolean success =
                 userService.confirmPasswordReset(dto.token, dto.newPassword);
+
+        if (!success) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+        return Response.ok().build();
+    }
+    @POST
+    @Path("/activate-account")
+    @PermitAll
+    public Response activateAccount(PasswordResetConfirmDTO dto) {
+
+        if (dto == null || dto.token == null) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+        boolean success = userService.confirmEmailVerification(dto.token);
 
         if (!success) {
             return Response.status(Response.Status.BAD_REQUEST).build();

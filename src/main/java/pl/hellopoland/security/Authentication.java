@@ -26,30 +26,55 @@ public class Authentication implements IdentityStore {
   @Inject
   private PasswordEncoder passwordEncoder;
 
-  @Override
-  public CredentialValidationResult validate(Credential credential) {
-    if (credential instanceof UsernamePasswordCredential) {
-      UsernamePasswordCredential usernamePassword = (UsernamePasswordCredential) credential;
+    @Override
+    public CredentialValidationResult validate(Credential credential) {
 
-      Optional<User> user = userDao.findUndeletedByEmail(usernamePassword.getCaller());
-      if (user.isPresent()
-          && (user.get().getPartner() == null || !user.get().getPartner().isBlocked())
-          && passwordEncoder.matches(
-              new String(usernamePassword.getPassword().getValue()), user.get().getPassword())) {
-          Set<String> groups = user.get().getRoles().stream()
-                  .map(ur -> ur.getRole().toString())
-                  .collect(toSet());
+        if (credential instanceof UsernamePasswordCredential) {
 
-        return new CredentialValidationResult(usernamePassword.getCaller());
-      }
+            UsernamePasswordCredential usernamePassword =
+                    (UsernamePasswordCredential) credential;
+
+            Optional<User> user =
+                    userDao.findUndeletedByEmail(usernamePassword.getCaller());
+
+            if (user.isPresent()) {
+
+                User u = user.get();
+
+                boolean isMarketUser =
+                        u.hasRole(pl.hellopoland.bo.UserRole.Role.USER)
+                                && u.getPartner() == null;
+
+                if ((!isMarketUser || u.isEmailVerified())
+                        && (u.getPartner() == null || !u.getPartner().isBlocked())
+                        && passwordEncoder.matches(
+                        new String(usernamePassword.getPassword().getValue()),
+                        u.getPassword())) {
+
+                    Set<String> groups = u.getRoles().stream()
+                            .map(ur -> ur.getRole().toString())
+                            .collect(toSet());
+
+                    return new CredentialValidationResult(
+                            usernamePassword.getCaller(),
+                            groups
+                    );
+                }
+            }
+        }
+
+        if (credential instanceof JwtCredential
+                && userDao.findUndeletedByEmail(
+                ((JwtCredential) credential).getPrincipal()
+        ).isPresent()) {
+
+            return new CredentialValidationResult(
+                    ((JwtCredential) credential).getPrincipal()
+            );
+        }
+
+        return NOT_VALIDATED_RESULT;
     }
-    if (credential instanceof JwtCredential
-        && userDao.findUndeletedByEmail(((JwtCredential) credential).getPrincipal()).isPresent()) {
-      return new CredentialValidationResult(((JwtCredential) credential).getPrincipal());
-    }
-
-    return NOT_VALIDATED_RESULT;
-  }
 
   @Override
   public Set<ValidationType> validationTypes() {

@@ -4,8 +4,13 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user_password_reset_tokens")
-public class UserPasswordResetToken {
+@Table(name = "user_tokens")
+public class UserToken {
+
+    public enum Type {
+        PASSWORD_RESET,
+        EMAIL_VERIFICATION
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,6 +22,10 @@ public class UserPasswordResetToken {
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id")
     private User user;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Type type;
 
     @Column(name = "expiry_date", nullable = false)
     private LocalDateTime expiryDate;
@@ -46,6 +55,14 @@ public class UserPasswordResetToken {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 
     public LocalDateTime getExpiryDate() {
