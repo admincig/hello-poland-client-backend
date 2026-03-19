@@ -15,7 +15,10 @@ public class DateCustomAdapter implements JsonbAdapter<Date, String> {
 
   @Override
   public Date adaptFromJson(String obj) throws Exception {
-    return DATE_FORMAT.parse(obj);
+      if (obj == null || obj.isBlank()) {
+          return null;
+      }
+      return DATE_FORMAT.parse(obj);
   }
 
 }
