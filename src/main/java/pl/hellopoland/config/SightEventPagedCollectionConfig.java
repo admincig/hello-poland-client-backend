@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class SightEventPagedCollectionConfig extends PagedCollectionConfig<SightEvent> {
 
   public SightEventPagedCollectionConfig() {
-    this.setOrderColumn("e.name");
+      this.setOrderColumn("e.id");
   }
 
   private boolean currentPartner;
@@ -72,8 +72,8 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
 
             addCondition(
                     "searchQuery",
-                    tsQuery,
-                    "tsearch('polish_hunspell', e.searchIndex, :searchQuery)"
+                    "%" + normalized.toLowerCase() + "%",
+                    "(lower(e.name) like :searchQuery or lower(e.lead) like :searchQuery or lower(e.searchIndex) like :searchQuery)"
             );
 
 
