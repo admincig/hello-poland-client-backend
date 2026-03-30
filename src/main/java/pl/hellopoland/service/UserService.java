@@ -318,7 +318,7 @@ public class UserService extends ServiceSuperclass {
 
         String portalUrl = properties.getProperty(
                 "portal.url",
-                "https://portal.hello-poland.pl"
+                "https://api.hello-poland.pl"
         );
 
         String resetUrl = portalUrl + "/reset-password?token=" + token;
@@ -403,7 +403,7 @@ public class UserService extends ServiceSuperclass {
 
         String portalUrl = properties.getProperty(
                 "portal.url",
-                "https://portal.hello-poland.pl"
+                "https://api.hello-poland.pl"
         );
 
         String activationUrl = portalUrl + "/activate-account?token=" + token;
