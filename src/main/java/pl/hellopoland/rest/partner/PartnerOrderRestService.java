@@ -24,4 +24,11 @@ public class PartnerOrderRestService {
     return Response.ok().build();
   }
 
+    @GET
+    @Path("/ht/{serialNumber}/sendTicketCopy")
+    public Response sendTicketCopyBySerial(@PathParam("serialNumber") String serialNumber) {
+        service.sendTicketCopyBySerialNumber(serialNumber);
+        return Response.ok().build();
+    }
+
 }

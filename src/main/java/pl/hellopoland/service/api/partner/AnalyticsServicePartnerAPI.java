@@ -18,4 +18,8 @@ public class AnalyticsServicePartnerAPI {
     return service.getOrdersCsvFile(fromDate, toDate);
   }
 
+    @RolesAllowed("partner")
+    public Object getSales(Date fromDate, Date toDate) {
+        return service.getSales(fromDate, toDate);
+    }
 }

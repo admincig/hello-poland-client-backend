@@ -7,6 +7,8 @@ import pl.hellopoland.bo.OrderDetails.Platform;
 import jakarta.ejb.LocalBean;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
+import pl.hellopoland.dto.SalesRowDTO;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.System.Logger.Level;
@@ -17,6 +19,9 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.stream.Collectors;
+import java.util.List;
+
 
 @LocalBean
 @Stateless
@@ -106,5 +111,88 @@ public class AnalyticsService extends ServiceSuperclass {
       logger.log(Level.ERROR, e.getLocalizedMessage());
     }
   }
+    public Object getSales(Date fromDate, Date toDate) {
+
+        var entries = orderService.getOrdersInDateRange(
+                fromDate,
+                toDate,
+                getLoggedUser().hasRole(UserRole.Role.ADMIN) ? null : getLoggedPartner()
+        );
+
+        return entries.stream()
+                .collect(Collectors.groupingBy(oe -> {
+                    OrderDateEntry dateEntry = oe.getDateEntry();
+                    OrderSightEntry sightEntry = dateEntry.getSightEntry();
+                    return sightEntry.getOrder();
+                }))
+                .values()
+                .stream()
+                .map(orderEntries -> {
+
+                    OrderEntry oe = orderEntries.get(0);
+
+                    OrderDateEntry dateEntry = oe.getDateEntry();
+                    OrderSightEntry sightEntry = dateEntry.getSightEntry();
+                    Order order = sightEntry.getOrder();
+                    OrderDetails oDetails = order.getDetails();
+                    SightEvent sightEvent = sightEntry.getSightEvent();
+
+                    return new SalesRowDTO(
+                            order.getId(),
+                            order.getDate(),                          // data zakupu
+                            dateEntry.getDate(),                      // data wydarzenia
+                            oDetails.getFirstName() + " " + oDetails.getLastName(),
+                            oDetails.getEmail(),
+                            order.getStatus().name(),
+                            order.getHash(),
+
+                            sightEvent.getName(),                     // wydarzenie
+                            sightEvent.getSight() != null
+                                    ? sightEvent.getSight().getName()
+                                    : "-"                             // obiekt
+                    );
+                })
+                .collect(Collectors.toList());
+    }
+
+    public List<SalesRowDTO> getSales(Date fromDate, Date toDate, Long partnerId) {
+        var orders = orderService.getOrdersInDateRange(fromDate, toDate, null);
+
+        return orders.stream()
+                .filter(oe -> {
+                    Partner partner = oe.getDateEntry().getSightEntry().getSightEvent().getPartner();
+                    return partnerId == null || (partner != null && partnerId.equals(partner.getId()));
+                })
+                .map(oe -> {
+                    OrderDateEntry dateEntry = oe.getDateEntry();
+                    OrderSightEntry sightEntry = dateEntry.getSightEntry();
+                    SightEvent sightEvent = sightEntry.getSightEvent();
+                    Partner partner = sightEvent.getPartner();
+                    Order order = sightEntry.getOrder();
+                    OrderDetails details = order.getDetails();
+
+                    String customerName = null;
+                    if (details != null) {
+                        String firstName = details.getFirstName() != null ? details.getFirstName() : "";
+                        String lastName = details.getLastName() != null ? details.getLastName() : "";
+                        customerName = (firstName + " " + lastName).trim();
+                    }
+
+                    return new SalesRowDTO(
+                            order.getId(),
+                            order.getDate(),
+                            dateEntry.getDate(),
+                            customerName,
+                            details != null ? details.getEmail() : null,
+                            order.getStatus() != null ? order.getStatus().name() : null,
+                            order.getHash(),
+                            sightEvent != null ? sightEvent.getName() : null,
+                            sightEvent != null && sightEvent.getSight() != null ? sightEvent.getSight().getName() : null,
+                            partner != null ? partner.getName() : null,
+                            partner != null ? partner.getId() : null
+                    );
+                })
+                .collect(Collectors.toList());
+    }
 
 }

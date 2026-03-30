@@ -32,4 +32,14 @@ public class PartnerAnalyticsRestService {
     response.header("Content-Disposition", "attachment;filename=" + report.getName());
     return response.build();
   }
+
+  @GET
+  @Path("/sales")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response getSales(
+            @QueryParam("fromDate") @DateFormat Date fromDate,
+            @QueryParam("toDate") @DateFormat Date toDate
+  ) {
+        return Response.ok(service.getSales(fromDate, toDate)).build();
+  }
 }

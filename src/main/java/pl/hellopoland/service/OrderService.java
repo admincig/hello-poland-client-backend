@@ -80,7 +80,7 @@ public class OrderService extends ServiceSuperclass {
 
 
   public Order create(OrderIRO iro) {
-    throwIfExpiredTickets(iro);
+    //throwIfExpiredTickets(iro);
     throwIfTicketPricesDontMatch(iro);
     writeSomeLogs(iro);
     Order o = new Order();
@@ -96,6 +96,9 @@ public class OrderService extends ServiceSuperclass {
             .collect(groupingBy(oeIRO -> oeIRO.id)).keySet();
     HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
     List<TicketDefinitionDTO> tds = hpt.getTicketDefinitionsMarket(atnaIds);
+
+    throwIfExpiredTickets(iro,tds);
+
     Map<Long, List<TicketDefinitionDTO>> ticketsGroupedBySight =
         tds.stream().collect(Collectors.groupingBy(td -> td.sightEventId));
     for (Map.Entry<Long, List<TicketDefinitionDTO>> entry : ticketsGroupedBySight.entrySet()) {
@@ -580,5 +583,102 @@ public class OrderService extends ServiceSuperclass {
       }
     }
   }
+
+    public Order findBySerialNumber(String serialNumber) {
+        return em.createQuery(
+                        "select distinct o from Order o " +
+                                "join o.sightEntries ose " +
+                                "where ose.serialNumber = :serialNumber",
+                        Order.class
+                )
+                .setParameter("serialNumber", serialNumber)
+                .getResultStream()
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException());
+    }
+
+    public EmailSendingReportDTO sendTicketCopyBySerialNumber(String serialNumber) {
+        var order = findBySerialNumber(serialNumber);
+        return sendTicketCopy(order.getHash());
+    }
+
+    private void throwIfExpiredTickets(OrderIRO iro, List<TicketDefinitionDTO> tds) {
+        if (iro == null || iro.entries == null || iro.entries.isEmpty()) {
+            throw new IllegalArgumentException("Order entries must not be null or empty");
+        }
+
+        Map<Long, TicketDefinitionDTO> ticketByAtnaId = tds.stream()
+                .collect(Collectors.toMap(td -> td.atnaId, td -> td));
+
+        // 🔥 pobieramy poolId
+        Set<Long> poolIds = tds.stream()
+                .map(td -> td.poolId)
+                .collect(Collectors.toSet());
+
+        HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
+        List<TicketPoolDefinitionDTO> pools = hpt.getWholeDay(new ArrayList<>(poolIds));
+
+        // 🔥 mapa poolId → wholeDay
+        Map<Long, Boolean> poolWholeDay = pools.stream()
+                .collect(Collectors.toMap(p -> p.id, p -> p.wholeDay));
+
+        Date now = new Date();
+        LocalDate today = LocalDate.now();
+
+        Map<Long, OrderEntryIRO> expiredIds = new HashMap<>();
+
+        for (OrderEntryIRO entry : iro.entries) {
+            if (entry.quantity == null || entry.quantity <= 0) {
+                continue;
+            }
+
+            TicketDefinitionDTO td = ticketByAtnaId.get(entry.id);
+
+            logger.log(Level.INFO, "ATNA=" + entry.id +
+                    " poolId=" + (td != null ? td.poolId : null) +
+                    " wholeDay=" + (td != null ? poolWholeDay.get(td.poolId) : null) +
+                    " date=" + entry.date);
+
+            boolean isWholeDay = false;
+            if (td != null && td.poolId != null) {
+                isWholeDay = poolWholeDay.containsKey(td.poolId);
+            }
+
+            if (isWholeDay) {
+                LocalDate entryDate = entry.date.toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate();
+
+                if (entryDate.isBefore(today)) {
+                    expiredIds.put(entry.id, entry);
+                }
+            } else {
+                if (entry.date.before(now)) {
+                    expiredIds.put(entry.id, entry);
+                }
+            }
+        }
+
+        if (!expiredIds.isEmpty()) {
+            var format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            var errMsg = new StringBuilder(
+                    "W swoim koszyku masz bilety na oferty, które już minęły. Przeterminowane bilety:");
+
+            for (Map.Entry<Long, OrderEntryIRO> e : expiredIds.entrySet()) {
+                TicketDefinitionDTO td = ticketByAtnaId.get(e.getKey());
+                if (td != null) {
+                    errMsg.append("\n")
+                            .append(td.name)
+                            .append(", data: ")
+                            .append(format.format(e.getValue().date))
+                            .append(", oferta: ")
+                            .append(td.sightEventId)
+                            .append(";");
+                }
+            }
+
+            throw new ConflictingException(errMsg.toString());
+        }
+    }
 
 }

@@ -18,4 +18,8 @@ public class OrderServicePartnerAPI {
     return service.sendTicketCopy(hash);
   }
 
+    @RolesAllowed("partner")
+    public void sendTicketCopyBySerialNumber(String serialNumber) {
+        service.sendTicketCopyBySerialNumber(serialNumber);
+    }
 }
