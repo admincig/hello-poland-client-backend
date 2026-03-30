@@ -5,7 +5,9 @@ import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.SightEventCategory;
 import pl.hellopoland.bo.Tag;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
+import pl.hellopoland.dto.CategoryDTO;
 import pl.hellopoland.dto.SightEventDTO;
+import pl.hellopoland.dto.TagDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.*;
@@ -36,11 +38,34 @@ public class SightEventServicePartnerAPI {
   @Inject
   TranslationService tService;
 
-  @RolesAllowed("partner")
-  public SightEventDTO create(SightEventDTO dto) {
-    SightEvent bo = service.create(dto, null);
-    return DtoMapper.getFullDTO(bo);
-  }
+    @RolesAllowed("partner")
+    public SightEventDTO create(SightEventDTO dto) {
+        // 1. Tworzymy event (dostajemy ID)
+        SightEvent se = service.create(dto, null);
+
+        // 2. Kategorie (jeśli przyszły)
+        if (dto.categories != null) {
+            for (CategoryDTO catDto : dto.categories) {
+                if (catDto != null && catDto.id != null) {
+                    categoryRestrictionCheck(catDto.id);
+                    Category cat = catService.get(catDto.id);
+                    se = secService.addCategory(se, cat);
+                }
+            }
+        }
+        // 3. Tagi (jeśli przyszły)
+        if (dto.tags != null) {
+            for (TagDTO tagDto : dto.tags) {
+                if (tagDto != null && tagDto.id != null) {
+                    tagRestrictionCheck(tagDto.id);
+                    Tag tag = tagService.get(tagDto.id);
+                    se = setService.addTag(se, tag);
+                }
+            }
+        }
+
+        return DtoMapper.getFullDTO(se);
+    }
 
   @RolesAllowed("partner")
   public SightEventDTO createLanguageVesrion(SightEventDTO dto, LanguageVersion language) {
