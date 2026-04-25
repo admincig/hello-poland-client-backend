@@ -59,4 +59,8 @@ public class UserServicePartnerAPI {
     return service.updateUsher(usher);
   }
 
+  @RolesAllowed("partner")
+  public void deleteUsherForCurrentPartner(long usherId) {
+        service.deleteUsher(usherId);
+  }
 }

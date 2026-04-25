@@ -774,4 +774,14 @@ public class HelloTicket {
         }
     }
 
+    public void deleteUsherForPartner(long usherId, String partnerAuthToken) {
+        try {
+            delete("/v1/partners/ushers/" + usherId, partnerAuthToken);
+        } catch (Exception e) {
+            logger.log(System.Logger.Level.WARNING, "Failed", e);
+            throw new ConflictingException(
+                    "Nie udało się usunąć biletera w zewnętrznym systemie.");
+        }
+    }
+
 }

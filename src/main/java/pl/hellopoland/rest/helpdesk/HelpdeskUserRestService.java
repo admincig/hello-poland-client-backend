@@ -33,4 +33,10 @@ public class HelpdeskUserRestService {
     return Response.ok().build();
   }
 
+    @DELETE
+    @Path("/{id}")
+    public Response deleteUser(@PathParam("id") Long id) {
+        service.deleteUser(id);
+        return Response.noContent().build();
+    }
 }

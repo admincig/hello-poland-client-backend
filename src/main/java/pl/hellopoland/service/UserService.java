@@ -458,4 +458,31 @@ public class UserService extends ServiceSuperclass {
 
         return true;
     }
+
+    public void deletePartnerUserFromHelpdesk(User user) {
+        if (user == null || user.isDeleted()) {
+            throw new NotFoundException();
+        }
+
+        if (user.getPartner() == null) {
+            throw new ConflictingException("User is not assigned to partner.");
+        }
+
+        if (user.hasRole(Role.ADMIN) || user.hasRole(Role.ROOT)) {
+            throw new ConflictingException("Cannot delete admin user.");
+        }
+
+        user.setDeleted(true);
+        //user.setEmail("deleted+" + user.getId() + "+" + System.currentTimeMillis() + "@hello-poland.pl");
+        //user.changePassword(RandomStringUtils.randomAlphanumeric(32));
+
+        em.merge(user);
+    }
+
+    public void deleteUsher(long usherId) {
+        Portal hpt = getPortal("Hello Ticket Cloud");
+        HelloTicket ht = new HelloTicket(hpt.getUrl());
+        ht.deleteUsherForPartner(usherId, getLoggedPartner().getHptToken());
+    }
+
 }

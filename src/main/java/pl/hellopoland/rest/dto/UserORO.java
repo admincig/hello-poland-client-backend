@@ -1,6 +1,10 @@
 package pl.hellopoland.rest.dto;
 
 import pl.hellopoland.bo.User;
+import pl.hellopoland.bo.UserRole;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class UserORO {
 
@@ -11,6 +15,7 @@ public class UserORO {
   public UserLocationRO location;
   public String picture;
   public UserDetailsRO details;
+  public Set<String> roles;
 
   public UserORO(User user) {
     this.email = user.getEmail();
@@ -22,6 +27,11 @@ public class UserORO {
       this.lastName = details.lastName;
       this.name = this.firstName + " " + this.lastName;
     }
+
+    this.roles = user.getRoles().stream()
+              .map(UserRole::getRole)
+              .map(Enum::name)
+              .collect(Collectors.toSet());
 
     this.picture = user.getPicture();
   }

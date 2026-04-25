@@ -11,20 +11,24 @@ import jakarta.inject.Inject;
 @Stateless
 public class UserServiceHelpdeskAPI {
 
-  @Inject
-  UserService service;
+    @Inject
+    UserService service;
 
-  @RolesAllowed("admin")
-  public UserORO me() {
-    User bo = service.me();
-    var dto = new UserORO(bo);
-    return dto;
-  }
+    @RolesAllowed("admin")
+    public UserORO me() {
+        User bo = service.me();
+        return new UserORO(bo);
+    }
 
-  @RolesAllowed("admin")
-  public void updatePassword(Long id, String newPassword) {
-    User bo = service.get(id);
-    service.updatePasswordForUser(bo, newPassword);
+    @RolesAllowed("admin")
+    public void updatePassword(Long id, String newPassword) {
+        User bo = service.get(id);
+        service.updatePasswordForUser(bo, newPassword);
+    }
 
-  }
+    @RolesAllowed("admin")
+    public void deleteUser(Long id) {
+        User bo = service.get(id);
+        service.deletePartnerUserFromHelpdesk(bo);
+    }
 }

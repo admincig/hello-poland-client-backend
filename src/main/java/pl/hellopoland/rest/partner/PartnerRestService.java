@@ -122,4 +122,12 @@ public class PartnerRestService {
     return Response.ok().build();
   }
 
+    @DELETE
+    @Path("/ushers/{id}")
+    public Response deleteUsher(@PathParam("id") long userId) {
+        userService.deleteUsherForCurrentPartner(userId);
+        return Response.noContent().build();
+    }
+
+
 }

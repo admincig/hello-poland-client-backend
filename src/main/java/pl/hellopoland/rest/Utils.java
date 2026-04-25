@@ -23,20 +23,40 @@ public class Utils {
     }
     return "unknown";
   }
+    public static List<Pair<String, byte[]>> extractFiles(MultipartFormDataInput input) throws IOException {
+        if (input == null) throw new IllegalArgumentException("Missing multipart body");
 
-  public static List<Pair<String, byte[]>> extractFiles(MultipartFormDataInput input) throws
-      IOException {
-    List<Pair<String, byte[]>> pairs = new ArrayList<>();
-    Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
-    List<InputPart> inputParts = uploadForm.get("file");
-    for (InputPart inputPart : inputParts) {
-      MultivaluedMap<String, String> header = inputPart.getHeaders();
-      String fileName = Utils.getFileName(header);
-      byte[] bytes = inputPart.getBody(byte[].class, null);
-      pairs.add(Pair.of(fileName, bytes));
+        Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
+        if (uploadForm == null || uploadForm.isEmpty()) {
+            throw new IllegalArgumentException("Missing multipart form-data");
+        }
+
+        List<Pair<String, byte[]>> pairs = new ArrayList<>();
+
+        for (Map.Entry<String, List<InputPart>> e : uploadForm.entrySet()) {
+            List<InputPart> parts = e.getValue();
+            if (parts == null) continue;
+
+            for (InputPart part : parts) {
+                MultivaluedMap<String, String> header = part.getHeaders();
+                String cd = header.getFirst("Content-Disposition");
+
+                // bierzemy tylko części, które wyglądają jak plik (mają filename=)
+                if (cd == null || !cd.toLowerCase().contains("filename=")) continue;
+
+                String fileName = Utils.getFileName(header);
+                byte[] bytes = part.getBody(byte[].class, null);
+                pairs.add(Pair.of(fileName, bytes));
+            }
+        }
+
+        if (pairs.isEmpty()) {
+            // pomocniczo: wypisz jakie klucze przyszły
+            throw new IllegalArgumentException("No file part found in multipart. Keys=" + uploadForm.keySet());
+        }
+
+        return pairs;
     }
-    return pairs;
-  }
 
   public enum FileType {
     image, file
