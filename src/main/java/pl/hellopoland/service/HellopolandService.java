@@ -3,6 +3,12 @@ package pl.hellopoland.service;
 import jakarta.ejb.LocalBean;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
+import java.lang.System.Logger.Level;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -16,21 +22,19 @@ import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.enums.BusinessType;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
+import pl.hellopoland.exception.conflict.ExternalSystemException;
 import pl.hellopoland.exception.email.EmailSendingRollbackException;
 import pl.hellopoland.soap.p24.object.MerchantRegisterRequest;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.soap.p24.MerchantRegisterValidator;
 
-import java.lang.System.Logger.Level;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 @LocalBean
 @Stateless
 public class HellopolandService extends ServiceSuperclass {
+  private static final String PARTNER_ALREADY_EXISTS_CODE = "9022";
+  private static final String PARTNER_ALREADY_EXISTS_MESSAGE =
+      "B\u0142\u0105d! Taki Partner ju\u017c istnieje.";
+
   @Inject
   private UserService userService;
   @Inject
@@ -61,7 +65,7 @@ public class HellopolandService extends ServiceSuperclass {
     var emailPassword = new HashMap<String, String>();
     emailPassword.put(email, newPassword);
     try {
-      emailService.sendEmail(new Email(email, "Reset konta w Hello Poland.", "Twój login to " + email + ", hasło to " + newPassword));
+      emailService.sendEmail(new Email(email, "Reset konta w Hello Poland.", "TwĂłj login to " + email + ", hasĹ‚o to " + newPassword));
     } catch (Exception e) {
       logger.log(System.Logger.Level.ERROR, e.getLocalizedMessage());
     }
@@ -84,6 +88,7 @@ public class HellopolandService extends ServiceSuperclass {
 
     var merchant = new MerchantRegisterRequest(partner);
     MerchantRegisterValidator.validate(merchant);
+    ensurePartnerDoesNotExist(partner);
     Partner partnerBO = getPartnerFromMerchantRegisterRequest(merchant);
 
     // 2. creating a partner and the user in hpl:
@@ -106,23 +111,27 @@ public class HellopolandService extends ServiceSuperclass {
           UserRole.Role.PARTNER, UserRole.Role.USHER));
       em.flush();
     } catch (Exception e) {
+      if (isPartnerAlreadyExistsException(e)) {
+        throw new ConflictingException(PARTNER_ALREADY_EXISTS_MESSAGE,
+            PARTNER_ALREADY_EXISTS_CODE, e);
+      }
       var exc = e.getCause();
       if (exc instanceof jakarta.validation.ConstraintViolationException) {
         var errMsg = new StringBuilder();
         ((jakarta.validation.ConstraintViolationException) exc).getConstraintViolations().forEach(
-            cv -> errMsg.append(cv.getPropertyPath() + " ").append(cv.getMessage() + ", "));
-        logger.log(Level.ERROR, "Błąd podczas dodawania partnera; " + errMsg.toString());
-        throw new ConflictingException("Błąd podczas dodawania partnera; " + errMsg.toString());
+            cv -> errMsg.append(cv.getPropertyPath()).append(" ").append(cv.getMessage()).append(", "));
+        logger.log(Level.ERROR, "BĹ‚Ä…d podczas dodawania partnera; " + errMsg);
+        throw new ConflictingException("BĹ‚Ä…d podczas dodawania partnera; " + errMsg);
       }
 
       var exc2 = e.getCause().getCause();
       if (exc2 instanceof ConstraintViolationException) {
         String errMsg = ((ConstraintViolationException) exc2).getSQLException().getMessage();
-        logger.log(Level.ERROR, "Błąd podczas dodawania partnera; " + errMsg);
+        logger.log(Level.ERROR, "BĹ‚Ä…d podczas dodawania partnera; " + errMsg);
         throw new ConflictingException(
-            "Błąd podczas dodawania partnera; " + errMsg.substring(errMsg.lastIndexOf(": ") + 1));
+            "BĹ‚Ä…d podczas dodawania partnera; " + errMsg.substring(errMsg.lastIndexOf(": ") + 1));
       }
-      throw new ConflictingException("Błąd podczas dodawania partnera");
+      throw new ConflictingException("BĹ‚Ä…d podczas dodawania partnera");
     }
 
     partner.password = password;
@@ -156,23 +165,29 @@ public class HellopolandService extends ServiceSuperclass {
     var hptToken = getLoggedUser().getHptToken();
     try {
       var hptPartner = ht.addPartner(partner, hptToken);
+      if (hptPartner == null) {
+        throw new ExternalSystemException("Nie udalo sie stworzyc partnera w zewnetrznym systemie");
+      }
       partnerBO.setHptToken(hptPartner.token);
       partnerBO.setHptId(hptPartner.id);
+    } catch (ConflictingException e) {
+      throw e;
+    } catch (ExternalSystemException e) {
+      throw new ConflictingException("Nie udalo sie stworzyc partnera w zewnetrznym systemie", e);
     } catch (Exception e) {
-      throw new ConflictingException("Nie udało się stworzyć partnera w zewnętrznym systemie", e);
+      throw new ConflictingException("Nie udalo sie stworzyc partnera w zewnetrznym systemie", e);
     }
 
     // 5. sending emails to users (with theirs login and password):
     emailPassword.forEach((key, value) -> {
       try {
-        emailService.sendEmail(new Email(key, "Nowe konto w Hello Poland.", "Twój login to " + key + ", hasło to " + value));
+        emailService.sendEmail(new Email(key, "Nowe konto w Hello Poland.", "TwĂłj login to " + key + ", hasĹ‚o to " + value));
       } catch (Exception e) {
         logger.log(System.Logger.Level.ERROR, e.getLocalizedMessage());
         ht.removePartner(partner.email, hptToken);
-        throw new EmailSendingRollbackException("Błąd podczas wysyłania maila do: " + key);
+        throw new EmailSendingRollbackException("BĹ‚Ä…d podczas wysyĹ‚ania maila do: " + key);
       }
     });
-
 
     // 6. create first translation
     translationService.createEntityLanguageVersion(partnerBO, partner, LanguageVersion.PL_PL);
@@ -232,6 +247,46 @@ public class HellopolandService extends ServiceSuperclass {
     return partnerBO;
   }
 
+  private void ensurePartnerDoesNotExist(PartnerDTO partner) {
+    if (partner == null) {
+      return;
+    }
+
+    boolean partnerNameExists = em.createQuery(
+            "select count(p) from Partner p where lower(p.name) = :name", Long.class)
+        .setParameter("name", partner.name.toLowerCase())
+        .getSingleResult() > 0;
+
+    boolean partnerEmailExists = em.createQuery(
+            "select count(p) from Partner p where lower(p.email) = :email", Long.class)
+        .setParameter("email", partner.email.toLowerCase())
+        .getSingleResult() > 0;
+
+    boolean userEmailAlreadyAssigned = userService.findUndeletedByEmail(partner.email)
+        .map(User::getPartner)
+        .filter(Objects::nonNull)
+        .isPresent();
+
+    if (partnerNameExists || partnerEmailExists || userEmailAlreadyAssigned) {
+      throw new ConflictingException(PARTNER_ALREADY_EXISTS_MESSAGE,
+          PARTNER_ALREADY_EXISTS_CODE);
+    }
+  }
+
+  private boolean isPartnerAlreadyExistsException(Throwable throwable) {
+    Throwable current = throwable;
+    while (current != null) {
+      if (current instanceof ConstraintViolationException cve) {
+        String sqlMessage = cve.getSQLException() != null ? cve.getSQLException().getMessage() : "";
+        if (sqlMessage != null && sqlMessage.toLowerCase().contains("duplicate key value")) {
+          return true;
+        }
+      }
+      current = current.getCause();
+    }
+    return false;
+  }
+
   private boolean areRolesSupported(Set<RoleDTO> roles) {
     var supported = new HashSet<Role>(Arrays.asList(UserRole.Role.values()));
     supported.removeAll(excludedRoles);
@@ -248,5 +303,4 @@ public class HellopolandService extends ServiceSuperclass {
         .filter(r -> !excludedRoles.contains(r) && !r.equals(UserRole.Role.USHER));
     return stream.toArray(UserRole.Role[]::new);
   }
-
 }

@@ -5,6 +5,7 @@ import pl.hellopoland.bo.UserRole.Role;
 import pl.hellopoland.dto.DiscountTypeDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
+import pl.hellopoland.exception.badrequest.BadRequestException;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.AccessDeniedException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
@@ -15,6 +16,7 @@ import jakarta.inject.Inject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -44,6 +46,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
           throw new ConflictingException(
                   "Brak ticketDefinitions (dodaj przynajmniej 1 bilet)");
     }
+    validateRequiredNormalTicket(dto.ticketDefinitions);
 
     SightEvent se = sightEventService.get(dto.sightEventId);
     if (se == null) {
@@ -129,6 +132,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
   }
 
   private TicketPoolDefinitionDTO update(TicketPoolDefinitionDTO dto, HptSubject subject) {
+    validateRequiredNormalTicket(dto.ticketDefinitions);
     validateTicketDiscount(dto);
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
@@ -178,6 +182,16 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
           throw new ConflictingException("Cena po rabacie nie może być mniejsza niż prowizja");
         }
       }
+    }
+  }
+
+  private void validateRequiredNormalTicket(List<TicketDefinitionDTO> ticketDefinitions) {
+    boolean hasNormalTicket = ticketDefinitions != null && ticketDefinitions.stream()
+        .map(td -> td.ticketType)
+        .filter(Objects::nonNull)
+        .anyMatch(ticketType -> "NORMALNY".equals(ticketType.code));
+    if (!hasNormalTicket) {
+      throw new BadRequestException("Oferta musi zawierać bilet typu Normalny.");
     }
   }
 }

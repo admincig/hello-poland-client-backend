@@ -9,4 +9,8 @@ public abstract class BadRequestBaseException extends BaseException {
     super(message);
   }
 
+  public BadRequestBaseException(String message, String code) {
+    super(message, code);
+  }
+
 }

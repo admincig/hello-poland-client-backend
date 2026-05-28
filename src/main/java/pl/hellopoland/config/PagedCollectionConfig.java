@@ -5,6 +5,7 @@ import pl.hellopoland.bo.ModelSuperclass;
 import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.Map;
 
 public abstract class PagedCollectionConfig<E extends ModelSuperclass> {
 
@@ -19,6 +20,13 @@ public abstract class PagedCollectionConfig<E extends ModelSuperclass> {
       conditions = new LinkedList<>();
     }
     conditions.add(new Entry(parameterName, value, query));
+  }
+
+  protected void addCondition(Map<String, Object> parameters, String query) {
+    if (conditions == null) {
+      conditions = new LinkedList<>();
+    }
+    conditions.add(new Entry(parameters, query));
   }
 
   @SuppressWarnings("unchecked")

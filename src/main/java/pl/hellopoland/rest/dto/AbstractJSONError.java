@@ -9,10 +9,17 @@ public class AbstractJSONError implements Serializable {
   public String exception;
   public String message;
   public Object object;
+  public String code;
 
   public AbstractJSONError(Class<? extends Exception> exception, String message, Object object) {
+    this(exception, message, object, null);
+  }
+
+  public AbstractJSONError(Class<? extends Exception> exception, String message, Object object,
+      String code) {
     this.exception = exception.getSimpleName();
     this.message = message;
     this.object = object;
+    this.code = code;
   }
 }

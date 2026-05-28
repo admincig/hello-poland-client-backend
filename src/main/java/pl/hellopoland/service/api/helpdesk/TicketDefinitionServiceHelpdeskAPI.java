@@ -23,6 +23,11 @@ public class TicketDefinitionServiceHelpdeskAPI {
   PartnerService partnerService;
 
   @RolesAllowed("admin")
+  public TicketDefinitionDTO add(TicketDefinitionDTO dto) {
+    return service.add(dto, service.getLoggedUser());
+  }
+
+  @RolesAllowed("admin")
   public PagedCollection<TicketDefinitionDTO> getList(Long partnerId) {
     List<TicketDefinitionDTO> tds =
         service.getTicketDefinitions(partnerId, service.getLoggedUser());

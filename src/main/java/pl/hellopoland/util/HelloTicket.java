@@ -16,7 +16,6 @@ import pl.hellopoland.rest.JsonbConfig;
 
 import jakarta.json.JsonArray;
 import jakarta.json.JsonException;
-import jakarta.json.JsonString;
 import jakarta.json.JsonStructure;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbException;
@@ -44,6 +43,8 @@ public class HelloTicket {
   }
 
   private System.Logger logger = System.getLogger(HelloTicket.class.getName());
+  private final pl.hellopoland.exception.ExceptionMessagesService exceptionMessagesService =
+      new pl.hellopoland.exception.ExceptionMessagesService();
 
   private String url;
   private static final int CONNECT_TIMEOUT_MS = 5000;
@@ -134,11 +135,10 @@ public class HelloTicket {
       return JsonbConfig.getInstance().fromJson(
           post("/v1/ticket-definitions", json, partnerAuthToken).toString(),
           TicketDefinitionDTO.class);
-    } catch (IOException e) {
+    } catch (Exception e) {
       logger.log(Level.ERROR, e);
+      throw mapExternalException(e);
     }
-
-    return null;
   }
 
   public void deleteSightEvent(SightEvent sightEvent, String partnerAuthToken) {
@@ -195,14 +195,7 @@ public class HelloTicket {
       return jsonb.fromJson(json.toString(), TicketPoolDefinitionDTO.class);
     } catch (Exception e) {
       logger.log(WARNING, "Failed", e);
-        if (e.getMessage() != null && e.getMessage().contains("400")) {
-            throw new BadRequestException("TicketPoolDefinition must have tickets definitions.");
-        }
-        if (e.getMessage() != null && e.getMessage().contains("409")) {
-            throw new ConflictingException("Bad availableTicketsNumber limit combination.");
-        }
-        throw new ExternalSystemException("HelloTicket addTicketPoolDefinition failed: " + e.getMessage());
-
+      throw mapExternalException(e);
     }
   }
 
@@ -263,6 +256,20 @@ public class HelloTicket {
     }
   }
 
+  public List<TicketTypeDTO> getTicketTypes(String authToken) {
+    try {
+      final Jsonb jsonb = JsonbConfig.getInstance();
+      JsonStructure json = get("/v1/ticket-types", authToken);
+      JsonArray jsonArray = (JsonArray) json;
+      List<TicketTypeDTO> dtos = new ArrayList<>();
+      jsonArray.forEach(p -> dtos.add(jsonb.fromJson(p.toString(), TicketTypeDTO.class)));
+      return dtos;
+    } catch (Exception e) {
+      logger.log(WARNING, "Failed", e);
+      return Collections.emptyList();
+    }
+  }
+
   public AvailableTicketNumberAssociationDTO checkAvailabilityOfTicketsForSightEvent(
       SightEvent sightEvent, Date fromDate, Date toDate) {
     if (fromDate == null) {
@@ -289,7 +296,7 @@ public class HelloTicket {
       return jsonb.fromJson(json.toString(), PartnerDTO.class);
     } catch (Exception e) {
       logger.log(WARNING, "Failed", e);
-      return null;
+      throw mapExternalException(e);
     }
   }
 
@@ -434,9 +441,99 @@ public class HelloTicket {
           post("/v1/partners/ushers", jsonString, partnerAuthToken).toString(), UserDTO.class);
     } catch (Exception e) {
       logger.log(WARNING, "Failed", e);
-      throw new ConflictingException(
-          "Nie udało się utworzyć biletera w zewnętrznym systemie." + e.getLocalizedMessage());
+      throw new ConflictingException(extractExternalErrorMessage(e));
     }
+  }
+
+  private String extractExternalErrorMessage(Exception e) {
+    String message = resolveExternalErrorMessage(extractExternalErrorCode(e),
+        extractRawExternalErrorMessage(e));
+    if (message == null || message.isBlank()) {
+      return "Nie udało się utworzyć pracownika.";
+    }
+
+    return message.replaceFirst("^HTTP\\s+\\d{3}:\\s*", "");
+  }
+
+  private RuntimeException mapExternalException(Exception e) {
+    Integer statusCode = extractExternalStatusCode(e);
+    String externalCode = extractExternalErrorCode(e);
+    String externalMessage =
+        resolveExternalErrorMessage(externalCode, extractRawExternalErrorMessage(e));
+
+    if (statusCode != null && statusCode == 400) {
+      return new BadRequestException(externalMessage, externalCode);
+    }
+    if (statusCode != null && statusCode == 409) {
+      return new ConflictingException(externalMessage, externalCode, e);
+    }
+
+    return new ExternalSystemException(externalMessage, externalCode, statusCode, e);
+  }
+
+  private String resolveExternalErrorMessage(String externalCode, String fallbackMessage) {
+    if (externalCode != null && !externalCode.isBlank()) {
+      return exceptionMessagesService.getMessageByCode(externalCode);
+    }
+    if (fallbackMessage != null && !fallbackMessage.isBlank()) {
+      return fallbackMessage.replaceFirst("^HTTP\\s+\\d{3}:\\s*", "");
+    }
+    return exceptionMessagesService.getMessageByCode(null);
+  }
+
+  private String extractRawExternalErrorMessage(Exception e) {
+    return e.getLocalizedMessage();
+  }
+
+  private String extractExternalErrorCode(Exception e) {
+    if (e instanceof ExternalSystemException) {
+      return ((ExternalSystemException) e).getCode();
+    }
+    return null;
+  }
+
+  private Integer extractExternalStatusCode(Exception e) {
+    if (e instanceof ExternalSystemException) {
+      return ((ExternalSystemException) e).getStatusCode();
+    }
+
+    String message = e.getMessage();
+    if (message != null) {
+      if (message.contains("400")) {
+        return 400;
+      }
+      if (message.contains("409")) {
+        return 409;
+      }
+    }
+    return null;
+  }
+
+  private ExternalSystemException buildExternalSystemException(int statusCode, String responseBody) {
+    String message = responseBody;
+    String code = null;
+
+    if (responseBody != null && !responseBody.isBlank()) {
+      try {
+        AbstractErrorDTO error =
+            JsonbConfig.getInstance().fromJson(responseBody, AbstractErrorDTO.class);
+        if (error != null) {
+          if (error.message != null && !error.message.isBlank()) {
+            message = error.message;
+          }
+          if (error.code != null && !error.code.isBlank()) {
+            code = error.code;
+          }
+        }
+      } catch (Exception ignored) {
+      }
+    }
+
+    if (message == null || message.isBlank()) {
+      message = "Zewnętrzny system zwrócił HTTP " + statusCode + " bez treści odpowiedzi.";
+    }
+
+    return new ExternalSystemException(message, code, statusCode);
   }
 
   public List<TicketPoolDefinitionDTO> getWholeDay(List<Long> tpdIds) {
@@ -541,16 +638,9 @@ public class HelloTicket {
           is = conn.getErrorStream();
           String respString = (is != null) ? IOUtils.toString(is) : "";
           if (is != null) is.close();
-          String msg;
-
-          try {
-              var resp = JsonbConfig.getInstance().fromJson(respString, JsonStructure.class);
-              msg = ((JsonString) resp.getValue("/message")).getString();
-          } catch (Exception e) {
-              msg = respString;
-          }
-
-          throw new ExternalSystemException("HTTP " + respCode + ": " + msg);
+          logger.log(System.Logger.Level.WARNING,
+              "Server responded with error code: " + respCode + " and body: " + respString);
+          throw buildExternalSystemException(respCode, respString);
       }
 
       is = conn.getInputStream();
@@ -587,12 +677,7 @@ public class HelloTicket {
           is = conn.getErrorStream();
           String respString = (is != null) ? IOUtils.toString(is) : "";
           if (is != null) is.close();
-          try {
-              var resp = JsonbConfig.getInstance().fromJson(respString, JsonStructure.class);
-              throw new ExternalSystemException(((JsonString) resp.getValue("/message")).getString());
-          } catch (Exception e) {
-              throw new ExternalSystemException(respString);
-          }
+          throw buildExternalSystemException(respCode, respString);
       }
 
       is = conn.getInputStream();
@@ -622,12 +707,7 @@ public class HelloTicket {
           is = conn.getErrorStream();
           String respString = (is != null) ? IOUtils.toString(is) : "";
           if (is != null) is.close();
-          try {
-              var resp = JsonbConfig.getInstance().fromJson(respString, JsonStructure.class);
-              throw new ExternalSystemException(((JsonString) resp.getValue("/message")).getString());
-          } catch (Exception e) {
-              throw new ExternalSystemException(respString);
-          }
+          throw buildExternalSystemException(respCode, respString);
       }
 
       is = conn.getInputStream();
@@ -663,7 +743,7 @@ public class HelloTicket {
           is = conn.getErrorStream();
           String resp = (is != null) ? IOUtils.toString(is) : "";
           if (is != null) is.close();
-          throw new ExternalSystemException(resp);
+          throw buildExternalSystemException(respCode, resp);
       }
 
       is = conn.getInputStream();
@@ -700,14 +780,7 @@ public class HelloTicket {
       return jsonb.fromJson(json.toString(), TicketPoolDefinitionDTO.class);
     } catch (Exception e) {
       logger.log(WARNING, "Failed", e);
-      if (e.getMessage() != null && e.getMessage().contains("400")) {
-        throw new BadRequestException("TicketPoolDefinition must have tickets definitions.");
-      }
-      if (e.getMessage() != null
-          && (e.getMessage().contains("409"))) {
-        throw new ConflictingException("Bad availableTicketsNumber limit combination.", e);
-      }
-      throw new ConflictingException(e.getMessage(), e);
+      throw mapExternalException(e);
     }
   }
 
@@ -724,13 +797,7 @@ public class HelloTicket {
       return jsonb.fromJson(json.toString(), ListOfTicketDefinitionDTOs.class);
     } catch (Exception e) {
       logger.log(WARNING, "Failed", e);
-      if (e.getMessage() != null && e.getMessage().contains("400")) {
-        throw new BadRequestException("TicketPoolDefinition must have tickets definitions.");
-      }
-      if (e.getMessage() != null && e.getMessage().contains("409")) {
-        throw new ConflictingException("Bad availableTicketsNumber limit combination.");
-      }
-      return null;
+      throw mapExternalException(e);
     }
   }
 

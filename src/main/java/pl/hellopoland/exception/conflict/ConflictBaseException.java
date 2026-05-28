@@ -12,4 +12,16 @@ public abstract class ConflictBaseException extends BaseException {
   public ConflictBaseException(String message) {
     super(message);
   }
+
+  public ConflictBaseException(String message, String code) {
+    super(message, code);
+  }
+
+  public ConflictBaseException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public ConflictBaseException(String message, String code, Throwable cause) {
+    super(message, code, cause);
+  }
 }

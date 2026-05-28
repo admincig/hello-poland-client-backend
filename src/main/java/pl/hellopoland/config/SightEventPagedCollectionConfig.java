@@ -7,7 +7,10 @@ import pl.hellopoland.enums.LanguageVersion;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -62,19 +65,26 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
         if (searchQuery != null && !searchQuery.isBlank()) {
 
             String normalized = searchQuery
-                    .replaceAll("[^a-zA-Z0-9ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]", " ")
+                    .replaceAll("[^\\p{L}\\p{N}]+", " ")
                     .trim();
 
             String tsQuery = Arrays.stream(normalized.split("\\s+"))
                     .filter(s -> !s.isBlank())
-                    .map(s -> s + ":*")
+                    .map(s -> s.toLowerCase(Locale.ROOT) + ":*")
                     .collect(Collectors.joining(" & "));
 
-            addCondition(
-                    "searchQuery",
-                    "%" + normalized.toLowerCase() + "%",
-                    "(lower(e.name) like :searchQuery or lower(e.lead) like :searchQuery or lower(e.searchIndex) like :searchQuery)"
-            );
+            if (!tsQuery.isBlank()) {
+                Map<String, Object> searchParameters = new LinkedHashMap<>();
+                searchParameters.put("searchQuery", tsQuery);
+                searchParameters.put("searchPhrase", "%" + normalized.toLowerCase(Locale.ROOT) + "%");
+                addCondition(
+                        searchParameters,
+                        "(tsearch('polish_hunspell', e.searchIndex, :searchQuery) = true"
+                                + " or lower(e.name) like :searchPhrase"
+                                + " or lower(s.name) like :searchPhrase"
+                                + " or lower(p.name) like :searchPhrase)"
+                );
+            }
 
 
         }

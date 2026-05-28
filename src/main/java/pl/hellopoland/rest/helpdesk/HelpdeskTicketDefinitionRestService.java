@@ -19,6 +19,11 @@ public class HelpdeskTicketDefinitionRestService {
   @Inject
   TicketDefinitionServiceHelpdeskAPI service;
 
+  @POST
+  public TicketDefinitionDTO add(TicketDefinitionDTO ticketDefinitionDTO) {
+    return service.add(ticketDefinitionDTO);
+  }
+
   @GET
   public PagedCollection<TicketDefinitionDTO> ticketDefinitions(
       @QueryParam("partnerId") Long partnerId) {

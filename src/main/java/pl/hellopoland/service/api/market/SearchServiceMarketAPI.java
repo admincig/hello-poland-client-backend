@@ -63,11 +63,13 @@ public class SearchServiceMarketAPI {
         .collect(Collectors.toList());
 
     if (minPrice != null) {
-      ses = ses.stream().filter(se -> se.getMinPrice() >= minPrice)
+      ses = ses.stream()
+          .filter(se -> se.getMinPrice() != null && se.getMinPrice() >= minPrice)
           .collect(toList());
     }
     if (maxPrice != null) {
-      ses = ses.stream().filter(se -> se.getMinPrice() <= maxPrice)
+      ses = ses.stream()
+          .filter(se -> se.getMinPrice() != null && se.getMinPrice() <= maxPrice)
           .collect(toList());
     }
 

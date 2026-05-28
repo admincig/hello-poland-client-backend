@@ -69,7 +69,13 @@ public abstract class ServiceSuperclass {
     TypedQuery<E> tq = em.createQuery(query, config.entityClass());
     if (config.getConditions() != null) {
       config.getConditions()
-          .forEach(condition -> tq.setParameter(condition.parameterName, condition.value));
+          .forEach(condition -> {
+            if (condition.parameters != null) {
+              condition.parameters.forEach(tq::setParameter);
+            } else {
+              tq.setParameter(condition.parameterName, condition.value);
+            }
+          });
     }
     if (config.getPageSize() != null) {
       tq.setMaxResults(config.getPageSize());
@@ -83,7 +89,13 @@ public abstract class ServiceSuperclass {
       Collection<Entry> collection) {
     if (collection != null) {
       for (var e : collection) {
-        query = query.replaceAll(":" + e.parameterName, e.value.toString());
+        if (e.parameters != null) {
+          for (var parameter : e.parameters.entrySet()) {
+            query = query.replaceAll(":" + parameter.getKey(), parameter.getValue().toString());
+          }
+        } else {
+          query = query.replaceAll(":" + e.parameterName, e.value.toString());
+        }
       }
     }
     return "Executing select query:\n" + query;

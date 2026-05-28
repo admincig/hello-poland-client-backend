@@ -10,4 +10,8 @@ public class BadRequestException extends BadRequestBaseException {
     super(message);
   }
 
+  public BadRequestException(String message, String code) {
+    super(message, code);
+  }
+
 }

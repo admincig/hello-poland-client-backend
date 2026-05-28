@@ -4,6 +4,7 @@ import pl.hellopoland.bo.HptSubject;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.dto.TicketDefinitionDTO;
+import pl.hellopoland.dto.TicketTypeDTO;
 import pl.hellopoland.exception.badrequest.BadRequestException;
 import pl.hellopoland.util.HelloTicket;
 
@@ -36,6 +37,9 @@ public class TicketDefinitionService extends ServiceSuperclass {
     if (dto.price < 0) {
       throw new BadRequestException("The ticket price must be greater than 0");
     }
+    if (dto.ticketTypeId == null) {
+      throw new BadRequestException("Typ biletu jest wymagany.");
+    }
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     return hpt.addTicketDefinition(dto, hptSubject.getHptToken());
@@ -45,6 +49,9 @@ public class TicketDefinitionService extends ServiceSuperclass {
       HptSubject hptSubject) {
     if (dto.price < 0) {
       throw new BadRequestException("The ticket price must be greater than 0");
+    }
+    if (dto.ticketTypeId == null) {
+      throw new BadRequestException("Typ biletu jest wymagany.");
     }
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
@@ -61,6 +68,12 @@ public class TicketDefinitionService extends ServiceSuperclass {
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     return hpt.getTicketDefinition(id, hptSubject.getHptToken());
+  }
+
+  public List<TicketTypeDTO> getTicketTypes(HptSubject hptSubject) {
+    Portal portal = getPortal("Hello Ticket Cloud");
+    HelloTicket hpt = new HelloTicket(portal.getUrl());
+    return hpt.getTicketTypes(hptSubject.getHptToken());
   }
 
 }

@@ -1,9 +1,7 @@
 package pl.hellopoland.rest.exceptionhandler;
 
 import pl.hellopoland.exception.conflict.ConflictingException;
-
-import jakarta.json.Json;
-import jakarta.json.JsonObject;
+import pl.hellopoland.rest.dto.AbstractJSONError;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.ExceptionMapper;
@@ -19,8 +17,9 @@ public class ConflictingExceptionMapper implements ExceptionMapper<ConflictingEx
   @Override
   public Response toResponse(ConflictingException e) {
     logger.log(Level.WARNING, "", e);
-    JsonObject body = Json.createObjectBuilder().add("message", e.getLocalizedMessage()).build();
-    return Response.status(Status.CONFLICT).entity(body).build();
+    return Response.status(Status.CONFLICT)
+        .entity(new AbstractJSONError(e.getClass(), e.getLocalizedMessage(), null, e.getCode()))
+        .build();
   }
 
 }

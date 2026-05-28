@@ -1,5 +1,6 @@
 package pl.hellopoland.rest.exceptionhandler;
 
+import pl.hellopoland.exception.BaseException;
 import pl.hellopoland.exception.conflict.ConflictBaseException;
 import pl.hellopoland.rest.dto.AbstractJSONError;
 
@@ -14,7 +15,8 @@ public class ConflictExceptionHandler implements ExceptionMapper<ConflictBaseExc
 
   @Override
   public Response toResponse(ConflictBaseException e) {
+    String code = e instanceof BaseException ? ((BaseException) e).getCode() : null;
     return Response.status(CONFLICT)
-        .entity(new AbstractJSONError(e.getClass(), e.getMessage(), null)).build();
+        .entity(new AbstractJSONError(e.getClass(), e.getMessage(), null, code)).build();
   }
 }

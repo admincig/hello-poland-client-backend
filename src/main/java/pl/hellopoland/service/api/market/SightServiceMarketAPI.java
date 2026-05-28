@@ -121,10 +121,12 @@ public class SightServiceMarketAPI {
                 .collect(Collectors.toList());
 
         var cheapestSE = dto.sightEvents.stream()
-                .min(Comparator.comparing(seDto -> seDto.minPrice))
+                .min(Comparator.comparing(
+                    seDto -> seDto.minPrice,
+                    Comparator.nullsLast(Comparator.naturalOrder())))
                 .orElse(null);
 
-        if (cheapestSE != null) {
+        if (cheapestSE != null && cheapestSE.minPrice != null) {
             dto.minPrice = cheapestSE.minPrice;
             dto.minDiscountPrice = cheapestSE.minDiscountPrice;
         }

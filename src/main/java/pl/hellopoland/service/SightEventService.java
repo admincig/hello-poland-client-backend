@@ -6,6 +6,7 @@ import pl.hellopoland.bo.*;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.*;
 import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.exception.badrequest.BadRequestException;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.AccessDeniedException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
@@ -175,6 +176,7 @@ public class SightEventService extends ServiceSuperclass {
     var availableLanguageVersions = dto.availableLanguageVersions;
     dto.generalAdmission = Boolean.TRUE.equals(dto.generalAdmission);
     fetchImagesOriginalById(dto);
+    validatePublishedSightEventHasNormalTicket(dto, partner, null);
     List<ImageDTO> gallery = dto.images;
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
@@ -265,6 +267,7 @@ public class SightEventService extends ServiceSuperclass {
       createLanguageVersion(dto, language);
     }
     if (bo.getDefaultLanguage().equals(language)) {
+      validatePublishedSightEventHasNormalTicket(dto, bo.getPartner(), bo.getHptId(), bo.isPublished());
       fetchImagesOriginalById(dto);
       if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
         Partner partner = bo.getPartner();
@@ -299,6 +302,39 @@ public class SightEventService extends ServiceSuperclass {
       em.flush();
     }
     return translationService.updateEntityLanguageVersion(bo, dto, language);
+  }
+
+  private void validatePublishedSightEventHasNormalTicket(SightEventDTO dto, Partner partner,
+      Long sightEventHptId) {
+    validatePublishedSightEventHasNormalTicket(dto, partner, sightEventHptId, false);
+  }
+
+  private void validatePublishedSightEventHasNormalTicket(SightEventDTO dto, Partner partner,
+      Long sightEventHptId, boolean currentlyPublished) {
+    boolean resultingPublished =
+        dto.published != null ? dto.published : currentlyPublished;
+    if (!resultingPublished) {
+      return;
+    }
+
+    if (sightEventHptId == null) {
+      throw new BadRequestException(
+          "Opublikowana oferta musi zawierac bilet typu Normalny.");
+    }
+
+    HelloTicket helloTicket = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
+    List<TicketPoolDefinitionDTO> ticketPoolDefinitions =
+        helloTicket.getTicketPoolDefinitions(partner.getHptToken(), List.of(sightEventHptId));
+    boolean hasNormalTicket = ticketPoolDefinitions != null && ticketPoolDefinitions.stream()
+        .filter(tpd -> tpd != null && !tpd.deleted)
+        .filter(tpd -> tpd.ticketDefinitions != null)
+        .flatMap(tpd -> tpd.ticketDefinitions.stream())
+        .filter(td -> td != null && td.ticketType != null)
+        .anyMatch(td -> "NORMALNY".equals(td.ticketType.code));
+    if (!hasNormalTicket) {
+      throw new BadRequestException(
+          "Opublikowana oferta musi zawierac bilet typu Normalny.");
+    }
   }
 
   private void handleAttachmentUpdate(SightEvent bo, SightEventDTO dto) {
@@ -379,11 +415,46 @@ public class SightEventService extends ServiceSuperclass {
   private Optional<TicketDefinitionDTO> findCheapest(SightEventDTO sightEventDto) {
     if (sightEventDto.ticketPoolDefinitions != null) {
       return sightEventDto.ticketPoolDefinitions.stream()
-          .flatMap(tpd -> tpd.ticketDefinitions.stream())
+          .map(this::findPreferredPriceFromTicket)
+          .flatMap(Optional::stream)
           .min(Comparator.comparing(td -> td.originalPrice));
     } else {
       return Optional.empty();
     }
+  }
+
+  private Optional<TicketDefinitionDTO> findPreferredPriceFromTicket(
+      TicketPoolDefinitionDTO ticketPoolDefinitionDto) {
+    if (ticketPoolDefinitionDto.ticketDefinitions == null) {
+      return Optional.empty();
+    }
+
+    List<TicketDefinitionDTO> typedCandidates = ticketPoolDefinitionDto.ticketDefinitions.stream()
+        .filter(td -> td.ticketType != null)
+        .collect(Collectors.toList());
+
+    Optional<TicketDefinitionDTO> normal = findCheapestByType(typedCandidates, "NORMALNY");
+    if (normal.isPresent()) {
+      return normal;
+    }
+
+    List<TicketDefinitionDTO> eligible = typedCandidates.stream()
+        .filter(td -> Boolean.TRUE.equals(td.ticketType.eligibleForPriceFrom))
+        .collect(Collectors.toList());
+    if (!eligible.isEmpty()) {
+      return eligible.stream()
+          .min(Comparator.comparing(td -> td.originalPrice));
+    }
+
+    return typedCandidates.stream()
+        .min(Comparator.comparing(td -> td.originalPrice));
+  }
+
+  private Optional<TicketDefinitionDTO> findCheapestByType(List<TicketDefinitionDTO> candidates,
+      String code) {
+    return candidates.stream()
+        .filter(td -> code.equals(td.ticketType.code))
+        .min(Comparator.comparing(td -> td.originalPrice));
   }
 
   private List<TicketPoolDefinitionDTO> downloadHptTpds(HptTpdsDownloadConfigurator configurator) {
