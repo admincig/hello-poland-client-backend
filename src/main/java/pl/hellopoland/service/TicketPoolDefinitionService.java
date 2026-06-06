@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -37,7 +38,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
   PartnerService partnerService;
 
   public TicketPoolDefinitionDTO add(TicketPoolDefinitionDTO dto) {
-    return add(dto, getLoggedPartner());
+    return add(dto, getCurrentPartner());
   }
 
   public TicketPoolDefinitionDTO add(TicketPoolDefinitionDTO dto, Partner partner) {
@@ -48,12 +49,9 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     }
     validateRequiredNormalTicket(dto.ticketDefinitions);
 
-    SightEvent se = sightEventService.get(dto.sightEventId);
+    SightEvent se = sightEventService.getForPartner(dto.sightEventId, partner);
     if (se == null) {
       throw new ResourceNotFoundException();
-    }
-    if (!se.getPartner().getId().equals(partner.getId())) {
-      throw new AccessDeniedException();
     }
     validateDates(dto);
     dto.sightEventId = se.getHptId();
@@ -97,7 +95,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     if (logged.hasRole(Role.ADMIN)) {
       subject = logged;
     } else {
-      subject = logged.getPartner();
+      subject = getCurrentPartner();
     }
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
@@ -110,7 +108,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     if (logged.hasRole(Role.ADMIN)) {
       subject = logged;
     } else {
-      subject = logged.getPartner();
+      subject = getCurrentPartner();
     }
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
@@ -127,7 +125,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     if (logged.hasRole(Role.ADMIN)) {
       return update(dto, logged);
     } else {
-      return update(dto, logged.getPartner());
+      return update(dto, getCurrentPartner());
     }
   }
 
@@ -149,7 +147,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     if (logged.hasRole(Role.ADMIN)) {
       subject = logged;
     } else {
-      subject = logged.getPartner();
+      subject = getCurrentPartner();
     }
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
@@ -193,5 +191,15 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     if (!hasNormalTicket) {
       throw new BadRequestException("Oferta musi zawierać bilet typu Normalny.");
     }
+  }
+
+  private Partner getCurrentPartner() {
+    String login = Optional.ofNullable(ctx.getCallerPrincipal())
+        .map(principal -> principal.getName())
+        .orElse(null);
+    if (login != null) {
+      return partnerService.findByUserEmail(login);
+    }
+    return getLoggedPartner();
   }
 }

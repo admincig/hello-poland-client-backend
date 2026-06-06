@@ -153,7 +153,7 @@ public class SightEventService extends ServiceSuperclass {
   public void delete(Long id) {
     SightEvent bo = get(id);
 
-    Partner partner = bo.getPartner();
+    Partner partner = getOwningPartner(bo);
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
     helloTicket.deleteSightEvent(bo, partner.getHptToken());
@@ -190,17 +190,16 @@ public class SightEventService extends ServiceSuperclass {
     SightEvent bo = new SightEvent();
     DtoMapper.copy(dto, bo);
     enrichLocation(bo.getLocation());
-    bo.setPartner(partner);
-    iService.handleImagesUpdate(bo, dto);
-    handleAttachmentUpdate(bo, dto);
-    bo.setPortal(hpt);
-
     if (sight != null) {
       bo.setSight(sight);
+      bo.setPartner(sight.getPartner());
       if (sight.getAgreements() != null && !sight.getAgreements().isEmpty()) {
         bo.setAgreements(Set.copyOf(sight.getAgreements()));
       }
     }
+    iService.handleImagesUpdate(bo, dto);
+    handleAttachmentUpdate(bo, dto);
+    bo.setPortal(hpt);
 
     em.persist(bo);
 
@@ -261,16 +260,17 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public SightEvent update(SightEvent bo, SightEventDTO dto, LanguageVersion language) {
+    alignPartnerWithSight(bo);
     if (!translationService.isTranslated(bo, language)) {
       // throw new ConflictingException(
       // "Translation for language " + language.getLanuage() + " doesn't exists");
       createLanguageVersion(dto, language);
     }
     if (bo.getDefaultLanguage().equals(language)) {
-      validatePublishedSightEventHasNormalTicket(dto, bo.getPartner(), bo.getHptId(), bo.isPublished());
+      Partner partner = getOwningPartner(bo);
+      validatePublishedSightEventHasNormalTicket(dto, partner, bo.getHptId(), bo.isPublished());
       fetchImagesOriginalById(dto);
       if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
-        Partner partner = bo.getPartner();
         Portal hpt = getPortal("Hello Ticket Cloud");
         HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
         dto.id = bo.getHptId();
@@ -283,6 +283,7 @@ public class SightEventService extends ServiceSuperclass {
       }
       DtoMapper.copy(dto, bo);
         enrichLocation(bo.getLocation());
+      alignPartnerWithSight(bo);
       oHoursService.remove(bo.getOpeningHours());
       ArrayList<OpeningHours> oHoursList = getOpeningHoursCollectionFromDTO(dto);
       if (oHoursList != null && !oHoursList.isEmpty()) {
@@ -343,7 +344,7 @@ public class SightEventService extends ServiceSuperclass {
     if (dto.pdfAttachment != null && dto.pdfAttachment.id != null) {
       newAttachmentId = dto.pdfAttachment.id;
       newAttachment = fdService.get(newAttachmentId);
-      if (newAttachment.getPartner() == null || !newAttachment.getPartner().getId().equals(bo.getPartner().getId())) {
+      if (newAttachment.getPartner() == null || !newAttachment.getPartner().getId().equals(getOwningPartner(bo).getId())) {
         throw new EJBAccessException();
       }
     }
@@ -360,9 +361,12 @@ public class SightEventService extends ServiceSuperclass {
 
   public SightEvent getForPartner(Long sightEventId, Partner partner) {
     SightEvent sightEvent =
-        em.createQuery("from SightEvent where id=:id and partner=:partner", SightEvent.class)
-            .setParameter("id", sightEventId).setParameter("partner", partner).getSingleResult();
+        em.createQuery("from SightEvent where id=:id and sight.partner.id=:partnerId", SightEvent.class)
+            .setParameter("id", sightEventId)
+            .setParameter("partnerId", partner.getId())
+            .getSingleResult();
     sightEvent.fetchRelations();
+    alignPartnerWithSight(sightEvent);
     return sightEvent;
   }
 
@@ -404,12 +408,39 @@ public class SightEventService extends ServiceSuperclass {
         Optional<TicketDefinitionDTO> cheapestOpt = findCheapest(sightEventDto);
         cheapestOpt.ifPresent(cheapest -> {
           sightEventDto.minPrice = cheapest.originalPrice;
-          if (cheapest.discount != null) {
-            sightEventDto.minDiscountPrice = cheapest.discount.price;
-          }
+          sightEventDto.minDiscountPrice = getValidDiscountPrice(cheapest);
         });
       }
     }
+  }
+
+  Integer getValidDiscountPrice(TicketDefinitionDTO ticketDefinitionDto) {
+    if (ticketDefinitionDto == null
+        || ticketDefinitionDto.originalPrice == null
+        || ticketDefinitionDto.discount == null) {
+      return null;
+    }
+
+    Integer discountAmount = ticketDefinitionDto.discount.amount;
+    if (discountAmount == null && ticketDefinitionDto.discount.type != null
+        && ticketDefinitionDto.discount.value != null) {
+      switch (ticketDefinitionDto.discount.type) {
+        case FLAT:
+          discountAmount = ticketDefinitionDto.discount.value;
+          break;
+        case PERCENT:
+          discountAmount =
+              (int) (1.0 * ticketDefinitionDto.originalPrice * ticketDefinitionDto.discount.value
+                  / 100);
+          break;
+      }
+    }
+
+    if (discountAmount == null || discountAmount <= 0
+        || discountAmount >= ticketDefinitionDto.originalPrice) {
+      return null;
+    }
+    return ticketDefinitionDto.originalPrice - discountAmount;
   }
 
   private Optional<TicketDefinitionDTO> findCheapest(SightEventDTO sightEventDto) {
@@ -488,7 +519,7 @@ public class SightEventService extends ServiceSuperclass {
     var groupedById = pairBosWithDtosByHptId(bos, dtos);
     var groupedByPartner = new HashMap<Partner, List<Pair<Long, SightEventDTO>>>();
     groupedById.forEach(triplet -> {
-      Partner partner = triplet.second.getPartner();
+      Partner partner = getOwningPartner(triplet.second);
       if (!groupedByPartner.containsKey(partner)) {
         groupedByPartner.put(partner, new ArrayList<>());
       }
@@ -548,7 +579,7 @@ public class SightEventService extends ServiceSuperclass {
       Portal hpt = getPortal("Hello Ticket Cloud");
       HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
       helloTicket.addPdfToSightEvent(bo.getHptId(), DtoMapper.getFullDTO(bo.getPdfAttachment()),
-          bo.getPartner().getHptToken());
+          getOwningPartner(bo).getHptToken());
     }
     return bo;
   }
@@ -559,7 +590,7 @@ public class SightEventService extends ServiceSuperclass {
       fdService.deleteFile(Paths.get(pdf.getPath()));
       Portal hpt = getPortal("Hello Ticket Cloud");
       HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
-      helloTicket.deletePdfFromSightEvent(bo, bo.getPartner().getHptToken());
+      helloTicket.deletePdfFromSightEvent(bo, getOwningPartner(bo).getHptToken());
       bo.setPdfAttachment(null);
       return;
     }
@@ -646,10 +677,11 @@ public class SightEventService extends ServiceSuperclass {
     SightEvent translation = translationService.translateEntity(bo, language);
     bo.setDefaultLanguage(language);
     bo = BeanUtils.copyNotNullProperties(translation, bo);
+    alignPartnerWithSight(bo);
     em.merge(bo);
     bo = get(bo.getId());
     if (bo.getPortal().getType() == Portal.Type.HELLOTICKET_CLOUD_1) {
-      Partner partner = bo.getPartner();
+      Partner partner = getOwningPartner(bo);
       Portal hpt = getPortal("Hello Ticket Cloud");
       HelloTicket helloTicket = new HelloTicket(hpt.getUrl());
       helloTicket.updateSightEvent(DtoMapper.getDTO(bo), partner.getHptToken());
@@ -720,6 +752,21 @@ public class SightEventService extends ServiceSuperclass {
     se.fetchRelations();
     se.setFavourite(se.getUsers().contains(userService.getLoggedUser()));
     return se;
+  }
+
+  private Partner getOwningPartner(SightEvent sightEvent) {
+    if (sightEvent.getSight() != null && sightEvent.getSight().getPartner() != null) {
+      return sightEvent.getSight().getPartner();
+    }
+    return sightEvent.getPartner();
+  }
+
+  private void alignPartnerWithSight(SightEvent sightEvent) {
+    Partner owningPartner = getOwningPartner(sightEvent);
+    if (owningPartner != null && (sightEvent.getPartner() == null
+        || !owningPartner.getId().equals(sightEvent.getPartner().getId()))) {
+      sightEvent.setPartner(owningPartner);
+    }
   }
 
   public void dereferenceImage(Long fileId) {

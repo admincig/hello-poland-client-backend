@@ -11,6 +11,7 @@ import pl.hellopoland.dto.FilterDTO;
 import pl.hellopoland.dto.FilterPriceEntryDTO;
 import pl.hellopoland.dto.SearchResultDTO;
 import pl.hellopoland.dto.SightDTO;
+import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.service.*;
 import pl.hellopoland.util.DtoMapper;
@@ -95,16 +96,10 @@ public class SearchServiceMarketAPI {
       dto.sightEvents = se.stream()
           .map(DtoMapper::getDTO)
           .collect(toList());
-      dto.minPrice = dto.sightEvents.stream()
-          .map(sedto -> sedto.minPrice)
-          .filter(Objects::nonNull)
-          .min(Comparator.naturalOrder())
-          .orElse(null);
-      dto.minDiscountPrice = dto.sightEvents.stream()
-          .map(sedto -> sedto.minDiscountPrice)
-          .filter(Objects::nonNull)
-          .min(Comparator.naturalOrder())
-          .orElse(null);
+      findCheapestPricedSightEvent(dto.sightEvents).ifPresent(cheapest -> {
+        dto.minPrice = cheapest.minPrice;
+        dto.minDiscountPrice = cheapest.minDiscountPrice;
+      });
       dto.categories = tService.translateEntities(categories, languageVersion).stream()
           .map(DtoMapper::getDTO)
           .collect(toSet());
@@ -114,6 +109,15 @@ public class SearchServiceMarketAPI {
       return dto;
     }).collect(toList());
     return oro;
+  }
+
+  Optional<SightEventDTO> findCheapestPricedSightEvent(List<SightEventDTO> sightEvents) {
+    if (sightEvents == null) {
+      return Optional.empty();
+    }
+    return sightEvents.stream()
+        .filter(sightEvent -> sightEvent.minPrice != null)
+        .min(Comparator.comparing(sightEvent -> sightEvent.minPrice));
   }
 
   private List<Tag> getTags(List<SightEvent> ses) {

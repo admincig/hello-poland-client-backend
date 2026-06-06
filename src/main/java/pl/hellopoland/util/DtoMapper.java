@@ -137,6 +137,9 @@ public class DtoMapper {
 
   public static SightEventDTO getDTO(SightEvent bo) {
     SightEventDTO dto = new SightEventDTO();
+    Partner partner = bo.getSight() != null && bo.getSight().getPartner() != null
+        ? bo.getSight().getPartner()
+        : bo.getPartner();
     dto.id = bo.getId();
     dto.name = bo.getName();
     dto.lead = bo.getLead();
@@ -151,14 +154,14 @@ public class DtoMapper {
     dto.sightId = bo.getSight() != null ? bo.getSight().getId() : null;
     dto.blocked = bo.isBlocked();
     dto.published = bo.isPublished();
-    dto.partnerAffiliateCode = bo.getPartner().getAffiliateCode();
+    dto.partnerAffiliateCode = partner.getAffiliateCode();
     dto.defaultLanguage = bo.getDefaultLanguage().getLanuage();
     dto.promotion = bo.getPromotion();
     dto.promoted = dto.promotion != null;
     dto.sightId = bo.getSight().getId();
     dto.sightName = bo.getSight().getName();
-    dto.partnerId = bo.getPartner().getId();
-    dto.partnerName = bo.getPartner().getName();
+    dto.partnerId = partner.getId();
+    dto.partnerName = partner.getName();
     dto.minPrice = bo.getMinPrice();
     dto.minDiscountPrice = bo.getMinDiscountPrice();
     dto.language = bo.getCurrentLanguage() == null ? dto.defaultLanguage

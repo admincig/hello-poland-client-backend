@@ -24,10 +24,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
 @LocalBean
 @Stateless
 public class UserService extends ServiceSuperclass {
+  private static final String USHER_EMAIL_MATCHES_PARTNER_EMAIL_MESSAGE =
+      "Podaj inny adres e-mail niż ten, którym logujesz się do profilu Partnera.";
+  private static final String USHER_EMAIL_ALREADY_USED_AS_LOGIN_MESSAGE =
+      "Podany adres e-mail jest już używany.";
+
   @Inject
   private PasswordEncoder passwordEncoder;
   @Inject
@@ -239,9 +245,38 @@ public class UserService extends ServiceSuperclass {
   }
 
   public UserDTO createUsherForLoggedPartner(UserDTO usherDTO) {
+    validateUsherEmailForPartnerAndHelpdeskLogins(usherDTO);
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket ht = new HelloTicket(hpt.getUrl());
     return ht.createUsherForLoggedPartner(usherDTO, getLoggedPartner().getHptToken());
+  }
+
+  private void validateUsherEmailForPartnerAndHelpdeskLogins(UserDTO usherDTO) {
+    String usherEmail = StringUtils.trim(usherDTO.email);
+    if (StringUtils.equalsIgnoreCase(usherEmail, getLoggedUser().getEmail())) {
+      throw new ConflictingException(USHER_EMAIL_MATCHES_PARTNER_EMAIL_MESSAGE);
+    }
+    if (StringUtils.isBlank(usherEmail)) {
+      return;
+    }
+
+    findUndeletedByEmail(usherEmail)
+        .filter(this::isPartnerOrHelpdeskLogin)
+        .ifPresent(user -> {
+          throw new ConflictingException(USHER_EMAIL_ALREADY_USED_AS_LOGIN_MESSAGE);
+        });
+    usherDTO.email = usherEmail;
+  }
+
+  private boolean isPartnerOrHelpdeskLogin(User user) {
+    return hasAnyRole(user, Role.PARTNER, Role.ADMIN, Role.SALESMAN);
+  }
+
+  private boolean hasAnyRole(User user, Role... roles) {
+    Set<Role> expectedRoles = Set.of(roles);
+    return Optional.ofNullable(user.getRoles()).orElse(List.of()).stream()
+        .map(UserRole::getRole)
+        .anyMatch(expectedRoles::contains);
   }
 
   public void attachToPartner(User user, Partner partner) {
