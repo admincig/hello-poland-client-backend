@@ -18,6 +18,11 @@ public class HelpdeskTicketPoolDefinitionRestService {
   @Inject
   TicketPoolDefinitionServiceHelpdeskAPI service;
 
+  @POST
+  public TicketPoolDefinitionDTO add(TicketPoolDefinitionDTO dto) {
+    return service.add(dto);
+  }
+
   @GET
   public List<TicketPoolDefinitionDTO> list(@QueryParam("partnerId") Long partnerId) {
     return service.list(partnerId);
@@ -33,14 +38,16 @@ public class HelpdeskTicketPoolDefinitionRestService {
 
   @GET
   @Path("/{id}")
-  public TicketPoolDefinitionDTO get(@PathParam("id") Long id) {
-    return service.get(id);
+  public TicketPoolDefinitionDTO get(@PathParam("id") Long id,
+      @QueryParam("partnerId") Long partnerId) {
+    return service.get(id, partnerId);
   }
 
   @DELETE
   @Path("/{id}")
-  public void deleteTicketPoolDef(@PathParam("id") Long id) {
-    service.delete(id);
+  public void deleteTicketPoolDef(@PathParam("id") Long id,
+      @QueryParam("partnerId") Long partnerId) {
+    service.delete(id, partnerId);
   }
 
 }

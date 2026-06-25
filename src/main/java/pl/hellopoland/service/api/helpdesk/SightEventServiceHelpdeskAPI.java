@@ -4,6 +4,7 @@ import pl.hellopoland.bo.Category;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.SightEventCategory;
 import pl.hellopoland.bo.Tag;
+import pl.hellopoland.bo.Sight;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
 import pl.hellopoland.dto.SightEventDTO;
 import pl.hellopoland.enums.LanguageVersion;
@@ -35,10 +36,12 @@ public class SightEventServiceHelpdeskAPI {
   private CategoryService catService;
   @Inject
   private TagService tagService;
+  @Inject
+  private SightService sightService;
 
 
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"admin", "salesman"})
   public PagedCollection<SightEventDTO> list(SightEventPagedCollectionConfig config,
       LanguageVersion language) {
     config.onlyActive();
@@ -48,29 +51,29 @@ public class SightEventServiceHelpdeskAPI {
     return new PagedCollection<>(dtos, bos.config);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"admin", "salesman"})
   public void setPromotion(Long id, Integer promotion) {
     service.setSightEventPromotion(id, promotion);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"admin", "salesman"})
   public void removePromotion(Long id) {
     service.removeSightEventPromotion(id);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"admin", "salesman"})
   public void delete(Long id) {
     service.delete(id);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"admin", "salesman"})
   public SightEventDTO update(SightEventDTO dto, LanguageVersion language) {
     SightEvent bo = service.get(dto.id);
     bo = service.update(bo, dto, language);
     return DtoMapper.getFullDTO(bo);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"admin", "salesman"})
   public SightEventDTO get(Long id, LanguageVersion language) {
     SightEvent bo = service.get(id);
     bo = tService.translateEntity(bo, language);
@@ -82,14 +85,27 @@ public class SightEventServiceHelpdeskAPI {
     return dto;
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"admin", "salesman"})
+  public SightEventDTO create(SightEventDTO dto, LanguageVersion language) {
+    if (dto.sightId == null) {
+      throw new ConflictingException("Sight is required.");
+    }
+    Sight sight = sightService.get(dto.sightId);
+    dto.defaultLanguage = language.getLanuage();
+    dto.availableLanguageVersions = Set.of(language.getLanuage());
+    dto.published = false;
+    dto.blocked = false;
+    return DtoMapper.getFullDTO(service.create(dto, sight.getPartner()));
+  }
+
+  @RolesAllowed({"admin", "salesman"})
   public SightEventDTO createLanguageVesrion(SightEventDTO dto, LanguageVersion language) {
     SightEvent bo = service.createLanguageVersion(dto, language);
     return DtoMapper.getFullDTO(bo);
   }
 
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"admin", "salesman"})
   public SightEventDTO changeDefaultLanguage(Long id, LanguageVersion language) {
     SightEvent bo = service.get(id);
     if (!tService.isTranslated(bo, language)) {
@@ -102,13 +118,13 @@ public class SightEventServiceHelpdeskAPI {
     return DtoMapper.getFullDTO(bo);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"admin", "salesman"})
   public void deleteLanguageVersion(Long id, LanguageVersion language) {
     SightEvent bo = service.get(id);
     tService.deleteEntityTranslations(bo, language);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"admin", "salesman"})
   public SightEventDTO addCategory(Long id, Long categoryId) {
     SightEvent se = service.get(id);
     Category cat = catService.get(categoryId);
@@ -116,7 +132,7 @@ public class SightEventServiceHelpdeskAPI {
     return DtoMapper.getFullDTO(se);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"admin", "salesman"})
   public SightEventDTO removeCategory(Long id, Long categoryId) {
     SightEvent se = service.get(id);
     Category cat = catService.get(categoryId);
@@ -124,7 +140,7 @@ public class SightEventServiceHelpdeskAPI {
     return DtoMapper.getFullDTO(se);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"admin", "salesman"})
   public SightEventDTO addTag(Long id, Long tagId) {
     SightEvent se = service.get(id);
     Tag tag = tagService.get(tagId);
@@ -132,7 +148,7 @@ public class SightEventServiceHelpdeskAPI {
     return DtoMapper.getFullDTO(se);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"admin", "salesman"})
   public SightEventDTO removeTag(Long id, Long tagId) {
     SightEvent se = service.get(id);
     Tag tag = tagService.get(tagId);

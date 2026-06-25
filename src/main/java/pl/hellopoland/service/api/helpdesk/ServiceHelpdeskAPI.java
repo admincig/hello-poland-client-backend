@@ -33,6 +33,11 @@ public class ServiceHelpdeskAPI {
   }
 
   @RolesAllowed("admin")
+  public EmailSendingReportDTO sendTicketCopyToEmail(String hash, String email) {
+    return orderService.sendTicketCopyToEmail(hash, email);
+  }
+
+  @RolesAllowed("admin")
   public void rebuildSearchIndices() {
     sightService.rebuildSearchIndices();
     sightEventService.rebuildSearchIndices();

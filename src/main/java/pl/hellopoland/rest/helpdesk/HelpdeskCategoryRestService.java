@@ -11,6 +11,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.util.List;
 
 @RequestScoped
 @Path("/helpdesk/categories")
@@ -47,6 +48,13 @@ public class HelpdeskCategoryRestService {
       @PathParam("id") Long id) {
     LanguageVersion lang = RestService.parseLang(contentLanguage);
     return service.get(id, lang);
+  }
+
+  @PUT
+  @Path("/order")
+  public Response reorder(List<Long> categoryIds) {
+    service.reorder(categoryIds);
+    return Response.ok().build();
   }
 
   @DELETE

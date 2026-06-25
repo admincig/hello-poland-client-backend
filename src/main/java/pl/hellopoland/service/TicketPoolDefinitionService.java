@@ -90,12 +90,12 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
   }
 
   public TicketPoolDefinitionDTO get(Long id) {
-    HptSubject subject = null;
-    User logged = getLoggedUser();
-    if (logged.hasRole(Role.ADMIN)) {
-      subject = logged;
-    } else {
-      subject = getCurrentPartner();
+    return get(id, getCurrentSubject());
+  }
+
+  public TicketPoolDefinitionDTO get(Long id, HptSubject subject) {
+    if (subject == null) {
+      subject = getCurrentSubject();
     }
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
@@ -103,12 +103,12 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
   }
 
   public void delete(Long id) {
-    HptSubject subject = null;
-    User logged = getLoggedUser();
-    if (logged.hasRole(Role.ADMIN)) {
-      subject = logged;
-    } else {
-      subject = getCurrentPartner();
+    delete(id, getCurrentSubject());
+  }
+
+  public void delete(Long id, HptSubject subject) {
+    if (subject == null) {
+      subject = getCurrentSubject();
     }
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
@@ -121,15 +121,13 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
   }
 
   public TicketPoolDefinitionDTO update(TicketPoolDefinitionDTO dto) {
-    User logged = getLoggedUser();
-    if (logged.hasRole(Role.ADMIN)) {
-      return update(dto, logged);
-    } else {
-      return update(dto, getCurrentPartner());
-    }
+    return update(dto, getCurrentSubject());
   }
 
-  private TicketPoolDefinitionDTO update(TicketPoolDefinitionDTO dto, HptSubject subject) {
+  public TicketPoolDefinitionDTO update(TicketPoolDefinitionDTO dto, HptSubject subject) {
+    if (subject == null) {
+      subject = getCurrentSubject();
+    }
     validateRequiredNormalTicket(dto.ticketDefinitions);
     validateTicketDiscount(dto);
     Portal portal = getPortal("Hello Ticket Cloud");
@@ -142,13 +140,8 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
   }
 
   public List<TicketPoolDefinitionDTO> list(Long partnerId) {
-    HptSubject subject = null;
-    User logged = getLoggedUser();
-    if (logged.hasRole(Role.ADMIN)) {
-      subject = logged;
-    } else {
-      subject = getCurrentPartner();
-    }
+    HptSubject subject =
+        partnerId != null ? partnerService.get(partnerId) : getCurrentSubject();
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     List<TicketPoolDefinitionDTO> tpds = hpt.getTicketPoolDefinitions(subject.getHptToken(), null);
@@ -158,6 +151,14 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
           .collect(Collectors.toList());
     }
     return tpds;
+  }
+
+  private HptSubject getCurrentSubject() {
+    User logged = getLoggedUser();
+    if (logged.hasRole(Role.ADMIN)) {
+      return logged;
+    }
+    return getCurrentPartner();
   }
 
   private void validateTicketDiscount(TicketPoolDefinitionDTO poolDef) {

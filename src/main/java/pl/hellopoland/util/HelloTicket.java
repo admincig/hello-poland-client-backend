@@ -49,6 +49,10 @@ public class HelloTicket {
   private String url;
   private static final int CONNECT_TIMEOUT_MS = 5000;
   private static final int READ_TIMEOUT_MS = 15000;
+  private static final String GENERIC_EXTERNAL_SAVE_ERROR =
+      "Nie udało się zapisać danych w zewnętrznym systemie. Sprawdź poprawność danych i spróbuj ponownie.";
+  private static final String EXTERNAL_TEXT_TOO_LONG_ERROR =
+      "Jedno z pól tekstowych jest za długie. Skróć opis lub wskazówki dojazdu i spróbuj ponownie.";
 
   private static final String AUTH_TOKEN =
       "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJIZWxsbyBQb2xhbmQiLCJhdXRoIjoiUk9MRV9FWFRFUk5BTF9VU0VSIn0.AODtF8AEqe-egeWKn2zPhfo2hWplkSbfFfFrNH6mpfsV9McC89paYns3sR_5LPx_V4pxpPOtgTMK7A0pCsJ3mA";
@@ -121,11 +125,10 @@ public class HelloTicket {
     try {
       return JsonbConfig.getInstance().fromJson(
           post("/v1/sight-events", json, partnerAuthToken).toString(), SightEventDTO.class);
-    } catch (IOException e) {
+    } catch (Exception e) {
       logger.log(Level.ERROR, e);
+      throw mapExternalException(e);
     }
-
-    return null;
   }
 
   public TicketDefinitionDTO addTicketDefinition(TicketDefinitionDTO dto, String partnerAuthToken) {
@@ -156,11 +159,10 @@ public class HelloTicket {
       return JsonbConfig.getInstance().fromJson(
           put("/v1/sight-events/" + sightEvent.id, sightEventJson, partnerAuthToken).toString(),
           SightEventDTO.class);
-    } catch (IOException e) {
+    } catch (Exception e) {
       logger.log(Level.ERROR, e);
+      throw mapExternalException(e);
     }
-
-    return null;
   }
 
   public List<TicketPoolDefinitionDTO> getTicketPoolDefinitions(String authToken,
@@ -407,6 +409,21 @@ public class HelloTicket {
     }
   }
 
+  public EmailSendingReportDTO sendTicketsCopyByAdmin(String serialNumber, String recipientEmail,
+      String hptToken) {
+    try {
+      Map<String, String> request = Collections.singletonMap("email", recipientEmail);
+      String requestJson = JsonbConfig.getInstance().toJson(request);
+      return JsonbConfig.getInstance().fromJson(
+          post("/v1/helpdesk/bookings/" + serialNumber + "/sendTicketCopyToEmail", requestJson,
+              hptToken).toString(),
+          EmailSendingReportDTO.class);
+    } catch (Exception e) {
+      logger.log(WARNING, "Failed", e);
+      throw new EmailSendingException();
+    }
+  }
+
   public SightEventDTO addPdfToSightEvent(Long sightEventHptId, FileDescriptorDTO pdfDto,
       String partnerAuthToken) {
     String pdfJsonString = JsonbConfig.getInstance().toJson(pdfDto);
@@ -476,9 +493,28 @@ public class HelloTicket {
       return exceptionMessagesService.getMessageByCode(externalCode);
     }
     if (fallbackMessage != null && !fallbackMessage.isBlank()) {
-      return fallbackMessage.replaceFirst("^HTTP\\s+\\d{3}:\\s*", "");
+      return sanitizeExternalErrorMessage(fallbackMessage);
     }
     return exceptionMessagesService.getMessageByCode(null);
+  }
+
+  private String sanitizeExternalErrorMessage(String fallbackMessage) {
+    String message = fallbackMessage.replaceFirst("^HTTP\\s+\\d{3}:\\s*", "");
+    String lowerMessage = message.toLowerCase(Locale.ROOT);
+
+    if (lowerMessage.contains("value too long for type character varying")
+        || lowerMessage.contains("dataexception")) {
+      return EXTERNAL_TEXT_TOO_LONG_ERROR;
+    }
+
+    if (lowerMessage.contains("could not execute statement")
+        || lowerMessage.contains("org.hibernate")
+        || lowerMessage.contains("sql error")
+        || lowerMessage.contains("constraint")) {
+      return GENERIC_EXTERNAL_SAVE_ERROR;
+    }
+
+    return message;
   }
 
   private String extractRawExternalErrorMessage(Exception e) {

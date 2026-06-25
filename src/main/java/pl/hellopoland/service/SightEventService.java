@@ -32,6 +32,9 @@ import static java.util.stream.Collectors.*;
 @Stateless
 public class SightEventService extends ServiceSuperclass {
 
+  private static final int SIGHT_EVENT_DESCRIPTION_MAX_LENGTH = 2500;
+  private static final int SIGHT_EVENT_DIRECTIONS_MAX_LENGTH = 1000;
+
   @Inject
   UserService userService;
   @Inject
@@ -162,6 +165,8 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public SightEvent create(SightEventDTO dto, Partner partner) {
+    validateSightEventTextLengths(dto);
+
     if (dto.sightId == null) {
       throw new ConflictingException("sightId can't be null.");
     }
@@ -240,17 +245,20 @@ public class SightEventService extends ServiceSuperclass {
 
   private SightEvent createLanguageVersion(SightEventDTO dto, Partner partner,
       LanguageVersion language) {
+    validateSightEventTextLengths(dto);
     return translationService.createEntityLanguageVersion(getForPartner(dto.id, partner), dto,
         language);
   }
 
   public SightEvent createLanguageVersion(SightEventDTO dto, LanguageVersion language) {
+    validateSightEventTextLengths(dto);
     SightEvent bo = get(dto.id);
     return translationService.createEntityLanguageVersion(bo, dto, language);
   }
 
   public SightEvent createLanguageVersionForLoggedUser(SightEventDTO dto,
       LanguageVersion language) {
+    validateSightEventTextLengths(dto);
     return translationService.createEntityLanguageVersion(getForLoggedUser(dto.id), dto, language);
   }
 
@@ -260,6 +268,8 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public SightEvent update(SightEvent bo, SightEventDTO dto, LanguageVersion language) {
+    validateSightEventTextLengths(dto);
+
     alignPartnerWithSight(bo);
     if (!translationService.isTranslated(bo, language)) {
       // throw new ConflictingException(
@@ -308,6 +318,27 @@ public class SightEventService extends ServiceSuperclass {
   private void validatePublishedSightEventHasNormalTicket(SightEventDTO dto, Partner partner,
       Long sightEventHptId) {
     validatePublishedSightEventHasNormalTicket(dto, partner, sightEventHptId, false);
+  }
+
+  private void validateSightEventTextLengths(SightEventDTO dto) {
+    if (dto == null) {
+      return;
+    }
+
+    if (isLongerThan(dto.description, SIGHT_EVENT_DESCRIPTION_MAX_LENGTH)) {
+      throw new BadRequestException("Opis oferty może mieć maksymalnie "
+          + SIGHT_EVENT_DESCRIPTION_MAX_LENGTH + " znaków.");
+    }
+
+    if (dto.location != null
+        && isLongerThan(dto.location.directions, SIGHT_EVENT_DIRECTIONS_MAX_LENGTH)) {
+      throw new BadRequestException("Wskazówki dojazdu mogą mieć maksymalnie "
+          + SIGHT_EVENT_DIRECTIONS_MAX_LENGTH + " znaków.");
+    }
+  }
+
+  private boolean isLongerThan(String value, int maxLength) {
+    return value != null && value.length() > maxLength;
   }
 
   private void validatePublishedSightEventHasNormalTicket(SightEventDTO dto, Partner partner,

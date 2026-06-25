@@ -24,18 +24,25 @@ public class HelpdeskSightRestService {
 
 
   @POST
-  public SightDTO createLanguageVersion(
+  public SightDTO create(
       @HeaderParam("Content-Language") String contentLanguage,
       SightDTO dto) {
     LanguageVersion lang = RestService.parseLang(contentLanguage);
+    if (dto.id == null) {
+      return service.create(dto, lang);
+    }
     return service.createLanguageVesrion(dto, lang);
   }
 
   @GET
   public PagedCollection<SightDTO> list(
-      @HeaderParam("Content-Language") String contentLanguage) {
-    return service.list(new SightPagedCollectionConfig(),
-        RestService.parseLang(contentLanguage));
+      @HeaderParam("Content-Language") String contentLanguage,
+      @QueryParam("partnerId") Long partnerId) {
+    SightPagedCollectionConfig config = new SightPagedCollectionConfig();
+    if (partnerId != null) {
+      config.setPartner(partnerId);
+    }
+    return service.list(config, RestService.parseLang(contentLanguage));
   }
 
   @DELETE

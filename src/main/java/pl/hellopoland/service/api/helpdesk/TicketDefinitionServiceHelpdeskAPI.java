@@ -22,15 +22,15 @@ public class TicketDefinitionServiceHelpdeskAPI {
   @Inject
   PartnerService partnerService;
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"admin", "salesman"})
   public TicketDefinitionDTO add(TicketDefinitionDTO dto) {
-    return service.add(dto, service.getLoggedUser());
+    return service.add(dto, getSubject(dto.partnerId));
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"admin", "salesman"})
   public PagedCollection<TicketDefinitionDTO> getList(Long partnerId) {
     List<TicketDefinitionDTO> tds =
-        service.getTicketDefinitions(partnerId, service.getLoggedUser());
+        service.getTicketDefinitions(partnerId, getSubject(partnerId));
     List<Long> partnerHptIds = tds.stream().map(td -> td.partnerId).collect(Collectors.toList());
     var partners = partnerService.findByHptIds(partnerHptIds);
     for (var iter = tds.iterator(); iter.hasNext();) {
@@ -45,19 +45,23 @@ public class TicketDefinitionServiceHelpdeskAPI {
     return new PagedCollection<>(tds, null);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"admin", "salesman"})
   public List<TicketDefinitionDTO> update(TicketDefinitionDTO dto) {
-    return service.update(dto, service.getLoggedUser());
+    return service.update(dto, getSubject(dto.partnerId));
   }
 
-  @RolesAllowed("admin")
-  public void delete(Long id) {
-    service.delete(id, service.getLoggedUser());
+  @RolesAllowed({"admin", "salesman"})
+  public void delete(Long id, Long partnerId) {
+    service.delete(id, getSubject(partnerId));
   }
 
-  @RolesAllowed("admin")
-  public TicketDefinitionDTO get(Long id) {
-    return service.getTicketDefinition(id, service.getLoggedUser());
+  @RolesAllowed({"admin", "salesman"})
+  public TicketDefinitionDTO get(Long id, Long partnerId) {
+    return service.getTicketDefinition(id, getSubject(partnerId));
+  }
+
+  private pl.hellopoland.bo.HptSubject getSubject(Long partnerId) {
+    return partnerId != null ? partnerService.get(partnerId) : service.getLoggedUser();
   }
 
 }

@@ -6,6 +6,7 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import java.util.List;
 import pl.hellopoland.dto.TicketTypeDTO;
@@ -21,8 +22,8 @@ public class HelpdeskTicketTypeRestService {
   TicketTypeServiceHelpdeskAPI service;
 
   @GET
-  public List<TicketTypeDTO> getList() {
-    return service.getList();
+  public List<TicketTypeDTO> getList(@QueryParam("partnerId") Long partnerId) {
+    return service.getList(partnerId);
   }
 
 }

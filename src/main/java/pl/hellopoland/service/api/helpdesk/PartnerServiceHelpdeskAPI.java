@@ -38,7 +38,7 @@ public class PartnerServiceHelpdeskAPI {
     hplService.resetPartnerCredentials(id, email);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"admin", "salesman"})
   public PagedCollection<PartnerDTO> listPartners(PartnerPagedCollectionConfig config,
       LanguageVersion language) {
     PagedEntityCollection<Partner> bos = service.getList(config);
@@ -66,7 +66,7 @@ public class PartnerServiceHelpdeskAPI {
     return get(id, lang);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"admin", "salesman"})
   public PartnerDTO get(Long id, LanguageVersion lang) {
     Partner bo = service.get(id);
     if (!bo.getDefaultLanguage().equals(lang)) {

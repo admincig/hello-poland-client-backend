@@ -515,7 +515,7 @@ public class OrderService extends ServiceSuperclass {
 
   public EmailSendingReportDTO sendTicketCopy(String hash) {
     var order = findByHash(hash);
-    EmailSendingReportDTO report = sendTicketsCopyByExternalAPI(order);
+    EmailSendingReportDTO report = sendTicketsCopyByExternalAPI(order, null);
     String clientEmail = order.getDetails().getEmail();
     if (report.validUnsentAddresses != null && report.validUnsentAddresses.length > 0) {
       Arrays.stream(report.validUnsentAddresses).filter(address -> clientEmail.equals(address))
@@ -530,24 +530,55 @@ public class OrderService extends ServiceSuperclass {
     return report;
   }
 
-  private EmailSendingReportDTO sendTicketsCopyByExternalAPI(Order order) {
+  public EmailSendingReportDTO sendTicketCopyToEmail(String hash, String email) {
+    var order = findByHash(hash);
+    String recipientEmail = email == null ? null : email.trim();
+    if (recipientEmail == null || recipientEmail.isEmpty()) {
+      throw new EmailSendingException("Podaj poprawny adres e-mail.");
+    }
+
+    EmailSendingReportDTO report = sendTicketsCopyByExternalAPI(order, recipientEmail);
+    if (report == null) {
+      throw new EmailSendingException(
+          "Wystąpił błąd podczas wysyłania kopii biletów do " + recipientEmail);
+    }
+    if (report.validUnsentAddresses != null
+        && Arrays.stream(report.validUnsentAddresses)
+            .anyMatch(recipientEmail::equalsIgnoreCase)) {
+      throw new EmailSendingException(
+          "Wystąpił błąd podczas wysyłania kopii biletów do " + recipientEmail);
+    }
+    if (report.invalidAddresses != null
+        && Arrays.stream(report.invalidAddresses)
+            .anyMatch(recipientEmail::equalsIgnoreCase)) {
+      throw new EmailSendingException(
+          "Wystąpił błąd podczas wysyłania kopii biletów do " + recipientEmail);
+    }
+    return report;
+  }
+
+  private EmailSendingReportDTO sendTicketsCopyByExternalAPI(Order order, String recipientEmail) {
     Map<Portal, List<OrderSightEntry>> groupedByPortal = groupByPortal(order);
     for (var entry : groupedByPortal.entrySet()) {
       Portal portal = entry.getKey();
       switch (portal.getType()) {
         case HELLOTICKET_CLOUD_1:
-          return sendTicketsCopyByHpt(portal, entry.getValue());
+          return sendTicketsCopyByHpt(portal, entry.getValue(), recipientEmail);
       }
     }
     return null;
   }
 
-  private EmailSendingReportDTO sendTicketsCopyByHpt(Portal portal, List<OrderSightEntry> ose) {
+  private EmailSendingReportDTO sendTicketsCopyByHpt(Portal portal, List<OrderSightEntry> ose,
+      String recipientEmail) {
     String serialNumber = ose.stream().map(OrderSightEntry::getSerialNumber).findFirst()
         .orElseThrow(() -> new ResourceNotFoundException());
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     User loggedUser = getLoggedUser();
     if (loggedUser.hasRole(Role.ADMIN)) {
+      if (recipientEmail != null) {
+        return hpt.sendTicketsCopyByAdmin(serialNumber, recipientEmail, loggedUser.getHptToken());
+      }
       return hpt.sendTicketsCopyByAdmin(serialNumber, loggedUser.getHptToken());
     }
     return hpt.sendTicketsCopyByPartner(serialNumber, loggedUser.getPartner().getHptToken());

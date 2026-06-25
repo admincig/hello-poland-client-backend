@@ -32,8 +32,9 @@ public class HelpdeskTicketDefinitionRestService {
 
   @GET
   @Path("/{id}")
-  public TicketDefinitionDTO get(@PathParam("id") Long id) {
-    return service.get(id);
+  public TicketDefinitionDTO get(@PathParam("id") Long id,
+      @QueryParam("partnerId") Long partnerId) {
+    return service.get(id, partnerId);
   }
 
   @PUT
@@ -45,8 +46,9 @@ public class HelpdeskTicketDefinitionRestService {
 
   @DELETE
   @Path("/{id}")
-  public void delete(@PathParam("id") Long id) {
-    service.delete(id);
+  public void delete(@PathParam("id") Long id,
+      @QueryParam("partnerId") Long partnerId) {
+    service.delete(id, partnerId);
   }
 
 }

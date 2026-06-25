@@ -34,7 +34,7 @@ public class TagServiceHelpdeskAPI {
     return DtoMapper.getFullDTO(service.createLanguageVesrion(dto, lang));
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"admin", "salesman"})
   public PagedCollection<TagDTO> pagedList(LanguageVersion language) {
     var config = new TagPagedCollectionConfig();
     var bos = service.pagedList(config);

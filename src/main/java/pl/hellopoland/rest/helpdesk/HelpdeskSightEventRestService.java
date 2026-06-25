@@ -24,10 +24,13 @@ public class HelpdeskSightEventRestService {
   private SightEventServiceHelpdeskAPI service;
 
   @POST
-  public SightEventDTO createLanguageVersion(
+  public SightEventDTO create(
       @HeaderParam("Content-Language") String contentLanguage,
       SightEventDTO dto) {
     LanguageVersion lang = RestService.parseLang(contentLanguage);
+    if (dto.id == null) {
+      return service.create(dto, lang);
+    }
     return service.createLanguageVesrion(dto, lang);
   }
 
