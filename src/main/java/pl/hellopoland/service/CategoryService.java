@@ -30,10 +30,12 @@ public class CategoryService extends ServiceSuperclass {
     cat.setBackgroundUrl(dto.backgroundUrl);
     cat.setRestricted(Boolean.TRUE.equals(dto.restricted));
     cat.setRecommended(Boolean.TRUE.equals(dto.recommended));
+    cat.setDisplayOrder(dto.displayOrder);
     cat.setDefaultLanguage(LanguageVersion.getForCreateAndUpdateEntity(dto.language));
     cat.setAvailableLanguageVersions(new HashSet<>(Set.of(cat.getDefaultLanguage())));
     em.persist(cat);
     tService.createEntityLanguageVersion(cat, dto, cat.getDefaultLanguage());
+    normalizeDisplayOrder(cat, dto.displayOrder);
     return cat;
   }
 
@@ -62,9 +64,34 @@ public class CategoryService extends ServiceSuperclass {
       bo.setRestricted(dto.restricted);
       bo.setIconUrl(dto.iconUrl);
       bo.setBackgroundUrl(dto.backgroundUrl);
+      if (dto.displayOrder != null) {
+        normalizeDisplayOrder(bo, dto.displayOrder);
+      }
       em.flush();
     }
     return tService.updateEntityLanguageVersion(bo, dto, lang);
+  }
+
+  public void reorder(List<Long> categoryIds) {
+    List<Category> categories = getDisplayOrderedCategories();
+    Map<Long, Category> categoriesById = new HashMap<>();
+    categories.forEach(category -> categoriesById.put(category.getId(), category));
+
+    List<Category> reorderedCategories = new ArrayList<>();
+    if (categoryIds != null) {
+      for (Long categoryId : categoryIds) {
+        Category category = categoriesById.remove(categoryId);
+        if (category != null) {
+          reorderedCategories.add(category);
+        }
+      }
+    }
+
+    reorderedCategories.addAll(categories.stream()
+        .filter(category -> categoriesById.containsKey(category.getId()))
+        .toList());
+
+    setDisplayOrder(reorderedCategories);
   }
 
   public Category changeDefaultLanguage(Long id, LanguageVersion language) {
@@ -80,6 +107,8 @@ public class CategoryService extends ServiceSuperclass {
     em.createQuery("delete from SightEventCategory where category=:category")
         .setParameter("category", category).executeUpdate();
     em.remove(category);
+    em.flush();
+    normalizeDisplayOrder(null, null);
   }
 
   public void deleteLanguageVersion(Long id, LanguageVersion lang) {
@@ -102,6 +131,33 @@ public class CategoryService extends ServiceSuperclass {
         iService.storeImageCollector(new ByteArrayInputStream(bytes), extension);
     category.setIconUrl(ic.getQvga().getDownloadUrl());
     return category;
+  }
+
+  private void normalizeDisplayOrder(Category movedCategory, Integer requestedDisplayOrder) {
+    List<Category> categories = getDisplayOrderedCategories();
+
+    if (movedCategory != null) {
+      categories.removeIf(category -> category.getId().equals(movedCategory.getId()));
+      int requestedIndex = requestedDisplayOrder == null
+          ? categories.size()
+          : Math.max(0, Math.min(requestedDisplayOrder - 1, categories.size()));
+      categories.add(requestedIndex, movedCategory);
+    }
+
+    setDisplayOrder(categories);
+  }
+
+  private List<Category> getDisplayOrderedCategories() {
+    return em.createQuery(
+        "from Category c order by case when c.displayOrder is null then 1 else 0 end, "
+            + "c.displayOrder asc, c.id desc",
+        Category.class).getResultList();
+  }
+
+  private void setDisplayOrder(List<Category> categories) {
+    for (int i = 0; i < categories.size(); i++) {
+      categories.get(i).setDisplayOrder(i + 1);
+    }
   }
 
 }

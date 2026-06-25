@@ -34,7 +34,7 @@ public class CategoryServiceHelpdeskAPI {
     return DtoMapper.getFullDTO(service.createLanguageVesrion(dto, lang));
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"admin", "salesman"})
   public PagedCollection<CategoryDTO> pagedList(LanguageVersion language) {
     var config = new CategoryPagedCollectionConfig();
     var bos = service.pagedList(config);
@@ -66,6 +66,11 @@ public class CategoryServiceHelpdeskAPI {
   public CategoryDTO update(CategoryDTO dto, LanguageVersion lang) {
     Category bo = service.update(dto, lang);
     return DtoMapper.getFullDTO(bo);
+  }
+
+  @RolesAllowed("admin")
+  public void reorder(List<Long> categoryIds) {
+    service.reorder(categoryIds);
   }
 
   @RolesAllowed("admin")
