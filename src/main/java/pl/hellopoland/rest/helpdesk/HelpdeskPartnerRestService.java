@@ -3,9 +3,11 @@ package pl.hellopoland.rest.helpdesk;
 import jakarta.validation.Valid;
 import pl.hellopoland.config.PartnerPagedCollectionConfig;
 import pl.hellopoland.dto.PartnerDTO;
+import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.rest.RestService;
 import pl.hellopoland.service.api.helpdesk.PartnerServiceHelpdeskAPI;
+import pl.hellopoland.service.api.helpdesk.UserServiceHelpdeskAPI;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -21,6 +23,9 @@ public class HelpdeskPartnerRestService {
 
   @Inject
   private PartnerServiceHelpdeskAPI service;
+
+  @Inject
+  private UserServiceHelpdeskAPI userService;
 
 
   @GET
@@ -48,6 +53,40 @@ public class HelpdeskPartnerRestService {
   @Path("/{id}/reset")
   public void updateCredentials(@PathParam("id") Long id, EmailWrapper dto) {
     service.resetPartner(id, dto.email());
+  }
+
+  @GET
+  @Path("/{id}/users")
+  public Response listUsers(@PathParam("id") Long id) {
+    return Response.ok(userService.getPartnerUsers(id)).build();
+  }
+
+  @POST
+  @Path("/{id}/users")
+  public Response createUser(@PathParam("id") Long id, @Valid UserDTO dto) {
+    return Response.ok(userService.createPartnerUser(id, dto)).build();
+  }
+
+  @PUT
+  @Path("/{id}/users/{userId}")
+  public Response updateUser(@PathParam("id") Long id, @PathParam("userId") Long userId,
+      @Valid UserDTO dto) {
+    return Response.ok(userService.updatePartnerUser(id, userId, dto)).build();
+  }
+
+  @PATCH
+  @Path("/{id}/users/{userId}/password")
+  public Response changeUserPassword(@PathParam("id") Long id, @PathParam("userId") Long userId,
+      UserDTO dto) {
+    userService.changePartnerUserPassword(id, userId, dto.password);
+    return Response.ok().build();
+  }
+
+  @DELETE
+  @Path("/{id}/users/{userId}")
+  public Response deleteUser(@PathParam("id") Long id, @PathParam("userId") Long userId) {
+    userService.deletePartnerUser(id, userId);
+    return Response.noContent().build();
   }
 
   @GET

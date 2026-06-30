@@ -36,6 +36,8 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
   SightEventService sightEventService;
   @Inject
   PartnerService partnerService;
+  @Inject
+  PartnerUserAccessService partnerUserAccessService;
 
   public TicketPoolDefinitionDTO add(TicketPoolDefinitionDTO dto) {
     return add(dto, getCurrentPartner());
@@ -53,6 +55,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     if (se == null) {
       throw new ResourceNotFoundException();
     }
+    requirePartnerUserCanAccess(se);
     validateDates(dto);
     dto.sightEventId = se.getHptId();
     Portal portal = getPortal("Hello Ticket Cloud");
@@ -99,7 +102,9 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     }
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
-    return hpt.getTicketPoolDefinition(subject.getHptToken(), id);
+    TicketPoolDefinitionDTO dto = hpt.getTicketPoolDefinition(subject.getHptToken(), id);
+    requirePartnerUserCanAccess(dto);
+    return dto;
   }
 
   public void delete(Long id) {
@@ -112,6 +117,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     }
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
+    requirePartnerUserCanAccess(hpt.getTicketPoolDefinition(subject.getHptToken(), id));
     hpt.deleteTicketPoolDefinition(subject.getHptToken(), id);
   }
 
@@ -136,6 +142,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     if (tpd == null) {
       throw new AccessDeniedException();
     }
+    requirePartnerUserCanAccess(tpd);
     return hpt.updateTicketPoolDefinition(dto, subject.getHptToken());
   }
 
@@ -202,5 +209,23 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
       return partnerService.findByUserEmail(login);
     }
     return getLoggedPartner();
+  }
+
+  private void requirePartnerUserCanAccess(TicketPoolDefinitionDTO dto) {
+    if (dto == null || dto.sightEventId == null || !isCurrentUserPartnerLogin()) {
+      return;
+    }
+    requirePartnerUserCanAccess(sightEventService.getByHptId(dto.sightEventId));
+  }
+
+  private void requirePartnerUserCanAccess(SightEvent sightEvent) {
+    if (isCurrentUserPartnerLogin()) {
+      partnerUserAccessService.requireCanAccessSightEvent(sightEvent);
+    }
+  }
+
+  private boolean isCurrentUserPartnerLogin() {
+    User logged = getLoggedUser();
+    return logged != null && logged.hasRole(Role.PARTNER);
   }
 }

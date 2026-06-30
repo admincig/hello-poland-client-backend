@@ -187,6 +187,14 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
     addCondition("sight", sight, "e.sight=:sight");
   }
 
+  public void setSightIds(Set<Long> sightIds) {
+    if (sightIds == null || sightIds.isEmpty()) {
+      addCondition("sightIds", Set.of(-1L), "s.id in (:sightIds)");
+      return;
+    }
+    addCondition("sightIds", sightIds, "s.id in (:sightIds)");
+  }
+
   public void setExcludedIds(Set<Long> ids) {
     this.excludedIds = ids;
     addCondition("ids", ids, "e.id not in (:ids)");

@@ -52,6 +52,11 @@ public class User extends ModelSuperclass implements HptSubject {
   private Set<Sight> sights;
   @ManyToMany(mappedBy = "users")
   private Set<SightEvent> sightEvents;
+  @ManyToMany(fetch = FetchType.LAZY)
+  @JoinTable(name = "partner_user_allowed_sights",
+      joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id")},
+      inverseJoinColumns = {@JoinColumn(name = "sight_id", referencedColumnName = "id")})
+  private Set<Sight> allowedPartnerSights = new java.util.HashSet<>();
 
   public String getEmail() {
     return email;
@@ -107,7 +112,7 @@ public class User extends ModelSuperclass implements HptSubject {
   }
 
   public boolean hasRole(UserRole.Role role) {
-    return roles.stream().anyMatch(ur -> ur.getRole().equals(role));
+    return roles != null && roles.stream().anyMatch(ur -> ur.getRole().equals(role));
   }
 
   public Partner getPartner() {
@@ -157,6 +162,15 @@ public class User extends ModelSuperclass implements HptSubject {
   public boolean hasSight(Sight sight) {
     return sights.stream().anyMatch(s -> s.getId().equals(sight.getId()));
   }
+
+  public Set<Sight> getAllowedPartnerSights() {
+    return allowedPartnerSights;
+  }
+
+  public void setAllowedPartnerSights(Set<Sight> allowedPartnerSights) {
+    this.allowedPartnerSights = allowedPartnerSights;
+  }
+
     public boolean isEmailVerified() {
         return emailVerified;
     }

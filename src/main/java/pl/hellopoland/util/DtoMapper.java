@@ -402,6 +402,10 @@ public class DtoMapper {
     dto.email = bo.getEmail();
     dto.roles = Optional.ofNullable(bo.getRoles()).orElse(Collections.emptyList()).stream()
         .map(DtoMapper::getDTO).collect(Collectors.toSet());
+    dto.allowedSightIds = Optional.ofNullable(bo.getAllowedPartnerSights())
+        .orElse(Collections.emptySet()).stream()
+        .map(Sight::getId)
+        .collect(Collectors.toList());
     return dto;
   }
 

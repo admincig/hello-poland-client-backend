@@ -18,7 +18,7 @@ import static pl.hellopoland.security.UserAuthDTO.ofCurrentUser;
 @Path("/partner")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@DeclareRoles({"root", "admin", "user"})
+@DeclareRoles({"root", "admin", "partner", "partner_admin", "partner_salesman", "salesman", "usher", "user"})
 public class PartnerAuthenticationRestService {
 
   @Inject

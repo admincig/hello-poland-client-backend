@@ -44,6 +44,8 @@ public class SightEventService extends ServiceSuperclass {
   @Inject
   PartnerService partnerService;
   @Inject
+  PartnerUserAccessService partnerUserAccessService;
+  @Inject
   OpeningHoursService oHoursService;
   @Inject
   FileDescriptorService fdService;
@@ -91,6 +93,10 @@ public class SightEventService extends ServiceSuperclass {
     }
     if (config.isCurrentPartner()) {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
+      Set<Long> allowedSightIds = partnerUserAccessService.getAllowedSightIdsForLoggedUser();
+      if (partnerUserAccessService.isPartnerSalesman(getLoggedUser())) {
+        config.setSightIds(allowedSightIds);
+      }
     }
     User loggedUser = userService.getLoggedUser();
     if (config.isLoggedUserFavourites()) {
@@ -177,6 +183,7 @@ public class SightEventService extends ServiceSuperclass {
     if (!sight.getPartner().getId().equals(partner.getId())) {
       throw new AccessDeniedException();
     }
+    partnerUserAccessService.requireCanAccessSight(sight);
     var defLang = dto.defaultLanguage;
     var availableLanguageVersions = dto.availableLanguageVersions;
     dto.generalAdmission = Boolean.TRUE.equals(dto.generalAdmission);
@@ -387,7 +394,9 @@ public class SightEventService extends ServiceSuperclass {
 
   public SightEvent getForLoggedUser(Long id) {
     Partner partner = partnerService.getLoggedPartner();
-    return getForPartner(id, partner);
+    SightEvent sightEvent = getForPartner(id, partner);
+    partnerUserAccessService.requireCanAccessSightEvent(sightEvent);
+    return sightEvent;
   }
 
   public SightEvent getForPartner(Long sightEventId, Partner partner) {

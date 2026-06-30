@@ -134,7 +134,7 @@ public class SightEventServicePartnerAPI {
   @RolesAllowed("partner")
   public SightEventDTO addCategory(Long id, Long categoryId) {
     categoryRestrictionCheck(categoryId);
-    SightEvent se = service.get(id);
+    SightEvent se = service.getForLoggedUser(id);
     Category cat = catService.get(categoryId);
     se = secService.addCategory(se, cat);
     return DtoMapper.getFullDTO(se);
@@ -143,7 +143,7 @@ public class SightEventServicePartnerAPI {
   @RolesAllowed("partner")
   public SightEventDTO removeCategory(Long id, Long categoryId) {
     categoryRestrictionCheck(categoryId);
-    SightEvent se = service.get(id);
+    SightEvent se = service.getForLoggedUser(id);
     Category cat = catService.get(categoryId);
     se = secService.removeCategory(se, cat);
     return DtoMapper.getFullDTO(se);
@@ -158,7 +158,7 @@ public class SightEventServicePartnerAPI {
   @RolesAllowed("partner")
   public SightEventDTO addTag(Long id, Long tagId) {
     tagRestrictionCheck(tagId);
-    SightEvent se = service.get(id);
+    SightEvent se = service.getForLoggedUser(id);
     Tag tag = tagService.get(tagId);
     se = setService.addTag(se, tag);
     return DtoMapper.getFullDTO(se);
@@ -167,7 +167,7 @@ public class SightEventServicePartnerAPI {
   @RolesAllowed("partner")
   public SightEventDTO removeTag(Long id, Long tagId) {
     tagRestrictionCheck(tagId);
-    SightEvent se = service.get(id);
+    SightEvent se = service.getForLoggedUser(id);
     Tag tag = tagService.get(tagId);
     se = setService.removeTag(se, tag);
     return DtoMapper.getFullDTO(se);

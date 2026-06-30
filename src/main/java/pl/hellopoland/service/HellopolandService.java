@@ -43,7 +43,8 @@ public class HellopolandService extends ServiceSuperclass {
   private TranslationService translationService;
 
   final Set<UserRole.Role> excludedRoles = Set.of(UserRole.Role.ROOT, UserRole.Role.ADMIN,
-      UserRole.Role.PARTNER, UserRole.Role.SALESMAN);
+      UserRole.Role.PARTNER, UserRole.Role.PARTNER_ADMIN, UserRole.Role.PARTNER_SALESMAN,
+      UserRole.Role.SALESMAN);
 
   public void resetPartnerCredentials(Long id, String email) {
     Partner partner = em.find(Partner.class, id);

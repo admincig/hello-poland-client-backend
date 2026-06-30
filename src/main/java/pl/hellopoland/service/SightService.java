@@ -45,6 +45,8 @@ public class SightService extends ServiceSuperclass {
 
   @Inject
   private UserService userService;
+  @Inject
+  private PartnerUserAccessService partnerUserAccessService;
 
   @Inject
   PostalCodeDictionaryLookup pcd;
@@ -75,7 +77,7 @@ public class SightService extends ServiceSuperclass {
     if (config.isCurrentPartner()) {
       config.setPartner(partnerService.findByUserEmail(ctx.getCallerPrincipal().getName()).getId());
     }
-    List<Sight> sights = getQuery(config).getResultList();
+    List<Sight> sights = partnerUserAccessService.filterAllowedSights(getQuery(config).getResultList());
     User loggedUser = userService.getLoggedUser();
     if (loggedUser != null) {
       List<Long> favourites = getAllFavouritesIdsForLoggedUser(loggedUser);
@@ -106,6 +108,7 @@ public class SightService extends ServiceSuperclass {
       bo.setPublished(false);
     }
     if (partner == null) {
+      partnerUserAccessService.requireCanManageSights();
       partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
     }
     bo.setPartner(partner);
@@ -146,9 +149,9 @@ public class SightService extends ServiceSuperclass {
 
   public List<Sight> getActiveForPartner() {
     Partner partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
-    return em.createQuery(
+    return partnerUserAccessService.filterAllowedSights(em.createQuery(
         "from Sight sight left join fetch sight.mainImage fmi where sight.active=true and sight.partner=:partner order by sight.id desc",
-        Sight.class).setParameter("partner", partner).getResultList();
+        Sight.class).setParameter("partner", partner).getResultList());
   }
 
   public List<Sight> getActiveForPartner(LanguageVersion language) {
@@ -160,6 +163,7 @@ public class SightService extends ServiceSuperclass {
   }
 
   public Sight updateForLoggedUser(SightDTO dto, LanguageVersion language) {
+    partnerUserAccessService.requireCanManageSights();
     Sight bo = getActiveForLoggedPartner(dto.id);
     return update(bo, dto, language);
   }
@@ -228,6 +232,7 @@ public class SightService extends ServiceSuperclass {
         .setParameter("id", id).setParameter("partner", getLoggedPartner()).getSingleResult();
     sight.fetchRelations();
     sight.getSightEvents().forEach(SightEvent::fetchRelations);
+    partnerUserAccessService.requireCanAccessSight(sight);
 
     return sight;
   }
@@ -248,6 +253,7 @@ public class SightService extends ServiceSuperclass {
   }
 
   public void deleteForLoggedUser(Long id) {
+    partnerUserAccessService.requireCanManageSights();
     Sight bo = getActiveForLoggedPartner(id);
     delete(bo);
   }
@@ -261,6 +267,7 @@ public class SightService extends ServiceSuperclass {
   }
 
   public void deleteForLoggedUser(Long id, LanguageVersion language) {
+    partnerUserAccessService.requireCanManageSights();
     translationService.deleteEntityTranslations(getActiveForLoggedPartner(id), language);
   }
 
@@ -271,10 +278,12 @@ public class SightService extends ServiceSuperclass {
         .orElseThrow(ResourceNotFoundException::new);
     sight.fetchRelations();
     sight.getSightEvents().forEach(SightEvent::fetchRelations);
+    partnerUserAccessService.requireCanAccessSight(sight);
     return sight;
   }
 
   public Sight changeDefaultLanguageForLoggedUser(Long id, LanguageVersion language) {
+    partnerUserAccessService.requireCanManageSights();
     Sight bo = getForLoggedPartner(id);
     return changeDefaultLanguage(bo, language);
   }

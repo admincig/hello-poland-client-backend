@@ -1,6 +1,7 @@
 package pl.hellopoland.rest.partner;
 
 import pl.hellopoland.dto.UserAuthDTO;
+import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.rest.dto.UserORO;
 import pl.hellopoland.service.api.partner.UserServicePartnerAPI;
 
@@ -33,6 +34,42 @@ public class PartnerUserRestService {
     }
     service.changePasswordForLoggedPartner(userDTO);
     return Response.ok().build();
+  }
+
+  @GET
+  public Response getPartnerPanelUsers() {
+    return Response.ok(service.getPartnerPanelUsers()).build();
+  }
+
+  @POST
+  public Response createPartnerPanelUser(UserDTO userDTO) {
+    return Response.ok(service.createPartnerPanelUser(userDTO)).build();
+  }
+
+  @GET
+  @Path("/{id}")
+  public Response getPartnerPanelUser(@PathParam("id") long userId) {
+    return Response.ok(service.getPartnerPanelUser(userId)).build();
+  }
+
+  @PATCH
+  @Path("/{id}")
+  public Response updatePartnerPanelUser(@PathParam("id") long userId, UserDTO userDTO) {
+    return Response.ok(service.updatePartnerPanelUser(userId, userDTO)).build();
+  }
+
+  @PATCH
+  @Path("/{id}/password")
+  public Response changePartnerPanelUserPassword(@PathParam("id") long userId, UserAuthDTO userDTO) {
+    service.changePasswordForPartnerPanelUser(userId, userDTO);
+    return Response.ok().build();
+  }
+
+  @DELETE
+  @Path("/{id}")
+  public Response deletePartnerPanelUser(@PathParam("id") long userId) {
+    service.deletePartnerPanelUser(userId);
+    return Response.noContent().build();
   }
 
 }

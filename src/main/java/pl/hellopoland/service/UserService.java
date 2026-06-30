@@ -5,11 +5,14 @@ import pl.hellopoland.bo.*;
 import pl.hellopoland.bo.UserRole.Role;
 import pl.hellopoland.dto.UserAuthDTO;
 import pl.hellopoland.dto.UserDTO;
+import pl.hellopoland.dto.RoleDTO;
 import pl.hellopoland.exception.UnauthorizedException;
 import pl.hellopoland.exception.conflict.ConflictingException;
+import pl.hellopoland.exception.notfound.AccessDeniedException;
 import pl.hellopoland.security.password.PasswordEncoder;
 import pl.hellopoland.util.HelloTicket;
 import pl.hellopoland.util.NameAndAddressSplitter;
+import pl.hellopoland.util.DtoMapper;
 
 import jakarta.ejb.LocalBean;
 import jakarta.ejb.Stateless;
@@ -20,6 +23,8 @@ import jakarta.ws.rs.NotFoundException;
 import java.lang.System.Logger.Level;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -42,6 +47,8 @@ public class UserService extends ServiceSuperclass {
   private EmailService emailService;
   @Inject
   private OrderService orderService;
+  @Inject
+  private PartnerUserAccessService partnerUserAccessService;
 
   public User me() {
     return Optional.ofNullable(getLoggedUser()).orElseThrow(UnauthorizedException::new);
@@ -269,7 +276,8 @@ public class UserService extends ServiceSuperclass {
   }
 
   private boolean isPartnerOrHelpdeskLogin(User user) {
-    return hasAnyRole(user, Role.PARTNER, Role.ADMIN, Role.SALESMAN);
+    return hasAnyRole(user, Role.PARTNER, Role.PARTNER_ADMIN, Role.PARTNER_SALESMAN,
+        Role.ADMIN, Role.SALESMAN);
   }
 
   private boolean hasAnyRole(User user, Role... roles) {
@@ -284,6 +292,243 @@ public class UserService extends ServiceSuperclass {
     user.setPartner(partner);
     createUserRole(user, Role.USHER);
     createUserRole(user, Role.PARTNER);
+  }
+
+  public List<UserDTO> getPartnerPanelUsersForLoggedPartner() {
+    partnerUserAccessService.requireCanManagePartnerUsers();
+    Partner partner = getLoggedPartner();
+    return em.createQuery(
+            "select distinct u from User u left join fetch u.roles r left join fetch u.allowedPartnerSights aps "
+                + "where u.partner = :partner and u.deleted = false",
+            User.class)
+        .setParameter("partner", partner)
+        .getResultStream()
+        .filter(this::isPartnerPanelManagedUser)
+        .sorted(Comparator.comparing(User::getEmail, String.CASE_INSENSITIVE_ORDER))
+        .map(DtoMapper::getDTO)
+        .collect(Collectors.toList());
+  }
+
+  public List<UserDTO> getPartnerUsersForHelpdesk(long partnerId) {
+    Partner partner = partnerService.get(partnerId);
+    return em.createQuery(
+            "select distinct u from User u left join fetch u.roles r left join fetch u.allowedPartnerSights aps "
+                + "where u.partner = :partner and u.deleted = false",
+            User.class)
+        .setParameter("partner", partner)
+        .getResultStream()
+        .filter(this::isHelpdeskPartnerUser)
+        .sorted(Comparator.comparing(User::getEmail, String.CASE_INSENSITIVE_ORDER))
+        .map(DtoMapper::getDTO)
+        .collect(Collectors.toList());
+  }
+
+  public UserDTO getPartnerPanelUserForLoggedPartner(long userId) {
+    partnerUserAccessService.requireCanManagePartnerUsers();
+    return DtoMapper.getDTO(getPartnerPanelUserEntity(userId));
+  }
+
+  public UserDTO createPartnerPanelUserForLoggedPartner(UserDTO dto) {
+    partnerUserAccessService.requireCanManagePartnerUsers();
+    validatePartnerPanelUserPayload(dto, true, null);
+
+    Partner partner = getLoggedPartner();
+    Role accessRole = getPartnerPanelAccessRole(dto);
+    User user = create(dto.email, dto.password, dto.name, null, partner, Role.PARTNER, accessRole);
+    user.setAllowedPartnerSights(getAllowedSightsForPartner(partner, accessRole, dto.allowedSightIds));
+    return DtoMapper.getDTO(user);
+  }
+
+  public UserDTO createPartnerPanelUserFromHelpdesk(long partnerId, UserDTO dto) {
+    validatePartnerPanelUserPayload(dto, true, null);
+
+    Partner partner = partnerService.get(partnerId);
+    Role accessRole = getPartnerPanelAccessRole(dto);
+    User user = create(dto.email, dto.password, dto.name, null, partner, Role.PARTNER, accessRole);
+    user.setAllowedPartnerSights(getAllowedSightsForPartner(partner, accessRole, dto.allowedSightIds));
+    return DtoMapper.getDTO(user);
+  }
+
+  public UserDTO updatePartnerPanelUserForLoggedPartner(long userId, UserDTO dto) {
+    partnerUserAccessService.requireCanManagePartnerUsers();
+    User user = getPartnerPanelUserEntity(userId);
+    validatePartnerPanelUserPayload(dto, false, user);
+
+    if (StringUtils.isNotBlank(dto.email)) {
+      user.setEmail(StringUtils.trim(dto.email).toLowerCase());
+    }
+    if (StringUtils.isNotBlank(dto.name)) {
+      user.setDetails(new UserDetails(
+          NameAndAddressSplitter.getFirstName(dto.name),
+          NameAndAddressSplitter.getLastName(dto.name)));
+    }
+    Role accessRole = getPartnerPanelAccessRole(dto);
+    replacePartnerPanelAccessRole(user, accessRole);
+    user.setAllowedPartnerSights(
+        getAllowedSightsForPartner(user.getPartner(), accessRole, dto.allowedSightIds));
+    return DtoMapper.getDTO(user);
+  }
+
+  public UserDTO updatePartnerPanelUserFromHelpdesk(long partnerId, long userId, UserDTO dto) {
+    User user = getHelpdeskPartnerUserEntity(partnerId, userId);
+    requirePartnerPanelManagedUser(user);
+    validatePartnerPanelUserPayload(dto, false, user);
+
+    if (StringUtils.isNotBlank(dto.email)) {
+      user.setEmail(StringUtils.trim(dto.email).toLowerCase());
+    }
+    if (StringUtils.isNotBlank(dto.name)) {
+      user.setDetails(new UserDetails(
+          NameAndAddressSplitter.getFirstName(dto.name),
+          NameAndAddressSplitter.getLastName(dto.name)));
+    }
+    Role accessRole = getPartnerPanelAccessRole(dto);
+    replacePartnerPanelAccessRole(user, accessRole);
+    user.setAllowedPartnerSights(
+        getAllowedSightsForPartner(user.getPartner(), accessRole, dto.allowedSightIds));
+    return DtoMapper.getDTO(user);
+  }
+
+  public void changePasswordForPartnerPanelUser(long userId, UserAuthDTO dto) {
+    partnerUserAccessService.requireCanManagePartnerUsers();
+    User user = getPartnerPanelUserEntity(userId);
+    user.changePassword(dto.password);
+  }
+
+  public void changePasswordForPartnerUserFromHelpdesk(long partnerId, long userId, String password) {
+    User user = getHelpdeskPartnerUserEntity(partnerId, userId);
+    if (isPartnerPanelManagedUser(user)) {
+      user.changePassword(password);
+      return;
+    }
+    updatePasswordForUser(user, password);
+  }
+
+  public void deletePartnerPanelUserForLoggedPartner(long userId) {
+    partnerUserAccessService.requireCanManagePartnerUsers();
+    User user = getPartnerPanelUserEntity(userId);
+    user.setDeleted(true);
+    em.merge(user);
+  }
+
+  public void deletePartnerPanelUserFromHelpdesk(long partnerId, long userId) {
+    User user = getHelpdeskPartnerUserEntity(partnerId, userId);
+    requirePartnerPanelManagedUser(user);
+    user.setDeleted(true);
+    em.merge(user);
+  }
+
+  private User getPartnerPanelUserEntity(long userId) {
+    Partner partner = getLoggedPartner();
+    User user = em.createQuery(
+            "select distinct u from User u left join fetch u.roles r left join fetch u.allowedPartnerSights aps "
+                + "where u.id = :id and u.partner = :partner and u.deleted = false",
+            User.class)
+        .setParameter("id", userId)
+        .setParameter("partner", partner)
+        .getResultStream()
+        .findFirst()
+        .orElseThrow(AccessDeniedException::new);
+    if (!isPartnerPanelManagedUser(user)) {
+      throw new AccessDeniedException();
+    }
+    return user;
+  }
+
+  private User getHelpdeskPartnerUserEntity(long partnerId, long userId) {
+    Partner partner = partnerService.get(partnerId);
+    User user = em.createQuery(
+            "select distinct u from User u left join fetch u.roles r left join fetch u.allowedPartnerSights aps "
+                + "where u.id = :id and u.partner = :partner and u.deleted = false",
+            User.class)
+        .setParameter("id", userId)
+        .setParameter("partner", partner)
+        .getResultStream()
+        .findFirst()
+        .orElseThrow(AccessDeniedException::new);
+    if (!isHelpdeskPartnerUser(user)) {
+      throw new AccessDeniedException();
+    }
+    return user;
+  }
+
+  private boolean isHelpdeskPartnerUser(User user) {
+    return hasAnyRole(user, Role.PARTNER, Role.PARTNER_ADMIN, Role.PARTNER_SALESMAN)
+        && !hasAnyRole(user, Role.ADMIN, Role.ROOT, Role.SALESMAN);
+  }
+
+  private boolean isPartnerPanelManagedUser(User user) {
+    return hasAnyRole(user, Role.PARTNER_ADMIN, Role.PARTNER_SALESMAN);
+  }
+
+  private void requirePartnerPanelManagedUser(User user) {
+    if (!isPartnerPanelManagedUser(user)) {
+      throw new ConflictingException("Konto gĹ‚Ăłwne partnera nie moĹĽe byÄ‡ edytowane jako konto panelowe.");
+    }
+  }
+
+  private void validatePartnerPanelUserPayload(UserDTO dto, boolean passwordRequired, User existing) {
+    if (dto == null) {
+      throw new ConflictingException("User data is required.");
+    }
+    if (StringUtils.isBlank(dto.email)) {
+      throw new ConflictingException("Email is required.");
+    }
+    if (passwordRequired && StringUtils.isBlank(dto.password)) {
+      throw new ConflictingException("Password is required.");
+    }
+    getPartnerPanelAccessRole(dto);
+    String email = StringUtils.trim(dto.email);
+    findUndeletedByEmail(email)
+        .filter(user -> existing == null || !user.getId().equals(existing.getId()))
+        .ifPresent(user -> {
+          throw new ConflictingException("Podany adres e-mail jest juĹĽ uĹĽywany.");
+        });
+    dto.email = email;
+  }
+
+  private Role getPartnerPanelAccessRole(UserDTO dto) {
+    Set<RoleDTO> roles = Optional.ofNullable(dto.roles).orElse(Set.of());
+    boolean admin = roles.contains(RoleDTO.PARTNER_ADMIN);
+    boolean salesman = roles.contains(RoleDTO.PARTNER_SALESMAN);
+    if (admin == salesman) {
+      throw new ConflictingException("Exactly one partner access role is required.");
+    }
+    return admin ? Role.PARTNER_ADMIN : Role.PARTNER_SALESMAN;
+  }
+
+  private void replacePartnerPanelAccessRole(User user, Role role) {
+    em.createQuery("delete from UserRole ur where ur.user = :user and ur.role in (:roles)")
+        .setParameter("user", user)
+        .setParameter("roles", List.of(Role.PARTNER_ADMIN, Role.PARTNER_SALESMAN))
+        .executeUpdate();
+    if (user.getRoles() != null) {
+      user.getRoles().removeIf(
+          ur -> ur.getRole() == Role.PARTNER_ADMIN || ur.getRole() == Role.PARTNER_SALESMAN);
+    }
+    if (!user.hasRole(Role.PARTNER)) {
+      createUserRole(user, Role.PARTNER);
+    }
+    createUserRole(user, role);
+  }
+
+  private Set<Sight> getAllowedSightsForPartner(Partner partner, Role role, List<Long> sightIds) {
+    if (role == Role.PARTNER_ADMIN) {
+      return new HashSet<>();
+    }
+    if (sightIds == null || sightIds.isEmpty()) {
+      return new HashSet<>();
+    }
+    Set<Sight> sights = new HashSet<>(em.createQuery(
+            "from Sight where partner = :partner and active = true and id in (:ids)",
+            Sight.class)
+        .setParameter("partner", partner)
+        .setParameter("ids", sightIds)
+        .getResultList());
+    if (sights.size() != new HashSet<>(sightIds).size()) {
+      throw new AccessDeniedException();
+    }
+    return sights;
   }
 
   private void createUserRole(User user, Role role) {

@@ -35,6 +35,36 @@ public class UserServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
+  public PagedCollection<UserDTO> getPartnerPanelUsers() {
+    return new PagedCollection<>(service.getPartnerPanelUsersForLoggedPartner(), null);
+  }
+
+  @RolesAllowed("partner")
+  public UserDTO getPartnerPanelUser(long userId) {
+    return service.getPartnerPanelUserForLoggedPartner(userId);
+  }
+
+  @RolesAllowed("partner")
+  public UserDTO createPartnerPanelUser(UserDTO userDTO) {
+    return service.createPartnerPanelUserForLoggedPartner(userDTO);
+  }
+
+  @RolesAllowed("partner")
+  public UserDTO updatePartnerPanelUser(long userId, UserDTO userDTO) {
+    return service.updatePartnerPanelUserForLoggedPartner(userId, userDTO);
+  }
+
+  @RolesAllowed("partner")
+  public void changePasswordForPartnerPanelUser(long userId, UserAuthDTO userDTO) {
+    service.changePasswordForPartnerPanelUser(userId, userDTO);
+  }
+
+  @RolesAllowed("partner")
+  public void deletePartnerPanelUser(long userId) {
+    service.deletePartnerPanelUserForLoggedPartner(userId);
+  }
+
+  @RolesAllowed("partner")
   public void changePasswordForUsher(long usherId, UserAuthDTO usherDTO) {
     service.changePasswordForUsher(usherId, usherDTO);
   }
