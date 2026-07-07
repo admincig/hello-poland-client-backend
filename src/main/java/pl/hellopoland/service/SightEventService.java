@@ -176,14 +176,17 @@ public class SightEventService extends ServiceSuperclass {
     if (dto.sightId == null) {
       throw new ConflictingException("sightId can't be null.");
     }
-    if (partner == null) {
+    boolean loggedPartnerContext = partner == null;
+    if (loggedPartnerContext) {
       partner = partnerService.findByUserEmail(ctx.getCallerPrincipal().getName());
     }
     Sight sight = sightService.get(dto.sightId);
     if (!sight.getPartner().getId().equals(partner.getId())) {
       throw new AccessDeniedException();
     }
-    partnerUserAccessService.requireCanAccessSight(sight);
+    if (loggedPartnerContext) {
+      partnerUserAccessService.requireCanAccessSight(sight);
+    }
     var defLang = dto.defaultLanguage;
     var availableLanguageVersions = dto.availableLanguageVersions;
     dto.generalAdmission = Boolean.TRUE.equals(dto.generalAdmission);

@@ -1,5 +1,7 @@
 alter table userrole drop constraint if exists userrole_role_check;
 
+alter table users add column if not exists blocked boolean not null default false;
+
 alter table userrole add constraint userrole_role_check
   check (
     role::text = any (

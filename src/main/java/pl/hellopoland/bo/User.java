@@ -45,6 +45,7 @@ public class User extends ModelSuperclass implements HptSubject {
   private Partner partner;
   private String hptToken;
   private boolean deleted;
+  private boolean blocked;
 
   @Column(name = "email_verified", nullable = false)
   private boolean emailVerified;
@@ -138,6 +139,14 @@ public class User extends ModelSuperclass implements HptSubject {
 
   public void setDeleted(boolean deleted) {
     this.deleted = deleted;
+  }
+
+  public boolean isBlocked() {
+    return blocked;
+  }
+
+  public void setBlocked(boolean blocked) {
+    this.blocked = blocked;
   }
 
   public String getName() {

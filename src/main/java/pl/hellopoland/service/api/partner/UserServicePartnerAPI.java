@@ -65,6 +65,11 @@ public class UserServicePartnerAPI {
   }
 
   @RolesAllowed("partner")
+  public UserDTO setPartnerPanelUserBlocked(long userId, boolean blocked) {
+    return service.setPartnerPanelUserBlockedForLoggedPartner(userId, blocked);
+  }
+
+  @RolesAllowed("partner")
   public void changePasswordForUsher(long usherId, UserAuthDTO usherDTO) {
     service.changePasswordForUsher(usherId, usherDTO);
   }
@@ -87,6 +92,11 @@ public class UserServicePartnerAPI {
   @RolesAllowed("partner")
   public UserDTO updateUsher(UserDTO usher) {
     return service.updateUsher(usher);
+  }
+
+  @RolesAllowed("partner")
+  public UserDTO setUsherBlocked(long usherId, boolean blocked) {
+    return service.setUsherBlockedForLoggedPartner(usherId, blocked);
   }
 
   @RolesAllowed("partner")

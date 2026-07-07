@@ -1,6 +1,7 @@
 package pl.hellopoland.service;
 
 import pl.hellopoland.bo.Agreement;
+import pl.hellopoland.bo.Partner;
 
 import jakarta.ejb.LocalBean;
 import jakarta.ejb.Stateless;
@@ -12,8 +13,12 @@ import java.util.Set;
 public class AgreementService extends ServiceSuperclass {
 
   public List<Agreement> getForLoggedUser(Set<Long> ids) {
+    return getForPartner(getLoggedPartner(), ids);
+  }
+
+  public List<Agreement> getForPartner(Partner partner, Set<Long> ids) {
     return em.createQuery("from Agreement where partner=:partner and id in (:ids)", Agreement.class)
-        .setParameter("partner", getLoggedPartner()).setParameter("ids", ids).getResultList();
+        .setParameter("partner", partner).setParameter("ids", ids).getResultList();
   }
 
 }

@@ -46,6 +46,7 @@ public class Authentication implements IdentityStore {
                                 && u.getPartner() == null;
 
                 if ((!isMarketUser || u.isEmailVerified())
+                        && !u.isBlocked()
                         && (u.getPartner() == null || !u.getPartner().isBlocked())
                         && passwordEncoder.matches(
                         new String(usernamePassword.getPassword().getValue()),
@@ -66,7 +67,7 @@ public class Authentication implements IdentityStore {
         if (credential instanceof JwtCredential
                 && userDao.findUndeletedByEmail(
                 ((JwtCredential) credential).getPrincipal()
-        ).isPresent()) {
+        ).filter(user -> !user.isBlocked()).isPresent()) {
 
             return new CredentialValidationResult(
                     ((JwtCredential) credential).getPrincipal()

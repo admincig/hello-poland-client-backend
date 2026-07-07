@@ -188,6 +188,14 @@ public class UserService extends ServiceSuperclass {
         .setParameter("email", email.toLowerCase()).getResultStream().findFirst();
   }
 
+  public Optional<User> findByEmail(String email) {
+    return em.createQuery("from User u left join fetch u.partner fp where lower(u.email) = :email",
+            User.class)
+        .setParameter("email", email.toLowerCase())
+        .getResultStream()
+        .findFirst();
+  }
+
   public Optional<User> findUndeletedByEmailWithNullPartner(String email) {
     return em
         .createQuery("from User where lower(email) = :email and partner = null and deleted=false",
@@ -245,9 +253,58 @@ public class UserService extends ServiceSuperclass {
     return ht.getUsherForPartner(usherId, getLoggedPartner().getHptToken());
   }
 
+  public List<UserDTO> getUshersForPartnerFromHelpdesk(Long partnerId) {
+    Partner partner = partnerService.get(partnerId);
+    Portal hpt = getPortal("Hello Ticket Cloud");
+    HelloTicket ht = new HelloTicket(hpt.getUrl());
+    return ht.getUshersForPartner(partner.getHptToken());
+  }
+
+  public UserDTO updateUsherForPartnerFromHelpdesk(Long partnerId, Long usherId, UserDTO usher) {
+    Partner partner = partnerService.get(partnerId);
+    usher.id = usherId;
+    Portal hpt = getPortal("Hello Ticket Cloud");
+    HelloTicket ht = new HelloTicket(hpt.getUrl());
+    return ht.updateUsherForPartner(usher, partner.getHptToken());
+  }
+
+  public UserDTO setUsherBlockedForPartnerFromHelpdesk(Long partnerId, Long usherId,
+      boolean blocked) {
+    Partner partner = partnerService.get(partnerId);
+    Portal hpt = getPortal("Hello Ticket Cloud");
+    HelloTicket ht = new HelloTicket(hpt.getUrl());
+    UserDTO usher = ht.getUsherForPartner(usherId, partner.getHptToken());
+    usher.blocked = blocked;
+    return ht.updateUsherForPartner(usher, partner.getHptToken());
+  }
+
+  public UserDTO createUsherForPartnerFromHelpdesk(Long partnerId, UserDTO usherDTO) {
+    validateUsherEmailForPartnerAndHelpdeskLogins(usherDTO);
+    Partner partner = partnerService.get(partnerId);
+    Portal hpt = getPortal("Hello Ticket Cloud");
+    HelloTicket ht = new HelloTicket(hpt.getUrl());
+    return ht.createUsherForLoggedPartner(usherDTO, partner.getHptToken());
+  }
+
+  public void changeUsherPasswordForPartnerFromHelpdesk(Long partnerId, Long usherId,
+      UserAuthDTO userAuthDTO) {
+    Partner partner = partnerService.get(partnerId);
+    Portal hpt = getPortal("Hello Ticket Cloud");
+    HelloTicket ht = new HelloTicket(hpt.getUrl());
+    ht.changeUsherPassword(usherId, userAuthDTO, partner.getHptToken());
+  }
+
   public UserDTO updateUsher(UserDTO usher) {
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket ht = new HelloTicket(hpt.getUrl());
+    return ht.updateUsherForPartner(usher, getLoggedPartner().getHptToken());
+  }
+
+  public UserDTO setUsherBlockedForLoggedPartner(long usherId, boolean blocked) {
+    Portal hpt = getPortal("Hello Ticket Cloud");
+    HelloTicket ht = new HelloTicket(hpt.getUrl());
+    UserDTO usher = ht.getUsherForPartner(usherId, getLoggedPartner().getHptToken());
+    usher.blocked = blocked;
     return ht.updateUsherForPartner(usher, getLoggedPartner().getHptToken());
   }
 
@@ -266,6 +323,7 @@ public class UserService extends ServiceSuperclass {
     if (StringUtils.isBlank(usherEmail)) {
       return;
     }
+    usherEmail = usherEmail.toLowerCase();
 
     findUndeletedByEmail(usherEmail)
         .filter(this::isPartnerOrHelpdeskLogin)
@@ -334,7 +392,7 @@ public class UserService extends ServiceSuperclass {
 
     Partner partner = getLoggedPartner();
     Role accessRole = getPartnerPanelAccessRole(dto);
-    User user = create(dto.email, dto.password, dto.name, null, partner, Role.PARTNER, accessRole);
+    User user = createPartnerPanelUser(dto, partner, accessRole);
     user.setAllowedPartnerSights(getAllowedSightsForPartner(partner, accessRole, dto.allowedSightIds));
     return DtoMapper.getDTO(user);
   }
@@ -344,7 +402,7 @@ public class UserService extends ServiceSuperclass {
 
     Partner partner = partnerService.get(partnerId);
     Role accessRole = getPartnerPanelAccessRole(dto);
-    User user = create(dto.email, dto.password, dto.name, null, partner, Role.PARTNER, accessRole);
+    User user = createPartnerPanelUser(dto, partner, accessRole);
     user.setAllowedPartnerSights(getAllowedSightsForPartner(partner, accessRole, dto.allowedSightIds));
     return DtoMapper.getDTO(user);
   }
@@ -358,9 +416,7 @@ public class UserService extends ServiceSuperclass {
       user.setEmail(StringUtils.trim(dto.email).toLowerCase());
     }
     if (StringUtils.isNotBlank(dto.name)) {
-      user.setDetails(new UserDetails(
-          NameAndAddressSplitter.getFirstName(dto.name),
-          NameAndAddressSplitter.getLastName(dto.name)));
+      setPartnerPanelUserName(user, dto.name);
     }
     Role accessRole = getPartnerPanelAccessRole(dto);
     replacePartnerPanelAccessRole(user, accessRole);
@@ -378,9 +434,7 @@ public class UserService extends ServiceSuperclass {
       user.setEmail(StringUtils.trim(dto.email).toLowerCase());
     }
     if (StringUtils.isNotBlank(dto.name)) {
-      user.setDetails(new UserDetails(
-          NameAndAddressSplitter.getFirstName(dto.name),
-          NameAndAddressSplitter.getLastName(dto.name)));
+      setPartnerPanelUserName(user, dto.name);
     }
     Role accessRole = getPartnerPanelAccessRole(dto);
     replacePartnerPanelAccessRole(user, accessRole);
@@ -404,17 +458,40 @@ public class UserService extends ServiceSuperclass {
     updatePasswordForUser(user, password);
   }
 
+  public UserDTO setPartnerPanelUserBlockedForLoggedPartner(long userId, boolean blocked) {
+    partnerUserAccessService.requireCanManagePartnerUsers();
+    User user = getPartnerPanelUserEntity(userId);
+    user.setBlocked(blocked);
+    return DtoMapper.getDTO(user);
+  }
+
+  public UserDTO setPartnerPanelUserBlockedFromHelpdesk(long partnerId, long userId,
+      boolean blocked) {
+    User user = getHelpdeskPartnerUserEntity(partnerId, userId);
+    requirePartnerPanelManagedUser(user);
+    user.setBlocked(blocked);
+    return DtoMapper.getDTO(user);
+  }
+
   public void deletePartnerPanelUserForLoggedPartner(long userId) {
     partnerUserAccessService.requireCanManagePartnerUsers();
     User user = getPartnerPanelUserEntity(userId);
-    user.setDeleted(true);
-    em.merge(user);
+    deletePartnerPanelUserAccount(user);
   }
 
   public void deletePartnerPanelUserFromHelpdesk(long partnerId, long userId) {
     User user = getHelpdeskPartnerUserEntity(partnerId, userId);
     requirePartnerPanelManagedUser(user);
+    deletePartnerPanelUserAccount(user);
+  }
+
+  private void deletePartnerPanelUserAccount(User user) {
     user.setDeleted(true);
+    user.setBlocked(true);
+    user.setEmail("deleted+" + user.getId() + "+" + System.currentTimeMillis()
+        + "@hello-poland.pl");
+    user.changePassword(RandomStringUtils.randomAlphanumeric(32));
+    user.setAllowedPartnerSights(new HashSet<>());
     em.merge(user);
   }
 
@@ -457,6 +534,23 @@ public class UserService extends ServiceSuperclass {
         && !hasAnyRole(user, Role.ADMIN, Role.ROOT, Role.SALESMAN);
   }
 
+  private User createPartnerPanelUser(UserDTO dto, Partner partner, Role accessRole) {
+    User user = new User(Role.PARTNER, accessRole);
+    user.setEmail(StringUtils.trim(dto.email).toLowerCase());
+    user.changePassword(dto.password);
+    user.setPartner(partner);
+    setPartnerPanelUserName(user, dto.name);
+    em.persist(user);
+    return user;
+  }
+
+  private void setPartnerPanelUserName(User user, String name) {
+    UserDetails details = Optional.ofNullable(user.getDetails()).orElseGet(UserDetails::new);
+    details.setFirstName(StringUtils.trimToNull(name));
+    details.setLastName(null);
+    user.setDetails(details);
+  }
+
   private boolean isPartnerPanelManagedUser(User user) {
     return hasAnyRole(user, Role.PARTNER_ADMIN, Role.PARTNER_SALESMAN);
   }
@@ -477,9 +571,18 @@ public class UserService extends ServiceSuperclass {
     if (passwordRequired && StringUtils.isBlank(dto.password)) {
       throw new ConflictingException("Password is required.");
     }
-    getPartnerPanelAccessRole(dto);
-    String email = StringUtils.trim(dto.email);
-    findUndeletedByEmail(email)
+    Role accessRole = getPartnerPanelAccessRole(dto);
+    if (accessRole == Role.PARTNER_SALESMAN
+        && (dto.allowedSightIds == null || dto.allowedSightIds.isEmpty())) {
+      throw new ConflictingException("Dla roli Salesman wybierz przynajmniej jeden obiekt.");
+    }
+    String email = StringUtils.trim(dto.email).toLowerCase();
+    Optional<User> userWithEmail = findByEmail(email)
+        .filter(user -> existing == null || !user.getId().equals(existing.getId()));
+    if (userWithEmail.isPresent()) {
+      throw new ConflictingException("Podany adres e-mail jest juz uzywany.");
+    }
+    findByEmail(email)
         .filter(user -> existing == null || !user.getId().equals(existing.getId()))
         .ifPresent(user -> {
           throw new ConflictingException("Podany adres e-mail jest juĹĽ uĹĽywany.");
@@ -763,6 +866,13 @@ public class UserService extends ServiceSuperclass {
         Portal hpt = getPortal("Hello Ticket Cloud");
         HelloTicket ht = new HelloTicket(hpt.getUrl());
         ht.deleteUsherForPartner(usherId, getLoggedPartner().getHptToken());
+    }
+
+    public void deleteUsherForPartnerFromHelpdesk(Long partnerId, Long usherId) {
+        Partner partner = partnerService.get(partnerId);
+        Portal hpt = getPortal("Hello Ticket Cloud");
+        HelloTicket ht = new HelloTicket(hpt.getUrl());
+        ht.deleteUsherForPartner(usherId, partner.getHptToken());
     }
 
 }

@@ -70,6 +70,13 @@ public class PartnerRestService {
     return Response.ok().build();
   }
 
+  @PATCH
+  @Path("/ushers/{id}/blocked")
+  public Response setUsherBlocked(@PathParam("id") long usherId, UserDTO usherDTO) {
+    boolean blocked = Boolean.TRUE.equals(usherDTO.blocked);
+    return Response.ok(userService.setUsherBlocked(usherId, blocked)).build();
+  }
+
   @PUT
   @Path("/company/mainImage")
   @Consumes({"image/jpeg", "image/jpg", "image/webp", "image/png"})

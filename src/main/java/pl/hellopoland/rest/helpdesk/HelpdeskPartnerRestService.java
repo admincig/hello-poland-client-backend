@@ -82,10 +82,60 @@ public class HelpdeskPartnerRestService {
     return Response.ok().build();
   }
 
+  @PATCH
+  @Path("/{id}/users/{userId}/blocked")
+  public Response setUserBlocked(@PathParam("id") Long id, @PathParam("userId") Long userId,
+      UserDTO dto) {
+    boolean blocked = Boolean.TRUE.equals(dto.blocked);
+    return Response.ok(userService.setPartnerUserBlocked(id, userId, blocked)).build();
+  }
+
   @DELETE
   @Path("/{id}/users/{userId}")
   public Response deleteUser(@PathParam("id") Long id, @PathParam("userId") Long userId) {
     userService.deletePartnerUser(id, userId);
+    return Response.noContent().build();
+  }
+
+  @GET
+  @Path("/{id}/ushers")
+  public Response listUshers(@PathParam("id") Long id) {
+    return Response.ok(userService.getPartnerUshers(id)).build();
+  }
+
+  @POST
+  @Path("/{id}/ushers")
+  public Response createUsher(@PathParam("id") Long id, @Valid UserDTO dto) {
+    return Response.ok(userService.createPartnerUsher(id, dto)).build();
+  }
+
+  @PATCH
+  @Path("/{id}/ushers/{usherId}")
+  public Response updateUsher(@PathParam("id") Long id, @PathParam("usherId") Long usherId,
+      @Valid UserDTO dto) {
+    return Response.ok(userService.updatePartnerUsher(id, usherId, dto)).build();
+  }
+
+  @PATCH
+  @Path("/{id}/ushers/{usherId}/password")
+  public Response changeUsherPassword(@PathParam("id") Long id, @PathParam("usherId") Long usherId,
+      UserDTO dto) {
+    userService.changePartnerUsherPassword(id, usherId, dto.password);
+    return Response.ok().build();
+  }
+
+  @PATCH
+  @Path("/{id}/ushers/{usherId}/blocked")
+  public Response setUsherBlocked(@PathParam("id") Long id, @PathParam("usherId") Long usherId,
+      UserDTO dto) {
+    boolean blocked = Boolean.TRUE.equals(dto.blocked);
+    return Response.ok(userService.setPartnerUsherBlocked(id, usherId, blocked)).build();
+  }
+
+  @DELETE
+  @Path("/{id}/ushers/{usherId}")
+  public Response deleteUsher(@PathParam("id") Long id, @PathParam("usherId") Long usherId) {
+    userService.deletePartnerUsher(id, usherId);
     return Response.noContent().build();
   }
 

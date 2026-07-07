@@ -8,8 +8,10 @@ import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
@@ -397,9 +399,13 @@ public class DtoMapper {
     var dto = new UserDTO();
     dto.id = bo.getId();
     if (bo.getDetails() != null) {
-      dto.name = bo.getDetails().getFirstName() + " " + bo.getDetails().getLastName();
+      dto.name = Stream.of(bo.getDetails().getFirstName(), bo.getDetails().getLastName())
+          .filter(Objects::nonNull)
+          .filter(name -> !name.isBlank())
+          .collect(Collectors.joining(" "));
     }
     dto.email = bo.getEmail();
+    dto.blocked = bo.isBlocked();
     dto.roles = Optional.ofNullable(bo.getRoles()).orElse(Collections.emptyList()).stream()
         .map(DtoMapper::getDTO).collect(Collectors.toSet());
     dto.allowedSightIds = Optional.ofNullable(bo.getAllowedPartnerSights())

@@ -202,7 +202,7 @@ public class SightService extends ServiceSuperclass {
   private void handleAgreementsUpdate(Sight bo, SightDTO dto) {
     var agreements = dto.agreements;
     if (agreements != null && !agreements.isEmpty()) {
-      var agreementBos = Set.copyOf(agreementService.getForLoggedUser(
+      var agreementBos = Set.copyOf(agreementService.getForPartner(bo.getPartner(),
           agreements.stream().map(agrDto -> agrDto.id).collect(Collectors.toSet())));
       bo.setAgreements(agreementBos);
       var sightEventBos = bo.getSightEvents();

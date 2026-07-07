@@ -65,6 +65,13 @@ public class PartnerUserRestService {
     return Response.ok().build();
   }
 
+  @PATCH
+  @Path("/{id}/blocked")
+  public Response setPartnerPanelUserBlocked(@PathParam("id") long userId, UserDTO userDTO) {
+    boolean blocked = Boolean.TRUE.equals(userDTO.blocked);
+    return Response.ok(service.setPartnerPanelUserBlocked(userId, blocked)).build();
+  }
+
   @DELETE
   @Path("/{id}")
   public Response deletePartnerPanelUser(@PathParam("id") long userId) {
