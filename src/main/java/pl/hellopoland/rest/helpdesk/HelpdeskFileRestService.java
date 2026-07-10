@@ -32,9 +32,10 @@ public class HelpdeskFileRestService {
 
   @Path("/{fileId}")
   @DELETE
-  public void delete(@PathParam("fileId") Long fileId, @QueryParam("type") Utils.FileType type) {
+  public void delete(@PathParam("fileId") Long fileId, @QueryParam("type") Utils.FileType type,
+      @QueryParam("partner") Long partnerId) {
     boolean isImage = Utils.FileType.image.equals(type);
-    service.deleteFile(fileId, isImage);
+    service.deleteFile(fileId, partnerId, isImage);
   }
 
 }

@@ -2,6 +2,7 @@ package pl.hellopoland.service.api.helpdesk;
 
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.bo.Partner;
+import pl.hellopoland.service.HelpdeskAccessService;
 import pl.hellopoland.service.PartnerService;
 import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.service.TicketPoolDefinitionService;
@@ -21,30 +22,42 @@ public class TicketPoolDefinitionServiceHelpdeskAPI {
   PartnerService partnerService;
   @Inject
   SightEventService sightEventService;
+  @Inject
+  HelpdeskAccessService accessService;
 
-  @RolesAllowed({"admin", "salesman"})
+  @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager",
+      "helpdesk_content_manager"})
   public TicketPoolDefinitionDTO add(TicketPoolDefinitionDTO dto) {
+    accessService.requireSightEventAccess(sightEventService.get(dto.sightEventId));
     Partner partner = sightEventService.get(dto.sightEventId).getPartner();
     return service.add(dto, partner);
   }
 
-  @RolesAllowed({"admin", "salesman"})
+  @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager",
+      "helpdesk_content_manager", "helpdesk_support"})
   public TicketPoolDefinitionDTO get(Long id, Long partnerId) {
+    accessService.requirePartnerAccess(getPartner(partnerId));
     return service.get(id, getPartner(partnerId));
   }
 
-  @RolesAllowed({"admin", "salesman"})
+  @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager",
+      "helpdesk_content_manager"})
   public void delete(Long id, Long partnerId) {
+    accessService.requirePartnerAccess(getPartner(partnerId));
     service.delete(id, getPartner(partnerId));
   }
 
-  @RolesAllowed({"admin", "salesman"})
+  @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager",
+      "helpdesk_content_manager"})
   public TicketPoolDefinitionDTO update(TicketPoolDefinitionDTO dto) {
+    accessService.requirePartnerAccess(getPartner(dto.partnerId));
     return service.update(dto, getPartner(dto.partnerId));
   }
 
-  @RolesAllowed({"admin", "salesman"})
+  @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager",
+      "helpdesk_content_manager", "helpdesk_support"})
   public List<TicketPoolDefinitionDTO> list(Long partnerId) {
+    accessService.requirePartnerAccess(getPartner(partnerId));
     List<TicketPoolDefinitionDTO> tpds = service.list(partnerId);
     List<Long> partnerHptIds = tpds.stream().map(tpd -> tpd.partnerId).collect(Collectors.toList());
     var partners = partnerService.findByHptIds(partnerHptIds);

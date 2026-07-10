@@ -7,6 +7,7 @@ import pl.hellopoland.dto.PartnerDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.dto.PagedCollection;
+import pl.hellopoland.service.HelpdeskAccessService;
 import pl.hellopoland.service.HellopolandService;
 import pl.hellopoland.service.PartnerService;
 import pl.hellopoland.service.TranslationService;
@@ -27,36 +28,41 @@ public class PartnerServiceHelpdeskAPI {
   HellopolandService hplService;
   @Inject
   TranslationService transService;
+  @Inject
+  HelpdeskAccessService accessService;
 
-  @RolesAllowed({"admin", "salesman"})
+  @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager"})
   public PartnerDTO addPartner(PartnerDTO partner) {
     return DtoMapper.getFullDTO(hplService.addPartner(partner));
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin"})
   public void resetPartner(Long id, String email) {
     hplService.resetPartnerCredentials(id, email);
   }
 
-  @RolesAllowed({"admin", "salesman"})
+  @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager",
+      "helpdesk_content_manager", "helpdesk_support"})
   public PagedCollection<PartnerDTO> listPartners(PartnerPagedCollectionConfig config,
       LanguageVersion language) {
+    accessService.applyPartnerScope(config);
     PagedEntityCollection<Partner> bos = service.getList(config);
     bos.items = transService.translateEntities(bos.items, language);
     var dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
     return new PagedCollection<>(dtos, bos.config);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin"})
   public void deleteLanguageVersion(Long id, LanguageVersion lang) {
     Partner bo = service.get(id);
     transService.deleteEntityTranslations(bo, lang);
     transService.deleteEntityTranslations(bo.getAddress(), lang);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager"})
   public PartnerDTO changeDefaultLanguage(Long id, LanguageVersion lang) {
     Partner bo = service.get(id);
+    accessService.requirePartnerAccess(bo);
     if (!transService.isTranslated(bo, lang)) {
       throw new ConflictingException(
           "Can not change the default language. Translation for language " + lang.getLanuage()
@@ -66,9 +72,11 @@ public class PartnerServiceHelpdeskAPI {
     return get(id, lang);
   }
 
-  @RolesAllowed({"admin", "salesman"})
+  @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager",
+      "helpdesk_content_manager", "helpdesk_support"})
   public PartnerDTO get(Long id, LanguageVersion lang) {
     Partner bo = service.get(id);
+    accessService.requirePartnerAccess(bo);
     if (!bo.getDefaultLanguage().equals(lang)) {
           bo = transService.translateEntity(bo, lang);
           Address address = transService.translateEntity(bo.getAddress(), lang);
@@ -79,31 +87,35 @@ public class PartnerServiceHelpdeskAPI {
     return DtoMapper.getFullDTO(bo);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager"})
   public PartnerDTO update(PartnerDTO dto, LanguageVersion lang) {
     Partner bo = service.get(dto.id);
+    accessService.requirePartnerAccess(bo);
     service.update(bo, dto, lang);
     return get(dto.id, lang);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager"})
   public PartnerDTO createLanguageVersion(PartnerDTO dto, LanguageVersion lang) {
     Partner bo = service.get(dto.id);
+    accessService.requirePartnerAccess(bo);
     dto.id = bo.getId();
     service.createLanguageVersion(dto, lang);
     return get(dto.id, lang);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager"})
   public PartnerDTO uploadMainImage(Long id, byte[] icon, String extension) {
     Partner bo = service.get(id);
+    accessService.requirePartnerAccess(bo);
     service.uploadMainImage(bo, icon, extension);
     return get(id, bo.getDefaultLanguage());
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager"})
   public PartnerDTO setBlocked(Long id, boolean blocked, LanguageVersion lang) {
     Partner bo = service.get(id);
+    accessService.requirePartnerAccess(bo);
     service.setBlocked(bo, blocked);
     return get(id, lang);
   }

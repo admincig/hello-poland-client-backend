@@ -21,6 +21,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.stream.Collectors;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 
 @LocalBean
@@ -46,8 +48,7 @@ public class AnalyticsService extends ServiceSuperclass {
         "NAZWA PARTNERA", "AFILIACJA", "WARTOŚĆ", "PROWIZJA", "NAZWA UŻUTKOWNIKA", "TELEON", "ADRES EMAIL", "PLATFORMA",
         "ZALOGOWANY", "NAZWA OFERTY", "DATA OFERTY", "ILOŚĆ", "NAZWA BILETÓW", "PROMOCJA", "FAKTURA");
 
-    var orders = orderService.getOrdersInDateRange(fromDate, toDate,
-        getLoggedUser().hasRole(UserRole.Role.ADMIN) ? null : getLoggedPartner());
+    var orders = getOrdersInCurrentUserHelpdeskScope(fromDate, toDate, null);
     for (OrderEntry oe : orders) {
       OrderDateEntry dateEntry = oe.getDateEntry();
       OrderSightEntry sightEntry = dateEntry.getSightEntry();
@@ -113,11 +114,7 @@ public class AnalyticsService extends ServiceSuperclass {
   }
     public Object getSales(Date fromDate, Date toDate) {
 
-        var entries = orderService.getOrdersInDateRange(
-                fromDate,
-                toDate,
-                getLoggedUser().hasRole(UserRole.Role.ADMIN) ? null : getLoggedPartner()
-        );
+        var entries = getOrdersInCurrentUserHelpdeskScope(fromDate, toDate, null);
 
         return entries.stream()
                 .collect(Collectors.groupingBy(oe -> {
@@ -156,13 +153,9 @@ public class AnalyticsService extends ServiceSuperclass {
     }
 
     public List<SalesRowDTO> getSales(Date fromDate, Date toDate, Long partnerId) {
-        var orders = orderService.getOrdersInDateRange(fromDate, toDate, null);
+        var orders = getOrdersInCurrentUserHelpdeskScope(fromDate, toDate, partnerId);
 
         return orders.stream()
-                .filter(oe -> {
-                    Partner partner = oe.getDateEntry().getSightEntry().getSightEvent().getPartner();
-                    return partnerId == null || (partner != null && partnerId.equals(partner.getId()));
-                })
                 .map(oe -> {
                     OrderDateEntry dateEntry = oe.getDateEntry();
                     OrderSightEntry sightEntry = dateEntry.getSightEntry();
@@ -193,6 +186,70 @@ public class AnalyticsService extends ServiceSuperclass {
                     );
                 })
                 .collect(Collectors.toList());
+    }
+
+    private List<OrderEntry> getOrdersInCurrentUserHelpdeskScope(Date fromDate, Date toDate,
+        Long requestedPartnerId) {
+        User user = getLoggedUser();
+        Partner loggedPartner = user != null ? user.getPartner() : null;
+        List<OrderEntry> orders = orderService.getOrdersInDateRange(fromDate, toDate, loggedPartner);
+
+        if (user == null || loggedPartner != null) {
+            return orders;
+        }
+
+        return orders.stream()
+            .filter(oe -> isOrderEntryInRequestedPartner(oe, requestedPartnerId))
+            .filter(oe -> isOrderEntryInHelpdeskScope(oe, user))
+            .collect(Collectors.toList());
+    }
+
+    private boolean isOrderEntryInRequestedPartner(OrderEntry oe, Long requestedPartnerId) {
+        if (requestedPartnerId == null) {
+            return true;
+        }
+        return Optional.ofNullable(getOrderEntryPartner(oe))
+            .map(Partner::getId)
+            .filter(requestedPartnerId::equals)
+            .isPresent();
+    }
+
+    private boolean isOrderEntryInHelpdeskScope(OrderEntry oe, User user) {
+        if (user.hasRole(UserRole.Role.ADMIN)
+            || user.hasRole(UserRole.Role.ROOT)
+            || user.hasRole(UserRole.Role.SALESMAN)) {
+            return true;
+        }
+
+        Set<Partner> allowedPartners = user.getAllowedHelpdeskPartners();
+        Set<Sight> allowedSights = user.getAllowedHelpdeskSights();
+        boolean hasPartnerScope = allowedPartners != null && !allowedPartners.isEmpty();
+        boolean hasSightScope = allowedSights != null && !allowedSights.isEmpty();
+
+        if (!hasPartnerScope && !hasSightScope) {
+            return true;
+        }
+
+        Partner partner = getOrderEntryPartner(oe);
+        Sight sight = getOrderEntrySight(oe);
+        boolean partnerAllowed = !hasPartnerScope || (partner != null
+            && allowedPartners.stream().anyMatch(allowed -> allowed.getId().equals(partner.getId())));
+        boolean sightAllowed = !hasSightScope || (sight != null
+            && allowedSights.stream().anyMatch(allowed -> allowed.getId().equals(sight.getId())));
+
+        return partnerAllowed && sightAllowed;
+    }
+
+    private Partner getOrderEntryPartner(OrderEntry oe) {
+        OrderSightEntry sightEntry = oe.getDateEntry().getSightEntry();
+        SightEvent sightEvent = sightEntry.getSightEvent();
+        return sightEvent != null ? sightEvent.getPartner() : null;
+    }
+
+    private Sight getOrderEntrySight(OrderEntry oe) {
+        OrderSightEntry sightEntry = oe.getDateEntry().getSightEntry();
+        SightEvent sightEvent = sightEntry.getSightEvent();
+        return sightEvent != null ? sightEvent.getSight() : null;
     }
 
 }

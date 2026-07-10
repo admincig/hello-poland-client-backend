@@ -20,6 +20,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.NoResultException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
+import java.io.ByteArrayInputStream;
 import java.lang.System.Logger.Level;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -39,6 +40,15 @@ public class UserService extends ServiceSuperclass {
   private static final String USHER_EMAIL_ALREADY_USED_AS_LOGIN_MESSAGE =
       "Podany adres e-mail jest już używany.";
 
+  private static final Set<Role> HELPDESK_USER_ROLES = Set.of(
+      Role.ROOT,
+      Role.ADMIN,
+      Role.SALESMAN,
+      Role.HELPDESK_PARTNER_MANAGER,
+      Role.HELPDESK_CONTENT_MANAGER,
+      Role.HELPDESK_SUPPORT
+  );
+
   @Inject
   private PasswordEncoder passwordEncoder;
   @Inject
@@ -49,6 +59,8 @@ public class UserService extends ServiceSuperclass {
   private OrderService orderService;
   @Inject
   private PartnerUserAccessService partnerUserAccessService;
+  @Inject
+  private ImageService imageService;
 
   public User me() {
     return Optional.ofNullable(getLoggedUser()).orElseThrow(UnauthorizedException::new);
@@ -125,6 +137,19 @@ public class UserService extends ServiceSuperclass {
     }
     oldDetails.update(newDetails);
     em.merge(user);
+    return user;
+  }
+
+  public User updateAvatarForLoggedUser(byte[] bytes, String extension) {
+    User user = me();
+    var image = imageService.validateAndStoreImageCollector(
+        "avatar-" + user.getId(),
+        new ByteArrayInputStream(bytes),
+        extension,
+        null,
+        400);
+    var dto = DtoMapper.getDTO(image);
+    user.setPicture(dto.qvg != null ? dto.qvg : dto.original);
     return user;
   }
 
@@ -335,7 +360,8 @@ public class UserService extends ServiceSuperclass {
 
   private boolean isPartnerOrHelpdeskLogin(User user) {
     return hasAnyRole(user, Role.PARTNER, Role.PARTNER_ADMIN, Role.PARTNER_SALESMAN,
-        Role.ADMIN, Role.SALESMAN);
+        Role.ADMIN, Role.ROOT, Role.SALESMAN, Role.HELPDESK_PARTNER_MANAGER,
+        Role.HELPDESK_CONTENT_MANAGER, Role.HELPDESK_SUPPORT);
   }
 
   private boolean hasAnyRole(User user, Role... roles) {
@@ -350,6 +376,94 @@ public class UserService extends ServiceSuperclass {
     user.setPartner(partner);
     createUserRole(user, Role.USHER);
     createUserRole(user, Role.PARTNER);
+  }
+
+  public List<UserDTO> getHelpdeskUsers() {
+    requireCanManageHelpdeskUsers();
+    return em.createQuery(
+            "select distinct u from User u left join fetch u.roles r "
+                + "left join fetch u.allowedHelpdeskPartners ahp "
+                + "left join fetch u.allowedHelpdeskSights ahs "
+                + "where u.partner is null and u.deleted = false",
+            User.class)
+        .getResultStream()
+        .filter(this::isHelpdeskUser)
+        .sorted(Comparator.comparing(User::getEmail, String.CASE_INSENSITIVE_ORDER))
+        .map(DtoMapper::getDTO)
+        .collect(Collectors.toList());
+  }
+
+  public UserDTO getHelpdeskUser(long userId) {
+    requireCanManageHelpdeskUsers();
+    return DtoMapper.getDTO(getHelpdeskUserEntity(userId));
+  }
+
+  public UserDTO createHelpdeskUser(UserDTO dto) {
+    requireCanManageHelpdeskUsers();
+    validateHelpdeskUserPayload(dto, true, null);
+
+    User user = new User();
+    user.setEmail(StringUtils.trim(dto.email).toLowerCase());
+    user.changePassword(dto.password);
+    setPartnerPanelUserName(user, dto.name);
+    em.persist(user);
+
+    replaceHelpdeskRoles(user, getHelpdeskRoles(dto), null);
+    updateHelpdeskScope(user, dto);
+    return DtoMapper.getDTO(user);
+  }
+
+  public UserDTO updateHelpdeskUser(long userId, UserDTO dto) {
+    requireCanManageHelpdeskUsers();
+    User user = getHelpdeskUserEntity(userId);
+    requireCanModifyHelpdeskUser(user);
+    validateHelpdeskUserPayload(dto, false, user);
+
+    if (StringUtils.isNotBlank(dto.email)) {
+      user.setEmail(StringUtils.trim(dto.email).toLowerCase());
+    }
+    if (StringUtils.isNotBlank(dto.name)) {
+      setPartnerPanelUserName(user, dto.name);
+    }
+    replaceHelpdeskRoles(user, getHelpdeskRoles(dto), user);
+    updateHelpdeskScope(user, dto);
+    return DtoMapper.getDTO(user);
+  }
+
+  public UserDTO setHelpdeskUserBlocked(long userId, boolean blocked) {
+    requireCanManageHelpdeskUsers();
+    User user = getHelpdeskUserEntity(userId);
+    requireCanModifyHelpdeskUser(user);
+    if (blocked) {
+      requireNotCurrentUser(user);
+      requireCanRemoveAdminAccess(user);
+    }
+    user.setBlocked(blocked);
+    return DtoMapper.getDTO(user);
+  }
+
+  public void changeHelpdeskUserPassword(long userId, String password) {
+    requireCanManageHelpdeskUsers();
+    User user = getHelpdeskUserEntity(userId);
+    requireCanModifyHelpdeskUser(user);
+    user.changePassword(password);
+  }
+
+  public void deleteHelpdeskUser(long userId) {
+    requireCanManageHelpdeskUsers();
+    User user = getHelpdeskUserEntity(userId);
+    requireCanModifyHelpdeskUser(user);
+    requireNotCurrentUser(user);
+    requireCanRemoveAdminAccess(user);
+
+    user.setDeleted(true);
+    user.setBlocked(true);
+    user.setEmail("deleted+" + user.getId() + "+" + System.currentTimeMillis()
+        + "@hello-poland.pl");
+    user.changePassword(RandomStringUtils.randomAlphanumeric(32));
+    user.setAllowedHelpdeskPartners(new HashSet<>());
+    user.setAllowedHelpdeskSights(new HashSet<>());
+    em.merge(user);
   }
 
   public List<UserDTO> getPartnerPanelUsersForLoggedPartner() {
@@ -531,7 +645,9 @@ public class UserService extends ServiceSuperclass {
 
   private boolean isHelpdeskPartnerUser(User user) {
     return hasAnyRole(user, Role.PARTNER, Role.PARTNER_ADMIN, Role.PARTNER_SALESMAN)
-        && !hasAnyRole(user, Role.ADMIN, Role.ROOT, Role.SALESMAN);
+        && !hasAnyRole(user, Role.ADMIN, Role.ROOT, Role.SALESMAN,
+            Role.HELPDESK_PARTNER_MANAGER, Role.HELPDESK_CONTENT_MANAGER,
+            Role.HELPDESK_SUPPORT);
   }
 
   private User createPartnerPanelUser(UserDTO dto, Partner partner, Role accessRole) {
@@ -629,6 +745,153 @@ public class UserService extends ServiceSuperclass {
         .setParameter("ids", sightIds)
         .getResultList());
     if (sights.size() != new HashSet<>(sightIds).size()) {
+      throw new AccessDeniedException();
+    }
+    return sights;
+  }
+
+  private void requireCanManageHelpdeskUsers() {
+    if (!hasAnyRole(getLoggedUser(), Role.ADMIN, Role.ROOT)) {
+      throw new AccessDeniedException();
+    }
+  }
+
+  private User getHelpdeskUserEntity(long userId) {
+    User user = em.createQuery(
+            "select distinct u from User u left join fetch u.roles r "
+                + "left join fetch u.allowedHelpdeskPartners ahp "
+                + "left join fetch u.allowedHelpdeskSights ahs "
+                + "where u.id = :id and u.partner is null and u.deleted = false",
+            User.class)
+        .setParameter("id", userId)
+        .getResultStream()
+        .findFirst()
+        .orElseThrow(AccessDeniedException::new);
+    if (!isHelpdeskUser(user)) {
+      throw new AccessDeniedException();
+    }
+    return user;
+  }
+
+  private boolean isHelpdeskUser(User user) {
+    return user != null && hasAnyRole(user, HELPDESK_USER_ROLES.toArray(new Role[0]));
+  }
+
+  private void requireCanModifyHelpdeskUser(User user) {
+    User loggedUser = getLoggedUser();
+    if (loggedUser.hasRole(Role.ROOT)) {
+      return;
+    }
+    if (loggedUser.hasRole(Role.ADMIN) && !hasAnyRole(user, Role.ADMIN, Role.ROOT)) {
+      return;
+    }
+    throw new AccessDeniedException();
+  }
+
+  private void requireNotCurrentUser(User user) {
+    if (user.getId().equals(getLoggedUser().getId())) {
+      throw new AccessDeniedException();
+    }
+  }
+
+  private void requireCanRemoveAdminAccess(User user) {
+    if (hasAnyRole(user, Role.ADMIN, Role.ROOT) && countActiveAdminUsers() <= 1) {
+      throw new ConflictingException("Nie mozna usunac ostatniego aktywnego administratora.");
+    }
+  }
+
+  private long countActiveAdminUsers() {
+    return em.createQuery(
+            "select count(distinct u) from User u join u.roles roles "
+                + "where u.deleted = false and u.blocked = false and roles.role in (:roles)",
+            Long.class)
+        .setParameter("roles", List.of(Role.ADMIN, Role.ROOT))
+        .getSingleResult();
+  }
+
+  private void validateHelpdeskUserPayload(UserDTO dto, boolean passwordRequired, User existing) {
+    if (dto == null) {
+      throw new ConflictingException("User data is required.");
+    }
+    if (StringUtils.isBlank(dto.email)) {
+      throw new ConflictingException("Email is required.");
+    }
+    if (passwordRequired && StringUtils.isBlank(dto.password)) {
+      throw new ConflictingException("Password is required.");
+    }
+    getHelpdeskRoles(dto);
+    String email = StringUtils.trim(dto.email).toLowerCase();
+    findByEmail(email)
+        .filter(user -> existing == null || !user.getId().equals(existing.getId()))
+        .ifPresent(user -> {
+          throw new ConflictingException("Podany adres e-mail jest juz uzywany.");
+        });
+    dto.email = email;
+  }
+
+  private Set<Role> getHelpdeskRoles(UserDTO dto) {
+    Set<RoleDTO> dtoRoles = Optional.ofNullable(dto.roles).orElse(Set.of());
+    Set<Role> roles = dtoRoles.stream()
+        .map(role -> Role.valueOf(role.name()))
+        .filter(HELPDESK_USER_ROLES::contains)
+        .collect(Collectors.toSet());
+    if (roles.isEmpty()) {
+      throw new ConflictingException("At least one helpdesk role is required.");
+    }
+    if (roles.stream().anyMatch(role -> role == Role.ADMIN || role == Role.ROOT)
+        && !getLoggedUser().hasRole(Role.ROOT)) {
+      throw new AccessDeniedException();
+    }
+    return roles;
+  }
+
+  private void replaceHelpdeskRoles(User user, Set<Role> roles, User existing) {
+    if (existing != null && hasAnyRole(existing, Role.ADMIN, Role.ROOT)
+        && roles.stream().noneMatch(role -> role == Role.ADMIN || role == Role.ROOT)) {
+      requireCanRemoveAdminAccess(existing);
+    }
+    em.createQuery("delete from UserRole ur where ur.user = :user and ur.role in (:roles)")
+        .setParameter("user", user)
+        .setParameter("roles", HELPDESK_USER_ROLES)
+        .executeUpdate();
+    if (user.getRoles() != null) {
+      user.getRoles().removeIf(ur -> HELPDESK_USER_ROLES.contains(ur.getRole()));
+    }
+    roles.forEach(role -> createUserRole(user, role));
+  }
+
+  private void updateHelpdeskScope(User user, UserDTO dto) {
+    user.setAllowedHelpdeskPartners(getAllowedHelpdeskPartners(dto.allowedHelpdeskPartnerIds));
+    user.setAllowedHelpdeskSights(getAllowedHelpdeskSights(dto.allowedHelpdeskSightIds));
+  }
+
+  private Set<Partner> getAllowedHelpdeskPartners(List<Long> partnerIds) {
+    if (partnerIds == null || partnerIds.isEmpty()) {
+      return new HashSet<>();
+    }
+    Set<Long> uniqueIds = new HashSet<>(partnerIds);
+    Set<Partner> partners = new HashSet<>(em.createQuery(
+            "from Partner where id in (:ids)",
+            Partner.class)
+        .setParameter("ids", uniqueIds)
+        .getResultList());
+    if (partners.size() != uniqueIds.size()) {
+      throw new AccessDeniedException();
+    }
+    return partners;
+  }
+
+  private Set<Sight> getAllowedHelpdeskSights(List<Long> sightIds) {
+    if (sightIds == null || sightIds.isEmpty()) {
+      return new HashSet<>();
+    }
+    Set<Long> uniqueIds = new HashSet<>(sightIds);
+    Set<Sight> sights = new HashSet<>(em.createQuery(
+            "from Sight where active = true and id in (:ids)",
+            Sight.class)
+        .setParameter("ids", uniqueIds)
+        .getResultList());
+    if (sights.size() != uniqueIds.size()) {
       throw new AccessDeniedException();
     }
     return sights;

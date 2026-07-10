@@ -24,17 +24,18 @@ public class CategoryServiceHelpdeskAPI {
   @Inject
   TranslationService tService;
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin"})
   public CategoryDTO create(CategoryDTO dto) {
     return DtoMapper.getFullDTO(service.create(dto));
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin"})
   public CategoryDTO createLanguageVesrion(CategoryDTO dto, LanguageVersion lang) {
     return DtoMapper.getFullDTO(service.createLanguageVesrion(dto, lang));
   }
 
-  @RolesAllowed({"admin", "salesman"})
+  @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager",
+      "helpdesk_content_manager", "helpdesk_support"})
   public PagedCollection<CategoryDTO> pagedList(LanguageVersion language) {
     var config = new CategoryPagedCollectionConfig();
     var bos = service.pagedList(config);
@@ -43,14 +44,15 @@ public class CategoryServiceHelpdeskAPI {
     return new PagedCollection<>(dtos, bos.config);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager",
+      "helpdesk_content_manager", "helpdesk_support"})
   public CategoryDTO get(Long id, LanguageVersion language) {
     Category cat = service.get(id);
     cat = tService.translateEntity(cat, language);
     return DtoMapper.getFullDTO(cat);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin"})
   public CategoryDTO changeDefaultLanguage(Long id, LanguageVersion language) {
     Category bo = service.get(id);
     if (!tService.isTranslated(bo, language)) {
@@ -62,28 +64,28 @@ public class CategoryServiceHelpdeskAPI {
     return DtoMapper.getFullDTO(bo);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin"})
   public CategoryDTO update(CategoryDTO dto, LanguageVersion lang) {
     Category bo = service.update(dto, lang);
     return DtoMapper.getFullDTO(bo);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin"})
   public void reorder(List<Long> categoryIds) {
     service.reorder(categoryIds);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin"})
   public void delete(long id) {
     service.delete(id);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin"})
   public void deleteLanguageVersion(Long id, LanguageVersion lang) {
     service.deleteLanguageVersion(id, lang);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin"})
   public CategoryDTO uploadIcon(Long id, byte[] bytes, String extension) {
     Category category = service.uploadIcon(id, bytes, extension);
     return DtoMapper.getFullDTO(category);

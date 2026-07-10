@@ -24,7 +24,8 @@ public class UserServiceMarketAPI {
   @Inject
   MailingListServiceMarketAPI mailingListAPI;
 
-  @RolesAllowed("user")
+  @RolesAllowed({"user", "root", "admin", "salesman", "helpdesk_partner_manager",
+      "helpdesk_content_manager", "helpdesk_support"})
   public UserORO me() {
     User bo = service.me();
     var dto = new UserORO(bo);

@@ -58,6 +58,16 @@ public class User extends ModelSuperclass implements HptSubject {
       joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id")},
       inverseJoinColumns = {@JoinColumn(name = "sight_id", referencedColumnName = "id")})
   private Set<Sight> allowedPartnerSights = new java.util.HashSet<>();
+  @ManyToMany(fetch = FetchType.LAZY)
+  @JoinTable(name = "helpdesk_user_allowed_partners",
+      joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id")},
+      inverseJoinColumns = {@JoinColumn(name = "partner_id", referencedColumnName = "id")})
+  private Set<Partner> allowedHelpdeskPartners = new java.util.HashSet<>();
+  @ManyToMany(fetch = FetchType.LAZY)
+  @JoinTable(name = "helpdesk_user_allowed_sights",
+      joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id")},
+      inverseJoinColumns = {@JoinColumn(name = "sight_id", referencedColumnName = "id")})
+  private Set<Sight> allowedHelpdeskSights = new java.util.HashSet<>();
 
   public String getEmail() {
     return email;
@@ -178,6 +188,22 @@ public class User extends ModelSuperclass implements HptSubject {
 
   public void setAllowedPartnerSights(Set<Sight> allowedPartnerSights) {
     this.allowedPartnerSights = allowedPartnerSights;
+  }
+
+  public Set<Partner> getAllowedHelpdeskPartners() {
+    return allowedHelpdeskPartners;
+  }
+
+  public void setAllowedHelpdeskPartners(Set<Partner> allowedHelpdeskPartners) {
+    this.allowedHelpdeskPartners = allowedHelpdeskPartners;
+  }
+
+  public Set<Sight> getAllowedHelpdeskSights() {
+    return allowedHelpdeskSights;
+  }
+
+  public void setAllowedHelpdeskSights(Set<Sight> allowedHelpdeskSights) {
+    this.allowedHelpdeskSights = allowedHelpdeskSights;
   }
 
     public boolean isEmailVerified() {

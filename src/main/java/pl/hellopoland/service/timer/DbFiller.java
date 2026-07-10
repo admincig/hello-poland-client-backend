@@ -87,7 +87,7 @@ public class DbFiller extends ServiceSuperclass {
   private void createUsers() {
     createUser("Hello Poland - admin", "admin@hello-poland.pl", "uEXVMJeQKGJ246ARHRbKBGc6",
         "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkBoZWxsby1wb2xhbmQucGwiLCJhdXRoIjoiUk9MRV9BRE1JTiJ9.wrXkY3YB_y4Vs-ADKbixCbLLAQ5G8apSlwPuYXp6DcnXMLaBrPA8GFeGG9_uaA4fP26fkbstbXwR6OnW30GQeA",
-        null, Role.ADMIN);
+        null, Role.ADMIN, Role.ROOT);
     createUser("Hello Poland - salesman", "salesman@hello-poland.pl", "uEXVMJeQKGJ246ARHRbKBGc6",
         "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzYWxlc21hbkBoZWxsby1wb2xhbmQucGwiLCJhdXRoIjoiUk9MRV9BRE1JTiJ9._nXw8sT0ZJ77Ac-RdS-zrrA40HJjDXtTyVNSq-VZns5JSyy5JSXb7j_qEPy_XuO4Y-P1FGYoKfVQcuxGWOFFkA",
         null, Role.SALESMAN);

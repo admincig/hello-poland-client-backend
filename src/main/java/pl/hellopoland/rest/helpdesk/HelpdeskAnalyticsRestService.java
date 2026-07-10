@@ -4,6 +4,7 @@ import pl.hellopoland.annotation.DateFormat;
 import pl.hellopoland.service.AnalyticsService;
 import pl.hellopoland.service.api.helpdesk.ServiceHelpdeskAPI;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -30,6 +31,8 @@ public class HelpdeskAnalyticsRestService {
     @GET
     @Path("/orders")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager",
+        "helpdesk_content_manager", "helpdesk_support"})
     public Response downloadOrdersCsv(@QueryParam("fromDate") @DateFormat Date fromDate,
                                       @QueryParam("toDate") @DateFormat Date toDate) {
         File report = helpdeskService.getOrdersCsvFile(fromDate, toDate);
@@ -40,6 +43,8 @@ public class HelpdeskAnalyticsRestService {
 
     @GET
     @Path("/sales")
+    @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager",
+        "helpdesk_content_manager", "helpdesk_support"})
     public Response getSales(@QueryParam("fromDate") @DateFormat Date fromDate,
                              @QueryParam("toDate") @DateFormat Date toDate,
                              @QueryParam("partnerId") Long partnerId) {

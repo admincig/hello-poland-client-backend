@@ -24,17 +24,18 @@ public class TagServiceHelpdeskAPI {
   @Inject
   TranslationService tService;
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin"})
   public TagDTO create(TagDTO dto) {
     return DtoMapper.getFullDTO(service.create(dto));
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin"})
   public TagDTO createLanguageVesrion(TagDTO dto, LanguageVersion lang) {
     return DtoMapper.getFullDTO(service.createLanguageVesrion(dto, lang));
   }
 
-  @RolesAllowed({"admin", "salesman"})
+  @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager",
+      "helpdesk_content_manager", "helpdesk_support"})
   public PagedCollection<TagDTO> pagedList(LanguageVersion language) {
     var config = new TagPagedCollectionConfig();
     var bos = service.pagedList(config);
@@ -43,14 +44,15 @@ public class TagServiceHelpdeskAPI {
     return new PagedCollection<>(dtos, bos.config);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager",
+      "helpdesk_content_manager", "helpdesk_support"})
   public TagDTO get(Long id, LanguageVersion language) {
     Tag cat = service.get(id);
     cat = tService.translateEntity(cat, language);
     return DtoMapper.getFullDTO(cat);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin"})
   public TagDTO changeDefaultLanguage(Long id, LanguageVersion language) {
     Tag bo = service.get(id);
     if (!tService.isTranslated(bo, language)) {
@@ -62,23 +64,23 @@ public class TagServiceHelpdeskAPI {
     return DtoMapper.getFullDTO(bo);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin"})
   public TagDTO update(TagDTO dto, LanguageVersion lang) {
     Tag bo = service.update(dto, lang);
     return DtoMapper.getFullDTO(bo);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin"})
   public void delete(long id) {
     service.delete(id);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin"})
   public void deleteLanguageVersion(Long id, LanguageVersion lang) {
     service.deleteLanguageVersion(id, lang);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin"})
   public TagDTO uploadIcon(Long id, byte[] bytes, String extension) {
     Tag tag = service.uploadIcon(id, bytes, extension);
     return DtoMapper.getFullDTO(tag);

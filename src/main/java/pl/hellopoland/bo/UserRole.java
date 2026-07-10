@@ -12,7 +12,8 @@ public class UserRole extends ModelSuperclass {
   private static final long serialVersionUID = -2777254091194478668L;
 
   public enum Role {
-    ROOT, ADMIN, PARTNER, PARTNER_ADMIN, PARTNER_SALESMAN, SALESMAN, USHER, USER;
+    ROOT, ADMIN, HELPDESK_PARTNER_MANAGER, HELPDESK_CONTENT_MANAGER, HELPDESK_SUPPORT, PARTNER,
+    PARTNER_ADMIN, PARTNER_SALESMAN, SALESMAN, USHER, USER;
 
     @Override
     public String toString() {

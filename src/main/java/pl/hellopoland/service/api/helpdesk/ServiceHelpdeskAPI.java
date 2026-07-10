@@ -22,34 +22,37 @@ public class ServiceHelpdeskAPI {
   @Inject
   private UserService userService;
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager",
+      "helpdesk_content_manager", "helpdesk_support"})
   public File getOrdersCsvFile(Date fromDate, Date toDate) {
     return analyticsService.getOrdersCsvFile(fromDate, toDate);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager",
+      "helpdesk_content_manager", "helpdesk_support"})
   public EmailSendingReportDTO sendTicketCopy(String hash) {
     return orderService.sendTicketCopy(hash);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager",
+      "helpdesk_content_manager", "helpdesk_support"})
   public EmailSendingReportDTO sendTicketCopyToEmail(String hash, String email) {
     return orderService.sendTicketCopyToEmail(hash, email);
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin"})
   public void rebuildSearchIndices() {
     sightService.rebuildSearchIndices();
     sightEventService.rebuildSearchIndices();
   }
 
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin"})
   public void sudoAckOrder(String hash) {
     orderService.sudoAck(hash);
   }
 
   // TODO delete this
-  @RolesAllowed("admin")
+  @RolesAllowed({"root", "admin"})
   public void globalRework() {
     userService.globalRework();
   }

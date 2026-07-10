@@ -49,17 +49,29 @@ public class ImageService extends ServiceSuperclass {
 
   public ImageCollector validateAndStoreImageCollector(String name, InputStream is, String extension,
       String url) {
-    BufferedImage buffImage = validate(is);
+    return validateAndStoreImageCollector(name, is, extension, url, 1000);
+  }
+
+  public ImageCollector validateAndStoreImageCollector(String name, InputStream is, String extension,
+      String url, int minWidth) {
+    BufferedImage buffImage = validate(is, minWidth);
     return storeImageCollectorInternal(name, buffImage, extension, url);
   }
 
   private BufferedImage validate(InputStream is) {
+    return validate(is, 1000);
+  }
+
+  private BufferedImage validate(InputStream is, int minWidth) {
     try {
       BufferedImage imageIO = ImageIO.read(is);
+      if (imageIO == null) {
+        throw new ConflictingException("Failed to validate image");
+      }
       logger.log(Level.INFO,
           "image width: " + imageIO.getWidth() + ", height: " + imageIO.getHeight());
-      if (imageIO.getWidth() < 1000) {
-        throw new ConflictingException("Image width must be a minimum of 1000px");
+      if (imageIO.getWidth() < minWidth) {
+        throw new ConflictingException("Image width must be a minimum of " + minWidth + "px");
       }
       return imageIO;
     } catch (IOException e) {

@@ -302,8 +302,12 @@ public class JwtAuthenticationMechanism implements HttpAuthenticationMechanism {
       HttpServletRequest request) {
     if (HELPDESK_CONTEXT_PATH.concat(LOGIN_REQUEST_PATH).equals(request.getPathInfo())) {
       return credentialValidationResult.getCallerGroups().stream()
-          .anyMatch(role -> role.equals(UserRole.Role.ADMIN.toString())
-              || role.equals(UserRole.Role.SALESMAN.toString()))
+          .anyMatch(role -> role.equals(UserRole.Role.ROOT.toString())
+              || role.equals(UserRole.Role.ADMIN.toString())
+              || role.equals(UserRole.Role.SALESMAN.toString())
+              || role.equals(UserRole.Role.HELPDESK_PARTNER_MANAGER.toString())
+              || role.equals(UserRole.Role.HELPDESK_CONTENT_MANAGER.toString())
+              || role.equals(UserRole.Role.HELPDESK_SUPPORT.toString()))
           && isStatusSuccess(credentialValidationResult);
     } else if (MARKET_CONTEXT_PATH.concat(LOGIN_REQUEST_PATH).equals(request.getPathInfo())) {
       return credentialValidationResult.getCallerGroups().contains(UserRole.Role.USER.toString())

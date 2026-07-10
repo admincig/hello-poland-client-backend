@@ -405,10 +405,19 @@ public class DtoMapper {
           .collect(Collectors.joining(" "));
     }
     dto.email = bo.getEmail();
+    dto.picture = bo.getPicture();
     dto.blocked = bo.isBlocked();
     dto.roles = Optional.ofNullable(bo.getRoles()).orElse(Collections.emptyList()).stream()
         .map(DtoMapper::getDTO).collect(Collectors.toSet());
     dto.allowedSightIds = Optional.ofNullable(bo.getAllowedPartnerSights())
+        .orElse(Collections.emptySet()).stream()
+        .map(Sight::getId)
+        .collect(Collectors.toList());
+    dto.allowedHelpdeskPartnerIds = Optional.ofNullable(bo.getAllowedHelpdeskPartners())
+        .orElse(Collections.emptySet()).stream()
+        .map(Partner::getId)
+        .collect(Collectors.toList());
+    dto.allowedHelpdeskSightIds = Optional.ofNullable(bo.getAllowedHelpdeskSights())
         .orElse(Collections.emptySet()).stream()
         .map(Sight::getId)
         .collect(Collectors.toList());

@@ -123,6 +123,11 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
     addCondition("partner", partnerId, "e.sight.partner.id=:partner");
   }
 
+  public void setPartnerIds(Set<Long> partnerIds) {
+    addCondition("partnerIds", partnerIds == null || partnerIds.isEmpty() ? Set.of(-1L) : partnerIds,
+        "e.sight.partner.id in (:partnerIds)");
+  }
+
   public void setCity(String city) {
     if (city != null) {
         addCondition("city", city, "lower(e.location.city)=lower(:city)");
