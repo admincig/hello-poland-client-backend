@@ -1,7 +1,9 @@
 package pl.hellopoland.service.api.helpdesk;
 
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
+import pl.hellopoland.dto.TicketPoolTypeDTO;
 import pl.hellopoland.bo.Partner;
+import pl.hellopoland.exception.badrequest.BadRequestException;
 import pl.hellopoland.service.HelpdeskAccessService;
 import pl.hellopoland.service.PartnerService;
 import pl.hellopoland.service.SightEventService;
@@ -28,6 +30,7 @@ public class TicketPoolDefinitionServiceHelpdeskAPI {
   @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager",
       "helpdesk_content_manager"})
   public TicketPoolDefinitionDTO add(TicketPoolDefinitionDTO dto) {
+    requireNotPromotional(dto);
     accessService.requireSightEventAccess(sightEventService.get(dto.sightEventId));
     Partner partner = sightEventService.get(dto.sightEventId).getPartner();
     return service.add(dto, partner);
@@ -44,6 +47,7 @@ public class TicketPoolDefinitionServiceHelpdeskAPI {
       "helpdesk_content_manager"})
   public void delete(Long id, Long partnerId) {
     accessService.requirePartnerAccess(getPartner(partnerId));
+    requireNotPromotional(service.get(id, getPartner(partnerId)));
     service.delete(id, getPartner(partnerId));
   }
 
@@ -51,6 +55,8 @@ public class TicketPoolDefinitionServiceHelpdeskAPI {
       "helpdesk_content_manager"})
   public TicketPoolDefinitionDTO update(TicketPoolDefinitionDTO dto) {
     accessService.requirePartnerAccess(getPartner(dto.partnerId));
+    requireNotPromotional(service.get(dto.id, getPartner(dto.partnerId)));
+    requireNotPromotional(dto);
     return service.update(dto, getPartner(dto.partnerId));
   }
 
@@ -69,6 +75,17 @@ public class TicketPoolDefinitionServiceHelpdeskAPI {
 
   private Partner getPartner(Long partnerId) {
     return partnerId != null ? partnerService.get(partnerId) : null;
+  }
+
+  private void requireNotPromotional(TicketPoolDefinitionDTO dto) {
+    if (dto != null && TicketPoolTypeDTO.PROMOTIONAL.equals(defaultPoolType(dto.poolType))) {
+      throw new BadRequestException(
+          "Promotional ticket pools are readonly in standard offer management.");
+    }
+  }
+
+  private TicketPoolTypeDTO defaultPoolType(TicketPoolTypeDTO poolType) {
+    return poolType == null ? TicketPoolTypeDTO.STANDARD : poolType;
   }
 
 }

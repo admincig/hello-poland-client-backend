@@ -9,6 +9,7 @@ public class OrderIRO {
 
   public List<OrderEntryIRO> entries;
   public OrderDetails details;
+  public String promotionReservationToken;
 
   public static class OrderEntryIRO {
     public Long id;

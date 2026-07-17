@@ -424,6 +424,13 @@ public class SightEventService extends ServiceSuperclass {
 
   public void fetchTicketPoolDefinitions(Collection<SightEvent> bos,
       List<SightEventDTO> dtos, boolean showDeletedTPD, boolean replaceTdIdsWithAtnaIds) {
+    fetchTicketPoolDefinitions(bos, dtos, showDeletedTPD, replaceTdIdsWithAtnaIds,
+        HptTpdsDownloadConfigurator.Audience.MARKET);
+  }
+
+  public void fetchTicketPoolDefinitions(Collection<SightEvent> bos,
+      List<SightEventDTO> dtos, boolean showDeletedTPD, boolean replaceTdIdsWithAtnaIds,
+      HptTpdsDownloadConfigurator.Audience audience) {
     if (hasAnyHptCloudEvent(bos)) {
 
       var partnersToSightEventsWithHptId = groupDtosWithHptIdByPartner(bos, dtos);
@@ -432,6 +439,7 @@ public class SightEventService extends ServiceSuperclass {
         HptTpdsDownloadConfigurator configurator = new HptTpdsDownloadConfigurator();
         configurator.replaceTdIdsWithAtnaIds = replaceTdIdsWithAtnaIds;
         configurator.showDeletedAndOverdued = showDeletedTPD;
+        configurator.audience = audience;
         configurator.subject = partnerToSightEventsWithHptId.getKey();
         configurator.sightEventIds = partnerToSightEventsWithHptId.getValue()
             .stream()
@@ -489,6 +497,7 @@ public class SightEventService extends ServiceSuperclass {
   private Optional<TicketDefinitionDTO> findCheapest(SightEventDTO sightEventDto) {
     if (sightEventDto.ticketPoolDefinitions != null) {
       return sightEventDto.ticketPoolDefinitions.stream()
+          .filter(this::isVisibleOnPortal)
           .map(this::findPreferredPriceFromTicket)
           .flatMap(Optional::stream)
           .min(Comparator.comparing(td -> td.originalPrice));
@@ -548,6 +557,9 @@ public class SightEventService extends ServiceSuperclass {
           }).collect(Collectors.toList());
     }
 
+    poolDefinitions = filterTicketPoolDefinitionsByAudience(poolDefinitions,
+        configurator.audience);
+
     if (configurator.replaceTdIdsWithAtnaIds) {
       poolDefinitions.forEach(pd -> {
         pd.ticketDefinitions.forEach(td -> td.id = td.atnaId);
@@ -555,6 +567,30 @@ public class SightEventService extends ServiceSuperclass {
     }
 
     return poolDefinitions;
+  }
+
+  private List<TicketPoolDefinitionDTO> filterTicketPoolDefinitionsByAudience(
+      List<TicketPoolDefinitionDTO> poolDefinitions, HptTpdsDownloadConfigurator.Audience audience) {
+    if (audience != HptTpdsDownloadConfigurator.Audience.PARTNER) {
+      return poolDefinitions;
+    }
+    return poolDefinitions.stream()
+        .filter(this::isVisibleForPartner)
+        .collect(Collectors.toList());
+  }
+
+  private boolean isVisibleForPartner(TicketPoolDefinitionDTO poolDefinition) {
+    return poolDefinition != null
+        && !TicketPoolTypeDTO.PROMOTIONAL.equals(defaultPoolType(poolDefinition.poolType))
+        && defaultVisible(poolDefinition.visibleForPartner);
+  }
+
+  private TicketPoolTypeDTO defaultPoolType(TicketPoolTypeDTO poolType) {
+    return poolType == null ? TicketPoolTypeDTO.STANDARD : poolType;
+  }
+
+  private boolean defaultVisible(Boolean visible) {
+    return visible == null || visible;
   }
 
   private Map<Partner, List<Pair<Long, SightEventDTO>>> groupDtosWithHptIdByPartner(
@@ -645,6 +681,7 @@ public class SightEventService extends ServiceSuperclass {
     if (tpds != null && !tpds.isEmpty()) {
       return !tpds.stream()
           .filter(tpd -> !tpd.deleted
+              && isVisibleOnPortal(tpd)
               && isInDateRange(tpd, fromDate, toDate)
               && ticketAreAvailable(dto, tpd, fromDate, toDate))
           .collect(toList()).isEmpty();
@@ -669,10 +706,14 @@ public class SightEventService extends ServiceSuperclass {
     }
 
     Stream<TicketPoolDefinitionDTO> s1 =
-        availableTickets.ticketPoolDefinitions.stream().filter(tp -> tp.ticketDefinitions.stream()
+        availableTickets.ticketPoolDefinitions.stream()
+            .filter(this::isVisibleOnPortal)
+            .filter(tp -> tp.ticketDefinitions.stream()
             .filter(td -> !td.availableTicketsNumber.equals(Integer.valueOf(0))).count() != 0);
     Stream<TicketPoolDTO> s2 =
-        availableTickets.ticketPools.stream().filter(tp -> tp.ticketDefinitions.stream()
+        availableTickets.ticketPools.stream()
+            .filter(this::isVisibleOnPortal)
+            .filter(tp -> tp.ticketDefinitions.stream()
             .filter(td -> !td.availableTicketsNumber.equals(Integer.valueOf(0))).count() != 0);
 
     return s1.count() != 0l || s2.count() != 0l;
@@ -700,10 +741,28 @@ public class SightEventService extends ServiceSuperclass {
         || fromDate.before(tpdStartDate)) && (toDate != null ? toDate.after(tpdStartDate) : true);
   }
 
+  public boolean isVisibleOnPortal(TicketPoolDefinitionDTO poolDefinition) {
+    return poolDefinition != null
+        && !TicketPoolTypeDTO.PROMOTIONAL.equals(defaultPoolType(poolDefinition.poolType))
+        && defaultVisible(poolDefinition.visibleOnPortal);
+  }
+
+  public boolean isVisibleOnPortal(TicketPoolDTO pool) {
+    return pool != null
+        && !TicketPoolTypeDTO.PROMOTIONAL.equals(defaultPoolType(pool.poolType))
+        && defaultVisible(pool.visibleOnPortal);
+  }
+
   public void stopSale(Long sightId, Long ticketPoolDefId, Date date) {
     var bo = getForLoggedUser(sightId);
+    Partner partner = getLoggedPartner();
     HelloTicket ht = new HelloTicket(bo.getPortal().getUrl());
-    ht.stopSale(getLoggedPartner().getHptToken(), bo.getHptId(), ticketPoolDefId, date);
+    TicketPoolDefinitionDTO poolDefinition =
+        ht.getTicketPoolDefinition(partner.getHptToken(), ticketPoolDefId);
+    if (!isVisibleForPartner(poolDefinition)) {
+      throw new ResourceNotFoundException();
+    }
+    ht.stopSale(partner.getHptToken(), bo.getHptId(), ticketPoolDefId, date);
   }
 
   public SightEvent changeDefaultLanguageForLoggedUser(Long id, LanguageVersion language) {

@@ -11,6 +11,7 @@ import pl.hellopoland.dto.TagDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.*;
+import pl.hellopoland.service.vo.HptTpdsDownloadConfigurator;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.PagedEntityCollection;
 
@@ -100,7 +101,8 @@ public class SightEventServicePartnerAPI {
     if (language != null) {
       dtos.forEach(dto -> dto.language = language.getLanuage());
     }
-    service.fetchTicketPoolDefinitions(bos.items, dtos, true, false);
+    service.fetchTicketPoolDefinitions(bos.items, dtos, true, false,
+        HptTpdsDownloadConfigurator.Audience.PARTNER);
     return new PagedCollection<>(dtos, bos.config);
   }
 

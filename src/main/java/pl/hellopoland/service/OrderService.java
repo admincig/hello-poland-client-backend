@@ -51,6 +51,8 @@ public class OrderService extends ServiceSuperclass {
   JwtVerificator jwtVerificator;
   @Inject
   PostalCodeDictionaryLookup pcd;
+  @Inject
+  PromotionCodeService promotionCodeService;
 
     private void enrichOrderDetails(OrderDetails d) {
         if (d == null) return;
@@ -154,6 +156,8 @@ public class OrderService extends ServiceSuperclass {
         }
       }
     }
+    em.flush();
+    promotionCodeService.attachReservationToOrder(iro.promotionReservationToken, o);
     try {
       placeInExternalAPI(o);
     } catch (Exception e) {
@@ -454,17 +458,20 @@ public class OrderService extends ServiceSuperclass {
 
   public void cancel(Order o) {
     o.setStatus(Order.Status.CANCELLED);
+    promotionCodeService.cancelOrderPromotions(o);
     cancelInExternalAPI(o);
     // TODO send mail or something
   }
 
   private void problem(Order order) {
     order.setStatus(Status.PROBLEM);
+    promotionCodeService.releaseOrderPromotions(order);
     // TODO handle failure
   }
 
   public void confirm(Order order) {
     confirmInExternalAPI(order);
+    promotionCodeService.markOrderPromotionsAsUsed(order);
     order.setStatus(Status.CONFIRMED);
   }
 

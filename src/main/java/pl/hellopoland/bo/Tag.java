@@ -25,6 +25,7 @@ public class Tag extends ModelSuperclass implements Translated {
   private Set<LanguageVersion> availableLanguageVersions;
   private boolean restricted;
   private boolean recommended;
+  private boolean promotional;
   private String iconUrl;
   private int assignedItemsCount;
   @Transient
@@ -72,6 +73,14 @@ public class Tag extends ModelSuperclass implements Translated {
 
   public void setRecommended(boolean recommended) {
     this.recommended = recommended;
+  }
+
+  public boolean isPromotional() {
+    return promotional;
+  }
+
+  public void setPromotional(boolean promotional) {
+    this.promotional = promotional;
   }
 
   public String getIconUrl() {
