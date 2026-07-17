@@ -1,0 +1,109 @@
+### Manualny scenariusz regresyjny: promocja TICKET
+### Uzupełnij baseUrl, tokeny i ID zgodnie ze środowiskiem testowym.
+
+@baseUrl = https://api.hello-poland.pl/v1
+@helpdeskToken = HELP_DESK_JWT
+@marketToken = MARKET_JWT
+@campaignId = 1
+@normalAtnaId = 2055
+@promoAtnaId = 3001
+@sightEventId = 411
+@campaignSightEventId = 1
+@code = VISA-TEST-001
+@reservationToken = TOKEN_Z_VALIDATE_CODE
+@orderHash = HASH_Z_POST_MARKET_ORDERS
+
+### 1. Helpdesk tworzy kampanię TICKET
+POST {{baseUrl}}/helpdesk/promotions
+Authorization: Bearer {{helpdeskToken}}
+Content-Type: application/json
+
+{
+  "name": "Promocja VISA test",
+  "promotionType": "TICKET",
+  "scopeType": "MANUAL",
+  "validFrom": "2026-08-01T00:00:00",
+  "validTo": "2026-08-31T23:59:59",
+  "globalLimit": 2000,
+  "codeLimit": 1,
+  "requiredTicketQuantity": 1,
+  "grantedTicketQuantity": 1,
+  "codeSetup": {
+    "codeType": "ONE_TIME",
+    "codes": ["{{code}}"]
+  },
+  "targetSetup": {
+    "sightEventIds": [{{sightEventId}}]
+  },
+  "ticketPoolSetup": {
+    "ticketPrice": 100,
+    "availableTicketsNumber": 10,
+    "wholeDay": true,
+    "isCyclic": true
+  }
+}
+
+### 2. Portal waliduje kod i rezerwuje użycie
+POST {{baseUrl}}/market/promotions/validate-code
+Authorization: Bearer {{marketToken}}
+Content-Type: application/json
+
+{
+  "code": "{{code}}",
+  "cartItems": [
+    {
+      "id": {{normalAtnaId}},
+      "quantity": 1
+    }
+  ]
+}
+
+### 3. Portal składa zamówienie standardową usługą, już z biletem promocyjnym
+POST {{baseUrl}}/market/orders
+Authorization: Bearer {{marketToken}}
+Content-Type: application/json
+
+{
+  "promotionReservationToken": "{{reservationToken}}",
+  "entries": [
+    {
+      "id": {{normalAtnaId}},
+      "quantity": 1,
+      "date": "2026-08-30T00:00:00"
+    },
+    {
+      "id": {{promoAtnaId}},
+      "quantity": 1,
+      "date": "2026-08-30T00:00:00"
+    }
+  ],
+  "details": {
+    "email": "test@example.com",
+    "firstName": "Test",
+    "lastName": "Promotion",
+    "phone": "500000000"
+  }
+}
+
+### 4a. Helpdesk może ręcznie potwierdzić zamówienie na testach
+POST {{baseUrl}}/helpdesk/orders/{{orderHash}}/sudoAck
+Authorization: Bearer {{helpdeskToken}}
+
+### 4b. Po potwierdzeniu użycie kodu powinno mieć status USED
+GET {{baseUrl}}/helpdesk/promotions/{{campaignId}}/redemptions
+Authorization: Bearer {{helpdeskToken}}
+
+### 5. Wariant negatywny: ponowna walidacja kodu jednorazowego powinna zwrócić INVALID/CODE_ALREADY_USED
+POST {{baseUrl}}/market/promotions/validate-code
+Authorization: Bearer {{marketToken}}
+Content-Type: application/json
+
+{
+  "code": "{{code}}",
+  "cartItems": [
+    {
+      "id": {{normalAtnaId}},
+      "quantity": 1
+    }
+  ]
+}
