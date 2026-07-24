@@ -143,6 +143,7 @@ public class DtoMapper {
         ? bo.getSight().getPartner()
         : bo.getPartner();
     dto.id = bo.getId();
+    dto.hptId = bo.getHptId();
     dto.name = bo.getName();
     dto.lead = bo.getLead();
     dto.description = bo.getDescription();

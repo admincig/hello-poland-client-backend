@@ -34,11 +34,14 @@ import pl.hellopoland.rest.dto.PromotionCodeSetupIRO;
 import pl.hellopoland.rest.dto.PromotionTargetSetupIRO;
 import pl.hellopoland.rest.dto.PromotionTicketPoolGenerationIRO;
 import pl.hellopoland.rest.dto.PromotionTicketPoolSetupIRO;
+import pl.hellopoland.rest.dto.PromotionTicketPoolTargetPreviewDTO;
+import pl.hellopoland.rest.dto.PromotionTicketPoolTargetPreviewORO;
 import pl.hellopoland.util.HelloTicket;
 
 import jakarta.ejb.LocalBean;
 import jakarta.ejb.Stateless;
 import java.security.SecureRandom;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashSet;
@@ -55,6 +58,11 @@ public class PromotionManagementService extends ServiceSuperclass {
   private static final int MAX_GENERATED_CODES = 100000;
   private static final String GENERATED_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   private static final String SPECIAL_TICKET_TYPE_CODE = "SPECJALNY";
+  private static final String ERR_PROMOTION_CODES_REQUIRED = "PROMOTION_CODES_REQUIRED";
+  private static final String ERR_PROMOTION_TICKET_TARGETS_REQUIRED =
+      "PROMOTION_TICKET_TARGETS_REQUIRED";
+  private static final String ERR_PROMOTION_TICKET_POOLS_REQUIRED =
+      "PROMOTION_TICKET_POOLS_REQUIRED";
   private static final SecureRandom RANDOM = new SecureRandom();
 
   public List<PromotionCampaignHelpdeskDTO> listCampaigns() {
@@ -71,22 +79,34 @@ public class PromotionManagementService extends ServiceSuperclass {
   public PromotionCampaignHelpdeskDTO createCampaign(PromotionCampaignHelpdeskDTO dto) {
     PromotionCampaign campaign = new PromotionCampaign();
     applyCampaign(campaign, dto);
-    campaign.setStatus(dto.status != null ? dto.status : PromotionStatus.DRAFT);
+    PromotionStatus requestedStatus = dto.status != null ? dto.status : PromotionStatus.DRAFT;
+    campaign.setStatus(requestedStatus == PromotionStatus.ACTIVE ? PromotionStatus.DRAFT : requestedStatus);
     campaign.setCreatedAt(new Date());
     campaign.setCreatedBy(getLoggedUser());
     em.persist(campaign);
     applyCampaignTags(campaign, dto.tagIds);
-    createInitialCodes(campaign, dto.codeSetup);
+    applyManualCampaignTargets(campaign, dto.targetSetup);
+    if (dto.codeSetup != null) {
+      createInitialCodes(campaign, dto.codeSetup);
+    }
     if (campaign.getPromotionType() == PromotionType.TICKET && dto.ticketPoolSetup != null) {
       generateTicketPools(campaign, dto.targetSetup, dto.ticketPoolSetup);
+    }
+    if (requestedStatus == PromotionStatus.ACTIVE) {
+      validateCanActivate(campaign);
+      campaign.setStatus(PromotionStatus.ACTIVE);
     }
     return campaignDetailsDTO(campaign);
   }
 
   public PromotionCampaignHelpdeskDTO updateCampaign(Long id, PromotionCampaignHelpdeskDTO dto) {
     PromotionCampaign campaign = getCampaignEntity(id);
+    assertCampaignDraft(campaign);
     applyCampaign(campaign, dto);
     if (dto.status != null) {
+      if (dto.status == PromotionStatus.ACTIVE) {
+        validateCanActivate(campaign);
+      }
       campaign.setStatus(dto.status);
     }
     campaign.setUpdatedAt(new Date());
@@ -100,6 +120,10 @@ public class PromotionManagementService extends ServiceSuperclass {
       throw new ConflictingException("Status promocji jest wymagany.");
     }
     PromotionCampaign campaign = getCampaignEntity(id);
+    validateStatusTransition(campaign, dto.status);
+    if (dto.status == PromotionStatus.ACTIVE) {
+      validateCanActivate(campaign);
+    }
     campaign.setStatus(dto.status);
     campaign.setUpdatedAt(new Date());
     campaign.setUpdatedBy(getLoggedUser());
@@ -113,6 +137,7 @@ public class PromotionManagementService extends ServiceSuperclass {
     }
 
     PromotionCampaign campaign = getCampaignEntity(campaignId);
+    assertCampaignDraft(campaign);
     SightEvent sightEvent = getSightEvent(dto.sightEventId);
     PromotionCampaignSightEvent relation = findCampaignSightEvent(campaign, sightEvent);
     if (relation == null) {
@@ -133,6 +158,7 @@ public class PromotionManagementService extends ServiceSuperclass {
   public PromotionCampaignSightEventHelpdeskDTO updateSightEvent(Long campaignId, Long relationId,
       PromotionCampaignSightEventHelpdeskDTO dto) {
     PromotionCampaign campaign = getCampaignEntity(campaignId);
+    assertCampaignDraft(campaign);
     PromotionCampaignSightEvent relation = getCampaignSightEventEntity(relationId);
     if (!Objects.equals(relation.getPromotionCampaign().getId(), campaign.getId())) {
       throw new ResourceNotFoundException();
@@ -148,6 +174,7 @@ public class PromotionManagementService extends ServiceSuperclass {
 
   public void removeSightEvent(Long campaignId, Long relationId) {
     PromotionCampaign campaign = getCampaignEntity(campaignId);
+    assertCampaignDraft(campaign);
     PromotionCampaignSightEvent relation = getCampaignSightEventEntity(relationId);
     if (!Objects.equals(relation.getPromotionCampaign().getId(), campaign.getId())) {
       throw new ResourceNotFoundException();
@@ -167,6 +194,50 @@ public class PromotionManagementService extends ServiceSuperclass {
         .collect(Collectors.toList());
   }
 
+  public List<PromotionCodeHelpdeskDTO> createCodes(Long campaignId, PromotionCodeSetupIRO iro) {
+    PromotionCampaign campaign = getCampaignEntity(campaignId);
+    assertCampaignDraft(campaign);
+    return createInitialCodes(campaign, iro);
+  }
+
+  public List<PromotionCodeHelpdeskDTO> replaceCodes(Long campaignId, PromotionCodeSetupIRO iro) {
+    PromotionCampaign campaign = getCampaignEntity(campaignId);
+    assertCampaignDraft(campaign);
+    assertNoCodeRedemptions(campaign);
+    removeExistingCodes(campaign);
+    return createInitialCodes(campaign, iro);
+  }
+
+  public String exportCodesCsv(Long campaignId) {
+    PromotionCampaign campaign = getCampaignEntity(campaignId);
+    List<PromotionCode> codes = em.createQuery(
+        "from PromotionCode where promotionCampaign = :campaign order by createdAt asc, id asc",
+        PromotionCode.class)
+        .setParameter("campaign", campaign)
+        .getResultList();
+
+    StringBuilder csv = new StringBuilder();
+    csv.append("code,status,code_type,max_redemptions,max_redemptions_per_customer,")
+        .append("max_redemptions_per_day,reserved_redemptions_count,used_redemptions_count,")
+        .append("reserved_until,created_at,updated_at,disabled_at\n");
+    for (PromotionCode code : codes) {
+      appendCsvRow(csv,
+          code.getCode(),
+          code.getStatus(),
+          code.getCodeType(),
+          code.getMaxRedemptions(),
+          code.getMaxRedemptionsPerCustomer(),
+          code.getMaxRedemptionsPerDay(),
+          code.getReservedRedemptionsCount(),
+          code.getUsedRedemptionsCount(),
+          code.getReservedUntil(),
+          code.getCreatedAt(),
+          code.getUpdatedAt(),
+          code.getDisabledAt());
+    }
+    return csv.toString();
+  }
+
   public List<PromotionCodeBatchHelpdeskDTO> listBatches(Long campaignId) {
     PromotionCampaign campaign = getCampaignEntity(campaignId);
     return em.createQuery(
@@ -180,6 +251,7 @@ public class PromotionManagementService extends ServiceSuperclass {
 
   public List<PromotionCodeHelpdeskDTO> importCodes(Long campaignId, PromotionCodeImportIRO iro) {
     PromotionCampaign campaign = getCampaignEntity(campaignId);
+    assertCampaignDraft(campaign);
     List<String> codes = normalizedCodes(iro);
     assertCodesDoNotExist(codes);
 
@@ -192,20 +264,24 @@ public class PromotionManagementService extends ServiceSuperclass {
 
   public PromotionCodeHelpdeskDTO updateCode(Long campaignId, Long codeId,
       PromotionCodeHelpdeskDTO dto) {
+    if (dto == null) {
+      throw new ConflictingException("Dane kodu są wymagane.");
+    }
     PromotionCampaign campaign = getCampaignEntity(campaignId);
     PromotionCode code = getCodeEntity(codeId);
     if (!Objects.equals(code.getPromotionCampaign().getId(), campaign.getId())) {
       throw new ResourceNotFoundException();
     }
+    validateCodeUpdate(campaign, code, dto);
     if (dto.status != null) {
       code.setStatus(dto.status);
       code.setDisabledAt(dto.status == PromotionCodeStatus.DISABLED ? new Date() : null);
     }
-    if (code.getCodeType() == PromotionCodeType.FIXED) {
+    if (campaign.getStatus() == PromotionStatus.DRAFT && code.getCodeType() == PromotionCodeType.FIXED) {
       code.setMaxRedemptions(dto.maxRedemptions);
+      code.setMaxRedemptionsPerCustomer(dto.maxRedemptionsPerCustomer);
+      code.setMaxRedemptionsPerDay(dto.maxRedemptionsPerDay);
     }
-    code.setMaxRedemptionsPerCustomer(dto.maxRedemptionsPerCustomer);
-    code.setMaxRedemptionsPerDay(dto.maxRedemptionsPerDay);
     code.setUpdatedAt(new Date());
     return codeDTO(code);
   }
@@ -224,6 +300,7 @@ public class PromotionManagementService extends ServiceSuperclass {
   public PromotionCampaignHelpdeskDTO generateTicketPools(Long campaignId,
       PromotionTicketPoolGenerationIRO iro) {
     PromotionCampaign campaign = getCampaignEntity(campaignId);
+    assertCampaignDraft(campaign);
     if (iro == null) {
       throw new ConflictingException("Podaj zakres i parametry puli promocyjnej.");
     }
@@ -231,15 +308,30 @@ public class PromotionManagementService extends ServiceSuperclass {
     return campaignDetailsDTO(campaign);
   }
 
+  public PromotionTicketPoolTargetPreviewORO previewTicketPoolTargets(Long campaignId,
+      PromotionTicketPoolGenerationIRO iro) {
+    PromotionCampaign campaign = getCampaignEntity(campaignId);
+    PromotionTargetSetupIRO targetSetup = iro != null ? iro.targetSetup : null;
+    List<SightEvent> sightEvents = resolvePromotionTargets(campaign, targetSetup);
+
+    PromotionTicketPoolTargetPreviewORO oro = new PromotionTicketPoolTargetPreviewORO();
+    oro.sightEvents = sightEvents.stream()
+        .map(sightEvent -> targetPreviewDTO(campaign, sightEvent))
+        .collect(Collectors.toList());
+    oro.count = oro.sightEvents.size();
+    return oro;
+  }
+
   private void generateTicketPools(PromotionCampaign campaign, PromotionTargetSetupIRO targetSetup,
       PromotionTicketPoolSetupIRO ticketPoolSetup) {
     if (campaign.getPromotionType() != PromotionType.TICKET) {
-      throw new ConflictingException("Pule promocyjne mozna generowac tylko dla promocji TICKET.");
+      throw new ConflictingException("Pule promocyjne można generować tylko dla promocji TICKET.");
     }
     validateTicketPoolSetup(ticketPoolSetup);
     List<SightEvent> sightEvents = resolvePromotionTargets(campaign, targetSetup);
     if (sightEvents.isEmpty()) {
-      throw new ConflictingException("Nie znaleziono ofert dla promocji.");
+      throw new ConflictingException(
+          "Nie znaleziono aktywnych ofert z powiązaniem HT dla wskazanego zakresu promocji.");
     }
 
     for (SightEvent sightEvent : sightEvents) {
@@ -310,7 +402,7 @@ public class PromotionManagementService extends ServiceSuperclass {
 
     TicketDefinitionDTO poolTicket = new TicketDefinitionDTO();
     poolTicket.id = ticketDefinition.id;
-    poolTicket.availableTicketsNumber = setup.availableTicketsNumber;
+    poolTicket.availableTicketsNumber = -1;
 
     TicketPoolDefinitionDTO pool = new TicketPoolDefinitionDTO();
     pool.name = setup.poolName != null && !setup.poolName.isBlank()
@@ -354,7 +446,7 @@ public class PromotionManagementService extends ServiceSuperclass {
         .filter(td -> Objects.equals(td.poolId, ticketPool.id))
         .findFirst()
         .orElseThrow(() -> new ConflictingException(
-            "Nie udalo sie odczytac ATNA biletu promocyjnego z HT."));
+            "Nie udało się odczytać ATNA biletu promocyjnego z HT."));
   }
 
   private void validateTicketPoolSetup(PromotionTicketPoolSetupIRO setup) {
@@ -362,15 +454,15 @@ public class PromotionManagementService extends ServiceSuperclass {
       throw new ConflictingException("Podaj parametry puli promocyjnej.");
     }
     if (setup.ticketPrice == null || setup.ticketPrice < 0) {
-      throw new ConflictingException("Podaj poprawna cene biletu promocyjnego.");
+      throw new ConflictingException("Podaj poprawną cenę biletu promocyjnego.");
     }
     if (setup.availableTicketsNumber == null || setup.availableTicketsNumber <= 0) {
-      throw new ConflictingException("Podaj liczbe biletow promocyjnych dla oferty.");
+      throw new ConflictingException("Podaj liczbę biletów promocyjnych dla oferty.");
     }
     Date startDate = setup.startDate;
     Date endDate = setup.endDate;
     if (startDate != null && endDate != null && endDate.before(startDate)) {
-      throw new ConflictingException("Data konca puli nie moze byc przed data startu.");
+      throw new ConflictingException("Data końca puli nie może być przed datą startu.");
     }
   }
 
@@ -386,6 +478,7 @@ public class PromotionManagementService extends ServiceSuperclass {
     if (campaign.getScopeType() == PromotionScopeType.TAG) {
       addSightEventsForTags(sightEventIds, activeCampaignTagIds(campaign));
     }
+    addAll(sightEventIds, activeCampaignSightEventIds(campaign));
 
     if (sightEventIds.isEmpty()) {
       return List.of();
@@ -445,6 +538,15 @@ public class PromotionManagementService extends ServiceSuperclass {
         .getResultList();
   }
 
+  private List<Long> activeCampaignSightEventIds(PromotionCampaign campaign) {
+    return em.createQuery(
+        "select pcse.sightEvent.id from PromotionCampaignSightEvent pcse "
+            + "where pcse.promotionCampaign = :campaign and pcse.active is true",
+        Long.class)
+        .setParameter("campaign", campaign)
+        .getResultList();
+  }
+
   private void addAll(Set<Long> target, List<Long> source) {
     if (source != null) {
       source.stream().filter(Objects::nonNull).forEach(target::add);
@@ -496,9 +598,10 @@ public class PromotionManagementService extends ServiceSuperclass {
         .orElse(null);
   }
 
-  private void createInitialCodes(PromotionCampaign campaign, PromotionCodeSetupIRO setup) {
+  private List<PromotionCodeHelpdeskDTO> createInitialCodes(PromotionCampaign campaign,
+      PromotionCodeSetupIRO setup) {
     if (setup == null) {
-      throw new ConflictingException("Podaj konfiguracje kodow dla promocji.");
+      throw new ConflictingException("Podaj konfigurację kodów dla promocji.");
     }
 
     boolean hasImportCodes = hasImportCodes(setup);
@@ -508,51 +611,52 @@ public class PromotionManagementService extends ServiceSuperclass {
         + (hasGenerateParams ? 1 : 0);
     if (selectedSources > 1) {
       throw new ConflictingException(
-          "Podaj liste kodow, jeden kod staly albo parametry generatora.");
+          "Podaj listę kodów, jeden kod stały albo parametry generatora.");
     }
 
     if (hasImportCodes) {
-      createImportedCodes(campaign, setup);
-      return;
+      return createImportedCodes(campaign, setup);
     }
     if (hasFixedCode) {
-      createFixedCode(campaign, setup);
-      return;
+      return createFixedCode(campaign, setup);
     }
-    createGeneratedCodes(campaign, setup);
+    return createGeneratedCodes(campaign, setup);
   }
 
-  private void createImportedCodes(PromotionCampaign campaign, PromotionCodeSetupIRO setup) {
+  private List<PromotionCodeHelpdeskDTO> createImportedCodes(PromotionCampaign campaign,
+      PromotionCodeSetupIRO setup) {
     List<String> codes = normalizedCodes(setup.codes);
     assertCodesDoNotExist(codes);
     PromotionCodeType codeType = setup.codeType != null ? setup.codeType : PromotionCodeType.ONE_TIME;
     PromotionCodeBatch batch =
         createBatch(campaign, PromotionCodeBatchSource.IMPORT, setup.fileName, codes.size());
-    createCodes(campaign, batch, codes, codeType, setup.maxRedemptions,
+    return createCodes(campaign, batch, codes, codeType, setup.maxRedemptions,
         setup.maxRedemptionsPerCustomer, setup.maxRedemptionsPerDay);
   }
 
-  private void createFixedCode(PromotionCampaign campaign, PromotionCodeSetupIRO setup) {
+  private List<PromotionCodeHelpdeskDTO> createFixedCode(PromotionCampaign campaign,
+      PromotionCodeSetupIRO setup) {
     List<String> codes = List.of(setup.fixedCode.trim());
     assertCodesDoNotExist(codes);
     PromotionCodeBatch batch =
         createBatch(campaign, PromotionCodeBatchSource.IMPORT,
             setup.fileName != null ? setup.fileName : "manual-fixed-code", codes.size());
-    createCodes(campaign, batch, codes, PromotionCodeType.FIXED, setup.maxRedemptions,
+    return createCodes(campaign, batch, codes, PromotionCodeType.FIXED, setup.maxRedemptions,
         setup.maxRedemptionsPerCustomer, setup.maxRedemptionsPerDay);
   }
 
-  private void createGeneratedCodes(PromotionCampaign campaign, PromotionCodeSetupIRO setup) {
+  private List<PromotionCodeHelpdeskDTO> createGeneratedCodes(PromotionCampaign campaign,
+      PromotionCodeSetupIRO setup) {
     if (setup.generateCount == null || setup.generateCount <= 0
         || setup.generateCount > MAX_GENERATED_CODES) {
-      throw new ConflictingException("Podaj poprawna liczbe kodow do wygenerowania.");
+      throw new ConflictingException("Podaj poprawną liczbę kodów do wygenerowania.");
     }
 
     List<String> codes = generateUniqueCodes(setup);
     PromotionCodeType codeType = setup.codeType != null ? setup.codeType : PromotionCodeType.ONE_TIME;
     PromotionCodeBatch batch =
         createBatch(campaign, PromotionCodeBatchSource.GENERATED, setup.fileName, codes.size());
-    createCodes(campaign, batch, codes, codeType, setup.maxRedemptions,
+    return createCodes(campaign, batch, codes, codeType, setup.maxRedemptions,
         setup.maxRedemptionsPerCustomer, setup.maxRedemptionsPerDay);
   }
 
@@ -580,7 +684,7 @@ public class PromotionManagementService extends ServiceSuperclass {
       code.setCode(codeValue);
       code.setCodeType(codeType);
       code.setStatus(PromotionCodeStatus.ACTIVE);
-      code.setMaxRedemptions(codeType == PromotionCodeType.ONE_TIME ? 1 : maxRedemptions);
+      code.setMaxRedemptions(codeType == PromotionCodeType.ONE_TIME ? Integer.valueOf(1) : maxRedemptions);
       code.setMaxRedemptionsPerCustomer(maxRedemptionsPerCustomer);
       code.setMaxRedemptionsPerDay(maxRedemptionsPerDay);
       code.setCreatedAt(new Date());
@@ -595,14 +699,14 @@ public class PromotionManagementService extends ServiceSuperclass {
         ? setup.generatedCodeLength
         : DEFAULT_GENERATED_CODE_LENGTH;
     if (length <= 0 || length > 64) {
-      throw new ConflictingException("Podaj poprawna dlugosc kodu.");
+      throw new ConflictingException("Podaj poprawną długość kodu.");
     }
 
     Set<String> codes = new LinkedHashSet<>();
     int attempts = 0;
     while (codes.size() < setup.generateCount) {
       if (attempts++ > 20) {
-        throw new ConflictingException("Nie udalo sie wygenerowac unikalnych kodow.");
+        throw new ConflictingException("Nie udało się wygenerować unikalnych kodów.");
       }
       while (codes.size() < setup.generateCount) {
         codes.add(generatedCode(setup, length));
@@ -626,6 +730,137 @@ public class PromotionManagementService extends ServiceSuperclass {
     return prefix + separator + randomPart;
   }
 
+  private void appendCsvRow(StringBuilder csv, Object... values) {
+    for (int i = 0; i < values.length; i++) {
+      if (i > 0) {
+        csv.append(',');
+      }
+      csv.append(csvValue(values[i]));
+    }
+    csv.append('\n');
+  }
+
+  private String csvValue(Object value) {
+    if (value == null) {
+      return "";
+    }
+    String text = value instanceof Date
+        ? new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format((Date) value)
+        : String.valueOf(value);
+    return "\"" + text.replace("\"", "\"\"") + "\"";
+  }
+
+  private void validateCanActivate(PromotionCampaign campaign) {
+    Long codesCount = em.createQuery(
+        "select count(code) from PromotionCode code where code.promotionCampaign = :campaign "
+            + "and code.status <> :disabledStatus",
+        Long.class)
+        .setParameter("campaign", campaign)
+        .setParameter("disabledStatus", PromotionCodeStatus.DISABLED)
+        .getSingleResult();
+    if (codesCount == 0) {
+      throw new ConflictingException("Nie można uruchomić promocji bez kodów.",
+          ERR_PROMOTION_CODES_REQUIRED);
+    }
+
+    if (campaign.getPromotionType() == PromotionType.TICKET) {
+      validateTicketPromotionReady(campaign);
+    }
+  }
+
+  private void validateTicketPromotionReady(PromotionCampaign campaign) {
+    List<SightEvent> sightEvents = resolvePromotionTargets(campaign, null);
+    if (sightEvents.isEmpty()) {
+      throw new ConflictingException(
+          "Nie można uruchomić promocji TICKET bez ofert objętych promocją.",
+          ERR_PROMOTION_TICKET_TARGETS_REQUIRED);
+    }
+
+    List<String> missingPools = sightEvents.stream()
+        .filter(sightEvent -> !hasReadyTicketPool(campaign, sightEvent))
+        .map(SightEvent::getName)
+        .collect(Collectors.toList());
+    if (!missingPools.isEmpty()) {
+      String examples = missingPools.stream().limit(5).collect(Collectors.joining(", "));
+      String suffix = missingPools.size() > 5 ? "..." : "";
+      throw new ConflictingException(
+          "Nie można uruchomić promocji TICKET. Brak gotowych pul promocyjnych dla "
+              + missingPools.size() + " ofert: " + examples + suffix,
+          ERR_PROMOTION_TICKET_POOLS_REQUIRED);
+    }
+  }
+
+  private boolean hasReadyTicketPool(PromotionCampaign campaign, SightEvent sightEvent) {
+    PromotionCampaignSightEvent relation = findCampaignSightEvent(campaign, sightEvent);
+    return relation != null
+        && relation.isActive()
+        && relation.getTicketPoolStatus() == PromotionTicketPoolStatus.CREATED
+        && relation.getHptAtnaId() != null;
+  }
+
+  private void validateStatusTransition(PromotionCampaign campaign, PromotionStatus targetStatus) {
+    PromotionStatus currentStatus = campaign.getStatus();
+    if (Objects.equals(currentStatus, targetStatus)) {
+      return;
+    }
+    if (currentStatus == PromotionStatus.ACTIVE && targetStatus == PromotionStatus.DISABLED) {
+      return;
+    }
+    if (currentStatus == PromotionStatus.DRAFT
+        && (targetStatus == PromotionStatus.ACTIVE || targetStatus == PromotionStatus.DISABLED)) {
+      return;
+    }
+    throw new ConflictingException(
+        "Po uruchomieniu promocji można ją tylko zakończyć przed czasem.");
+  }
+
+  private void assertCampaignDraft(PromotionCampaign campaign) {
+    if (campaign.getStatus() != PromotionStatus.DRAFT) {
+      throw new ConflictingException("Promocję można konfigurować tylko w statusie DRAFT.");
+    }
+  }
+
+  private void assertNoCodeRedemptions(PromotionCampaign campaign) {
+    Long redemptionsCount = em.createQuery(
+        "select count(redemption) from PromotionCodeRedemption redemption "
+            + "where redemption.promotionCampaign = :campaign",
+        Long.class)
+        .setParameter("campaign", campaign)
+        .getSingleResult();
+    if (redemptionsCount > 0) {
+      throw new ConflictingException("Nie można zastąpić kodów, bo promocja ma już użycia kodów.");
+    }
+  }
+
+  private void validateCodeUpdate(PromotionCampaign campaign, PromotionCode code,
+      PromotionCodeHelpdeskDTO dto) {
+    if (campaign.getStatus() == PromotionStatus.DRAFT) {
+      return;
+    }
+    boolean disableOnly = dto != null
+        && dto.status == PromotionCodeStatus.DISABLED
+        && code.getStatus() == PromotionCodeStatus.ACTIVE
+        && dto.maxRedemptions == null
+        && dto.maxRedemptionsPerCustomer == null
+        && dto.maxRedemptionsPerDay == null;
+    if ((campaign.getStatus() == PromotionStatus.ACTIVE
+        || campaign.getStatus() == PromotionStatus.DISABLED) && disableOnly) {
+      return;
+    }
+    throw new ConflictingException(
+        "Po uruchomieniu promocji można tylko wyłączyć aktywny kod.");
+  }
+
+  private void removeExistingCodes(PromotionCampaign campaign) {
+    em.createQuery("delete from PromotionCode code where code.promotionCampaign = :campaign")
+        .setParameter("campaign", campaign)
+        .executeUpdate();
+    em.createQuery("delete from PromotionCodeBatch batch where batch.promotionCampaign = :campaign")
+        .setParameter("campaign", campaign)
+        .executeUpdate();
+    em.flush();
+  }
+
   private void applyCampaign(PromotionCampaign campaign, PromotionCampaignHelpdeskDTO dto) {
     if (dto == null || dto.name == null || dto.name.isBlank()) {
       throw new ConflictingException("Nazwa promocji jest wymagana.");
@@ -633,6 +868,7 @@ public class PromotionManagementService extends ServiceSuperclass {
     if (dto.promotionType == null || dto.scopeType == null) {
       throw new ConflictingException("Typ promocji i zakres są wymagane.");
     }
+    validateCampaignTargetSelection(dto);
     if (dto.validFrom == null || dto.validTo == null || dto.validTo.before(dto.validFrom)) {
       throw new ConflictingException("Podaj poprawny okres obowiązywania promocji.");
     }
@@ -660,6 +896,35 @@ public class PromotionManagementService extends ServiceSuperclass {
     campaign.setDiscountPercent(dto.promotionType == PromotionType.PERCENT ? dto.discountPercent : null);
     campaign.setDiscountAmountGross(dto.promotionType == PromotionType.AMOUNT
         ? dto.discountAmountGross : null);
+  }
+
+  private void applyManualCampaignTargets(PromotionCampaign campaign, PromotionTargetSetupIRO setup) {
+    if (campaign.getScopeType() != PromotionScopeType.MANUAL || setup == null) {
+      return;
+    }
+    for (Long sightEventId : new LinkedHashSet<>(setup.sightEventIds)) {
+      if (sightEventId != null) {
+        ensureCampaignSightEvent(campaign, getSightEvent(sightEventId),
+            PromotionCampaignSightEventSource.MANUAL, null);
+      }
+    }
+  }
+
+  private void validateCampaignTargetSelection(PromotionCampaignHelpdeskDTO dto) {
+    if (dto.scopeType == PromotionScopeType.GLOBAL) {
+      return;
+    }
+    if (dto.scopeType == PromotionScopeType.TAG && !hasItems(dto.tagIds)) {
+      throw new ConflictingException("Wybierz tag dla promocji.");
+    }
+    if (dto.scopeType == PromotionScopeType.MANUAL
+        && (dto.targetSetup == null || !hasItems(dto.targetSetup.sightEventIds))) {
+      throw new ConflictingException("Wybierz oferty dla promocji.");
+    }
+  }
+
+  private boolean hasItems(List<Long> items) {
+    return items != null && items.stream().anyMatch(Objects::nonNull);
   }
 
   private void applyCampaignTags(PromotionCampaign campaign, List<Long> tagIds) {
@@ -703,7 +968,7 @@ public class PromotionManagementService extends ServiceSuperclass {
 
   private List<String> normalizedCodes(List<String> rawCodes) {
     if (rawCodes == null) {
-      throw new ConflictingException("Lista kodow jest wymagana.");
+      throw new ConflictingException("Lista kodów jest wymagana.");
     }
     List<String> codes = rawCodes.stream()
         .filter(Objects::nonNull)
@@ -711,7 +976,7 @@ public class PromotionManagementService extends ServiceSuperclass {
         .filter(code -> !code.isBlank())
         .collect(Collectors.toList());
     if (codes.isEmpty()) {
-      throw new ConflictingException("Lista kodow jest pusta.");
+      throw new ConflictingException("Lista kodów jest pusta.");
     }
     Set<String> unique = new LinkedHashSet<>(codes);
     if (unique.size() != codes.size()) {
@@ -889,6 +1154,33 @@ public class PromotionManagementService extends ServiceSuperclass {
     dto.ticketPoolStatus = relation.getTicketPoolStatus();
     dto.createdAt = relation.getCreatedAt();
     dto.updatedAt = relation.getUpdatedAt();
+    return dto;
+  }
+
+  private PromotionTicketPoolTargetPreviewDTO targetPreviewDTO(PromotionCampaign campaign,
+      SightEvent sightEvent) {
+    PromotionCampaignSightEvent relation = findCampaignSightEvent(campaign, sightEvent);
+    PromotionTicketPoolTargetPreviewDTO dto = new PromotionTicketPoolTargetPreviewDTO();
+    dto.sightEventId = sightEvent.getId();
+    dto.sightEventName = sightEvent.getName();
+    dto.hptSightEventId = sightEvent.getHptId();
+    dto.sightId = sightEvent.getSight() != null ? sightEvent.getSight().getId() : null;
+    dto.sightName = sightEvent.getSight() != null ? sightEvent.getSight().getName() : null;
+    dto.partnerId = sightEvent.getPartner() != null ? sightEvent.getPartner().getId() : null;
+    dto.partnerName = sightEvent.getPartner() != null ? sightEvent.getPartner().getName() : null;
+    dto.alreadyInCampaign = relation != null;
+    dto.relationId = relation != null ? relation.getId() : null;
+    dto.activeInCampaign = relation != null ? relation.isActive() : null;
+    dto.hptAtnaId = relation != null ? relation.getHptAtnaId() : null;
+    dto.hptTicketDefinitionId = relation != null ? relation.getHptTicketDefinitionId() : null;
+    dto.hptTicketPoolDefinitionId = relation != null ? relation.getHptTicketPoolDefinitionId() : null;
+    if (relation != null) {
+      dto.ticketPoolStatus = relation.getTicketPoolStatus();
+    } else if (campaign.getPromotionType() == PromotionType.TICKET) {
+      dto.ticketPoolStatus = PromotionTicketPoolStatus.NOT_CREATED;
+    } else {
+      dto.ticketPoolStatus = PromotionTicketPoolStatus.NOT_REQUIRED;
+    }
     return dto;
   }
 

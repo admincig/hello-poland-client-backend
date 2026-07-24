@@ -6,7 +6,9 @@ import pl.hellopoland.rest.dto.PromotionCodeBatchHelpdeskDTO;
 import pl.hellopoland.rest.dto.PromotionCodeHelpdeskDTO;
 import pl.hellopoland.rest.dto.PromotionCodeImportIRO;
 import pl.hellopoland.rest.dto.PromotionCodeRedemptionHelpdeskDTO;
+import pl.hellopoland.rest.dto.PromotionCodeSetupIRO;
 import pl.hellopoland.rest.dto.PromotionTicketPoolGenerationIRO;
+import pl.hellopoland.rest.dto.PromotionTicketPoolTargetPreviewORO;
 import pl.hellopoland.service.PromotionManagementService;
 
 import jakarta.annotation.security.RolesAllowed;
@@ -68,6 +70,21 @@ public class PromotionManagementServiceHelpdeskAPI {
   }
 
   @RolesAllowed({"root", "admin"})
+  public List<PromotionCodeHelpdeskDTO> createCodes(Long campaignId, PromotionCodeSetupIRO iro) {
+    return service.createCodes(campaignId, iro);
+  }
+
+  @RolesAllowed({"root", "admin"})
+  public List<PromotionCodeHelpdeskDTO> replaceCodes(Long campaignId, PromotionCodeSetupIRO iro) {
+    return service.replaceCodes(campaignId, iro);
+  }
+
+  @RolesAllowed({"root", "admin"})
+  public String exportCodesCsv(Long campaignId) {
+    return service.exportCodesCsv(campaignId);
+  }
+
+  @RolesAllowed({"root", "admin"})
   public List<PromotionCodeBatchHelpdeskDTO> listBatches(Long campaignId) {
     return service.listBatches(campaignId);
   }
@@ -92,5 +109,11 @@ public class PromotionManagementServiceHelpdeskAPI {
   public PromotionCampaignHelpdeskDTO generateTicketPools(Long campaignId,
       PromotionTicketPoolGenerationIRO iro) {
     return service.generateTicketPools(campaignId, iro);
+  }
+
+  @RolesAllowed({"root", "admin"})
+  public PromotionTicketPoolTargetPreviewORO previewTicketPoolTargets(Long campaignId,
+      PromotionTicketPoolGenerationIRO iro) {
+    return service.previewTicketPoolTargets(campaignId, iro);
   }
 }

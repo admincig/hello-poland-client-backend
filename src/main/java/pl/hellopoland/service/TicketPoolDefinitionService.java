@@ -162,8 +162,8 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
 
   private HptSubject getCurrentSubject() {
     User logged = getLoggedUser();
-    if (logged.hasRole(Role.ADMIN)) {
-      return logged;
+    if (hasHelpdeskSystemRole(logged)) {
+      return getHelpdeskHptSubject();
     }
     return getCurrentPartner();
   }

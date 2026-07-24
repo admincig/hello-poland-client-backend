@@ -484,6 +484,11 @@ public class HelloTicket {
     if (statusCode != null && statusCode == 409) {
       return new ConflictingException(externalMessage, externalCode, e);
     }
+    if (statusCode != null && (statusCode == 401 || statusCode == 403)) {
+      return new ExternalSystemException(
+          "Brak autoryzacji w zewnetrznym systemie HelloTicket. Sprawdz token HPT.",
+          externalCode, statusCode, e);
+    }
 
     return new ExternalSystemException(externalMessage, externalCode, statusCode, e);
   }

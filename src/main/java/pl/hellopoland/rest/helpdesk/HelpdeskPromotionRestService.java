@@ -7,6 +7,8 @@ import pl.hellopoland.rest.dto.PromotionCodeHelpdeskDTO;
 import pl.hellopoland.rest.dto.PromotionCodeImportIRO;
 import pl.hellopoland.rest.dto.PromotionCodeRedemptionHelpdeskDTO;
 import pl.hellopoland.rest.dto.PromotionTicketPoolGenerationIRO;
+import pl.hellopoland.rest.dto.PromotionCodeSetupIRO;
+import pl.hellopoland.rest.dto.PromotionTicketPoolTargetPreviewORO;
 import pl.hellopoland.service.api.helpdesk.PromotionManagementServiceHelpdeskAPI;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -92,6 +94,30 @@ public class HelpdeskPromotionRestService {
   }
 
   @POST
+  @Path("/{id}/codes")
+  public List<PromotionCodeHelpdeskDTO> createCodes(@PathParam("id") Long id,
+      PromotionCodeSetupIRO iro) {
+    return service.createCodes(id, iro);
+  }
+
+  @PUT
+  @Path("/{id}/codes")
+  public List<PromotionCodeHelpdeskDTO> replaceCodes(@PathParam("id") Long id,
+      PromotionCodeSetupIRO iro) {
+    return service.replaceCodes(id, iro);
+  }
+
+  @GET
+  @Path("/{id}/codes/export")
+  @Produces("text/csv")
+  public Response exportCodes(@PathParam("id") Long id) {
+    String csv = service.exportCodesCsv(id);
+    return Response.ok(csv, "text/csv")
+        .header("Content-Disposition", "attachment; filename=\"promotion-" + id + "-codes.csv\"")
+        .build();
+  }
+
+  @POST
   @Path("/{id}/codes/import")
   public List<PromotionCodeHelpdeskDTO> importCodes(@PathParam("id") Long id,
       PromotionCodeImportIRO iro) {
@@ -122,5 +148,12 @@ public class HelpdeskPromotionRestService {
   public PromotionCampaignHelpdeskDTO generateTicketPools(@PathParam("id") Long id,
       PromotionTicketPoolGenerationIRO iro) {
     return service.generateTicketPools(id, iro);
+  }
+
+  @POST
+  @Path("/{id}/ticket-pools/preview")
+  public PromotionTicketPoolTargetPreviewORO previewTicketPoolTargets(@PathParam("id") Long id,
+      PromotionTicketPoolGenerationIRO iro) {
+    return service.previewTicketPoolTargets(id, iro);
   }
 }

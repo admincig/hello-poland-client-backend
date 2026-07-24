@@ -582,11 +582,11 @@ public class OrderService extends ServiceSuperclass {
         .orElseThrow(() -> new ResourceNotFoundException());
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     User loggedUser = getLoggedUser();
-    if (loggedUser.hasRole(Role.ADMIN)) {
+    if (hasHelpdeskSystemRole(loggedUser)) {
       if (recipientEmail != null) {
-        return hpt.sendTicketsCopyByAdmin(serialNumber, recipientEmail, loggedUser.getHptToken());
+        return hpt.sendTicketsCopyByAdmin(serialNumber, recipientEmail, getHelpdeskHptToken());
       }
-      return hpt.sendTicketsCopyByAdmin(serialNumber, loggedUser.getHptToken());
+      return hpt.sendTicketsCopyByAdmin(serialNumber, getHelpdeskHptToken());
     }
     return hpt.sendTicketsCopyByPartner(serialNumber, loggedUser.getPartner().getHptToken());
   }

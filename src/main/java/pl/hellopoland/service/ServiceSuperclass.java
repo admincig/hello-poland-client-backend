@@ -4,9 +4,14 @@ import pl.hellopoland.bo.ModelSuperclass;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Portal;
 import pl.hellopoland.bo.User;
+import pl.hellopoland.bo.HptSubject;
+import pl.hellopoland.bo.UserRole.Role;
 import pl.hellopoland.config.Entry;
 import pl.hellopoland.config.PagedCollectionConfig;
+import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
+
+import org.apache.commons.lang3.StringUtils;
 
 import jakarta.inject.Inject;
 import jakarta.interceptor.AroundInvoke;
@@ -118,6 +123,38 @@ public abstract class ServiceSuperclass {
 
   public Partner getLoggedPartner() {
     return getLoggedUser().getPartner();
+  }
+
+  public String getHelpdeskHptToken() {
+    String configuredToken = properties.getProperty("hpt.helpdesk.token");
+    if (StringUtils.isNotBlank(configuredToken)) {
+      return configuredToken.trim();
+    }
+
+    return em.createQuery(
+            "select distinct u from User u join u.roles r "
+                + "where u.deleted = false and u.blocked = false and u.hptToken is not null "
+                + "and r.role in (:roles)",
+            User.class)
+        .setParameter("roles", List.of(Role.ROOT, Role.ADMIN))
+        .getResultStream()
+        .filter(user -> StringUtils.isNotBlank(user.getHptToken()))
+        .sorted(Comparator.comparing((User user) -> !user.hasRole(Role.ROOT))
+            .thenComparing(User::getId))
+        .map(user -> user.getHptToken().trim())
+        .findFirst()
+        .orElseThrow(() -> new ConflictingException(
+            "Brak skonfigurowanego tokena administracyjnego HelloTicket."));
+  }
+
+  public HptSubject getHelpdeskHptSubject() {
+    return this::getHelpdeskHptToken;
+  }
+
+  protected boolean hasHelpdeskSystemRole(User user) {
+    return user != null && (user.hasRole(Role.ROOT) || user.hasRole(Role.ADMIN)
+        || user.hasRole(Role.SALESMAN) || user.hasRole(Role.HELPDESK_PARTNER_MANAGER)
+        || user.hasRole(Role.HELPDESK_CONTENT_MANAGER) || user.hasRole(Role.HELPDESK_SUPPORT));
   }
 
   @AroundInvoke

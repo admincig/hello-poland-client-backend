@@ -24,7 +24,7 @@ public class TicketTypeServiceHelpdeskAPI {
   public List<TicketTypeDTO> getList(Long partnerId) {
     accessService.requirePartnerAccess(partnerId != null ? partnerService.get(partnerId) : null);
     return service.getTicketTypes(
-        partnerId != null ? partnerService.get(partnerId) : service.getLoggedUser());
+        partnerId != null ? partnerService.get(partnerId) : service.getHelpdeskHptSubject());
   }
 
 }

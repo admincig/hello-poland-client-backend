@@ -163,7 +163,7 @@ public class HellopolandService extends ServiceSuperclass {
     // 4. creating a partner in hpt:
     Portal hpt = getPortal("Hello Ticket Cloud");
     var ht = new HelloTicket(hpt.getUrl());
-    var hptToken = getLoggedUser().getHptToken();
+    var hptToken = getHelpdeskHptToken();
     try {
       var hptPartner = ht.addPartner(partner, hptToken);
       if (hptPartner == null) {
@@ -174,6 +174,9 @@ public class HellopolandService extends ServiceSuperclass {
     } catch (ConflictingException e) {
       throw e;
     } catch (ExternalSystemException e) {
+      if (e.getStatusCode() != null && (e.getStatusCode() == 401 || e.getStatusCode() == 403)) {
+        throw new ConflictingException(e.getMessage(), e);
+      }
       throw new ConflictingException("Nie udalo sie stworzyc partnera w zewnetrznym systemie", e);
     } catch (Exception e) {
       throw new ConflictingException("Nie udalo sie stworzyc partnera w zewnetrznym systemie", e);

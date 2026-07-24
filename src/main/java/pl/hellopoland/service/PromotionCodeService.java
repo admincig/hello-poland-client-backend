@@ -84,7 +84,7 @@ public class PromotionCodeService extends ServiceSuperclass {
 
     CartContext cartContext = resolveCart(iro);
     if (cartContext.isEmpty() && campaign.getScopeType() != PromotionScopeType.GLOBAL) {
-      return invalid("CART_REQUIRED", "Dodaj bilety do koszyka, aby uĹĽyÄ‡ kodu.");
+      return invalid("CART_REQUIRED", "Dodaj bilety do koszyka, aby użyć kodu.");
     }
 
     PromotionCodeValidationORO scopeValidation = validateScope(campaign, cartContext.hpSightEventIds());
@@ -114,7 +114,7 @@ public class PromotionCodeService extends ServiceSuperclass {
       return result;
     }
 
-    return invalid("INVALID_PROMOTION_CONFIGURATION", "NieobsĹ‚ugiwany typ promocji.");
+    return invalid("INVALID_PROMOTION_CONFIGURATION", "Nieobsługiwany typ promocji.");
   }
 
   private PromotionCodeValidationORO fillTicketEffects(PromotionCodeValidationORO response,
@@ -123,7 +123,7 @@ public class PromotionCodeService extends ServiceSuperclass {
         findActiveCampaignSightEvents(campaign, cartContext.hpSightEventIds());
     if (campaignSightEvents.isEmpty()) {
       return invalid("PROMOTION_NOT_AVAILABLE_FOR_OFFER",
-          "Kod nie dziaĹ‚a dla wybranych biletĂłw.");
+          "Kod nie działa dla wybranych biletów.");
     }
 
     int requiredQuantity = valueOrDefault(campaign.getRequiredTicketQuantity(), 1);
@@ -149,7 +149,7 @@ public class PromotionCodeService extends ServiceSuperclass {
       TicketDefinitionDTO promotionalTicket = promotionalTickets.get(campaignSightEvent.getHptAtnaId());
       if (promotionalTicket == null) {
         return invalid("PROMOTION_TICKET_NOT_FOUND",
-            "Nie udaĹ‚o siÄ™ znaleĹşÄ‡ biletu promocyjnego.");
+            "Nie udało się znaleźć biletu promocyjnego.");
       }
 
       Effect effect = new Effect();
@@ -162,7 +162,7 @@ public class PromotionCodeService extends ServiceSuperclass {
 
     if (response.effects.isEmpty()) {
       return invalid("PROMOTION_CONDITIONS_NOT_MET",
-          "Koszyk nie speĹ‚nia warunkĂłw promocji.");
+          "Koszyk nie spełnia warunków promocji.");
     }
 
     return response;
@@ -191,7 +191,7 @@ public class PromotionCodeService extends ServiceSuperclass {
     List<Long> matchingCartItemIds = cartContext.cartItemIdsForHpSightEventIds(matchingSightEventIds);
     if (matchingCartItemIds.isEmpty()) {
       return invalid("PROMOTION_NOT_AVAILABLE_FOR_OFFER",
-          "Kod nie dziaĹ‚a dla wybranych biletĂłw.");
+          "Kod nie działa dla wybranych biletów.");
     }
 
     Target target = new Target();
@@ -225,10 +225,10 @@ public class PromotionCodeService extends ServiceSuperclass {
 
     Date now = new Date();
     if (campaign.getValidFrom().after(now)) {
-      return invalid("PROMOTION_NOT_STARTED", "Promocja jeszcze siÄ™ nie rozpoczÄ™Ĺ‚a.");
+      return invalid("PROMOTION_NOT_STARTED", "Promocja jeszcze się nie rozpoczęła.");
     }
     if (campaign.getValidTo().before(now)) {
-      return invalid("PROMOTION_EXPIRED", "Promocja juĹĽ siÄ™ zakoĹ„czyĹ‚a.");
+      return invalid("PROMOTION_EXPIRED", "Promocja już się zakończyła.");
     }
 
     return PromotionCodeValidationORO.valid();
@@ -237,7 +237,7 @@ public class PromotionCodeService extends ServiceSuperclass {
   private PromotionCodeValidationORO validateLimits(PromotionCampaign campaign, PromotionCode code) {
     if (isLimitReached(campaign.getGlobalLimit(), campaign.getReservedRedemptionsCount(),
         campaign.getUsedRedemptionsCount())) {
-      return invalid("PROMOTION_LIMIT_REACHED", "SkoĹ„czyĹ‚a siÄ™ pula promocji.");
+      return invalid("PROMOTION_LIMIT_REACHED", "Skończyła się pula promocji.");
     }
 
     Integer codeLimit = code.getMaxRedemptions() != null
@@ -245,7 +245,7 @@ public class PromotionCodeService extends ServiceSuperclass {
         : campaign.getCodeLimit();
     if (isLimitReached(codeLimit, code.getReservedRedemptionsCount(),
         code.getUsedRedemptionsCount())) {
-      return invalid("CODE_LIMIT_REACHED", "Kod zostaĹ‚ juĹĽ wykorzystany.");
+      return invalid("CODE_LIMIT_REACHED", "Kod został już wykorzystany.");
     }
 
     return PromotionCodeValidationORO.valid();
@@ -265,13 +265,13 @@ public class PromotionCodeService extends ServiceSuperclass {
     if (campaign.getScopeType() == PromotionScopeType.GLOBAL) {
       if (campaign.getPromotionType() == PromotionType.TICKET) {
         return invalid("INVALID_PROMOTION_CONFIGURATION",
-            "Promocja biletowa nie moĹĽe byÄ‡ globalna.");
+            "Promocja biletowa nie może być globalna.");
       }
       return PromotionCodeValidationORO.valid();
     }
 
     if (sightEventIds.isEmpty()) {
-      return invalid("CART_REQUIRED", "Dodaj bilety do koszyka, aby uĹĽyÄ‡ kodu.");
+      return invalid("CART_REQUIRED", "Dodaj bilety do koszyka, aby użyć kodu.");
     }
 
     Long matchingSightEventsCount = em.createQuery(
@@ -286,7 +286,7 @@ public class PromotionCodeService extends ServiceSuperclass {
 
     if (matchingSightEventsCount == 0) {
       return invalid("PROMOTION_NOT_AVAILABLE_FOR_OFFER",
-          "Kod nie dziaĹ‚a dla wybranych biletĂłw.");
+          "Kod nie działa dla wybranych biletów.");
     }
 
     return PromotionCodeValidationORO.valid();
@@ -430,12 +430,12 @@ public class PromotionCodeService extends ServiceSuperclass {
 
   private PromotionCodeValidationORO invalidForCodeStatus(PromotionCodeStatus status) {
     if (status == PromotionCodeStatus.USED) {
-      return invalid("CODE_ALREADY_USED", "Kod zostaĹ‚ juĹĽ wykorzystany.");
+      return invalid("CODE_ALREADY_USED", "Kod został już wykorzystany.");
     }
     if (status == PromotionCodeStatus.RESERVED) {
       return invalid("CODE_RESERVED", "Kod jest obecnie zarezerwowany.");
     }
-    return invalid("CODE_DISABLED", "Kod zostaĹ‚ wyĹ‚Ä…czony.");
+    return invalid("CODE_DISABLED", "Kod został wyłączony.");
   }
 
   private PromotionCodeValidationORO invalid(String errorCode, String message) {

@@ -78,7 +78,7 @@ public class TicketDefinitionServiceHelpdeskAPI {
   }
 
   private pl.hellopoland.bo.HptSubject getSubject(Long partnerId) {
-    return partnerId != null ? partnerService.get(partnerId) : service.getLoggedUser();
+    return partnerId != null ? partnerService.get(partnerId) : service.getHelpdeskHptSubject();
   }
 
 }

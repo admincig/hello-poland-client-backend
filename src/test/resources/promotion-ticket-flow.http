@@ -1,5 +1,5 @@
 ### Manualny scenariusz regresyjny: promocja TICKET
-### Uzupełnij baseUrl, tokeny i ID zgodnie ze środowiskiem testowym.
+### Uzupelnij baseUrl, tokeny i ID zgodnie ze srodowiskiem testowym.
 
 @baseUrl = https://api.hello-poland.pl/v1
 @helpdeskToken = HELP_DESK_JWT
@@ -8,12 +8,11 @@
 @normalAtnaId = 2055
 @promoAtnaId = 3001
 @sightEventId = 411
-@campaignSightEventId = 1
 @code = VISA-TEST-001
 @reservationToken = TOKEN_Z_VALIDATE_CODE
 @orderHash = HASH_Z_POST_MARKET_ORDERS
 
-### 1. Helpdesk tworzy kampanię TICKET
+### 1. Helpdesk tworzy kampanie TICKET jako DRAFT
 POST {{baseUrl}}/helpdesk/promotions
 Authorization: Bearer {{helpdeskToken}}
 Content-Type: application/json
@@ -22,16 +21,35 @@ Content-Type: application/json
   "name": "Promocja VISA test",
   "promotionType": "TICKET",
   "scopeType": "MANUAL",
+  "status": "DRAFT",
   "validFrom": "2026-08-01T00:00:00",
   "validTo": "2026-08-31T23:59:59",
   "globalLimit": 2000,
   "codeLimit": 1,
   "requiredTicketQuantity": 1,
-  "grantedTicketQuantity": 1,
-  "codeSetup": {
-    "codeType": "ONE_TIME",
-    "codes": ["{{code}}"]
-  },
+  "grantedTicketQuantity": 1
+}
+
+### 1a. Helpdesk dodaje/generuje kody dla kampanii
+POST {{baseUrl}}/helpdesk/promotions/{{campaignId}}/codes
+Authorization: Bearer {{helpdeskToken}}
+Content-Type: application/json
+
+{
+  "codeType": "ONE_TIME",
+  "codes": ["{{code}}"]
+}
+
+### 1b. Helpdesk opcjonalnie eksportuje kody kampanii do CSV
+GET {{baseUrl}}/helpdesk/promotions/{{campaignId}}/codes/export
+Authorization: Bearer {{helpdeskToken}}
+
+### 1c. Helpdesk sprawdza oferty wybrane do generowania pul
+POST {{baseUrl}}/helpdesk/promotions/{{campaignId}}/ticket-pools/preview
+Authorization: Bearer {{helpdeskToken}}
+Content-Type: application/json
+
+{
   "targetSetup": {
     "sightEventIds": [{{sightEventId}}]
   },
@@ -43,7 +61,33 @@ Content-Type: application/json
   }
 }
 
-### 2. Portal waliduje kod i rezerwuje użycie
+### 1d. Helpdesk generuje pule promocyjne
+POST {{baseUrl}}/helpdesk/promotions/{{campaignId}}/ticket-pools/generate
+Authorization: Bearer {{helpdeskToken}}
+Content-Type: application/json
+
+{
+  "targetSetup": {
+    "sightEventIds": [{{sightEventId}}]
+  },
+  "ticketPoolSetup": {
+    "ticketPrice": 100,
+    "availableTicketsNumber": 10,
+    "wholeDay": true,
+    "isCyclic": true
+  }
+}
+
+### 1e. Helpdesk uruchamia kampanie po akceptacji
+PATCH {{baseUrl}}/helpdesk/promotions/{{campaignId}}/status
+Authorization: Bearer {{helpdeskToken}}
+Content-Type: application/json
+
+{
+  "status": "ACTIVE"
+}
+
+### 2. Portal waliduje kod i rezerwuje uzycie
 POST {{baseUrl}}/market/promotions/validate-code
 Authorization: Bearer {{marketToken}}
 Content-Type: application/json
@@ -58,7 +102,7 @@ Content-Type: application/json
   ]
 }
 
-### 3. Portal składa zamówienie standardową usługą, już z biletem promocyjnym
+### 3. Portal sklada zamowienie standardowa usluga, juz z biletem promocyjnym
 POST {{baseUrl}}/market/orders
 Authorization: Bearer {{marketToken}}
 Content-Type: application/json
@@ -85,15 +129,15 @@ Content-Type: application/json
   }
 }
 
-### 4a. Helpdesk może ręcznie potwierdzić zamówienie na testach
+### 4a. Helpdesk moze recznie potwierdzic zamowienie na testach
 POST {{baseUrl}}/helpdesk/orders/{{orderHash}}/sudoAck
 Authorization: Bearer {{helpdeskToken}}
 
-### 4b. Po potwierdzeniu użycie kodu powinno mieć status USED
+### 4b. Po potwierdzeniu uzycie kodu powinno miec status USED
 GET {{baseUrl}}/helpdesk/promotions/{{campaignId}}/redemptions
 Authorization: Bearer {{helpdeskToken}}
 
-### 5. Wariant negatywny: ponowna walidacja kodu jednorazowego powinna zwrócić INVALID/CODE_ALREADY_USED
+### 5. Wariant negatywny: ponowna walidacja kodu jednorazowego powinna zwrocic INVALID/CODE_ALREADY_USED
 POST {{baseUrl}}/market/promotions/validate-code
 Authorization: Bearer {{marketToken}}
 Content-Type: application/json
