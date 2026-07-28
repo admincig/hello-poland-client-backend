@@ -41,6 +41,8 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
   private String phone;
   @Embedded
   private Location location;
+  @Column(name = "google_place_id", columnDefinition = "text")
+  private String googlePlaceId;
   @ManyToOne(fetch = FetchType.LAZY)
   private Partner partner;
   private boolean active = true;
@@ -149,6 +151,14 @@ public class Sight extends ModelSuperclass implements Located, Imaged, Translate
   @Override
   public void setLocation(Location sightLocation) {
     this.location = sightLocation;
+  }
+
+  public String getGooglePlaceId() {
+    return googlePlaceId;
+  }
+
+  public void setGooglePlaceId(String googlePlaceId) {
+    this.googlePlaceId = googlePlaceId;
   }
 
   public boolean isActive() {

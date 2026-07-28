@@ -27,6 +27,7 @@ public class DtoMapper {
     target.setDescription(source.description);
     target.setEmail(source.email);
     target.setPhone(source.phone);
+    target.setGooglePlaceId(source.googlePlaceId);
     target.setScore(source.score);
     if (source.defaultLanguage != null) {
       target
@@ -88,6 +89,7 @@ public class DtoMapper {
     dto.location = ofNullable(bo.getLocation()).map(DtoMapper::getDTO).orElse(null);
     dto.email = bo.getEmail();
     dto.phone = bo.getPhone();
+    dto.googlePlaceId = bo.getGooglePlaceId();
     dto.score = bo.getScore();
     dto.blocked = bo.isBlocked();
     dto.published = bo.isPublished();
