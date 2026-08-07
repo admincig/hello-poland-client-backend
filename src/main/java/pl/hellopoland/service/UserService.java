@@ -35,6 +35,7 @@ import org.apache.commons.lang3.StringUtils;
 @LocalBean
 @Stateless
 public class UserService extends ServiceSuperclass {
+  private static final String ACCOUNT_EMAIL_SENDER = "Hello Poland";
   private static final String USHER_EMAIL_MATCHES_PARTNER_EMAIL_MESSAGE =
       "Podaj inny adres e-mail niż ten, którym logujesz się do profilu Partnera.";
   private static final String USHER_EMAIL_ALREADY_USED_AS_LOGIN_MESSAGE =
@@ -773,7 +774,7 @@ public class UserService extends ServiceSuperclass {
     return user;
   }
 
-  private boolean isHelpdeskUser(User user) {
+  public boolean isHelpdeskUser(User user) {
     return user != null && hasAnyRole(user, HELPDESK_USER_ROLES.toArray(new Role[0]));
   }
 
@@ -949,6 +950,10 @@ public class UserService extends ServiceSuperclass {
   }
 
     public void createPasswordResetToken(User user, String token) {
+        createPasswordResetToken(user, token, "portal.url");
+    }
+
+    public void createPasswordResetToken(User user, String token, String portalUrlProperty) {
         int ttl = Integer.parseInt(
                 properties.getProperty("password.reset.token.ttl.minutes", "30")
         );
@@ -963,8 +968,8 @@ public class UserService extends ServiceSuperclass {
         em.persist(ut);
 
         String portalUrl = properties.getProperty(
-                "portal.url",
-                "https://api.hello-poland.pl"
+                portalUrlProperty,
+                properties.getProperty("portal.url", "https://api.hello-poland.pl")
         );
 
         String resetUrl = portalUrl + "/reset-password?token=" + token;
@@ -982,12 +987,13 @@ public class UserService extends ServiceSuperclass {
         body = body.replace("\\n", System.lineSeparator());
 
         try {
-            emailService.sendEmail(
+            emailService.sendHtmlEmail(
                     new Email(
                             user.getEmail(),
                             subject,
                             body
-                    )
+                    ),
+                    ACCOUNT_EMAIL_SENDER
             );
         } catch (Exception e) {
             logger.log(System.Logger.Level.ERROR,
@@ -1069,7 +1075,8 @@ public class UserService extends ServiceSuperclass {
 
         try {
             emailService.sendEmail(
-                    new Email(user.getEmail(), subject, body)
+                    new Email(user.getEmail(), subject, body),
+                    ACCOUNT_EMAIL_SENDER
             );
         } catch (Exception e) {
             logger.log(System.Logger.Level.ERROR,

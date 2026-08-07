@@ -7,6 +7,7 @@ import pl.hellopoland.bo.PromotionCodeRedemption;
 import pl.hellopoland.bo.Order;
 import pl.hellopoland.bo.OrderEntry;
 import pl.hellopoland.bo.SightEvent;
+import pl.hellopoland.bo.Discount;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.enums.PromotionCodeStatus;
 import pl.hellopoland.enums.PromotionCodeRedemptionStatus;
@@ -17,6 +18,7 @@ import pl.hellopoland.enums.PromotionTicketPoolStatus;
 import pl.hellopoland.enums.PromotionType;
 import pl.hellopoland.rest.dto.PromotionCodeValidationIRO;
 import pl.hellopoland.rest.dto.PromotionCodeValidationORO;
+import pl.hellopoland.rest.dto.PromotionCodeReservationReleaseIRO;
 import pl.hellopoland.rest.dto.PromotionCodeValidationORO.Effect;
 import pl.hellopoland.rest.dto.PromotionCodeValidationORO.Item;
 import pl.hellopoland.rest.dto.PromotionCodeValidationORO.PoolRef;
@@ -31,6 +33,8 @@ import jakarta.ejb.LocalBean;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.NoResultException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -466,6 +470,7 @@ public class PromotionCodeService extends ServiceSuperclass {
 
     redemption.setOrder(order);
     redemption.setOrderEntry(findMatchingOrderEntry(redemption, order));
+    applyDiscountPromotion(redemption, order);
     redemption.setUpdatedAt(now);
   }
 
@@ -484,6 +489,19 @@ public class PromotionCodeService extends ServiceSuperclass {
     Date now = new Date();
     findReservedRedemptionsForOrder(order).forEach(redemption ->
         releaseReservation(redemption, PromotionCodeRedemptionStatus.RELEASED, now));
+  }
+
+  public void releaseReservation(PromotionCodeReservationReleaseIRO iro) {
+    if (iro == null || iro.reservationToken == null || iro.reservationToken.isBlank()) {
+      return;
+    }
+
+    PromotionCodeRedemption redemption = findRedemptionByToken(iro.reservationToken);
+    if (redemption == null || redemption.getOrder() != null) {
+      return;
+    }
+
+    releaseReservation(redemption, PromotionCodeRedemptionStatus.RELEASED, new Date());
   }
 
   public void releaseExpiredReservations() {
@@ -558,6 +576,160 @@ public class PromotionCodeService extends ServiceSuperclass {
         .findFirst()
         .orElseThrow(() -> new ConflictingException(
             "W zamówieniu brakuje biletu promocyjnego wymaganego przez kod."));
+  }
+
+  private void applyDiscountPromotion(PromotionCodeRedemption redemption, Order order) {
+    PromotionType promotionType = redemption.getPromotionTypeSnapshot();
+    if (promotionType != PromotionType.PERCENT && promotionType != PromotionType.AMOUNT) {
+      return;
+    }
+
+    List<OrderEntry> entries = findDiscountableOrderEntries(redemption, order);
+    if (entries.isEmpty()) {
+      throw new ConflictingException("Kod nie działa dla biletów znajdujących się w zamówieniu.");
+    }
+
+    if (promotionType == PromotionType.PERCENT) {
+      applyPercentDiscount(redemption, entries);
+    }
+    if (promotionType == PromotionType.AMOUNT) {
+      applyAmountDiscount(redemption, entries);
+    }
+  }
+
+  private List<OrderEntry> findDiscountableOrderEntries(PromotionCodeRedemption redemption,
+      Order order) {
+    StringBuilder query = new StringBuilder()
+        .append("select orderEntry from OrderEntry orderEntry ")
+        .append("join orderEntry.dateEntry dateEntry ")
+        .append("join dateEntry.sightEntry sightEntry ")
+        .append("where sightEntry.order = :order ");
+
+    if (redemption.getPromotionCampaign().getScopeType() != PromotionScopeType.GLOBAL) {
+      query
+          .append("and exists (")
+          .append("select pcse from PromotionCampaignSightEvent pcse ")
+          .append("where pcse.promotionCampaign = :campaign ")
+          .append("and pcse.sightEvent = sightEntry.sightEvent ")
+          .append("and pcse.active is true")
+          .append(") ");
+    }
+
+    var typedQuery = em.createQuery(query.toString(), OrderEntry.class)
+        .setParameter("order", order);
+
+    if (redemption.getPromotionCampaign().getScopeType() != PromotionScopeType.GLOBAL) {
+      typedQuery.setParameter("campaign", redemption.getPromotionCampaign());
+    }
+
+    return typedQuery.getResultList().stream()
+        .filter(entry -> entry.getQuantity() != null && entry.getQuantity() > 0)
+        .collect(Collectors.toList());
+  }
+
+  private void applyPercentDiscount(PromotionCodeRedemption redemption, List<OrderEntry> entries) {
+    BigDecimal percent = redemption.getDiscountPercent();
+    if (percent == null || percent.compareTo(BigDecimal.ZERO) <= 0) {
+      throw new ConflictingException("Nieprawidłowa konfiguracja rabatu procentowego.");
+    }
+
+    for (OrderEntry entry : entries) {
+      int currentPrice = entry.getRealPrice();
+      int discountAmount = BigDecimal.valueOf(currentPrice)
+          .multiply(percent)
+          .divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP)
+          .intValue();
+
+      setPromotionalPrice(entry, Math.max(0, currentPrice - discountAmount));
+    }
+  }
+
+  private void applyAmountDiscount(PromotionCodeRedemption redemption, List<OrderEntry> entries) {
+    Integer amountGross = redemption.getDiscountAmountGross();
+    if (amountGross == null || amountGross <= 0) {
+      throw new ConflictingException("Nieprawidłowa konfiguracja rabatu kwotowego.");
+    }
+
+    int remainingDiscount = Math.min(amountGross, entries.stream()
+        .mapToInt(OrderEntry::getSum)
+        .sum());
+
+    for (OrderEntry entry : new ArrayList<>(entries)) {
+      if (remainingDiscount <= 0) {
+        break;
+      }
+
+      int currentPrice = entry.getRealPrice();
+      int quantity = entry.getQuantity();
+      int entryTotal = currentPrice * quantity;
+
+      if (remainingDiscount >= entryTotal) {
+        setPromotionalPrice(entry, 0);
+        remainingDiscount -= entryTotal;
+        continue;
+      }
+
+      int freeUnits = currentPrice > 0 ? remainingDiscount / currentPrice : 0;
+      int unitRemainder = currentPrice > 0 ? remainingDiscount % currentPrice : 0;
+
+      if (freeUnits > 0) {
+        OrderEntry freeEntry = splitOrderEntry(entry, freeUnits);
+        setPromotionalPrice(freeEntry, 0);
+        remainingDiscount -= currentPrice * freeUnits;
+      }
+
+      if (unitRemainder > 0 && entry.getQuantity() > 0) {
+        OrderEntry partiallyDiscountedEntry = splitOrderEntry(entry, 1);
+        setPromotionalPrice(partiallyDiscountedEntry, currentPrice - unitRemainder);
+        remainingDiscount = 0;
+      }
+    }
+  }
+
+  private void setPromotionalPrice(OrderEntry entry, int price) {
+    Discount discount = entry.getDiscount();
+    if (discount == null) {
+      discount = new Discount();
+      entry.setDiscount(discount);
+    }
+    discount.setPrice(price);
+  }
+
+  private OrderEntry splitOrderEntry(OrderEntry source, int quantity) {
+    if (quantity <= 0 || source.getQuantity() == null || quantity > source.getQuantity()) {
+      throw new ConflictingException("Nie udało się rozdzielić rabatu promocyjnego na bilety.");
+    }
+
+    if (quantity == source.getQuantity()) {
+      return source;
+    }
+
+    source.setQuantity(source.getQuantity() - quantity);
+
+    OrderEntry copy = new OrderEntry();
+    copy.setDateEntry(source.getDateEntry());
+    copy.setQuantity(quantity);
+    copy.setUnitPrice(source.getUnitPrice());
+    copy.setName(source.getName());
+    copy.setExternalDefinitionId(source.getExternalDefinitionId());
+    copy.setPoolId(source.getPoolId());
+    copy.setPartnerAffiliateCode(source.getPartnerAffiliateCode());
+    copy.setDiscount(copyDiscount(source.getDiscount()));
+    em.persist(copy);
+
+    return copy;
+  }
+
+  private Discount copyDiscount(Discount source) {
+    if (source == null) {
+      return null;
+    }
+
+    Discount copy = new Discount();
+    copy.setPrice(source.getPrice());
+    copy.setHplPart(source.getHplPart());
+    copy.setPartnerPart(source.getPartnerPart());
+    return copy;
   }
 
   private void reserve(PromotionCode code, PromotionCampaign campaign,

@@ -8,7 +8,7 @@ public class PartnerPagedCollectionConfig extends PagedCollectionConfig<Partner>
 
   @Override
   public String joins() {
-    return "left join fetch e.mainImage mi";
+    return "left join fetch e.mainImage mi left join fetch e.address a";
   }
 
   public void setBlocked(boolean blocked) {

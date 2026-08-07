@@ -32,6 +32,21 @@ public class EmailService extends ServiceSuperclass {
 
   public void sendEmail(Email parameterObject)
       throws MessagingException, UnsupportedEncodingException {
+    sendEmail(parameterObject, MAIL_PERSONAL, false);
+  }
+
+  public void sendEmail(Email parameterObject, String senderName)
+      throws MessagingException, UnsupportedEncodingException {
+    sendEmail(parameterObject, senderName, false);
+  }
+
+  public void sendHtmlEmail(Email parameterObject, String senderName)
+      throws MessagingException, UnsupportedEncodingException {
+    sendEmail(parameterObject, senderName, true);
+  }
+
+  private void sendEmail(Email parameterObject, String senderName, boolean html)
+      throws MessagingException, UnsupportedEncodingException {
     if (!Boolean.TRUE.toString().equals(System.getProperty(MAIL_SMTP_ENABLED_PROPERTY))) {
       logger.log(Level.WARNING, "SMTP Integration is disabled");
       logger.log(Level.INFO, "Email:\n"
@@ -46,11 +61,15 @@ public class EmailService extends ServiceSuperclass {
     var message = new MimeMessage(session);
     try {
       message
-          .setFrom(new InternetAddress(System.getProperty(MAIL_USERNAME_PROPERTY), MAIL_PERSONAL));
+          .setFrom(new InternetAddress(System.getProperty(MAIL_USERNAME_PROPERTY), senderName));
       message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(parameterObject.recipientEmail));
       message.setSubject(parameterObject.subject, "UTF-8");
       var mimeBodyPart = new MimeBodyPart();
-      mimeBodyPart.setText(parameterObject.msg, "UTF-8");
+      if (html) {
+        mimeBodyPart.setContent(parameterObject.msg, "text/html; charset=UTF-8");
+      } else {
+        mimeBodyPart.setText(parameterObject.msg, "UTF-8");
+      }
       var multipart = new MimeMultipart();
       multipart.addBodyPart(mimeBodyPart);
       message.setContent(multipart);

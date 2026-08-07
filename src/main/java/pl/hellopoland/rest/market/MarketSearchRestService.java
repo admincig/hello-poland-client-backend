@@ -35,6 +35,7 @@ public class MarketSearchRestService {
       @QueryParam("categories") Long[] categoryIds,
       @QueryParam("tags") Long[] tagIds,
       @QueryParam("city") String city,
+      @QueryParam("voivodeship") String voivodeship,
       @QueryParam("fromDate") @DateFormat Date fromDate,
       @QueryParam("toDate") @DateFormat Date toDate,
       @QueryParam("minPrice") Integer minPrice,
@@ -46,6 +47,7 @@ public class MarketSearchRestService {
     seConfig.setCategoriesIdsArray(categoryIds);
     seConfig.setTagsIdsArray(tagIds);
     seConfig.setCity(city);
+    seConfig.setVoivodeship(voivodeship);
     if (fromDate == null) {
       fromDate = new Date();
     }
@@ -57,8 +59,9 @@ public class MarketSearchRestService {
   @GET
   @Path("/filters")
   public FilterDTO filters(
+      @QueryParam("voivodeship") String voivodeship,
       @HeaderParam("Content-Language") String contentLanguage) {
-    return service.filters(RestService.parseLang(contentLanguage));
+    return service.filters(RestService.parseLang(contentLanguage), voivodeship);
   }
 
     @GET

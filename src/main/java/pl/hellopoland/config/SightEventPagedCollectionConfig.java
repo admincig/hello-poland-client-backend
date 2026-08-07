@@ -129,9 +129,15 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
   }
 
   public void setCity(String city) {
-    if (city != null) {
-        addCondition("city", city, "lower(e.location.city)=lower(:city)");
+    if (city != null && !city.isBlank()) {
+      addCondition("city", city, "lower(e.location.city)=lower(:city)");
+    }
+  }
 
+  public void setVoivodeship(String voivodeship) {
+    if (voivodeship != null && !voivodeship.isBlank()) {
+      addCondition("voivodeship", voivodeship.strip(),
+          "lower(trim(e.location.voivodeship))=lower(:voivodeship)");
     }
   }
 

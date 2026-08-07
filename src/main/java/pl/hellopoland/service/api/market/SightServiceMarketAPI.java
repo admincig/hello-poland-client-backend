@@ -192,6 +192,25 @@ public class SightServiceMarketAPI {
     Map<Long, List<SightEvent>> grouped =
         hptClient.getSightEventsInDateRange(sightEvents, null, null).stream()
             .collect(Collectors.groupingBy(se -> se.getSight().getId()));
+
+    List<SightEvent> availableSightEvents = grouped.values().stream()
+        .flatMap(Collection::stream)
+        .collect(Collectors.toList());
+    List<pl.hellopoland.dto.SightEventDTO> sightEventDtos = availableSightEvents.stream()
+        .map(DtoMapper::getDTO)
+        .collect(Collectors.toList());
+    sightEventService.fetchTicketPoolDefinitions(availableSightEvents, sightEventDtos, false, true);
+    Map<Long, pl.hellopoland.dto.SightEventDTO> sightEventDtosById = sightEventDtos.stream()
+        .collect(Collectors.toMap(dto -> dto.id, dto -> dto));
+
+    availableSightEvents.forEach(sightEvent -> {
+      pl.hellopoland.dto.SightEventDTO dto = sightEventDtosById.get(sightEvent.getId());
+      if (dto != null) {
+        sightEvent.setMinPrice(dto.minPrice);
+        sightEvent.setMinDiscountPrice(dto.minDiscountPrice);
+      }
+    });
+
     for (Sight s : items) {
       s.setSightEvents(grouped.get(s.getId()));
     }

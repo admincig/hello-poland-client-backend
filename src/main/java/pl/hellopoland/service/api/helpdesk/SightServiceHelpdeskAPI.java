@@ -4,6 +4,8 @@ import pl.hellopoland.bo.Category;
 import pl.hellopoland.bo.Partner;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEventCategory;
+import pl.hellopoland.bo.SightEventTag;
+import pl.hellopoland.bo.Tag;
 import pl.hellopoland.config.SightPagedCollectionConfig;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.enums.LanguageVersion;
@@ -12,6 +14,8 @@ import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.HelpdeskAccessService;
 import pl.hellopoland.service.SightService;
 import pl.hellopoland.service.PartnerService;
+import pl.hellopoland.service.CategoryService;
+import pl.hellopoland.service.TagService;
 import pl.hellopoland.service.TranslationService;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.PagedEntityCollection;
@@ -19,6 +23,7 @@ import pl.hellopoland.util.PagedEntityCollection;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -32,6 +37,10 @@ public class SightServiceHelpdeskAPI {
   @Inject
   private PartnerService partnerService;
   @Inject
+  private CategoryService categoryService;
+  @Inject
+  private TagService tagService;
+  @Inject
   private HelpdeskAccessService accessService;
 
   @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager",
@@ -41,7 +50,22 @@ public class SightServiceHelpdeskAPI {
     config.onlyActive();
     accessService.applySightScope(config);
     PagedEntityCollection<Sight> bos = service.getList(config, language);
-    var dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
+    Map<Long, Set<Category>> categoriesBySight = categoryService.getForSights(bos.items).stream()
+        .collect(Collectors.groupingBy(
+            relation -> relation.getSightEvent().getSight().getId(),
+            Collectors.mapping(SightEventCategory::getCategory, Collectors.toSet())));
+    Map<Long, Set<Tag>> tagsBySight = tagService.getForSights(bos.items).stream()
+        .collect(Collectors.groupingBy(
+            relation -> relation.getSightEvent().getSight().getId(),
+            Collectors.mapping(SightEventTag::getTag, Collectors.toSet())));
+    var dtos = bos.items.stream().map(bo -> {
+      SightDTO dto = DtoMapper.getDTO(bo);
+      dto.categories = categoriesBySight.getOrDefault(bo.getId(), Set.of()).stream()
+          .map(DtoMapper::getDTO).collect(Collectors.toSet());
+      dto.tags = tagsBySight.getOrDefault(bo.getId(), Set.of()).stream()
+          .map(DtoMapper::getDTO).collect(Collectors.toSet());
+      return dto;
+    }).collect(Collectors.toList());
     return new PagedCollection<>(dtos, bos.config);
   }
 

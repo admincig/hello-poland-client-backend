@@ -4,6 +4,7 @@ import pl.hellopoland.bo.Category;
 import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.SightEventCategory;
+import pl.hellopoland.bo.Sight;
 import pl.hellopoland.config.CategoryPagedCollectionConfig;
 import pl.hellopoland.dto.CategoryDTO;
 import pl.hellopoland.enums.LanguageVersion;
@@ -115,7 +116,7 @@ public class CategoryService extends ServiceSuperclass {
     tService.deleteEntityTranslations(get(id), lang);
   }
 
-  public List<SightEventCategory> getFor(List<SightEvent> sightEvents) {
+  public List<SightEventCategory> getFor(Collection<SightEvent> sightEvents) {
     if (sightEvents.isEmpty()) {
       return Collections.emptyList();
     }
@@ -123,6 +124,17 @@ public class CategoryService extends ServiceSuperclass {
         .createQuery("from SightEventCategory where sightEvent in (:sightEvents)",
             SightEventCategory.class)
         .setParameter("sightEvents", sightEvents).getResultList();
+  }
+
+  public List<SightEventCategory> getForSights(Collection<Sight> sights) {
+    if (sights.isEmpty()) {
+      return Collections.emptyList();
+    }
+    return em
+        .createQuery("from SightEventCategory where sightEvent.sight in (:sights) "
+            + "and sightEvent.active = true",
+            SightEventCategory.class)
+        .setParameter("sights", sights).getResultList();
   }
 
   public Category uploadIcon(Long id, byte[] bytes, String extension) {

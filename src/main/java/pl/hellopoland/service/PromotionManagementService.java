@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -85,7 +86,7 @@ public class PromotionManagementService extends ServiceSuperclass {
     campaign.setCreatedBy(getLoggedUser());
     em.persist(campaign);
     applyCampaignTags(campaign, dto.tagIds);
-    applyManualCampaignTargets(campaign, dto.targetSetup);
+    materializeCampaignTargets(campaign, dto.targetSetup, null, false);
     if (dto.codeSetup != null) {
       createInitialCodes(campaign, dto.codeSetup);
     }
@@ -97,6 +98,35 @@ public class PromotionManagementService extends ServiceSuperclass {
       campaign.setStatus(PromotionStatus.ACTIVE);
     }
     return campaignDetailsDTO(campaign);
+  }
+
+  public PromotionTicketPoolTargetPreviewORO previewTargets(PromotionCampaignHelpdeskDTO dto) {
+    if (dto == null || dto.scopeType == null || dto.scopeType == PromotionScopeType.GLOBAL) {
+      PromotionTicketPoolTargetPreviewORO empty = new PromotionTicketPoolTargetPreviewORO();
+      empty.sightEvents = List.of();
+      empty.count = 0;
+      return empty;
+    }
+    Set<Long> sightEventIds = new LinkedHashSet<>();
+    if (hasTargetSelection(dto.targetSetup)) {
+      addAll(sightEventIds, dto.targetSetup.sightEventIds);
+      addSightEventsForSights(sightEventIds, dto.targetSetup.sightIds);
+      addSightEventsForPartners(sightEventIds, dto.targetSetup.partnerIds);
+      addSightEventsForTags(sightEventIds, dto.targetSetup.tagIds);
+    } else if (dto.scopeType == PromotionScopeType.TAG) {
+      addSightEventsForTags(sightEventIds, dto.tagIds);
+    }
+
+    List<SightEvent> sightEvents = sightEventIds.isEmpty()
+        ? List.of()
+        : getActiveHptSightEvents(sightEventIds);
+    PromotionType promotionType = dto.promotionType != null ? dto.promotionType : PromotionType.PERCENT;
+    PromotionTicketPoolTargetPreviewORO oro = new PromotionTicketPoolTargetPreviewORO();
+    oro.sightEvents = sightEvents.stream()
+        .map(sightEvent -> targetPreviewDTO(promotionType, sightEvent, null))
+        .collect(Collectors.toList());
+    oro.count = oro.sightEvents.size();
+    return oro;
   }
 
   public PromotionCampaignHelpdeskDTO updateCampaign(Long id, PromotionCampaignHelpdeskDTO dto) {
@@ -112,6 +142,9 @@ public class PromotionManagementService extends ServiceSuperclass {
     campaign.setUpdatedAt(new Date());
     campaign.setUpdatedBy(getLoggedUser());
     applyCampaignTags(campaign, dto.tagIds);
+    if (dto.targetSetup != null) {
+      materializeCampaignTargets(campaign, dto.targetSetup, null, false);
+    }
     return campaignDetailsDTO(campaign);
   }
 
@@ -174,13 +207,34 @@ public class PromotionManagementService extends ServiceSuperclass {
 
   public void removeSightEvent(Long campaignId, Long relationId) {
     PromotionCampaign campaign = getCampaignEntity(campaignId);
-    assertCampaignDraft(campaign);
+    assertCampaignParticipantsEditable(campaign);
     PromotionCampaignSightEvent relation = getCampaignSightEventEntity(relationId);
     if (!Objects.equals(relation.getPromotionCampaign().getId(), campaign.getId())) {
       throw new ResourceNotFoundException();
     }
     relation.setActive(false);
     relation.setUpdatedAt(new Date());
+    closePromotionTicketPool(campaign, relation);
+  }
+
+  public PromotionCampaignHelpdeskDTO updateSightEvents(Long campaignId,
+      PromotionTicketPoolGenerationIRO iro) {
+    PromotionCampaign campaign = getCampaignEntity(campaignId);
+    assertCampaignParticipantsEditable(campaign);
+    if (campaign.getScopeType() == PromotionScopeType.GLOBAL) {
+      throw new ConflictingException("Promocja globalna nie ma listy ofert do edycji.");
+    }
+    if (iro == null || iro.targetSetup == null) {
+      throw new ConflictingException("Wybierz oferty objęte promocją.");
+    }
+    List<SightEvent> selectedSightEvents = resolveRequestedCampaignTargets(campaign, iro.targetSetup);
+    if (selectedSightEvents.isEmpty()) {
+      throw new ConflictingException("Wybierz co najmniej jedną aktywną ofertę z powiązaniem HT.");
+    }
+    materializeCampaignTargets(campaign, iro.targetSetup, iro.ticketPoolSetup, true);
+    campaign.setUpdatedAt(new Date());
+    campaign.setUpdatedBy(getLoggedUser());
+    return campaignDetailsDTO(campaign);
   }
 
   public List<PromotionCodeHelpdeskDTO> listCodes(Long campaignId) {
@@ -469,20 +523,44 @@ public class PromotionManagementService extends ServiceSuperclass {
   private List<SightEvent> resolvePromotionTargets(PromotionCampaign campaign,
       PromotionTargetSetupIRO setup) {
     Set<Long> sightEventIds = new LinkedHashSet<>();
-    if (setup != null) {
+    boolean hasSetupSelection = hasTargetSelection(setup);
+    if (hasSetupSelection) {
       addAll(sightEventIds, setup.sightEventIds);
       addSightEventsForSights(sightEventIds, setup.sightIds);
       addSightEventsForPartners(sightEventIds, setup.partnerIds);
       addSightEventsForTags(sightEventIds, setup.tagIds);
     }
-    if (campaign.getScopeType() == PromotionScopeType.TAG) {
+    if (!hasSetupSelection && hasAnyCampaignSightEvents(campaign)) {
+      addAll(sightEventIds, activeCampaignSightEventIds(campaign));
+    } else if (!hasSetupSelection && campaign.getScopeType() == PromotionScopeType.TAG) {
       addSightEventsForTags(sightEventIds, activeCampaignTagIds(campaign));
     }
-    addAll(sightEventIds, activeCampaignSightEventIds(campaign));
 
     if (sightEventIds.isEmpty()) {
       return List.of();
     }
+    return getActiveHptSightEvents(sightEventIds);
+  }
+
+  private List<SightEvent> resolveRequestedCampaignTargets(PromotionCampaign campaign,
+      PromotionTargetSetupIRO setup) {
+    Set<Long> sightEventIds = new LinkedHashSet<>();
+    if (hasTargetSelection(setup)) {
+      addAll(sightEventIds, setup.sightEventIds);
+      addSightEventsForSights(sightEventIds, setup.sightIds);
+      addSightEventsForPartners(sightEventIds, setup.partnerIds);
+      addSightEventsForTags(sightEventIds, setup.tagIds);
+    } else if (campaign.getScopeType() == PromotionScopeType.TAG) {
+      addSightEventsForTags(sightEventIds, activeCampaignTagIds(campaign));
+    }
+
+    if (sightEventIds.isEmpty()) {
+      return List.of();
+    }
+    return getActiveHptSightEvents(sightEventIds);
+  }
+
+  private List<SightEvent> getActiveHptSightEvents(Set<Long> sightEventIds) {
     return em.createQuery(
         "select distinct se from SightEvent se "
             + "join fetch se.partner "
@@ -547,6 +625,24 @@ public class PromotionManagementService extends ServiceSuperclass {
         .getResultList();
   }
 
+  private boolean hasAnyCampaignSightEvents(PromotionCampaign campaign) {
+    Long count = em.createQuery(
+        "select count(pcse) from PromotionCampaignSightEvent pcse "
+            + "where pcse.promotionCampaign = :campaign",
+        Long.class)
+        .setParameter("campaign", campaign)
+        .getSingleResult();
+    return count > 0;
+  }
+
+  private List<PromotionCampaignSightEvent> campaignSightEvents(PromotionCampaign campaign) {
+    return em.createQuery(
+        "from PromotionCampaignSightEvent where promotionCampaign = :campaign",
+        PromotionCampaignSightEvent.class)
+        .setParameter("campaign", campaign)
+        .getResultList();
+  }
+
   private void addAll(Set<Long> target, List<Long> source) {
     if (source != null) {
       source.stream().filter(Objects::nonNull).forEach(target::add);
@@ -572,6 +668,48 @@ public class PromotionManagementService extends ServiceSuperclass {
     }
     relation.setUpdatedAt(new Date());
     return relation;
+  }
+
+  private void materializeCampaignTargets(PromotionCampaign campaign, PromotionTargetSetupIRO setup,
+      PromotionTicketPoolSetupIRO ticketPoolSetup, boolean closeRemovedPools) {
+    if (campaign.getScopeType() == PromotionScopeType.GLOBAL) {
+      return;
+    }
+
+    List<SightEvent> selectedSightEvents = resolveRequestedCampaignTargets(campaign, setup);
+    Set<Long> selectedIds = selectedSightEvents.stream()
+        .map(SightEvent::getId)
+        .collect(Collectors.toCollection(LinkedHashSet::new));
+    Map<Long, PromotionCampaignSightEvent> existingRelations =
+        campaignSightEvents(campaign).stream()
+            .collect(Collectors.toMap(relation -> relation.getSightEvent().getId(),
+                relation -> relation));
+
+    for (PromotionCampaignSightEvent relation : existingRelations.values()) {
+      if (relation.isActive() && !selectedIds.contains(relation.getSightEvent().getId())) {
+        relation.setActive(false);
+        relation.setUpdatedAt(new Date());
+        if (closeRemovedPools) {
+          closePromotionTicketPool(campaign, relation);
+        }
+      }
+    }
+
+    for (SightEvent sightEvent : selectedSightEvents) {
+      PromotionCampaignSightEvent relation = ensureCampaignSightEvent(campaign, sightEvent,
+          sourceForTarget(campaign, sightEvent), sourceTagForTarget(campaign, sightEvent));
+      if (campaign.getPromotionType() == PromotionType.TICKET
+          && relation.getTicketPoolStatus() != PromotionTicketPoolStatus.CREATED
+          && ticketPoolSetup != null) {
+        createPromotionTicketPool(campaign, relation, ticketPoolSetup);
+      }
+      if (campaign.getPromotionType() == PromotionType.TICKET
+          && campaign.getStatus() == PromotionStatus.ACTIVE
+          && relation.getTicketPoolStatus() != PromotionTicketPoolStatus.CREATED) {
+        throw new ConflictingException(
+            "Dodanie oferty do aktywnej promocji TICKET wymaga utworzenia puli promocyjnej.");
+      }
+    }
   }
 
   private PromotionCampaignSightEventSource sourceForTarget(PromotionCampaign campaign,
@@ -820,6 +958,14 @@ public class PromotionManagementService extends ServiceSuperclass {
     }
   }
 
+  private void assertCampaignParticipantsEditable(PromotionCampaign campaign) {
+    if (campaign.getStatus() != PromotionStatus.DRAFT
+        && campaign.getStatus() != PromotionStatus.ACTIVE) {
+      throw new ConflictingException(
+          "Listę ofert można zmieniać tylko dla promocji roboczej albo aktywnej.");
+    }
+  }
+
   private void assertNoCodeRedemptions(PromotionCampaign campaign) {
     Long redemptionsCount = em.createQuery(
         "select count(redemption) from PromotionCodeRedemption redemption "
@@ -927,6 +1073,14 @@ public class PromotionManagementService extends ServiceSuperclass {
     return items != null && items.stream().anyMatch(Objects::nonNull);
   }
 
+  private boolean hasTargetSelection(PromotionTargetSetupIRO setup) {
+    return setup != null
+        && (hasItems(setup.sightEventIds)
+            || hasItems(setup.sightIds)
+            || hasItems(setup.partnerIds)
+            || hasItems(setup.tagIds));
+  }
+
   private void applyCampaignTags(PromotionCampaign campaign, List<Long> tagIds) {
     if (tagIds == null) {
       return;
@@ -964,6 +1118,25 @@ public class PromotionManagementService extends ServiceSuperclass {
       relation.setTicketPoolStatus(PromotionTicketPoolStatus.NOT_REQUIRED);
     }
     relation.setUpdatedAt(new Date());
+  }
+
+  private void closePromotionTicketPool(PromotionCampaign campaign,
+      PromotionCampaignSightEvent relation) {
+    if (campaign.getPromotionType() != PromotionType.TICKET
+        || relation.getHptTicketPoolDefinitionId() == null) {
+      return;
+    }
+    try {
+      HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
+      hpt.deleteTicketPoolDefinition(relation.getSightEvent().getPartner().getHptToken(),
+          relation.getHptTicketPoolDefinitionId());
+      relation.setTicketPoolStatus(PromotionTicketPoolStatus.NOT_CREATED);
+      relation.setUpdatedAt(new Date());
+    } catch (Exception e) {
+      relation.setTicketPoolStatus(PromotionTicketPoolStatus.ERROR);
+      relation.setUpdatedAt(new Date());
+      throw e;
+    }
   }
 
   private List<String> normalizedCodes(List<String> rawCodes) {
@@ -1160,6 +1333,11 @@ public class PromotionManagementService extends ServiceSuperclass {
   private PromotionTicketPoolTargetPreviewDTO targetPreviewDTO(PromotionCampaign campaign,
       SightEvent sightEvent) {
     PromotionCampaignSightEvent relation = findCampaignSightEvent(campaign, sightEvent);
+    return targetPreviewDTO(campaign.getPromotionType(), sightEvent, relation);
+  }
+
+  private PromotionTicketPoolTargetPreviewDTO targetPreviewDTO(PromotionType promotionType,
+      SightEvent sightEvent, PromotionCampaignSightEvent relation) {
     PromotionTicketPoolTargetPreviewDTO dto = new PromotionTicketPoolTargetPreviewDTO();
     dto.sightEventId = sightEvent.getId();
     dto.sightEventName = sightEvent.getName();
@@ -1176,7 +1354,7 @@ public class PromotionManagementService extends ServiceSuperclass {
     dto.hptTicketPoolDefinitionId = relation != null ? relation.getHptTicketPoolDefinitionId() : null;
     if (relation != null) {
       dto.ticketPoolStatus = relation.getTicketPoolStatus();
-    } else if (campaign.getPromotionType() == PromotionType.TICKET) {
+    } else if (promotionType == PromotionType.TICKET) {
       dto.ticketPoolStatus = PromotionTicketPoolStatus.NOT_CREATED;
     } else {
       dto.ticketPoolStatus = PromotionTicketPoolStatus.NOT_REQUIRED;

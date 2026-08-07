@@ -38,6 +38,11 @@ public class PromotionManagementServiceHelpdeskAPI {
   }
 
   @RolesAllowed({"root", "admin"})
+  public PromotionTicketPoolTargetPreviewORO previewTargets(PromotionCampaignHelpdeskDTO dto) {
+    return service.previewTargets(dto);
+  }
+
+  @RolesAllowed({"root", "admin"})
   public PromotionCampaignHelpdeskDTO updateCampaign(Long id, PromotionCampaignHelpdeskDTO dto) {
     return service.updateCampaign(id, dto);
   }
@@ -62,6 +67,12 @@ public class PromotionManagementServiceHelpdeskAPI {
   @RolesAllowed({"root", "admin"})
   public void removeSightEvent(Long campaignId, Long relationId) {
     service.removeSightEvent(campaignId, relationId);
+  }
+
+  @RolesAllowed({"root", "admin"})
+  public PromotionCampaignHelpdeskDTO updateSightEvents(Long campaignId,
+      PromotionTicketPoolGenerationIRO iro) {
+    return service.updateSightEvents(campaignId, iro);
   }
 
   @RolesAllowed({"root", "admin"})

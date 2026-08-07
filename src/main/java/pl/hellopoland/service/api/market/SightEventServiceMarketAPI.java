@@ -55,6 +55,9 @@ public class SightEventServiceMarketAPI {
         .map(DtoMapper::getDTO)
         .collect(Collectors.toList());
     service.fetchTicketPoolDefinitions(bos.items, dtos, false, true);
+    dtos = dtos.stream()
+        .filter(dto -> service.isAvailable(dto, null, null))
+        .collect(Collectors.toList());
 
     return new PagedCollection<>(dtos, bos.config);
   }

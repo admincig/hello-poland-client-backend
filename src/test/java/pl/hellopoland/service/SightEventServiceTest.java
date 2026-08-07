@@ -3,10 +3,15 @@ package pl.hellopoland.service;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import java.util.Arrays;
+import java.util.List;
 import org.junit.Test;
 import pl.hellopoland.dto.DiscountDTO;
 import pl.hellopoland.dto.DiscountTypeDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
+import pl.hellopoland.dto.TicketPoolDefinitionDTO;
+import pl.hellopoland.dto.TicketPoolTypeDTO;
+import pl.hellopoland.service.vo.HptTpdsDownloadConfigurator;
 
 public class SightEventServiceTest {
 
@@ -45,6 +50,54 @@ public class SightEventServiceTest {
     TicketDefinitionDTO ticket = ticketWithDiscountAmount(4400, 104000, 0);
 
     assertNull(service.getValidDiscountPrice(ticket));
+  }
+
+  @Test
+  public void helpdeskShowsPartnerPoolsAndAdditionalPromotionalPools() {
+    TicketPoolDefinitionDTO partnerPool = pool(TicketPoolTypeDTO.STANDARD, true, false);
+    TicketPoolDefinitionDTO promotionalPool = pool(TicketPoolTypeDTO.PROMOTIONAL, false, false);
+    TicketPoolDefinitionDTO hiddenStandardPool = pool(TicketPoolTypeDTO.STANDARD, false, false);
+    TicketPoolDefinitionDTO deletedPool = pool(TicketPoolTypeDTO.STANDARD, true, true);
+
+    List<TicketPoolDefinitionDTO> result = service.filterTicketPoolDefinitionsByAudience(
+        Arrays.asList(partnerPool, promotionalPool, hiddenStandardPool, deletedPool),
+        HptTpdsDownloadConfigurator.Audience.HELPDESK);
+
+    assertEquals(Arrays.asList(partnerPool, promotionalPool), result);
+  }
+
+  @Test
+  public void partnerDoesNotShowPromotionalOrHiddenPools() {
+    TicketPoolDefinitionDTO partnerPool = pool(TicketPoolTypeDTO.STANDARD, true, false);
+    TicketPoolDefinitionDTO promotionalPool = pool(TicketPoolTypeDTO.PROMOTIONAL, false, false);
+    TicketPoolDefinitionDTO hiddenStandardPool = pool(TicketPoolTypeDTO.STANDARD, false, false);
+
+    List<TicketPoolDefinitionDTO> result = service.filterTicketPoolDefinitionsByAudience(
+        Arrays.asList(partnerPool, promotionalPool, hiddenStandardPool),
+        HptTpdsDownloadConfigurator.Audience.PARTNER);
+
+    assertEquals(List.of(partnerPool), result);
+  }
+
+  @Test
+  public void canonicalizesValidVoivodeshipNames() {
+    assertEquals("Mazowieckie", service.canonicalVoivodeship(" mazowieckie "));
+    assertEquals("Kujawsko-pomorskie", service.canonicalVoivodeship("KUJAWSKO-POMORSKIE"));
+  }
+
+  @Test
+  public void rejectsInvalidVoivodeshipNames() {
+    assertNull(service.canonicalVoivodeship(null));
+    assertNull(service.canonicalVoivodeship("kujawsko-toruńskie"));
+  }
+
+  private TicketPoolDefinitionDTO pool(TicketPoolTypeDTO poolType, boolean visibleForPartner,
+      boolean deleted) {
+    TicketPoolDefinitionDTO pool = new TicketPoolDefinitionDTO();
+    pool.poolType = poolType;
+    pool.visibleForPartner = visibleForPartner;
+    pool.deleted = deleted;
+    return pool;
   }
 
   private TicketDefinitionDTO ticketWithDiscountAmount(Integer originalPrice, Integer discountAmount,

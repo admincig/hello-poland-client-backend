@@ -51,6 +51,12 @@ public class HelpdeskPromotionRestService {
     return service.createCampaign(dto);
   }
 
+  @POST
+  @Path("/targets/preview")
+  public PromotionTicketPoolTargetPreviewORO previewTargets(PromotionCampaignHelpdeskDTO dto) {
+    return service.previewTargets(dto);
+  }
+
   @PUT
   @Path("/{id}")
   public PromotionCampaignHelpdeskDTO updateCampaign(@PathParam("id") Long id,
@@ -85,6 +91,13 @@ public class HelpdeskPromotionRestService {
       @PathParam("relationId") Long relationId) {
     service.removeSightEvent(id, relationId);
     return Response.ok().build();
+  }
+
+  @PUT
+  @Path("/{id}/sight-events")
+  public PromotionCampaignHelpdeskDTO updateSightEvents(@PathParam("id") Long id,
+      PromotionTicketPoolGenerationIRO iro) {
+    return service.updateSightEvents(id, iro);
   }
 
   @GET

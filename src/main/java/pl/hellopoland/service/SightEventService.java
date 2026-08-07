@@ -17,6 +17,7 @@ import jakarta.ejb.EJBAccessException;
 import jakarta.ejb.LocalBean;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
+import jakarta.persistence.TypedQuery;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.nio.file.Paths;
@@ -34,6 +35,23 @@ public class SightEventService extends ServiceSuperclass {
 
   private static final int SIGHT_EVENT_DESCRIPTION_MAX_LENGTH = 2500;
   private static final int SIGHT_EVENT_DIRECTIONS_MAX_LENGTH = 1000;
+  private static final Map<String, String> POLISH_VOIVODESHIPS = Map.ofEntries(
+      Map.entry("dolnośląskie", "Dolnośląskie"),
+      Map.entry("kujawsko-pomorskie", "Kujawsko-pomorskie"),
+      Map.entry("lubelskie", "Lubelskie"),
+      Map.entry("lubuskie", "Lubuskie"),
+      Map.entry("łódzkie", "Łódzkie"),
+      Map.entry("małopolskie", "Małopolskie"),
+      Map.entry("mazowieckie", "Mazowieckie"),
+      Map.entry("opolskie", "Opolskie"),
+      Map.entry("podkarpackie", "Podkarpackie"),
+      Map.entry("podlaskie", "Podlaskie"),
+      Map.entry("pomorskie", "Pomorskie"),
+      Map.entry("śląskie", "Śląskie"),
+      Map.entry("świętokrzyskie", "Świętokrzyskie"),
+      Map.entry("warmińsko-mazurskie", "Warmińsko-mazurskie"),
+      Map.entry("wielkopolskie", "Wielkopolskie"),
+      Map.entry("zachodniopomorskie", "Zachodniopomorskie"));
 
   @Inject
   UserService userService;
@@ -456,6 +474,8 @@ public class SightEventService extends ServiceSuperclass {
       }
 
       for (var sightEventDto : dtos) {
+        sightEventDto.minPrice = null;
+        sightEventDto.minDiscountPrice = null;
         Optional<TicketDefinitionDTO> cheapestOpt = findCheapest(sightEventDto);
         cheapestOpt.ifPresent(cheapest -> {
           sightEventDto.minPrice = cheapest.originalPrice;
@@ -569,14 +589,26 @@ public class SightEventService extends ServiceSuperclass {
     return poolDefinitions;
   }
 
-  private List<TicketPoolDefinitionDTO> filterTicketPoolDefinitionsByAudience(
+  List<TicketPoolDefinitionDTO> filterTicketPoolDefinitionsByAudience(
       List<TicketPoolDefinitionDTO> poolDefinitions, HptTpdsDownloadConfigurator.Audience audience) {
-    if (audience != HptTpdsDownloadConfigurator.Audience.PARTNER) {
-      return poolDefinitions;
+    if (audience == HptTpdsDownloadConfigurator.Audience.PARTNER) {
+      return poolDefinitions.stream()
+          .filter(this::isVisibleForPartner)
+          .collect(Collectors.toList());
     }
-    return poolDefinitions.stream()
-        .filter(this::isVisibleForPartner)
-        .collect(Collectors.toList());
+    if (audience == HptTpdsDownloadConfigurator.Audience.HELPDESK) {
+      return poolDefinitions.stream()
+          .filter(this::isVisibleForHelpdesk)
+          .collect(Collectors.toList());
+    }
+    return poolDefinitions;
+  }
+
+  private boolean isVisibleForHelpdesk(TicketPoolDefinitionDTO poolDefinition) {
+    return poolDefinition != null
+        && !poolDefinition.deleted
+        && (TicketPoolTypeDTO.PROMOTIONAL.equals(defaultPoolType(poolDefinition.poolType))
+            || isVisibleForPartner(poolDefinition));
   }
 
   private boolean isVisibleForPartner(TicketPoolDefinitionDTO poolDefinition) {
@@ -815,15 +847,50 @@ public class SightEventService extends ServiceSuperclass {
   }
 
   public List<String> getCitiesForPublicEvents() {
-    return em.createQuery(
-        "select distinct location.city from SightEvent where active = true "
-            + "and published = true and blocked = false and available = true and partner.blocked = false order by location.city asc",
-        String.class).getResultStream()
+    return getCitiesForPublicEvents(null);
+  }
+
+  public List<String> getCitiesForPublicEvents(String voivodeship) {
+    String query = "select distinct location.city from SightEvent where active = true "
+        + "and published = true and blocked = false and available = true and partner.blocked = false "
+        + "and location.city is not null";
+    boolean filterByVoivodeship = voivodeship != null && !voivodeship.isBlank();
+    if (filterByVoivodeship) {
+      query += " and lower(trim(location.voivodeship)) = lower(:voivodeship)";
+    }
+    query += " order by location.city asc";
+
+    TypedQuery<String> citiesQuery = em.createQuery(query, String.class);
+    if (filterByVoivodeship) {
+      citiesQuery.setParameter("voivodeship", voivodeship.strip());
+    }
+
+    return citiesQuery.getResultStream()
         .map(String::strip)
         .filter(city -> !city.isBlank())
         .distinct()
         .sorted(Comparator.comparing(String::toLowerCase, polishComparator()))
         .collect(toList());
+  }
+
+  public List<String> getVoivodeshipsForPublicEvents() {
+    return em.createQuery(
+        "select distinct location.voivodeship from SightEvent where active = true "
+            + "and published = true and blocked = false and available = true and partner.blocked = false "
+            + "and location.voivodeship is not null",
+        String.class).getResultStream()
+        .map(this::canonicalVoivodeship)
+        .filter(Objects::nonNull)
+        .distinct()
+        .sorted(Comparator.comparing(String::toLowerCase, polishComparator()))
+        .collect(toList());
+  }
+
+  String canonicalVoivodeship(String value) {
+    if (value == null || value.isBlank()) {
+      return null;
+    }
+    return POLISH_VOIVODESHIPS.get(value.strip().toLowerCase(Locale.forLanguageTag("pl-PL")));
   }
 
   private Comparator<Object> polishComparator() {

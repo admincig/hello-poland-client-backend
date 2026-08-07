@@ -3,6 +3,7 @@ package pl.hellopoland.service.api.helpdesk;
 import pl.hellopoland.bo.Category;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.SightEventCategory;
+import pl.hellopoland.bo.SightEventTag;
 import pl.hellopoland.bo.Tag;
 import pl.hellopoland.bo.Sight;
 import pl.hellopoland.config.SightEventPagedCollectionConfig;
@@ -11,6 +12,7 @@ import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.*;
+import pl.hellopoland.service.vo.HptTpdsDownloadConfigurator;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.PagedEntityCollection;
 
@@ -18,6 +20,7 @@ import jakarta.annotation.security.RolesAllowed;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -51,7 +54,22 @@ public class SightEventServiceHelpdeskAPI {
     config.setLanguage(language);
     accessService.applySightEventScope(config);
     PagedEntityCollection<SightEvent> bos = service.getList(config);
-    var dtos = bos.items.stream().map(DtoMapper::getDTO).collect(Collectors.toList());
+    Map<Long, Set<Category>> categoriesBySightEvent = catService.getFor(bos.items).stream()
+        .collect(Collectors.groupingBy(
+            relation -> relation.getSightEvent().getId(),
+            Collectors.mapping(SightEventCategory::getCategory, Collectors.toSet())));
+    Map<Long, Set<Tag>> tagsBySightEvent = tagService.getFor(bos.items).stream()
+        .collect(Collectors.groupingBy(
+            relation -> relation.getSightEvent().getId(),
+            Collectors.mapping(SightEventTag::getTag, Collectors.toSet())));
+    var dtos = bos.items.stream().map(bo -> {
+      SightEventDTO dto = DtoMapper.getDTO(bo);
+      dto.categories = categoriesBySightEvent.getOrDefault(bo.getId(), Set.of()).stream()
+          .map(DtoMapper::getDTO).collect(Collectors.toSet());
+      dto.tags = tagsBySightEvent.getOrDefault(bo.getId(), Set.of()).stream()
+          .map(DtoMapper::getDTO).collect(Collectors.toSet());
+      return dto;
+    }).collect(Collectors.toList());
     return new PagedCollection<>(dtos, bos.config);
   }
 
@@ -95,7 +113,8 @@ public class SightEventServiceHelpdeskAPI {
         .collect(Collectors.toSet());
     tService.translateEntities(categories, language);
     SightEventDTO dto = DtoMapper.getFullDTO(bo);
-    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), false, false);
+    service.fetchTicketPoolDefinitions(List.of(bo), List.of(dto), true, false,
+        HptTpdsDownloadConfigurator.Audience.HELPDESK);
     return dto;
   }
 

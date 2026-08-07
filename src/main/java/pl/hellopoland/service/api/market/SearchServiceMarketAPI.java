@@ -62,15 +62,31 @@ public class SearchServiceMarketAPI {
     List<SightEvent> ses = bos.items.stream()
         .filter(SightEvent::isAccessible)
         .collect(Collectors.toList());
+    List<SightEventDTO> sightEventDtos = ses.stream()
+        .map(DtoMapper::getDTO)
+        .collect(toList());
+    seService.fetchTicketPoolDefinitions(ses, sightEventDtos, false, true);
+    sightEventDtos = filterAvailableOnPortal(sightEventDtos);
+    Map<Long, SightEventDTO> sightEventDtosById = sightEventDtos.stream()
+        .collect(toMap(dto -> dto.id, dto -> dto));
+    ses = ses.stream()
+        .filter(sightEvent -> sightEventDtosById.containsKey(sightEvent.getId()))
+        .collect(toList());
 
     if (minPrice != null) {
       ses = ses.stream()
-          .filter(se -> se.getMinPrice() != null && se.getMinPrice() >= minPrice)
+          .filter(se -> {
+            SightEventDTO dto = sightEventDtosById.get(se.getId());
+            return dto != null && dto.minPrice != null && dto.minPrice >= minPrice;
+          })
           .collect(toList());
     }
     if (maxPrice != null) {
       ses = ses.stream()
-          .filter(se -> se.getMinPrice() != null && se.getMinPrice() <= maxPrice)
+          .filter(se -> {
+            SightEventDTO dto = sightEventDtosById.get(se.getId());
+            return dto != null && dto.minPrice != null && dto.minPrice <= maxPrice;
+          })
           .collect(toList());
     }
 
@@ -94,7 +110,8 @@ public class SearchServiceMarketAPI {
       SightDTO dto = DtoMapper.getDTO(s);
       dto.favourite = finalFavouriteSights.contains(s.getId());
       dto.sightEvents = se.stream()
-          .map(DtoMapper::getDTO)
+          .map(sightEvent -> sightEventDtosById.get(sightEvent.getId()))
+          .filter(Objects::nonNull)
           .collect(toList());
       findCheapestPricedSightEvent(dto.sightEvents).ifPresent(cheapest -> {
         dto.minPrice = cheapest.minPrice;
@@ -120,6 +137,15 @@ public class SearchServiceMarketAPI {
         .min(Comparator.comparing(sightEvent -> sightEvent.minPrice));
   }
 
+  List<SightEventDTO> filterAvailableOnPortal(List<SightEventDTO> sightEvents) {
+    if (sightEvents == null) {
+      return Collections.emptyList();
+    }
+    return sightEvents.stream()
+        .filter(sightEvent -> seService.isAvailable(sightEvent, null, null))
+        .collect(toList());
+  }
+
   private List<Tag> getTags(List<SightEvent> ses) {
     return ses.stream()
         .filter(event -> event.getTags() != null)
@@ -140,9 +166,15 @@ public class SearchServiceMarketAPI {
 
   @PermitAll
   public FilterDTO filters(LanguageVersion languageVersion) {
+    return filters(languageVersion, null);
+  }
+
+  @PermitAll
+  public FilterDTO filters(LanguageVersion languageVersion, String voivodeship) {
     FilterDTO filter = new FilterDTO();
     filter.prices = predefinedPriceFilters;
-    filter.city = seService.getCitiesForPublicEvents();
+    filter.city = seService.getCitiesForPublicEvents(voivodeship);
+    filter.voivodeship = seService.getVoivodeshipsForPublicEvents();
     Collection<Category> categories =
         catService.pagedList(new CategoryPagedCollectionConfig()).items;
     categories = tService.translateEntities(categories, languageVersion);

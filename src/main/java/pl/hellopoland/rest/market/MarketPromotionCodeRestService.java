@@ -2,6 +2,7 @@ package pl.hellopoland.rest.market;
 
 import pl.hellopoland.rest.dto.PromotionCodeValidationIRO;
 import pl.hellopoland.rest.dto.PromotionCodeValidationORO;
+import pl.hellopoland.rest.dto.PromotionCodeReservationReleaseIRO;
 import pl.hellopoland.service.api.market.PromotionCodeServiceMarketAPI;
 
 import jakarta.enterprise.context.RequestScoped;
@@ -25,5 +26,11 @@ public class MarketPromotionCodeRestService {
   @Path("/validate-code")
   public PromotionCodeValidationORO validate(PromotionCodeValidationIRO iro) {
     return service.validate(iro);
+  }
+
+  @POST
+  @Path("/release-reservation")
+  public void releaseReservation(PromotionCodeReservationReleaseIRO iro) {
+    service.releaseReservation(iro);
   }
 }

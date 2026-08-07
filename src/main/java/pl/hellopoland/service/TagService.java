@@ -3,6 +3,7 @@ package pl.hellopoland.service;
 import pl.hellopoland.bo.ImageCollector;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.SightEventTag;
+import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.Tag;
 import pl.hellopoland.config.TagPagedCollectionConfig;
 import pl.hellopoland.dto.TagDTO;
@@ -89,7 +90,7 @@ public class TagService extends ServiceSuperclass {
     tService.deleteEntityTranslations(get(id), lang);
   }
 
-  public List<SightEventTag> getFor(List<SightEvent> sightEvents) {
+  public List<SightEventTag> getFor(Collection<SightEvent> sightEvents) {
     if (sightEvents.isEmpty()) {
       return Collections.emptyList();
     }
@@ -97,6 +98,16 @@ public class TagService extends ServiceSuperclass {
         .createQuery("from SightEventTag where sightEvent in (:sightEvents)",
             SightEventTag.class)
         .setParameter("sightEvents", sightEvents).getResultList();
+  }
+
+  public List<SightEventTag> getForSights(Collection<Sight> sights) {
+    if (sights.isEmpty()) {
+      return Collections.emptyList();
+    }
+    return em
+        .createQuery("from SightEventTag where sightEvent.sight in (:sights) "
+            + "and sightEvent.active = true", SightEventTag.class)
+        .setParameter("sights", sights).getResultList();
   }
 
     public Tag uploadIcon(Long id, byte[] bytes, String extension) {

@@ -450,6 +450,7 @@ public class DtoMapper {
         : bo.getCurrentLanguage().getLanuage();
     dto.blocked = bo.isBlocked();
     dto.mainImage = DtoMapper.getDTO(bo.getMainImage());
+    dto.location = getDTO(bo.getAddress());
     return dto;
   }
 
