@@ -113,6 +113,51 @@ public class UserService extends ServiceSuperclass {
     return bo;
   }
 
+  /**
+   * Registers a market user or restarts registration for an account that has not been activated yet.
+   * Existing active, deleted, blocked or non-market accounts cannot be taken over through registration.
+   */
+  public User registerMarketUser(String email, String decodedPassword, boolean tosAgreement) {
+    Optional<User> existingUser = findByEmail(email);
+
+    if (existingUser.isEmpty()) {
+      return create(email, decodedPassword, tosAgreement);
+    }
+
+    User user = existingUser.get();
+    if (!isPendingMarketRegistration(user)) {
+      throw new ConflictingException("Konto dla podanego adresu e-mail już istnieje.");
+    }
+
+    user.changePassword(decodedPassword);
+    UserDetails details = Optional.ofNullable(user.getDetails()).orElseGet(UserDetails::new);
+    details.setTosAgreement(tosAgreement);
+    user.setDetails(details);
+
+    em.createQuery("""
+        update UserToken t
+        set t.used = true
+        where t.user = :user
+          and t.type = :type
+          and t.used = false
+        """)
+        .setParameter("user", user)
+        .setParameter("type", UserToken.Type.EMAIL_VERIFICATION)
+        .executeUpdate();
+
+    createEmailVerificationToken(user);
+    return user;
+  }
+
+  private boolean isPendingMarketRegistration(User user) {
+    return !user.isDeleted()
+        && !user.isBlocked()
+        && !user.isEmailVerified()
+        && user.getPartner() == null
+        && user.hasRole(Role.USER)
+        && user.getRoles().stream().allMatch(role -> role.getRole() == Role.USER);
+  }
+
   public User create(String email, String decodedPassword, String name, String picture,
       Partner partner, UserRole.Role... roles) {
     User bo = new User(roles);
@@ -969,7 +1014,7 @@ public class UserService extends ServiceSuperclass {
 
         String portalUrl = properties.getProperty(
                 portalUrlProperty,
-                properties.getProperty("portal.url", "https://api.hello-poland.pl")
+                properties.getProperty("portal.url", "https://hello-poland.pl")
         );
 
         String resetUrl = portalUrl + "/reset-password?token=" + token;
@@ -1055,7 +1100,7 @@ public class UserService extends ServiceSuperclass {
 
         String portalUrl = properties.getProperty(
                 "portal.url",
-                "https://api.hello-poland.pl"
+                "https://hello-poland.pl"
         );
 
         String activationUrl = portalUrl + "/activate-account?token=" + token;
@@ -1074,7 +1119,7 @@ public class UserService extends ServiceSuperclass {
                 .replace("\\n", System.lineSeparator());
 
         try {
-            emailService.sendEmail(
+            emailService.sendHtmlEmail(
                     new Email(user.getEmail(), subject, body),
                     ACCOUNT_EMAIL_SENDER
             );

@@ -8,8 +8,10 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import pl.hellopoland.dto.SightEventDTO;
+import pl.hellopoland.dto.TagDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolTypeDTO;
+import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.service.SightEventService;
 
 public class SearchServiceMarketAPITest {
@@ -81,6 +83,27 @@ public class SearchServiceMarketAPITest {
     assertEquals(List.of(sightEvent), service.filterAvailableOnPortal(List.of(sightEvent)));
   }
 
+  @Test
+  public void sortsFilterTagsAccordingToPolishAlphabetIgnoringCase() {
+    List<TagDTO> sorted = service.sortTagsAlphabetically(List.of(
+        tag("Żagle"),
+        tag("polecamy"),
+        tag("Łódź"),
+        tag("KDR Karta Dużej Rodziny"),
+        tag("źrebak"),
+        tag("Certyfikat Powiatu Poznańskiego"),
+        tag("literatura i historia")), LanguageVersion.PL_PL);
+
+    assertEquals(List.of(
+        "Certyfikat Powiatu Poznańskiego",
+        "KDR Karta Dużej Rodziny",
+        "literatura i historia",
+        "Łódź",
+        "polecamy",
+        "źrebak",
+        "Żagle"), sorted.stream().map(tag -> tag.label).toList());
+  }
+
   private TicketPoolDefinitionDTO pool(TicketPoolTypeDTO poolType, boolean visibleOnPortal) {
     TicketPoolDefinitionDTO pool = new TicketPoolDefinitionDTO();
     pool.poolType = poolType;
@@ -95,5 +118,11 @@ public class SearchServiceMarketAPITest {
     sightEvent.minPrice = minPrice;
     sightEvent.minDiscountPrice = minDiscountPrice;
     return sightEvent;
+  }
+
+  private TagDTO tag(String label) {
+    TagDTO tag = new TagDTO();
+    tag.label = label;
+    return tag;
   }
 }

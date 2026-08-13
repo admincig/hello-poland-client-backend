@@ -10,7 +10,6 @@ import pl.hellopoland.service.UserService;
 
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
-import jakarta.ejb.EJBTransactionRolledbackException;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import java.lang.System.Logger;
@@ -34,17 +33,19 @@ public class UserServiceMarketAPI {
 
   @PermitAll
   public void register(UserInfoDTO userDTO) {
+    if (userDTO == null || userDTO.email == null || userDTO.email.trim().isEmpty()) {
+      throw new ConflictingException("Adres e-mail jest wymagany.");
+    }
     validatePassword(userDTO.password, userDTO.passwordConfirmation);
     if (userDTO.tosAgreement == null) {
       staticLogger.log(Logger.Level.WARNING, "tosAgreement is required");
       throw new ConflictingException("tosAgreement is required");
     }
-    User user = null;
-    try {
-      user = service.create(userDTO.email, userDTO.password, userDTO.tosAgreement);
-    } catch (EJBTransactionRolledbackException e) {
-      staticLogger.log(Logger.Level.WARNING, "User with email already exists:" + userDTO.email);
-    }
+    userDTO.email = userDTO.email.trim().toLowerCase();
+    User user = service.registerMarketUser(
+        userDTO.email,
+        userDTO.password,
+        userDTO.tosAgreement);
 
     if (userDTO.addToMailingList) {
       mailingListAPI.addToMailingList(user.getEmail());

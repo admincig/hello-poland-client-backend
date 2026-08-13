@@ -203,7 +203,10 @@ public class SightEventServiceMarketAPI {
             .toInstant()));
     AvailableDatesORO oro = new AvailableDatesORO();
     for (var tpd : asos.ticketPoolDefinitions) {
-      if (service.isVisibleOnPortal(tpd) && tpd.availableTicketsNumber != 0) {
+      boolean noMoreTickets = tpd.availableTicketsNumber.equals(0)
+          || tpd.ticketDefinitions.stream()
+              .allMatch(ticket -> ticket.availableTicketsNumber.equals(0));
+      if (service.isVisibleOnPortal(tpd) && !noMoreTickets) {
         oro.availableDates.addAll(tpdService.getStartDates(tpd.id, date, halfYearFromNow));
       }
     }

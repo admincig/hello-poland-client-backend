@@ -12,11 +12,13 @@ import pl.hellopoland.dto.FilterPriceEntryDTO;
 import pl.hellopoland.dto.SearchResultDTO;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.dto.SightEventDTO;
+import pl.hellopoland.dto.TagDTO;
 import pl.hellopoland.enums.LanguageVersion;
 import pl.hellopoland.service.*;
 import pl.hellopoland.util.DtoMapper;
 import pl.hellopoland.util.PagedEntityCollection;
 
+import java.text.Collator;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -181,8 +183,21 @@ public class SearchServiceMarketAPI {
     filter.categories = categories.stream().map(DtoMapper::getDTO).collect(toList());
     Collection<Tag> tags = tagService.pagedList(new TagPagedCollectionConfig()).items;
     tags = tService.translateEntities(tags, languageVersion);
-    filter.tags = tags.stream().map(DtoMapper::getDTO).collect(toList());
+    filter.tags = sortTagsAlphabetically(
+        tags.stream().map(DtoMapper::getDTO).collect(toList()), languageVersion);
     return filter;
+  }
+
+  List<TagDTO> sortTagsAlphabetically(Collection<TagDTO> tags,
+      LanguageVersion languageVersion) {
+    Collator collator = Collator.getInstance(Locale.forLanguageTag(languageVersion.getLanuage()));
+    collator.setStrength(Collator.SECONDARY);
+    Comparator<String> labelComparator = collator::compare;
+
+    return tags.stream()
+        .sorted(Comparator.comparing(tag -> tag.label,
+            Comparator.nullsLast(labelComparator)))
+        .collect(toList());
   }
 
 }
