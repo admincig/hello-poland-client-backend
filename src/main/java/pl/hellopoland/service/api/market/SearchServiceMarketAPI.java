@@ -101,18 +101,29 @@ public class SearchServiceMarketAPI {
       favouriteSights = sightService.getAllFavouritesIdsForLoggedUser(loggedUser);
     }
     LanguageVersion languageVersion = seConfig.getLanguage();
+    List<Tag> resultTags = tService.translateEntities(getTags(ses), languageVersion);
+    tagService.markPromotionalForActiveCampaigns(resultTags);
     SearchResultDTO oro = new SearchResultDTO();
     List<Long> finalFavouriteSights = favouriteSights;
     oro.sights = ss.entrySet().stream().map(entry -> {
       Sight s = tService.translateEntity(entry.getKey(), languageVersion);
       List<SightEvent> se = entry.getValue();
       List<Category> categories = getCategories(se);
-      List<Tag> tags = getTags(se);
+      List<Tag> translatedTags = getTags(se);
 
       SightDTO dto = DtoMapper.getDTO(s);
       dto.favourite = finalFavouriteSights.contains(s.getId());
       dto.sightEvents = se.stream()
-          .map(sightEvent -> sightEventDtosById.get(sightEvent.getId()))
+          .map(sightEvent -> {
+            SightEventDTO sightEventDto = sightEventDtosById.get(sightEvent.getId());
+            if (sightEventDto != null && sightEvent.getTags() != null) {
+              sightEventDto.tags = sightEvent.getTags().stream()
+                  .map(SightEventTag::getTag)
+                  .map(DtoMapper::getDTO)
+                  .collect(toSet());
+            }
+            return sightEventDto;
+          })
           .filter(Objects::nonNull)
           .collect(toList());
       findCheapestPricedSightEvent(dto.sightEvents).ifPresent(cheapest -> {
@@ -122,7 +133,7 @@ public class SearchServiceMarketAPI {
       dto.categories = tService.translateEntities(categories, languageVersion).stream()
           .map(DtoMapper::getDTO)
           .collect(toSet());
-      dto.tags = tService.translateEntities(tags, languageVersion).stream()
+      dto.tags = translatedTags.stream()
           .map(DtoMapper::getDTO)
           .collect(toSet());
       return dto;
@@ -183,6 +194,7 @@ public class SearchServiceMarketAPI {
     filter.categories = categories.stream().map(DtoMapper::getDTO).collect(toList());
     Collection<Tag> tags = tagService.pagedList(new TagPagedCollectionConfig()).items;
     tags = tService.translateEntities(tags, languageVersion);
+    tagService.markPromotionalForActiveCampaigns(tags);
     filter.tags = sortTagsAlphabetically(
         tags.stream().map(DtoMapper::getDTO).collect(toList()), languageVersion);
     return filter;

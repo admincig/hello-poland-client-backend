@@ -53,6 +53,12 @@ public class PromotionManagementServiceHelpdeskAPI {
   }
 
   @RolesAllowed({"root", "admin"})
+  public PromotionCampaignHelpdeskDTO updateMarkerTag(Long id,
+      PromotionCampaignHelpdeskDTO dto) {
+    return service.updateMarkerTag(id, dto);
+  }
+
+  @RolesAllowed({"root", "admin"})
   public PromotionCampaignSightEventHelpdeskDTO addSightEvent(Long campaignId,
       PromotionCampaignSightEventHelpdeskDTO dto) {
     return service.addSightEvent(campaignId, dto);

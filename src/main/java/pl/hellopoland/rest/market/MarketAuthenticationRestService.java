@@ -3,6 +3,7 @@ package pl.hellopoland.rest.market;
 import jakarta.annotation.security.PermitAll;
 import jakarta.persistence.PersistenceContext;
 import pl.hellopoland.bo.User;
+import pl.hellopoland.bo.UserToken;
 import pl.hellopoland.rest.dto.PasswordResetConfirmDTO;
 import pl.hellopoland.rest.dto.PasswordResetRequestDTO;
 import pl.hellopoland.security.CurrentUser;
@@ -72,22 +73,21 @@ public class MarketAuthenticationRestService {
   @Path("/password-reset")
   @PermitAll
   public Response requestPasswordReset(PasswordResetRequestDTO dto) {
+    Optional<User> userOpt = Optional.empty();
 
-        Optional<User> userOpt = Optional.empty();
+    if (dto != null && dto.email != null) {
+      userOpt = userService.findUndeletedByEmail(dto.email)
+          .filter(userService::isActiveMarketUser);
+    }
 
-        if (dto != null && dto.email != null) {
-            userOpt = userService.findUndeletedByEmail(dto.email);
+    if (userOpt.isPresent()) {
+      String token = java.util.UUID.randomUUID().toString()
+          + java.util.UUID.randomUUID().toString();
+      userService.createPasswordResetToken(userOpt.get(), token);
+    }
 
-            if (userOpt.isPresent()) {
-                String token = java.util.UUID.randomUUID().toString()
-                        + java.util.UUID.randomUUID().toString();
-                User user = userOpt.get();
-
-                userService.createPasswordResetToken(user, token);
-            }
-        }
-
-        return Response.ok().build();
+    // Always return 200 to avoid revealing whether the address belongs to a portal account.
+    return Response.ok().build();
   }
 
     @POST
@@ -99,8 +99,13 @@ public class MarketAuthenticationRestService {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
-        boolean success =
-                userService.confirmPasswordReset(dto.token, dto.newPassword);
+        UserToken resetToken = userService.findValidPasswordResetToken(dto.token);
+
+        if (resetToken == null || !userService.isActiveMarketUser(resetToken.getUser())) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
+        boolean success = userService.confirmPasswordReset(dto.token, dto.newPassword);
 
         if (!success) {
             return Response.status(Response.Status.BAD_REQUEST).build();

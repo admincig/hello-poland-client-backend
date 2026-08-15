@@ -71,6 +71,13 @@ public class HelpdeskPromotionRestService {
     return service.changeCampaignStatus(id, dto);
   }
 
+  @PATCH
+  @Path("/{id}/marker-tag")
+  public PromotionCampaignHelpdeskDTO updateMarkerTag(@PathParam("id") Long id,
+      PromotionCampaignHelpdeskDTO dto) {
+    return service.updateMarkerTag(id, dto);
+  }
+
   @POST
   @Path("/{id}/sight-events")
   public PromotionCampaignSightEventHelpdeskDTO addSightEvent(@PathParam("id") Long id,

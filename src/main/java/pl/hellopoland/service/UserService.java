@@ -823,6 +823,19 @@ public class UserService extends ServiceSuperclass {
     return user != null && hasAnyRole(user, HELPDESK_USER_ROLES.toArray(new Role[0]));
   }
 
+  /**
+   * A password reset requested through the public portal is available only to an account that can
+   * actually authenticate through /market/login.
+   */
+  public boolean isActiveMarketUser(User user) {
+    return user != null
+        && !user.isDeleted()
+        && !user.isBlocked()
+        && user.isEmailVerified()
+        && user.getPartner() == null
+        && user.hasRole(Role.USER);
+  }
+
   private void requireCanModifyHelpdeskUser(User user) {
     User loggedUser = getLoggedUser();
     if (loggedUser.hasRole(Role.ROOT)) {

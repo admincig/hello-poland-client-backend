@@ -10,6 +10,7 @@ import pl.hellopoland.rest.dto.AvailableDatesORO;
 import pl.hellopoland.rest.dto.AvailableTicketNumberAssociationORO;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.SightEventService;
+import pl.hellopoland.service.TagService;
 import pl.hellopoland.service.TicketPoolDefinitionService;
 import pl.hellopoland.service.TranslationService;
 import pl.hellopoland.service.UserService;
@@ -41,18 +42,22 @@ public class SightEventServiceMarketAPI {
 
   @Inject
   private TranslationService translationService;
+  @Inject
+  private TagService tagService;
 
   @PermitAll
   public PagedCollection<SightEventDTO> getList(SightEventPagedCollectionConfig config) {
     config.onlyAvailable();
     config.onlyActive();
     config.onlyPublished();
+    config.setFetchTags(true);
     PagedEntityCollection<SightEvent> bos = service.getList(config);
     bos.items = bos.items.stream()
         .filter(se -> se.isAccessible())
         .collect(Collectors.toList());
+    translateTags(bos.items, config.getLanguage());
     List<SightEventDTO> dtos = bos.items.stream()
-        .map(DtoMapper::getDTO)
+        .map(DtoMapper::getDTOWithTags)
         .collect(Collectors.toList());
     service.fetchTicketPoolDefinitions(bos.items, dtos, false, true);
     dtos = dtos.stream()
@@ -81,6 +86,7 @@ public class SightEventServiceMarketAPI {
     } else {
       language = bo.getDefaultLanguage();
     }
+    translateTags(List.of(bo), null);
     dto = DtoMapper.getFullDTO(bo);
     dto.partnerAffiliateCode = null;
     dto.language = language.getLanuage();
@@ -102,8 +108,22 @@ public class SightEventServiceMarketAPI {
     HelloTicket hptClient = new HelloTicket(service.getPortal("Hello Ticket Cloud").getUrl());
     List<SightEvent> ses = hptClient.getSightEventsInDateRange(new ArrayList<SightEvent>(pc.items),
         new Date(), null);
-    return ses.stream().map(DtoMapper::getDTO)
+    translateTags(ses, language);
+    return ses.stream().map(DtoMapper::getDTOWithTags)
         .collect(Collectors.toList());
+  }
+
+  private void translateTags(Collection<SightEvent> sightEvents, LanguageVersion language) {
+    Set<Tag> tags = sightEvents.stream()
+        .filter(Objects::nonNull)
+        .filter(sightEvent -> sightEvent.getTags() != null)
+        .flatMap(sightEvent -> sightEvent.getTags().stream())
+        .map(SightEventTag::getTag)
+        .collect(Collectors.toSet());
+    if (language != null) {
+      translationService.translateEntities(tags, language);
+    }
+    tagService.markPromotionalForActiveCampaigns(tags);
   }
 
   private SightEventPagedCollectionConfig prepareConfigForRandom(Integer count) {
@@ -114,6 +134,7 @@ public class SightEventServiceMarketAPI {
     config.onlyPublished();
     config.onlyAvailable();
     config.setDateFrom(new Date());
+    config.setFetchTags(true);
     return config;
   }
 

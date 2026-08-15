@@ -25,6 +25,7 @@ public class Tag extends ModelSuperclass implements Translated {
   private Set<LanguageVersion> availableLanguageVersions;
   private boolean restricted;
   private boolean recommended;
+  @Transient
   private boolean promotional;
   private String iconUrl;
   private int assignedItemsCount;

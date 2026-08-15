@@ -163,6 +163,16 @@ public class PromotionManagementService extends ServiceSuperclass {
     return campaignDetailsDTO(campaign);
   }
 
+  public PromotionCampaignHelpdeskDTO updateMarkerTag(Long id,
+      PromotionCampaignHelpdeskDTO dto) {
+    PromotionCampaign campaign = getCampaignEntity(id);
+    campaign.setMarkerTag(dto != null && dto.markerTagId != null
+        ? getTag(dto.markerTagId) : null);
+    campaign.setUpdatedAt(new Date());
+    campaign.setUpdatedBy(getLoggedUser());
+    return campaignDetailsDTO(campaign);
+  }
+
   public PromotionCampaignSightEventHelpdeskDTO addSightEvent(Long campaignId,
       PromotionCampaignSightEventHelpdeskDTO dto) {
     if (dto == null || dto.sightEventId == null) {
@@ -1042,6 +1052,7 @@ public class PromotionManagementService extends ServiceSuperclass {
     campaign.setDiscountPercent(dto.promotionType == PromotionType.PERCENT ? dto.discountPercent : null);
     campaign.setDiscountAmountGross(dto.promotionType == PromotionType.AMOUNT
         ? dto.discountAmountGross : null);
+    campaign.setMarkerTag(dto.markerTagId != null ? getTag(dto.markerTagId) : null);
   }
 
   private void applyManualCampaignTargets(PromotionCampaign campaign, PromotionTargetSetupIRO setup) {
@@ -1093,7 +1104,6 @@ public class PromotionManagementService extends ServiceSuperclass {
 
     for (Long tagId : new LinkedHashSet<>(tagIds)) {
       Tag tag = getTag(tagId);
-      tag.setPromotional(true);
       PromotionCampaignTag relation = findCampaignTag(campaign, tag);
       if (relation == null) {
         relation = new PromotionCampaignTag();
@@ -1307,6 +1317,7 @@ public class PromotionManagementService extends ServiceSuperclass {
     dto.discountAmountGross = campaign.getDiscountAmountGross();
     dto.createdAt = campaign.getCreatedAt();
     dto.updatedAt = campaign.getUpdatedAt();
+    dto.markerTagId = campaign.getMarkerTag() != null ? campaign.getMarkerTag().getId() : null;
     return dto;
   }
 

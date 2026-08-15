@@ -30,6 +30,7 @@ public class PromotionCampaignHelpdeskDTO {
   public Integer discountAmountGross;
   public Date createdAt;
   public Date updatedAt;
+  public Long markerTagId;
   public List<Long> tagIds = new ArrayList<>();
   public List<PromotionCampaignSightEventHelpdeskDTO> sightEvents = new ArrayList<>();
   public PromotionCodeSetupIRO codeSetup;

@@ -8,6 +8,7 @@ import pl.hellopoland.bo.Tag;
 import pl.hellopoland.config.TagPagedCollectionConfig;
 import pl.hellopoland.dto.TagDTO;
 import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.enums.PromotionStatus;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
 import pl.hellopoland.util.BeanUtils;
 import pl.hellopoland.util.PagedEntityCollection;
@@ -81,6 +82,8 @@ public class TagService extends ServiceSuperclass {
 
   public void delete(Long id) {
     Tag tag = get(id);
+    em.createQuery("update PromotionCampaign set markerTag = null where markerTag = :tag")
+        .setParameter("tag", tag).executeUpdate();
     em.createQuery("delete from SightEventTag where tag=:tag")
         .setParameter("tag", tag).executeUpdate();
     em.remove(tag);
@@ -108,6 +111,38 @@ public class TagService extends ServiceSuperclass {
         .createQuery("from SightEventTag where sightEvent.sight in (:sights) "
             + "and sightEvent.active = true", SightEventTag.class)
         .setParameter("sights", sights).getResultList();
+  }
+
+  public void markPromotionalForActiveCampaigns(Collection<Tag> tags) {
+    if (tags == null || tags.isEmpty()) {
+      return;
+    }
+    Set<Long> tagIds = tags.stream()
+        .filter(Objects::nonNull)
+        .map(Tag::getId)
+        .filter(Objects::nonNull)
+        .collect(java.util.stream.Collectors.toSet());
+    if (tagIds.isEmpty()) {
+      applyPromotionalFlags(tags, Collections.emptySet());
+      return;
+    }
+    Date now = new Date();
+    Set<Long> activeMarkerTagIds = new HashSet<>(em.createQuery(
+        "select distinct campaign.markerTag.id from PromotionCampaign campaign "
+            + "where campaign.markerTag.id in :tagIds and campaign.status = :status "
+            + "and campaign.validFrom <= :now and campaign.validTo >= :now",
+        Long.class)
+        .setParameter("tagIds", tagIds)
+        .setParameter("status", PromotionStatus.ACTIVE)
+        .setParameter("now", now)
+        .getResultList());
+    applyPromotionalFlags(tags, activeMarkerTagIds);
+  }
+
+  void applyPromotionalFlags(Collection<Tag> tags, Set<Long> activeMarkerTagIds) {
+    tags.stream()
+        .filter(Objects::nonNull)
+        .forEach(tag -> tag.setPromotional(activeMarkerTagIds.contains(tag.getId())));
   }
 
     public Tag uploadIcon(Long id, byte[] bytes, String extension) {

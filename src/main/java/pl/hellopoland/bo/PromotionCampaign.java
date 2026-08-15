@@ -76,6 +76,9 @@ public class PromotionCampaign extends ModelSuperclass {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "updated_by")
   private User updatedBy;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "marker_tag_id")
+  private Tag markerTag;
 
   public String getName() {
     return name;
@@ -235,5 +238,13 @@ public class PromotionCampaign extends ModelSuperclass {
 
   public void setUpdatedBy(User updatedBy) {
     this.updatedBy = updatedBy;
+  }
+
+  public Tag getMarkerTag() {
+    return markerTag;
+  }
+
+  public void setMarkerTag(Tag markerTag) {
+    this.markerTag = markerTag;
   }
 }

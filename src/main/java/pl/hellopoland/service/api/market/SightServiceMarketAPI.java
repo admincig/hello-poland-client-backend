@@ -4,6 +4,7 @@ import pl.hellopoland.bo.Sight;
 import pl.hellopoland.bo.SightEvent;
 import pl.hellopoland.bo.SightEventCategory;
 import pl.hellopoland.bo.SightEventTag;
+import pl.hellopoland.bo.Tag;
 import pl.hellopoland.config.SightPagedCollectionConfig;
 import pl.hellopoland.dto.SightDTO;
 import pl.hellopoland.enums.LanguageVersion;
@@ -11,6 +12,7 @@ import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.rest.dto.PagedCollection;
 import pl.hellopoland.service.SightEventService;
 import pl.hellopoland.service.SightService;
+import pl.hellopoland.service.TagService;
 import pl.hellopoland.service.TranslationService;
 import pl.hellopoland.service.UserService;
 import pl.hellopoland.util.DtoMapper;
@@ -35,6 +37,8 @@ public class SightServiceMarketAPI {
   SightEventService sightEventService;
   @Inject
   UserService userService;
+  @Inject
+  TagService tagService;
 
   @Inject
   private TranslationService translationService;
@@ -46,8 +50,9 @@ public class SightServiceMarketAPI {
     config.setOrderColumn("e.name");
     config.setOrderDirection("asc");
     PagedEntityCollection<Sight> bos = service.getList(config, language);
+    enrichTags(bos.items, language);
     List<SightDTO> dtos = bos.items.stream().map(bo -> {
-      var dto = DtoMapper.getDTO(bo);
+      var dto = DtoMapper.getDTOWithTags(bo);
       dto.language = bo.getDefaultLanguage().getLanuage();
       return dto;
     }).collect(Collectors.toList());
@@ -105,6 +110,7 @@ public class SightServiceMarketAPI {
             translationService.translateEntities(bo.getCategories(), language);
             translationService.translateEntities(bo.getTags(), language);
         }
+        tagService.markPromotionalForActiveCampaigns(bo.getTags());
 
         var dto = DtoMapper.getFullDTO(bo);
         dto.language = language.getLanuage();
@@ -146,6 +152,7 @@ public class SightServiceMarketAPI {
     config.setExcludedIds(Set.of(bo.getId()));
     config.fetchSightEvents(true);
     Collection<Sight> sights = service.getList(config, language).items;
+    enrichTags(sights, language);
     fetchSightEventPrices(sights);
     return sights.stream()
         .map(minPriceMapper)
@@ -153,7 +160,7 @@ public class SightServiceMarketAPI {
   }
 
   private Function<Sight, SightDTO> minPriceMapper = s -> {
-    SightDTO dto = DtoMapper.getDTO(s);
+    SightDTO dto = DtoMapper.getDTOWithTags(s);
     if (s.getSightEvents() != null && !s.getSightEvents().isEmpty()) {
       dto.sightEvents =
           s.getSightEvents().stream()
@@ -174,6 +181,7 @@ public class SightServiceMarketAPI {
   public PagedCollection<SightDTO> getRecommended(Integer count, LanguageVersion languageVersion) {
     SightPagedCollectionConfig config = prepareConfigForRandom(count);
     PagedEntityCollection<Sight> pagedCollection = service.getList(config, languageVersion);
+    enrichTags(pagedCollection.items, languageVersion);
     fetchSightEventPrices(pagedCollection.items);
     return new PagedCollection<>(
         pagedCollection.items.stream()
@@ -214,6 +222,23 @@ public class SightServiceMarketAPI {
     for (Sight s : items) {
       s.setSightEvents(grouped.get(s.getId()));
     }
+  }
+
+  private void enrichTags(Collection<Sight> sights, LanguageVersion language) {
+    Map<Sight, Set<Tag>> tagsBySight = tagService.getForSights(sights).stream()
+        .filter(relation -> relation.getSightEvent().isAccessible())
+        .collect(Collectors.groupingBy(
+            relation -> relation.getSightEvent().getSight(),
+            Collectors.mapping(SightEventTag::getTag, Collectors.toSet())));
+    Set<Tag> tags = tagsBySight.values().stream()
+        .flatMap(Collection::stream)
+        .collect(Collectors.toSet());
+    if (language != null) {
+      translationService.translateEntities(tags, language);
+    }
+    tagService.markPromotionalForActiveCampaigns(tags);
+    sights.forEach(sight -> sight.setTags(
+        tagsBySight.getOrDefault(sight, Collections.emptySet())));
   }
 
   private SightPagedCollectionConfig prepareConfigForRandom(Integer count) {
@@ -259,6 +284,7 @@ public class SightServiceMarketAPI {
         config.setOrderDirection("asc");
 
         PagedEntityCollection<Sight> bos = service.getList(config, language);
+        enrichTags(bos.items, language);
 
         // dociąga ceny z HelloTicket i podstawia je do sightEvents
         fetchSightEventPrices(bos.items);
