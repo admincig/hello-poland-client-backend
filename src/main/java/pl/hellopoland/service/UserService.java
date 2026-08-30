@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -1000,11 +1001,19 @@ public class UserService extends ServiceSuperclass {
         .getResultList();
   }
 
-  public User findByPartnerAndRole(Partner partner, Role role) {
-    return em.createQuery("select u from User u join u.roles roles where roles.role = :role and u.partner = :partner", User.class)
+  public User findPartnerUserByEmailAndRole(Partner partner, String email, Role role) {
+    return em.createQuery(
+            "select distinct u from User u join u.roles roles "
+                + "where roles.role = :role and u.partner = :partner "
+                + "and lower(u.email) = :email and u.deleted = false",
+            User.class)
         .setParameter("role", role)
         .setParameter("partner", partner)
-        .getSingleResult();
+        .setParameter("email", email.toLowerCase(Locale.ROOT))
+        .getResultStream()
+        .findFirst()
+        .orElseThrow(() -> new ConflictingException(
+            "Nie znaleziono głównego konta partnera dla adresu " + email));
   }
 
     public void createPasswordResetToken(User user, String token) {

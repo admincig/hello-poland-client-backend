@@ -48,6 +48,7 @@ public class HellopolandService extends ServiceSuperclass {
 
   public void resetPartnerCredentials(Long id, String email) {
     Partner partner = em.find(Partner.class, id);
+    String previousEmail = partner.getEmail();
     email = StringUtils.trim(email).toLowerCase(Locale.ROOT);
     partner.setEmail(email);
     Portal hpt = getPortal("Hello Ticket Cloud");
@@ -60,7 +61,8 @@ public class HellopolandService extends ServiceSuperclass {
     form.passwordConfirmation = newPassword;
     ht.changePartnerCredentials(form, partner.getHptToken());
 
-    User user = userService.findByPartnerAndRole(partner, Role.PARTNER);
+    User user = userService.findPartnerUserByEmailAndRole(
+        partner, previousEmail, Role.PARTNER);
     user.changePassword(newPassword);
     user.setEmail(email);
 
@@ -73,14 +75,15 @@ public class HellopolandService extends ServiceSuperclass {
     }
   }
 
-  public void synchronizePartnerWithHpt(Partner partner) {
+  public void synchronizePartnerWithHpt(Partner partner, String previousEmail) {
     String email = StringUtils.trimToNull(partner.getEmail());
     if (email == null) {
       throw new ConflictingException("The email cannot be blank.");
     }
     email = email.toLowerCase(Locale.ROOT);
     partner.setEmail(email);
-    userService.findByPartnerAndRole(partner, Role.PARTNER).setEmail(email);
+    userService.findPartnerUserByEmailAndRole(
+        partner, previousEmail, Role.PARTNER).setEmail(email);
 
     if (partner.getHptId() == null) {
       return;

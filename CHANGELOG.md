@@ -25,5 +25,5 @@ w tym pliku. Zmiany przygotowywane do następnego wydania zapisujemy w sekcji
 ### Naprawiono
 
 - Rozjazd adresu powiadomień partnera pomiędzy bazami HP i HT po zmianie loginu partnera.
+- Wybór głównego konta partnera, gdy partner posiada więcej niż jednego użytkownika z rolą `PARTNER`.
 - Jednoczesne filtrowanie wydarzeń po kategoriach i tagach dzięki rozdzieleniu nazw parametrów zapytania.
-

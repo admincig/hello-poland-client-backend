@@ -91,8 +91,9 @@ public class PartnerServiceHelpdeskAPI {
   public PartnerDTO update(PartnerDTO dto, LanguageVersion lang) {
     Partner bo = service.get(dto.id);
     accessService.requirePartnerAccess(bo);
+    String previousEmail = bo.getEmail();
     service.update(bo, dto, lang);
-    hplService.synchronizePartnerWithHpt(service.get(dto.id));
+    hplService.synchronizePartnerWithHpt(service.get(dto.id), previousEmail);
     return get(dto.id, lang);
   }
 
