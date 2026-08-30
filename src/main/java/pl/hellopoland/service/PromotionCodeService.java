@@ -35,13 +35,15 @@ import jakarta.persistence.LockModeType;
 import jakarta.persistence.NoResultException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -127,7 +129,7 @@ public class PromotionCodeService extends ServiceSuperclass {
         findActiveCampaignSightEvents(campaign, cartContext.hpSightEventIds());
     if (campaignSightEvents.isEmpty()) {
       return invalid("PROMOTION_NOT_AVAILABLE_FOR_OFFER",
-          "Kod nie działa dla wybranych biletów.");
+          "Kod jest poprawny, ale wybrana oferta nie jest objęta tą promocją.");
     }
 
     int requiredQuantity = valueOrDefault(campaign.getRequiredTicketQuantity(), 1);
@@ -145,7 +147,8 @@ public class PromotionCodeService extends ServiceSuperclass {
       }
 
       Long hpSightEventId = campaignSightEvent.getSightEvent().getId();
-      int cartQuantity = cartContext.quantityForHpSightEventId(hpSightEventId);
+      int cartQuantity = cartContext.quantityForHpSightEventIdWithinTicketValidity(
+          hpSightEventId, campaign, this);
       if (cartQuantity < requiredQuantity) {
         continue;
       }
@@ -158,15 +161,25 @@ public class PromotionCodeService extends ServiceSuperclass {
 
       Effect effect = new Effect();
       effect.type = EFFECT_ADD_TICKET;
-      effect.sourceCartItemId = cartContext.firstCartItemIdForHpSightEventId(hpSightEventId);
+      effect.sourceCartItemId = cartContext.firstCartItemIdForHpSightEventIdWithinTicketValidity(
+          hpSightEventId, campaign, this);
       effect.sightEvent = sightEventRef(hpSightEventId);
       effect.item = ticketItem(promotionalTicket, grantedQuantity);
       response.effects.add(effect);
     }
 
     if (response.effects.isEmpty()) {
+      Set<Long> matchingSightEventIds = campaignSightEvents.stream()
+          .map(item -> item.getSightEvent().getId())
+          .collect(Collectors.toSet());
+      if (cartContext.hasOnlyItemsAfterTicketValidity(
+          matchingSightEventIds, campaign, this)) {
+        return invalid("PROMOTION_TICKET_DATE_EXCEEDED",
+            ticketValidityExceededMessage(campaign));
+      }
       return invalid("PROMOTION_CONDITIONS_NOT_MET",
-          "Koszyk nie spełnia warunków promocji.");
+          "Kod jest poprawny, ale warunki promocji nie są spełnione. "
+              + "Dodaj wymaganą liczbę biletów w cenie regularnej dla tej samej oferty.");
     }
 
     return response;
@@ -195,7 +208,7 @@ public class PromotionCodeService extends ServiceSuperclass {
     List<Long> matchingCartItemIds = cartContext.cartItemIdsForHpSightEventIds(matchingSightEventIds);
     if (matchingCartItemIds.isEmpty()) {
       return invalid("PROMOTION_NOT_AVAILABLE_FOR_OFFER",
-          "Kod nie działa dla wybranych biletów.");
+          "Kod jest poprawny, ale wybrana oferta nie jest objęta tą promocją.");
     }
 
     Target target = new Target();
@@ -224,18 +237,27 @@ public class PromotionCodeService extends ServiceSuperclass {
 
   private PromotionCodeValidationORO validateCampaign(PromotionCampaign campaign) {
     if (campaign.getStatus() != PromotionStatus.ACTIVE) {
-      return invalid("PROMOTION_NOT_ACTIVE", "Promocja nie jest aktywna.");
+      return invalid("PROMOTION_NOT_ACTIVE",
+          "Kod jest poprawny, ale promocja nie jest obecnie aktywna.");
     }
 
     Date now = new Date();
     if (campaign.getValidFrom().after(now)) {
-      return invalid("PROMOTION_NOT_STARTED", "Promocja jeszcze się nie rozpoczęła.");
+      return invalid("PROMOTION_NOT_STARTED",
+          "Kod jest poprawny, ale promocja rozpocznie się "
+              + formatPromotionDateTime(campaign.getValidFrom()) + ".");
     }
     if (campaign.getValidTo().before(now)) {
-      return invalid("PROMOTION_EXPIRED", "Promocja już się zakończyła.");
+      return invalid("PROMOTION_EXPIRED",
+          "Kod jest poprawny, ale promocja zakończyła się "
+              + formatPromotionDateTime(campaign.getValidTo()) + ".");
     }
 
     return PromotionCodeValidationORO.valid();
+  }
+
+  private String formatPromotionDateTime(Date date) {
+    return new SimpleDateFormat("dd.MM.yyyy 'o' HH:mm").format(date);
   }
 
   private PromotionCodeValidationORO validateLimits(PromotionCampaign campaign, PromotionCode code) {
@@ -290,7 +312,7 @@ public class PromotionCodeService extends ServiceSuperclass {
 
     if (matchingSightEventsCount == 0) {
       return invalid("PROMOTION_NOT_AVAILABLE_FOR_OFFER",
-          "Kod nie działa dla wybranych biletów.");
+          "Kod jest poprawny, ale wybrana oferta nie jest objęta tą promocją.");
     }
 
     return PromotionCodeValidationORO.valid();
@@ -300,13 +322,13 @@ public class PromotionCodeService extends ServiceSuperclass {
       PromotionCampaignSightEvent campaignSightEvent) {
     if (campaignSightEvent.getTicketPoolStatus() != PromotionTicketPoolStatus.CREATED) {
       return invalid("PROMOTION_POOL_NOT_READY",
-          "Pula promocyjna dla tej oferty nie jest jeszcze gotowa.");
+          "Kod jest poprawny, ale bilety promocyjne dla wybranej oferty nie są obecnie dostępne.");
     }
     if (campaignSightEvent.getHptAtnaId() == null
         || campaignSightEvent.getHptTicketDefinitionId() == null
         || campaignSightEvent.getHptTicketPoolDefinitionId() == null) {
       return invalid("PROMOTION_POOL_NOT_READY",
-          "Pula promocyjna dla tej oferty nie jest jeszcze gotowa.");
+          "Kod jest poprawny, ale bilety promocyjne dla wybranej oferty nie są obecnie dostępne.");
     }
     return PromotionCodeValidationORO.valid();
   }
@@ -329,18 +351,20 @@ public class PromotionCodeService extends ServiceSuperclass {
   }
 
   private CartContext resolveCart(PromotionCodeValidationIRO iro) {
-    Map<Long, Integer> quantitiesByAtnaId = new LinkedHashMap<>();
-    if (iro.cartItems != null) {
-      iro.cartItems.stream()
-          .filter(item -> item != null && item.id != null)
-          .forEach(item -> quantitiesByAtnaId.merge(item.id, valueOrDefault(item.quantity, 0), Integer::sum));
-    }
-    quantitiesByAtnaId.entrySet().removeIf(entry -> entry.getValue() <= 0);
-    if (quantitiesByAtnaId.isEmpty()) {
+    List<PromotionCodeValidationIRO.CartItem> requestedItems = iro.cartItems == null
+        ? List.of()
+        : iro.cartItems.stream()
+            .filter(item -> item != null && item.id != null)
+            .filter(item -> valueOrDefault(item.quantity, 0) > 0)
+            .collect(Collectors.toList());
+    if (requestedItems.isEmpty()) {
       return new CartContext(List.of());
     }
 
-    Map<Long, TicketDefinitionDTO> ticketDefinitions = fetchTicketDefinitions(quantitiesByAtnaId.keySet());
+    Set<Long> atnaIds = requestedItems.stream()
+        .map(item -> item.id)
+        .collect(Collectors.toSet());
+    Map<Long, TicketDefinitionDTO> ticketDefinitions = fetchTicketDefinitions(atnaIds);
     Set<Long> hptSightEventIds = ticketDefinitions.values().stream()
         .map(td -> td.sightEventId)
         .filter(Objects::nonNull)
@@ -348,8 +372,8 @@ public class PromotionCodeService extends ServiceSuperclass {
     Map<Long, SightEvent> hpSightEventsByHptId = findSightEventsByHptIds(hptSightEventIds);
 
     List<CartItemContext> items = new ArrayList<>();
-    for (Map.Entry<Long, Integer> entry : quantitiesByAtnaId.entrySet()) {
-      TicketDefinitionDTO ticketDefinition = ticketDefinitions.get(entry.getKey());
+    for (PromotionCodeValidationIRO.CartItem requestedItem : requestedItems) {
+      TicketDefinitionDTO ticketDefinition = ticketDefinitions.get(requestedItem.id);
       if (ticketDefinition == null || ticketDefinition.sightEventId == null) {
         continue;
       }
@@ -357,10 +381,30 @@ public class PromotionCodeService extends ServiceSuperclass {
       if (sightEvent == null) {
         continue;
       }
-      items.add(new CartItemContext(entry.getKey(), entry.getValue(), ticketDefinition,
-          sightEvent.getId()));
+      items.add(new CartItemContext(requestedItem.id, requestedItem.quantity, ticketDefinition,
+          sightEvent.getId(), requestedItem.date));
     }
     return new CartContext(items);
+  }
+
+  boolean isVisitDateWithinTicketValidity(PromotionCampaign campaign, Date visitDate) {
+    if (campaign == null || campaign.getTicketValidTo() == null || visitDate == null) {
+      return false;
+    }
+    ZoneId zone = ZoneId.systemDefault();
+    LocalDate visitDay = visitDate.toInstant().atZone(zone).toLocalDate();
+    LocalDate lastValidDay = campaign.getTicketValidTo().toInstant().atZone(zone).toLocalDate();
+    return !visitDay.isAfter(lastValidDay);
+  }
+
+  private String ticketValidityExceededMessage(PromotionCampaign campaign) {
+    if (campaign == null || campaign.getTicketValidTo() == null) {
+      return "Kod jest poprawny, ale nie skonfigurowano granicznej daty ważności biletu "
+          + "promocyjnego. Skontaktuj się z obsługą Hello! Poland.";
+    }
+    return "Kod jest poprawny, ale wybrany termin przekracza ważność biletu promocyjnego. "
+        + "W tej promocji można wybrać termin najpóźniej "
+        + new SimpleDateFormat("dd.MM.yyyy").format(campaign.getTicketValidTo()) + ".";
   }
 
   private Map<Long, TicketDefinitionDTO> fetchTicketDefinitions(Collection<Long> atnaIds) {
@@ -468,8 +512,10 @@ public class PromotionCodeService extends ServiceSuperclass {
       throw new ConflictingException("Rezerwacja kodu promocyjnego wygasła.");
     }
 
+    OrderEntry matchingOrderEntry = findMatchingOrderEntry(redemption, order);
+    validateTicketPromotionVisitDate(redemption, matchingOrderEntry);
     redemption.setOrder(order);
-    redemption.setOrderEntry(findMatchingOrderEntry(redemption, order));
+    redemption.setOrderEntry(matchingOrderEntry);
     applyDiscountPromotion(redemption, order);
     redemption.setUpdatedAt(now);
   }
@@ -576,6 +622,20 @@ public class PromotionCodeService extends ServiceSuperclass {
         .findFirst()
         .orElseThrow(() -> new ConflictingException(
             "W zamówieniu brakuje biletu promocyjnego wymaganego przez kod."));
+  }
+
+  private void validateTicketPromotionVisitDate(PromotionCodeRedemption redemption,
+      OrderEntry matchingOrderEntry) {
+    if (redemption.getPromotionTypeSnapshot() != PromotionType.TICKET) {
+      return;
+    }
+    Date visitDate = matchingOrderEntry != null && matchingOrderEntry.getDateEntry() != null
+        ? matchingOrderEntry.getDateEntry().getDate()
+        : null;
+    if (!isVisitDateWithinTicketValidity(redemption.getPromotionCampaign(), visitDate)) {
+      throw new ConflictingException(
+          ticketValidityExceededMessage(redemption.getPromotionCampaign()));
+    }
   }
 
   private void applyDiscountPromotion(PromotionCodeRedemption redemption, Order order) {
@@ -864,13 +924,15 @@ public class PromotionCodeService extends ServiceSuperclass {
     private final int quantity;
     private final TicketDefinitionDTO ticketDefinition;
     private final Long hpSightEventId;
+    private final Date visitDate;
 
     private CartItemContext(Long atnaId, int quantity, TicketDefinitionDTO ticketDefinition,
-        Long hpSightEventId) {
+        Long hpSightEventId, Date visitDate) {
       this.atnaId = atnaId;
       this.quantity = quantity;
       this.ticketDefinition = ticketDefinition;
       this.hpSightEventId = hpSightEventId;
+      this.visitDate = visitDate;
     }
   }
 
@@ -891,19 +953,35 @@ public class PromotionCodeService extends ServiceSuperclass {
           .collect(Collectors.toSet());
     }
 
-    private int quantityForHpSightEventId(Long hpSightEventId) {
+    private int quantityForHpSightEventIdWithinTicketValidity(Long hpSightEventId,
+        PromotionCampaign campaign, PromotionCodeService service) {
       return items.stream()
           .filter(item -> Objects.equals(item.hpSightEventId, hpSightEventId))
+          .filter(item -> item.visitDate == null
+              || service.isVisitDateWithinTicketValidity(campaign, item.visitDate))
           .mapToInt(item -> item.quantity)
           .sum();
     }
 
-    private Long firstCartItemIdForHpSightEventId(Long hpSightEventId) {
+    private Long firstCartItemIdForHpSightEventIdWithinTicketValidity(Long hpSightEventId,
+        PromotionCampaign campaign, PromotionCodeService service) {
       return items.stream()
           .filter(item -> Objects.equals(item.hpSightEventId, hpSightEventId))
+          .filter(item -> item.visitDate == null
+              || service.isVisitDateWithinTicketValidity(campaign, item.visitDate))
           .map(item -> item.atnaId)
           .findFirst()
           .orElse(null);
+    }
+
+    private boolean hasOnlyItemsAfterTicketValidity(Set<Long> hpSightEventIds,
+        PromotionCampaign campaign, PromotionCodeService service) {
+      List<CartItemContext> matchingItems = items.stream()
+          .filter(item -> hpSightEventIds.contains(item.hpSightEventId))
+          .collect(Collectors.toList());
+      return !matchingItems.isEmpty()
+          && matchingItems.stream().allMatch(item -> item.visitDate != null
+              && !service.isVisitDateWithinTicketValidity(campaign, item.visitDate));
     }
 
     private List<Long> cartItemIdsForHpSightEventIds(Set<Long> hpSightEventIds) {

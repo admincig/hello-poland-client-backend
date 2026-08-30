@@ -24,6 +24,7 @@ Content-Type: application/json
   "status": "DRAFT",
   "validFrom": "2026-08-01T00:00:00",
   "validTo": "2026-08-31T23:59:59",
+  "ticketValidTo": "2026-12-31T23:59:59",
   "globalLimit": 2000,
   "codeLimit": 1,
   "requiredTicketQuantity": 1,

@@ -140,6 +140,7 @@ Tworzy kampanię. Dla promocji `TICKET` może od razu utworzyć kody oraz pule p
   "scopeType": "MANUAL",
   "validFrom": "2026-08-01T00:00:00",
   "validTo": "2026-08-31T23:59:59",
+  "ticketValidTo": "2026-12-31T23:59:59",
   "globalLimit": 2000,
   "codeLimit": 1,
   "requiredTicketQuantity": 1,
@@ -186,6 +187,7 @@ Backend wykona:
   "scopeType": "MANUAL",
   "validFrom": "2026-08-01T00:00:00",
   "validTo": "2026-08-31T23:59:59",
+  "ticketValidTo": "2026-12-31T23:59:59",
   "globalLimit": 2000,
   "codeLimit": 1,
   "requiredTicketQuantity": 1,
@@ -311,7 +313,7 @@ Jeśli nie ma `codes` ani `fixedCode`, backend oczekuje `generateCount` i generu
 
 Zasady:
 
-- `generateCount` musi być większe od `0`,
+- `generateCount` musi być liczbą całkowitą od `1` do `100000`,
 - maksymalnie można wygenerować `100000` kodów w jednym requestcie,
 - `generatedCodeLength` domyślnie wynosi `12`,
 - prefix jest opcjonalny,
@@ -389,7 +391,8 @@ Wymagane:
 Domyślne zachowania:
 
 - jeśli nie podano `startDate`, backend użyje `promotion_campaign.validFrom`,
-- jeśli nie podano `endDate`, backend użyje `promotion_campaign.validTo`,
+- jeśli nie podano `endDate`, backend użyje `promotion_campaign.ticketValidTo`,
+- `endDate` nie może przekraczać `promotion_campaign.ticketValidTo`,
 - jeśli nie podano `entryStartDate`, backend użyje daty startu puli,
 - jeśli nie podano `entryEndDate`, backend użyje daty końca puli,
 - jeśli nie podano `wholeDay`, backend ustawi `true`,

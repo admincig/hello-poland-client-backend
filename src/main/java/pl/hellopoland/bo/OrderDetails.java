@@ -9,7 +9,7 @@ import jakarta.persistence.Enumerated;
 public class OrderDetails {
 
   public enum Platform {
-    ANDROID, IOS, WEB, WEB_MOBILE, UNKNOWN;
+    ANDROID, IOS, WEB, WEB_MOBILE, WIDGET, UNKNOWN;
   }
 
 

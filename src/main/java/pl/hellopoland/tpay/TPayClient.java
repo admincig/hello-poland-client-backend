@@ -33,9 +33,10 @@ public class TPayClient extends ServiceSuperclass {
   private String notificationEmail = ServiceSuperclass.properties.getProperty("tpay.notification.email");
   private String redirectUrl = ServiceSuperclass.properties.getProperty("tpay.redirectUrl");
 
-  public TransactionCreated createTransaction(String description, String hash, String ackUrl, BigDecimal totalPrice, String email, String name) {
+  public TransactionCreated createTransaction(String description, String hash, String ackUrl, BigDecimal totalPrice,
+                                              String email, String name, boolean widget) {
     try {
-      return createTransactionInternal(description, hash, ackUrl, totalPrice, email, name);
+      return createTransactionInternal(description, hash, ackUrl, totalPrice, email, name, widget);
     } catch (IOException e) {
       throw new RuntimeException(e);
     } catch (InterruptedException e) {
@@ -43,10 +44,12 @@ public class TPayClient extends ServiceSuperclass {
     }
   }
 
-  private TransactionCreated createTransactionInternal(String description, String hash, String ackUrl, BigDecimal totalPrice, String email, String name) throws IOException, InterruptedException {
+  private TransactionCreated createTransactionInternal(String description, String hash, String ackUrl,
+                                                       BigDecimal totalPrice, String email, String name,
+                                                       boolean widget) throws IOException, InterruptedException {
     String accessToken = login();
     String transactionUrl = apiUrl + "/transactions";
-    CreateTransaction requestJson = prepareRequestJson(description, hash, ackUrl, totalPrice, email, name);
+    CreateTransaction requestJson = prepareRequestJson(description, hash, ackUrl, totalPrice, email, name, widget);
     String requestJsonString = om.writeValueAsString(requestJson);
     logger.log(System.Logger.Level.INFO, "TPAY /transactions request=" + requestJsonString);
 
@@ -70,7 +73,9 @@ public class TPayClient extends ServiceSuperclass {
       return om.readValue(body, TransactionCreated.class);
   }
 
-  private CreateTransaction prepareRequestJson(String description, String hash, String ackUrl, BigDecimal totalPrice, String email, String name) {
+  private CreateTransaction prepareRequestJson(String description, String hash, String ackUrl,
+                                               BigDecimal totalPrice, String email, String name,
+                                               boolean widget) {
     CreateTransaction createTransaction = new CreateTransaction();
     createTransaction.description = description;
     createTransaction.hiddenDescription = hash;
@@ -83,9 +88,14 @@ public class TPayClient extends ServiceSuperclass {
     createTransaction.callbacks.notification.email = notificationEmail;
     createTransaction.callbacks.notification.url = ackUrl;
     createTransaction.callbacks.payerUrls = new PayerUrls();
-    createTransaction.callbacks.payerUrls.success = redirectUrl + "/zamowienie?id=" + hash;
+    createTransaction.callbacks.payerUrls.success = buildPayerSuccessUrl(redirectUrl, hash, widget);
     createTransaction.callbacks.payerUrls.error = redirectUrl;
     return createTransaction;
+  }
+
+  static String buildPayerSuccessUrl(String redirectUrl, String hash, boolean widget) {
+    String confirmationPath = widget ? "/widget/order/" : "/zamowienie";
+    return redirectUrl + confirmationPath + "?id=" + hash;
   }
 
   /*private String login() throws IOException, InterruptedException {

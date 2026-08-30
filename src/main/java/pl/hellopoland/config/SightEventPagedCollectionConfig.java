@@ -149,8 +149,8 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
 
   public void setCategoriesIds(List<Long> categoriesIds) {
     if (categoriesIds != null && !categoriesIds.isEmpty()) {
-      addCondition("ids", categoriesIds,
-          "e.id in (select sightEvent.id from SightEventCategory where category.id in (:ids))");
+      addCondition("categoryIds", categoriesIds,
+          "e.id in (select sightEvent.id from SightEventCategory where category.id in (:categoryIds))");
     }
   }
 
@@ -165,8 +165,8 @@ public class SightEventPagedCollectionConfig extends PagedCollectionConfig<Sight
 
   public void setTagsIds(List<Long> tagsIds) {
     if (tagsIds != null && !tagsIds.isEmpty()) {
-      addCondition("ids", tagsIds,
-          "e.id in (select sightEvent.id from SightEventTag where tag.id in (:ids))");
+      addCondition("tagIds", tagsIds,
+          "e.id in (select sightEvent.id from SightEventTag where tag.id in (:tagIds))");
     }
   }
 

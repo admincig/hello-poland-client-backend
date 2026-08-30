@@ -4,9 +4,6 @@ import jakarta.ejb.LocalBean;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonStructure;
-import jakarta.json.JsonValue;
-import jakarta.json.bind.JsonbException;
 import jakarta.persistence.TypedQuery;
 import pl.hellopoland.bo.*;
 import pl.hellopoland.bo.Order.Status;
@@ -17,7 +14,6 @@ import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.email.EmailSendingException;
 import pl.hellopoland.exception.notfound.ResourceNotFoundException;
-import pl.hellopoland.rest.JsonbConfig;
 import pl.hellopoland.rest.dto.OrderIRO;
 import pl.hellopoland.rest.dto.OrderIRO.OrderEntryIRO;
 import pl.hellopoland.security.JwtVerificator;
@@ -162,16 +158,7 @@ public class OrderService extends ServiceSuperclass {
       placeInExternalAPI(o);
     } catch (Exception e) {
       logger.log(Level.ERROR, e.getMessage());
-      try {
-        var hptJsonError = JsonbConfig.getInstance().fromJson(e.getMessage(), JsonStructure.class);
-        JsonValue message = hptJsonError.getValue("/message");
-        if (message != null) {
-          throw new ConflictingException(message.toString());
-        }
-      } catch (JsonbException ex) {
-        logger.log(Level.ERROR, ex.getMessage());
-      }
-      throw new ConflictingException("Nie udało się złożyć zamówienia");
+      throw new ConflictingException(orderReservationErrorMessage(e));
     }
     TransactionCreated transactionCreated = createPayment(o);
     o.setTPayPaymentId(transactionCreated.transactionId);
@@ -180,6 +167,28 @@ public class OrderService extends ServiceSuperclass {
     logger.log(Level.INFO, "Returned order id=" + o.getId() + "; payment= " + transactionCreated.transactionPaymentUrl);
     logger.log(Level.INFO, "-------End creating order --------");
     return o;
+  }
+
+  String orderReservationErrorMessage(Exception exception) {
+    String message = exception != null ? exception.getLocalizedMessage() : null;
+    if (message == null || message.isBlank()
+        || "Nieznany błąd.".equalsIgnoreCase(message.trim())
+        || message.contains("Placing order in HPT returned null response")) {
+      return "Nie udało się zarezerwować biletów w wybranym terminie. "
+          + "Sprawdź dostępność terminu i spróbuj ponownie.";
+    }
+
+    String lowerMessage = message.toLowerCase(Locale.ROOT);
+    if (lowerMessage.contains("poza zakresem definicji puli")
+        || lowerMessage.contains("wydarzenie nie jest cykliczne")) {
+      return "Wybrany termin nie jest dostępny dla jednego z biletów. "
+          + "Wróć do koszyka, wybierz inny termin i spróbuj ponownie.";
+    }
+    if (lowerMessage.contains("brak dostępnych biletów")) {
+      return "Bilety na wybrany termin zostały wyprzedane. "
+          + "Wróć do koszyka i wybierz inny termin lub ofertę.";
+    }
+    return message.replaceAll("^\"|\"$", "");
   }
 
   private String getAckPaymentURL(Order o) {
@@ -215,7 +224,8 @@ public class OrderService extends ServiceSuperclass {
             String ackUrl = getAckPaymentURL(o);
             OrderDetails details = o.getDetails();
             return tPayClient.createTransaction(description, o.getHash(), ackUrl, totalPrice,
-                    details.getEmail(), details.getFirstName() + " " + details.getLastName());
+                    details.getEmail(), details.getFirstName() + " " + details.getLastName(),
+                    OrderDetails.Platform.WIDGET.equals(details.getPlatform()));
         }
         return new TransactionCreated();
     }

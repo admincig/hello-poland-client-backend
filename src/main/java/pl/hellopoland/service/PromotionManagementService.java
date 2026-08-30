@@ -42,6 +42,8 @@ import jakarta.ejb.LocalBean;
 import jakarta.ejb.Stateless;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashSet;
@@ -241,6 +243,9 @@ public class PromotionManagementService extends ServiceSuperclass {
     if (selectedSightEvents.isEmpty()) {
       throw new ConflictingException("Wybierz co najmniej jedną aktywną ofertę z powiązaniem HT.");
     }
+    if (campaign.getPromotionType() == PromotionType.TICKET) {
+      validateTicketPoolSetup(iro.ticketPoolSetup);
+    }
     materializeCampaignTargets(campaign, iro.targetSetup, iro.ticketPoolSetup, true);
     campaign.setUpdatedAt(new Date());
     campaign.setUpdatedBy(getLoggedUser());
@@ -250,7 +255,7 @@ public class PromotionManagementService extends ServiceSuperclass {
   public List<PromotionCodeHelpdeskDTO> listCodes(Long campaignId) {
     PromotionCampaign campaign = getCampaignEntity(campaignId);
     return em.createQuery(
-        "from PromotionCode where promotionCampaign = :campaign order by createdAt desc",
+        "from PromotionCode where promotionCampaign = :campaign order by createdAt desc, id desc",
         PromotionCode.class)
         .setParameter("campaign", campaign)
         .getResultStream()
@@ -275,7 +280,7 @@ public class PromotionManagementService extends ServiceSuperclass {
   public String exportCodesCsv(Long campaignId) {
     PromotionCampaign campaign = getCampaignEntity(campaignId);
     List<PromotionCode> codes = em.createQuery(
-        "from PromotionCode where promotionCampaign = :campaign order by createdAt asc, id asc",
+        "from PromotionCode where promotionCampaign = :campaign order by createdAt desc, id desc",
         PromotionCode.class)
         .setParameter("campaign", campaign)
         .getResultList();
@@ -461,8 +466,37 @@ public class PromotionManagementService extends ServiceSuperclass {
   private TicketPoolDefinitionDTO createSpecialTicketPool(HelloTicket hpt, String hptToken,
       PromotionCampaign campaign, PromotionCampaignSightEvent relation,
       PromotionTicketPoolSetupIRO setup, TicketDefinitionDTO ticketDefinition) {
-    Date startDate = setup.startDate != null ? setup.startDate : campaign.getValidFrom();
-    Date endDate = setup.endDate != null ? setup.endDate : campaign.getValidTo();
+    TicketPoolDefinitionDTO pool = buildSpecialTicketPoolDefinition(campaign, relation, setup,
+        ticketDefinition);
+    return hpt.addTicketPoolDefinition(pool, hptToken);
+  }
+
+  TicketPoolDefinitionDTO buildSpecialTicketPoolDefinition(PromotionCampaign campaign,
+      PromotionCampaignSightEvent relation, PromotionTicketPoolSetupIRO setup,
+      TicketDefinitionDTO ticketDefinition) {
+    Date validityStartDate = setup.startDate != null ? setup.startDate : campaign.getValidFrom();
+    Date configuredTicketValidTo = campaign.getTicketValidTo();
+    if (configuredTicketValidTo == null) {
+      throw new ConflictingException(
+          "Ustaw graniczną datę ważności biletów promocyjnych.");
+    }
+    Date validityEndDate = setup.endDate != null ? setup.endDate : configuredTicketValidTo;
+    if (validityEndDate.after(configuredTicketValidTo)) {
+      throw new ConflictingException(
+          "Ważność puli nie może przekraczać granicznej daty ważności biletów promocji.");
+    }
+    boolean wholeDay = setup.wholeDay == null || setup.wholeDay;
+    boolean cyclic = setup.isCyclic == null || setup.isCyclic;
+
+    Date poolStartDate = validityStartDate;
+    Date poolEndDate = validityEndDate;
+    Date recurrenceEndDate = validityEndDate;
+    if (cyclic && wholeDay) {
+      // Campaign dates constrain code redemption. Ticket validity is configured separately.
+      poolStartDate = startOfDay(validityStartDate);
+      poolEndDate = endOfDay(validityStartDate);
+      recurrenceEndDate = endOfDay(validityEndDate);
+    }
 
     TicketDefinitionDTO poolTicket = new TicketDefinitionDTO();
     poolTicket.id = ticketDefinition.id;
@@ -473,14 +507,14 @@ public class PromotionManagementService extends ServiceSuperclass {
         ? setup.poolName
         : "Promocja - " + campaign.getName();
     pool.availableTicketsNumber = setup.availableTicketsNumber;
-    pool.isCyclic = setup.isCyclic == null || setup.isCyclic;
-    pool.startDate = startDate;
-    pool.endDate = endDate;
-    pool.entryStartDate = setup.entryStartDate != null ? setup.entryStartDate : startDate;
-    pool.entryEndDate = setup.entryEndDate != null ? setup.entryEndDate : endDate;
+    pool.isCyclic = cyclic;
+    pool.startDate = poolStartDate;
+    pool.endDate = poolEndDate;
+    pool.entryStartDate = setup.entryStartDate != null ? setup.entryStartDate : poolStartDate;
+    pool.entryEndDate = setup.entryEndDate != null ? setup.entryEndDate : poolEndDate;
     pool.sightEventId = relation.getSightEvent().getHptId();
     pool.ticketDefinitions = List.of(poolTicket);
-    pool.wholeDay = setup.wholeDay == null || setup.wholeDay;
+    pool.wholeDay = wholeDay;
     pool.poolType = TicketPoolTypeDTO.PROMOTIONAL;
     pool.visibleForPartner = false;
     pool.visibleOnPortal = false;
@@ -488,10 +522,22 @@ public class PromotionManagementService extends ServiceSuperclass {
       pool.frequencyData = new FrequencyDataDTO();
       pool.frequencyData.frequency = 1;
       pool.frequencyData.frequencyType = FrequencyTypeDTO.DAILY;
-      pool.frequencyData.startDate = startDate;
-      pool.frequencyData.endDate = endDate;
+      pool.frequencyData.startDate = poolStartDate;
+      pool.frequencyData.endDate = recurrenceEndDate;
     }
-    return hpt.addTicketPoolDefinition(pool, hptToken);
+    return pool;
+  }
+
+  private Date startOfDay(Date date) {
+    ZoneId zone = ZoneId.systemDefault();
+    LocalDate localDate = date.toInstant().atZone(zone).toLocalDate();
+    return Date.from(localDate.atStartOfDay(zone).toInstant());
+  }
+
+  private Date endOfDay(Date date) {
+    ZoneId zone = ZoneId.systemDefault();
+    LocalDate localDate = date.toInstant().atZone(zone).toLocalDate();
+    return Date.from(localDate.plusDays(1).atStartOfDay(zone).toInstant().minusMillis(1));
   }
 
   private TicketDefinitionDTO resolveCreatedPoolTicket(HelloTicket hpt, String hptToken,
@@ -513,12 +559,12 @@ public class PromotionManagementService extends ServiceSuperclass {
             "Nie udało się odczytać ATNA biletu promocyjnego z HT."));
   }
 
-  private void validateTicketPoolSetup(PromotionTicketPoolSetupIRO setup) {
+  void validateTicketPoolSetup(PromotionTicketPoolSetupIRO setup) {
     if (setup == null) {
       throw new ConflictingException("Podaj parametry puli promocyjnej.");
     }
-    if (setup.ticketPrice == null || setup.ticketPrice < 0) {
-      throw new ConflictingException("Podaj poprawną cenę biletu promocyjnego.");
+    if (setup.ticketPrice == null || setup.ticketPrice <= 0) {
+      throw new ConflictingException("Cena biletu promocyjnego musi być większa od zera.");
     }
     if (setup.availableTicketsNumber == null || setup.availableTicketsNumber <= 0) {
       throw new ConflictingException("Podaj liczbę biletów promocyjnych dla oferty.");
@@ -709,9 +755,12 @@ public class PromotionManagementService extends ServiceSuperclass {
       PromotionCampaignSightEvent relation = ensureCampaignSightEvent(campaign, sightEvent,
           sourceForTarget(campaign, sightEvent), sourceTagForTarget(campaign, sightEvent));
       if (campaign.getPromotionType() == PromotionType.TICKET
-          && relation.getTicketPoolStatus() != PromotionTicketPoolStatus.CREATED
           && ticketPoolSetup != null) {
-        createPromotionTicketPool(campaign, relation, ticketPoolSetup);
+        if (relation.getTicketPoolStatus() == PromotionTicketPoolStatus.CREATED) {
+          updatePromotionTicketPool(campaign, relation, ticketPoolSetup);
+        } else {
+          createPromotionTicketPool(campaign, relation, ticketPoolSetup);
+        }
       }
       if (campaign.getPromotionType() == PromotionType.TICKET
           && campaign.getStatus() == PromotionStatus.ACTIVE
@@ -719,6 +768,63 @@ public class PromotionManagementService extends ServiceSuperclass {
         throw new ConflictingException(
             "Dodanie oferty do aktywnej promocji TICKET wymaga utworzenia puli promocyjnej.");
       }
+    }
+  }
+
+  private void updatePromotionTicketPool(PromotionCampaign campaign,
+      PromotionCampaignSightEvent relation, PromotionTicketPoolSetupIRO setup) {
+    SightEvent sightEvent = relation.getSightEvent();
+    try {
+      HelloTicket hpt = new HelloTicket(getPortal("Hello Ticket Cloud").getUrl());
+      String hptToken = sightEvent.getPartner().getHptToken();
+      TicketDefinitionDTO ticketDefinition = hpt.getTicketDefinition(
+          relation.getHptTicketDefinitionId(), hptToken);
+      if (ticketDefinition == null) {
+        throw new ConflictingException(
+            "Nie można zaktualizować promocji dla oferty „" + sightEvent.getName()
+                + "”: nie znaleziono biletu promocyjnego w HelloTicket.");
+      }
+      ticketDefinition.price = setup.ticketPrice;
+      ticketDefinition.originalPrice = setup.ticketPrice;
+      if (setup.ticketName != null && !setup.ticketName.isBlank()) {
+        ticketDefinition.name = setup.ticketName;
+      }
+      hpt.updateTicketDefinition(ticketDefinition, hptToken);
+
+      TicketPoolDefinitionDTO ticketPool = hpt.getTicketPoolDefinition(
+          hptToken, relation.getHptTicketPoolDefinitionId());
+      if (ticketPool == null) {
+        throw new ConflictingException(
+            "Nie można zaktualizować promocji dla oferty „" + sightEvent.getName()
+                + "”: nie znaleziono puli promocyjnej w HelloTicket.");
+      }
+      TicketPoolDefinitionDTO desired = buildSpecialTicketPoolDefinition(
+          campaign, relation, setup, ticketDefinition);
+      ticketPool.name = desired.name;
+      ticketPool.isCyclic = desired.isCyclic;
+      ticketPool.startDate = desired.startDate;
+      ticketPool.endDate = desired.endDate;
+      ticketPool.entryStartDate = desired.entryStartDate;
+      ticketPool.entryEndDate = desired.entryEndDate;
+      ticketPool.wholeDay = desired.wholeDay;
+      ticketPool.poolType = desired.poolType;
+      ticketPool.visibleForPartner = desired.visibleForPartner;
+      ticketPool.visibleOnPortal = desired.visibleOnPortal;
+      ticketPool.frequencyData = desired.frequencyData;
+      // Do not reset the remaining ticket count in a pool that may already have redemptions.
+      hpt.updateTicketPoolDefinition(ticketPool, hptToken);
+
+      relation.setTicketPoolStatus(PromotionTicketPoolStatus.CREATED);
+      relation.setUpdatedAt(new Date());
+    } catch (Exception e) {
+      relation.setTicketPoolStatus(PromotionTicketPoolStatus.ERROR);
+      relation.setUpdatedAt(new Date());
+      if (e instanceof ConflictingException) {
+        throw (ConflictingException) e;
+      }
+      throw new ConflictingException(
+          "Nie udało się zaktualizować biletu promocyjnego dla oferty „"
+              + sightEvent.getName() + "”. " + e.getMessage(), e);
     }
   }
 
@@ -795,12 +901,9 @@ public class PromotionManagementService extends ServiceSuperclass {
 
   private List<PromotionCodeHelpdeskDTO> createGeneratedCodes(PromotionCampaign campaign,
       PromotionCodeSetupIRO setup) {
-    if (setup.generateCount == null || setup.generateCount <= 0
-        || setup.generateCount > MAX_GENERATED_CODES) {
-      throw new ConflictingException("Podaj poprawną liczbę kodów do wygenerowania.");
-    }
+    int requestedCodesCount = requestedGeneratedCodesCount(setup);
 
-    List<String> codes = generateUniqueCodes(setup);
+    List<String> codes = generateUniqueCodes(setup, requestedCodesCount);
     PromotionCodeType codeType = setup.codeType != null ? setup.codeType : PromotionCodeType.ONE_TIME;
     PromotionCodeBatch batch =
         createBatch(campaign, PromotionCodeBatchSource.GENERATED, setup.fileName, codes.size());
@@ -842,7 +945,17 @@ public class PromotionManagementService extends ServiceSuperclass {
     return result;
   }
 
-  private List<String> generateUniqueCodes(PromotionCodeSetupIRO setup) {
+  int requestedGeneratedCodesCount(PromotionCodeSetupIRO setup) {
+    if (setup == null || setup.generateCount == null || setup.generateCount <= 0
+        || setup.generateCount > MAX_GENERATED_CODES) {
+      throw new ConflictingException(
+          "Liczba generowanych kodów musi być liczbą całkowitą od 1 do "
+              + MAX_GENERATED_CODES + ".");
+    }
+    return setup.generateCount;
+  }
+
+  private List<String> generateUniqueCodes(PromotionCodeSetupIRO setup, int requestedCodesCount) {
     int length = setup.generatedCodeLength != null
         ? setup.generatedCodeLength
         : DEFAULT_GENERATED_CODE_LENGTH;
@@ -852,11 +965,11 @@ public class PromotionManagementService extends ServiceSuperclass {
 
     Set<String> codes = new LinkedHashSet<>();
     int attempts = 0;
-    while (codes.size() < setup.generateCount) {
+    while (codes.size() < requestedCodesCount) {
       if (attempts++ > 20) {
         throw new ConflictingException("Nie udało się wygenerować unikalnych kodów.");
       }
-      while (codes.size() < setup.generateCount) {
+      while (codes.size() < requestedCodesCount) {
         codes.add(generatedCode(setup, length));
       }
       findExistingCodeValues(new ArrayList<>(codes)).forEach(codes::remove);
@@ -1028,6 +1141,11 @@ public class PromotionManagementService extends ServiceSuperclass {
     if (dto.validFrom == null || dto.validTo == null || dto.validTo.before(dto.validFrom)) {
       throw new ConflictingException("Podaj poprawny okres obowiązywania promocji.");
     }
+    if (dto.promotionType == PromotionType.TICKET
+        && (dto.ticketValidTo == null || dto.ticketValidTo.before(dto.validTo))) {
+      throw new ConflictingException(
+          "Data ważności biletów musi przypadać nie wcześniej niż koniec promocji.");
+    }
     if (dto.promotionType == PromotionType.TICKET && dto.scopeType == PromotionScopeType.GLOBAL) {
       throw new ConflictingException("Promocja biletowa nie może być globalna.");
     }
@@ -1043,6 +1161,8 @@ public class PromotionManagementService extends ServiceSuperclass {
     campaign.setScopeType(dto.scopeType);
     campaign.setValidFrom(dto.validFrom);
     campaign.setValidTo(dto.validTo);
+    campaign.setTicketValidTo(dto.promotionType == PromotionType.TICKET
+        ? dto.ticketValidTo : null);
     campaign.setGlobalLimit(dto.globalLimit);
     campaign.setCodeLimit(dto.codeLimit);
     campaign.setCustomerLimit(dto.customerLimit);
@@ -1305,6 +1425,7 @@ public class PromotionManagementService extends ServiceSuperclass {
     dto.scopeType = campaign.getScopeType();
     dto.validFrom = campaign.getValidFrom();
     dto.validTo = campaign.getValidTo();
+    dto.ticketValidTo = campaign.getTicketValidTo();
     dto.globalLimit = campaign.getGlobalLimit();
     dto.codeLimit = campaign.getCodeLimit();
     dto.customerLimit = campaign.getCustomerLimit();

@@ -92,6 +92,7 @@ public class PartnerServiceHelpdeskAPI {
     Partner bo = service.get(dto.id);
     accessService.requirePartnerAccess(bo);
     service.update(bo, dto, lang);
+    hplService.synchronizePartnerWithHpt(service.get(dto.id));
     return get(dto.id, lang);
   }
 

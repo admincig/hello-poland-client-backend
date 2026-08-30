@@ -9,6 +9,7 @@ create table if not exists promotion_campaign (
   scope_type varchar(32) not null,
   valid_from timestamp(6) not null,
   valid_to timestamp(6) not null,
+  ticket_valid_to timestamp(6) null,
   global_limit integer null,
   code_limit integer null,
   customer_limit integer null,
@@ -32,6 +33,10 @@ create table if not exists promotion_campaign (
     check (scope_type in ('MANUAL', 'TAG', 'GLOBAL')),
   constraint promotion_campaign_dates_check
     check (valid_to >= valid_from),
+  constraint promotion_campaign_ticket_valid_to_required_check
+    check (promotion_type <> 'TICKET' or ticket_valid_to is not null),
+  constraint promotion_campaign_ticket_valid_to_range_check
+    check (ticket_valid_to is null or ticket_valid_to >= valid_to),
   constraint promotion_campaign_ticket_not_global_check
     check (promotion_type <> 'TICKET' or scope_type <> 'GLOBAL'),
   constraint promotion_campaign_global_limit_check

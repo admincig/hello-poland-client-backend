@@ -18,6 +18,7 @@ public class PromotionCampaignHelpdeskDTO {
   public PromotionScopeType scopeType;
   public Date validFrom;
   public Date validTo;
+  public Date ticketValidTo;
   public Integer globalLimit;
   public Integer codeLimit;
   public Integer customerLimit;

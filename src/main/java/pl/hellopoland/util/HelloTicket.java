@@ -302,6 +302,18 @@ public class HelloTicket {
     }
   }
 
+  public PartnerDTO updatePartner(Long partnerId, PartnerDTO dto, String hptToken) {
+    try {
+      Jsonb jsonb = JsonbConfig.getInstance();
+      JsonStructure json =
+          put("/v1/helpdesk/partners/" + partnerId, jsonb.toJson(dto), hptToken);
+      return jsonb.fromJson(json.toString(), PartnerDTO.class);
+    } catch (Exception e) {
+      logger.log(WARNING, "Failed", e);
+      throw mapExternalException(e);
+    }
+  }
+
   public void removePartner(String partnerEmail, String hptToken) {
     try {
       delete("/v1/helpdesk/partners/" + partnerEmail, hptToken);

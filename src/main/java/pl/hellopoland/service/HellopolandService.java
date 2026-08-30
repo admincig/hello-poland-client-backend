@@ -48,6 +48,7 @@ public class HellopolandService extends ServiceSuperclass {
 
   public void resetPartnerCredentials(Long id, String email) {
     Partner partner = em.find(Partner.class, id);
+    email = StringUtils.trim(email).toLowerCase(Locale.ROOT);
     partner.setEmail(email);
     Portal hpt = getPortal("Hello Ticket Cloud");
     HelloTicket ht = new HelloTicket(hpt.getUrl());
@@ -70,6 +71,29 @@ public class HellopolandService extends ServiceSuperclass {
     } catch (Exception e) {
       logger.log(System.Logger.Level.ERROR, e.getLocalizedMessage());
     }
+  }
+
+  public void synchronizePartnerWithHpt(Partner partner) {
+    String email = StringUtils.trimToNull(partner.getEmail());
+    if (email == null) {
+      throw new ConflictingException("The email cannot be blank.");
+    }
+    email = email.toLowerCase(Locale.ROOT);
+    partner.setEmail(email);
+    userService.findByPartnerAndRole(partner, Role.PARTNER).setEmail(email);
+
+    if (partner.getHptId() == null) {
+      return;
+    }
+
+    PartnerDTO partnerDTO = new PartnerDTO();
+    partnerDTO.id = partner.getHptId();
+    partnerDTO.name = partner.getName();
+    partnerDTO.email = email;
+
+    Portal hpt = getPortal("Hello Ticket Cloud");
+    HelloTicket ht = new HelloTicket(hpt.getUrl());
+    ht.updatePartner(partner.getHptId(), partnerDTO, getHelpdeskHptToken());
   }
 
   public Partner addPartner(PartnerDTO partner) {

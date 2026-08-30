@@ -3,6 +3,7 @@ package pl.hellopoland.service;
 import pl.hellopoland.bo.*;
 import pl.hellopoland.bo.UserRole.Role;
 import pl.hellopoland.dto.DiscountTypeDTO;
+import pl.hellopoland.dto.FrequencyTypeDTO;
 import pl.hellopoland.dto.TicketDefinitionDTO;
 import pl.hellopoland.dto.TicketPoolDefinitionDTO;
 import pl.hellopoland.exception.badrequest.BadRequestException;
@@ -69,26 +70,46 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
   }
 
   private void validateDates(TicketPoolDefinitionDTO tpdDTO) {
+    if (tpdDTO.startDate == null || tpdDTO.endDate == null) {
+      throw new BadRequestException("Termin rozpoczęcia i zakończenia puli jest wymagany.");
+    }
     if (tpdDTO.endDate != null && tpdDTO.startDate.after(tpdDTO.endDate)) {
-      throw new ConflictingException("Ticket pool definition's startDate after endDate.");
+      throw new BadRequestException(
+          "Termin rozpoczęcia puli nie może być późniejszy niż termin zakończenia.");
     }
     if (tpdDTO.entryEndDate != null && tpdDTO.entryStartDate != null
         && tpdDTO.entryStartDate.after(tpdDTO.entryEndDate)) {
-      throw new ConflictingException("Ticket pool definition's entryStartDate after entryEndDate.");
+      throw new BadRequestException(
+          "Początek sprzedaży nie może być późniejszy niż koniec sprzedaży.");
     }
     if (tpdDTO.entryStartDate != null && tpdDTO.startDate != null
         && tpdDTO.entryStartDate.after(tpdDTO.startDate)) {
-      throw new ConflictingException("Ticket pool definition's entryStartDate after startDate.");
+      throw new BadRequestException(
+          "Początek sprzedaży nie może być późniejszy niż początek puli.");
     }
     var frequencyData = tpdDTO.frequencyData;
     if (frequencyData != null && frequencyData.endDate != null
         && tpdDTO.startDate.after(frequencyData.endDate)) {
-      throw new ConflictingException("Ticket pool definition's startDate after frequency endDate.");
+      throw new BadRequestException("Początek puli nie może być późniejszy niż koniec powtarzania.");
     }
     if (frequencyData != null && frequencyData.endDate != null && frequencyData.startDate != null
         && frequencyData.startDate.after(frequencyData.endDate)) {
-      throw new ConflictingException(
-          "Ticket pool definition's frequency startDate after frequency endDate.");
+      throw new BadRequestException(
+          "Początek powtarzania nie może być późniejszy niż koniec powtarzania.");
+    }
+    if (Boolean.TRUE.equals(tpdDTO.isCyclic)) {
+      if (tpdDTO.frequencyData == null || tpdDTO.frequencyData.frequencyType == null) {
+        throw new BadRequestException("Dla puli cyklicznej należy określić sposób powtarzania.");
+      }
+      if (tpdDTO.frequencyData.frequency == null || tpdDTO.frequencyData.frequency < 1) {
+        throw new BadRequestException("Częstotliwość powtarzania musi być większa od zera.");
+      }
+      if (tpdDTO.frequencyData.frequencyType == FrequencyTypeDTO.WEEKLY
+          && (tpdDTO.frequencyData.daysOfWeek == null
+              || tpdDTO.frequencyData.daysOfWeek.isEmpty())) {
+        throw new BadRequestException(
+            "Dla powtarzania tygodniowego wybierz co najmniej jeden dzień tygodnia.");
+      }
     }
   }
 
@@ -136,6 +157,7 @@ public class TicketPoolDefinitionService extends ServiceSuperclass {
     }
     validateRequiredNormalTicket(dto.ticketDefinitions);
     validateTicketDiscount(dto);
+    validateDates(dto);
     Portal portal = getPortal("Hello Ticket Cloud");
     HelloTicket hpt = new HelloTicket(portal.getUrl());
     TicketPoolDefinitionDTO tpd = hpt.getTicketPoolDefinition(subject.getHptToken(), dto.id);

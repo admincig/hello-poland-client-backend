@@ -43,6 +43,8 @@ public class PromotionCampaign extends ModelSuperclass {
   @NotNull
   @Column(name = "valid_to", nullable = false)
   private Date validTo;
+  @Column(name = "ticket_valid_to")
+  private Date ticketValidTo;
   @Column(name = "global_limit")
   private Integer globalLimit;
   @Column(name = "code_limit")
@@ -126,6 +128,14 @@ public class PromotionCampaign extends ModelSuperclass {
 
   public void setValidTo(Date validTo) {
     this.validTo = validTo;
+  }
+
+  public Date getTicketValidTo() {
+    return ticketValidTo;
+  }
+
+  public void setTicketValidTo(Date ticketValidTo) {
+    this.ticketValidTo = ticketValidTo;
   }
 
   public Integer getGlobalLimit() {
