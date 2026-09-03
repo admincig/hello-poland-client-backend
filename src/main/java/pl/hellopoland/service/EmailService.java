@@ -14,6 +14,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.util.Properties;
+import org.apache.commons.lang3.StringUtils;
 
 @LocalBean
 @Stateless
@@ -29,6 +30,7 @@ public class EmailService extends ServiceSuperclass {
       "mail.smtp.socketFactory.class";
   private static final String MAIL_SMTP_STARTTLS_ENABLE_PROPERTY = "mail.smtp.starttls.enable";
   private static final String MAIL_SMTP_ENABLED_PROPERTY = "mail.smtp.enabled";
+  private static final String MAIL_REDIRECT_ALL_TO_PROPERTY = "mail.redirect.all.to";
 
   public void sendEmail(Email parameterObject)
       throws MessagingException, UnsupportedEncodingException {
@@ -47,10 +49,11 @@ public class EmailService extends ServiceSuperclass {
 
   private void sendEmail(Email parameterObject, String senderName, boolean html)
       throws MessagingException, UnsupportedEncodingException {
+    String recipientEmail = redirectRecipientIfConfigured(parameterObject.recipientEmail);
     if (!Boolean.TRUE.toString().equals(System.getProperty(MAIL_SMTP_ENABLED_PROPERTY))) {
       logger.log(Level.WARNING, "SMTP Integration is disabled");
       logger.log(Level.INFO, "Email:\n"
-          + "To: " + parameterObject.recipientEmail + "\n"
+          + "To: " + recipientEmail + "\n"
           + "Subject: " + parameterObject.subject + "\n"
           + "Body: " + parameterObject.msg
       );
@@ -62,7 +65,7 @@ public class EmailService extends ServiceSuperclass {
     try {
       message
           .setFrom(new InternetAddress(System.getProperty(MAIL_USERNAME_PROPERTY), senderName));
-      message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(parameterObject.recipientEmail));
+      message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
       message.setSubject(parameterObject.subject, "UTF-8");
       var mimeBodyPart = new MimeBodyPart();
       if (html) {
@@ -90,10 +93,22 @@ public class EmailService extends ServiceSuperclass {
         logger.log(Level.INFO, "Email has not been sent to  " + addr);
       }
     } catch (MessagingException | UnsupportedEncodingException e) {
-      logger.log(System.Logger.Level.ERROR, "Sending an email failed: " + parameterObject.recipientEmail);
+      logger.log(System.Logger.Level.ERROR, "Sending an email failed: " + recipientEmail);
       logger.log(System.Logger.Level.ERROR, e.getLocalizedMessage());
       throw e;
     }
+  }
+
+  private String redirectRecipientIfConfigured(String recipientEmail) {
+    String redirectEmail = System.getProperty(MAIL_REDIRECT_ALL_TO_PROPERTY);
+    if (StringUtils.isBlank(redirectEmail)) {
+      return recipientEmail;
+    }
+
+    redirectEmail = redirectEmail.trim();
+    logger.log(Level.INFO,
+        "Redirecting email recipient from " + recipientEmail + " to " + redirectEmail);
+    return redirectEmail;
   }
 
   private Properties getSessionProperties() {

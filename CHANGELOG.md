@@ -6,6 +6,38 @@ w tym pliku. Zmiany przygotowywane do następnego wydania zapisujemy w sekcji
 
 ## Unreleased
 
+### Naprawiono
+
+- Ujednolicono i poprawiono polskie komunikaty błędów zwracane podczas dodawania partnera.
+- Komunikat błędu wysyłki danych dostępowych informuje, że partner nie został utworzony.
+
+## 2.0.20.17 — 2026-09-02
+
+### Dodano
+
+- Opcjonalne globalne przekierowanie wiadomości przez `mail.redirect.all.to`, używane na TST.
+- Konfigurowalny techniczny odbiorca danych dostępowych partnerów w
+  `mail.partner.credentials.recipient`.
+
+### Zmieniono
+
+- Wiadomości z wygenerowanymi i resetowanymi hasłami partnerów trafiają do skrzynki
+  technicznej, bez zmiany właściwego loginu partnera.
+- Domyślne techniczne adresy pocztowe wskazują skrzynki w domenie `hello-poland.pl`.
+
+## 2.0.20.16 — 2026-09-01
+
+### Zmieniono
+
+- Dane raportu „Ostatnia sprzedaż” zwracają cenę kupionego biletu zamiast danych partnera.
+
+### Naprawiono
+
+- Pobieranie raportu sprzedaży CSV, które kończyło się błędem `401 Unauthorized` z powodu
+  ponownej autoryzacji wywołania w warstwie EJB.
+- Generowanie raportu sprzedaży dla starszych promocji bez określonego udziału Hello Poland
+  w finansowaniu rabatu.
+
 ## 2.0.20.15 — 2026-08-30
 
 ### Dodano

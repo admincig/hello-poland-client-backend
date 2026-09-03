@@ -21,6 +21,7 @@ import pl.hellopoland.dto.UserAuthDTO;
 import pl.hellopoland.dto.UserDTO;
 import pl.hellopoland.enums.BusinessType;
 import pl.hellopoland.enums.LanguageVersion;
+import pl.hellopoland.exception.ExceptionMessagesService;
 import pl.hellopoland.exception.conflict.ConflictingException;
 import pl.hellopoland.exception.conflict.ExternalSystemException;
 import pl.hellopoland.exception.email.EmailSendingRollbackException;
@@ -32,8 +33,25 @@ import pl.hellopoland.util.soap.p24.MerchantRegisterValidator;
 @Stateless
 public class HellopolandService extends ServiceSuperclass {
   private static final String PARTNER_ALREADY_EXISTS_CODE = "9022";
-  private static final String PARTNER_ALREADY_EXISTS_MESSAGE =
-      "B\u0142\u0105d! Taki Partner ju\u017c istnieje.";
+  private static final String PARTNER_EMAIL_REQUIRED_KEY = "partner.create.email.required";
+  private static final String PARTNER_NAME_REQUIRED_KEY = "partner.create.name.required";
+  private static final String PARTNER_COMMISSION_OUT_OF_RANGE_KEY =
+      "partner.create.commission.outOfRange";
+  private static final String PARTNER_CREATION_FAILED_KEY = "partner.create.failed";
+  private static final String PARTNER_USER_EMAIL_REQUIRED_KEY =
+      "partner.create.user.email.required";
+  private static final String PARTNER_USER_ROLES_INVALID_KEY =
+      "partner.create.user.roles.invalid";
+  private static final String HPT_PARTNER_CREATION_FAILED_KEY =
+      "partner.create.helloTicket.failed";
+  private static final String HPT_AUTHORIZATION_FAILED_KEY =
+      "partner.create.helloTicket.authorizationFailed";
+  private static final String PARTNER_CREDENTIALS_SEND_FAILED_KEY =
+      "partner.create.credentials.sendFailed";
+  private static final String PARTNER_CREDENTIALS_RECIPIENT_MISSING_KEY =
+      "partner.create.credentials.recipientMissing";
+  private static final String PARTNER_CREDENTIALS_RECIPIENT_PROPERTY =
+      "mail.partner.credentials.recipient";
 
   @Inject
   private UserService userService;
@@ -41,6 +59,8 @@ public class HellopolandService extends ServiceSuperclass {
   private EmailService emailService;
   @Inject
   private TranslationService translationService;
+  @Inject
+  private ExceptionMessagesService exceptionMessagesService;
 
   final Set<UserRole.Role> excludedRoles = Set.of(UserRole.Role.ROOT, UserRole.Role.ADMIN,
       UserRole.Role.PARTNER, UserRole.Role.PARTNER_ADMIN, UserRole.Role.PARTNER_SALESMAN,
@@ -66,10 +86,10 @@ public class HellopolandService extends ServiceSuperclass {
     user.changePassword(newPassword);
     user.setEmail(email);
 
-    var emailPassword = new HashMap<String, String>();
-    emailPassword.put(email, newPassword);
     try {
-      emailService.sendEmail(new Email(email, "Reset konta w Hello Poland.", "TwĂłj login to " + email + ", hasĹ‚o to " + newPassword));
+      emailService.sendEmail(new Email(getPartnerCredentialsRecipient(),
+          "Reset konta partnera w Hello Poland.",
+          credentialsEmailBody(partner.getName(), email, newPassword)));
     } catch (Exception e) {
       logger.log(System.Logger.Level.ERROR, e.getLocalizedMessage());
     }
@@ -101,21 +121,21 @@ public class HellopolandService extends ServiceSuperclass {
 
   public Partner addPartner(PartnerDTO partner) {
     if (StringUtils.isBlank(partner.email)) {
-      throw new ConflictingException("The email cannot be blank.");
+      throw new ConflictingException(
+          exceptionMessagesService.getMessageByKey(PARTNER_EMAIL_REQUIRED_KEY));
     }
     if (StringUtils.isBlank(partner.name)) {
-      throw new ConflictingException("The partner name cannot be blank.");
+      throw new ConflictingException(
+          exceptionMessagesService.getMessageByKey(PARTNER_NAME_REQUIRED_KEY));
     }
-//    if (partner.commission == null) {
-//      throw new ConflictingException("The partner commission cannot be blank.");
-//    }
     if (partner.commission != null && (partner.commission.compareTo(BigDecimal.ZERO) < 0
         || partner.commission.compareTo(new BigDecimal("100")) > 0)) {
-      throw new ConflictingException("The partner commission is out of range: 0 - 100.");
+      throw new ConflictingException(
+          exceptionMessagesService.getMessageByKey(PARTNER_COMMISSION_OUT_OF_RANGE_KEY));
     }
 
     var merchant = new MerchantRegisterRequest(partner);
-    MerchantRegisterValidator.validate(merchant);
+    MerchantRegisterValidator.validate(merchant, exceptionMessagesService);
     ensurePartnerDoesNotExist(partner);
     Partner partnerBO = getPartnerFromMerchantRegisterRequest(merchant);
 
@@ -140,7 +160,8 @@ public class HellopolandService extends ServiceSuperclass {
       em.flush();
     } catch (Exception e) {
       if (isPartnerAlreadyExistsException(e)) {
-        throw new ConflictingException(PARTNER_ALREADY_EXISTS_MESSAGE,
+        throw new ConflictingException(
+            exceptionMessagesService.getMessageByCode(PARTNER_ALREADY_EXISTS_CODE),
             PARTNER_ALREADY_EXISTS_CODE, e);
       }
       var exc = e.getCause();
@@ -148,18 +169,20 @@ public class HellopolandService extends ServiceSuperclass {
         var errMsg = new StringBuilder();
         ((jakarta.validation.ConstraintViolationException) exc).getConstraintViolations().forEach(
             cv -> errMsg.append(cv.getPropertyPath()).append(" ").append(cv.getMessage()).append(", "));
-        logger.log(Level.ERROR, "BĹ‚Ä…d podczas dodawania partnera; " + errMsg);
-        throw new ConflictingException("BĹ‚Ä…d podczas dodawania partnera; " + errMsg);
+        String message = exceptionMessagesService.getMessageByKey(PARTNER_CREATION_FAILED_KEY);
+        logger.log(Level.ERROR, message + " " + errMsg);
+        throw new ConflictingException(message);
       }
 
       var exc2 = e.getCause().getCause();
       if (exc2 instanceof ConstraintViolationException) {
         String errMsg = ((ConstraintViolationException) exc2).getSQLException().getMessage();
-        logger.log(Level.ERROR, "BĹ‚Ä…d podczas dodawania partnera; " + errMsg);
-        throw new ConflictingException(
-            "BĹ‚Ä…d podczas dodawania partnera; " + errMsg.substring(errMsg.lastIndexOf(": ") + 1));
+        String message = exceptionMessagesService.getMessageByKey(PARTNER_CREATION_FAILED_KEY);
+        logger.log(Level.ERROR, message + " " + errMsg);
+        throw new ConflictingException(message);
       }
-      throw new ConflictingException("BĹ‚Ä…d podczas dodawania partnera");
+      throw new ConflictingException(
+          exceptionMessagesService.getMessageByKey(PARTNER_CREATION_FAILED_KEY));
     }
 
     partner.password = password;
@@ -171,10 +194,12 @@ public class HellopolandService extends ServiceSuperclass {
     if (usersDTOs != null && !usersDTOs.isEmpty()) {
       for (UserDTO userDTO : usersDTOs) {
         if (StringUtils.isBlank(userDTO.email)) {
-          throw new ConflictingException("The email cannot be blank.");
+          throw new ConflictingException(
+              exceptionMessagesService.getMessageByKey(PARTNER_USER_EMAIL_REQUIRED_KEY));
         }
         if (userDTO.roles == null || !areRolesSupported(userDTO.roles)) {
-          throw new ConflictingException("Roles are blank or some role is unsupported.");
+          throw new ConflictingException(
+              exceptionMessagesService.getMessageByKey(PARTNER_USER_ROLES_INVALID_KEY));
         }
         Role[] userRoles = getFilteredRolesFromDTO(userDTO.roles);
         if (userRoles.length > 0) {
@@ -194,7 +219,8 @@ public class HellopolandService extends ServiceSuperclass {
     try {
       var hptPartner = ht.addPartner(partner, hptToken);
       if (hptPartner == null) {
-        throw new ExternalSystemException("Nie udalo sie stworzyc partnera w zewnetrznym systemie");
+        throw new ExternalSystemException(
+            exceptionMessagesService.getMessageByKey(HPT_PARTNER_CREATION_FAILED_KEY));
       }
       partnerBO.setHptToken(hptPartner.token);
       partnerBO.setHptId(hptPartner.id);
@@ -202,21 +228,29 @@ public class HellopolandService extends ServiceSuperclass {
       throw e;
     } catch (ExternalSystemException e) {
       if (e.getStatusCode() != null && (e.getStatusCode() == 401 || e.getStatusCode() == 403)) {
-        throw new ConflictingException(e.getMessage(), e);
+        throw new ConflictingException(
+            exceptionMessagesService.getMessageByKey(HPT_AUTHORIZATION_FAILED_KEY), e);
       }
-      throw new ConflictingException("Nie udalo sie stworzyc partnera w zewnetrznym systemie", e);
+      throw new ConflictingException(
+          exceptionMessagesService.getMessageByKey(HPT_PARTNER_CREATION_FAILED_KEY), e);
     } catch (Exception e) {
-      throw new ConflictingException("Nie udalo sie stworzyc partnera w zewnetrznym systemie", e);
+      throw new ConflictingException(
+          exceptionMessagesService.getMessageByKey(HPT_PARTNER_CREATION_FAILED_KEY), e);
     }
 
-    // 5. sending emails to users (with theirs login and password):
+    // 5. sending generated credentials to the internal technical mailbox:
+    String credentialsRecipient = getPartnerCredentialsRecipient();
     emailPassword.forEach((key, value) -> {
       try {
-        emailService.sendEmail(new Email(key, "Nowe konto w Hello Poland.", "TwĂłj login to " + key + ", hasĹ‚o to " + value));
+        emailService.sendEmail(new Email(credentialsRecipient,
+            "Nowe konto partnera w Hello Poland.",
+            credentialsEmailBody(partner.name, key, value)));
       } catch (Exception e) {
         logger.log(System.Logger.Level.ERROR, e.getLocalizedMessage());
         ht.removePartner(partner.email, hptToken);
-        throw new EmailSendingRollbackException("BĹ‚Ä…d podczas wysyĹ‚ania maila do: " + key);
+        throw new EmailSendingRollbackException(
+            exceptionMessagesService.getFormattedMessageByKey(
+                PARTNER_CREDENTIALS_SEND_FAILED_KEY, credentialsRecipient));
       }
     });
 
@@ -226,6 +260,20 @@ public class HellopolandService extends ServiceSuperclass {
         LanguageVersion.PL_PL);
 
     return partnerBO;
+  }
+
+  private String getPartnerCredentialsRecipient() {
+    String recipient = StringUtils.trimToNull(
+        properties.getProperty(PARTNER_CREDENTIALS_RECIPIENT_PROPERTY));
+    if (recipient == null) {
+      throw new ConflictingException(
+          exceptionMessagesService.getMessageByKey(PARTNER_CREDENTIALS_RECIPIENT_MISSING_KEY));
+    }
+    return recipient;
+  }
+
+  private String credentialsEmailBody(String partnerName, String login, String password) {
+    return "Partner: " + partnerName + "\nLogin: " + login + "\nHas\u0142o: " + password;
   }
 
   private Partner getPartnerFromMerchantRegisterRequest(MerchantRegisterRequest merchant) {
@@ -299,7 +347,8 @@ public class HellopolandService extends ServiceSuperclass {
         .isPresent();
 
     if (partnerNameExists || partnerEmailExists || userEmailAlreadyAssigned) {
-      throw new ConflictingException(PARTNER_ALREADY_EXISTS_MESSAGE,
+      throw new ConflictingException(
+          exceptionMessagesService.getMessageByCode(PARTNER_ALREADY_EXISTS_CODE),
           PARTNER_ALREADY_EXISTS_CODE);
     }
   }

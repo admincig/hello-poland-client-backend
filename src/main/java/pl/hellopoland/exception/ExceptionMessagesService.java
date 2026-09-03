@@ -1,6 +1,7 @@
 package pl.hellopoland.exception;
 
 import jakarta.enterprise.context.RequestScoped;
+import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -19,13 +20,21 @@ public class ExceptionMessagesService {
   }
 
   public String getMessage(String exceptionSimpleClassName) {
+    return getMessageByKey(exceptionSimpleClassName);
+  }
+
+  public String getMessageByKey(String key) {
     try {
-      if (resourceBundle.containsKey(exceptionSimpleClassName)) {
-        return resourceBundle.getString(exceptionSimpleClassName);
+      if (resourceBundle.containsKey(key)) {
+        return resourceBundle.getString(key);
       }
     } catch (MissingResourceException ignored) {
     }
     return getFallbackMessage(UNKNOWN_ERROR, "Nieznany błąd.");
+  }
+
+  public String getFormattedMessageByKey(String key, Object... arguments) {
+    return MessageFormat.format(getMessageByKey(key), arguments);
   }
 
   public String getMessageByCode(String code) {
