@@ -8,6 +8,7 @@ import jakarta.ejb.LocalBean;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import pl.hellopoland.dto.SalesRowDTO;
+import pl.hellopoland.rest.dto.HelpdeskSalesRowORO;
 
 import java.io.File;
 import java.io.IOException;
@@ -86,7 +87,7 @@ public class AnalyticsService extends ServiceSuperclass {
     return csvFile;
   }
 
-  private BigDecimal calculateCommission(BigDecimal commissionPercent, OrderEntry oe) {
+  BigDecimal calculateCommission(BigDecimal commissionPercent, OrderEntry oe) {
     if (commissionPercent == null) {
       return new BigDecimal(0);
     }
@@ -94,7 +95,7 @@ public class AnalyticsService extends ServiceSuperclass {
     BigDecimal commissionVal =
         originalTotal.multiply(commissionPercent).divide(HUNDRED).setScale(2,
             RoundingMode.HALF_EVEN);
-    if (oe.getDiscount() != null) {
+    if (oe.getDiscount() != null && oe.getDiscount().getHplPart() != null) {
       commissionVal = commissionVal.subtract(new BigDecimal(oe.getDiscount().getHplPart()));
     }
     commissionVal = commissionVal.divide(HUNDRED);
@@ -152,7 +153,7 @@ public class AnalyticsService extends ServiceSuperclass {
                 .collect(Collectors.toList());
     }
 
-    public List<SalesRowDTO> getSales(Date fromDate, Date toDate, Long partnerId) {
+    public List<HelpdeskSalesRowORO> getSales(Date fromDate, Date toDate, Long partnerId) {
         var orders = getOrdersInCurrentUserHelpdeskScope(fromDate, toDate, partnerId);
 
         return orders.stream()
@@ -160,7 +161,6 @@ public class AnalyticsService extends ServiceSuperclass {
                     OrderDateEntry dateEntry = oe.getDateEntry();
                     OrderSightEntry sightEntry = dateEntry.getSightEntry();
                     SightEvent sightEvent = sightEntry.getSightEvent();
-                    Partner partner = sightEvent.getPartner();
                     Order order = sightEntry.getOrder();
                     OrderDetails details = order.getDetails();
 
@@ -171,7 +171,7 @@ public class AnalyticsService extends ServiceSuperclass {
                         customerName = (firstName + " " + lastName).trim();
                     }
 
-                    return new SalesRowDTO(
+                    return new HelpdeskSalesRowORO(
                             order.getId(),
                             order.getDate(),
                             dateEntry.getDate(),
@@ -181,8 +181,7 @@ public class AnalyticsService extends ServiceSuperclass {
                             order.getHash(),
                             sightEvent != null ? sightEvent.getName() : null,
                             sightEvent != null && sightEvent.getSight() != null ? sightEvent.getSight().getName() : null,
-                            partner != null ? partner.getName() : null,
-                            partner != null ? partner.getId() : null
+                            oe.getRealPrice()
                     );
                 })
                 .collect(Collectors.toList());

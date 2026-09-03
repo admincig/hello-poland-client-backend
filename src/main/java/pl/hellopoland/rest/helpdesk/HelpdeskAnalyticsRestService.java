@@ -2,7 +2,6 @@ package pl.hellopoland.rest.helpdesk;
 
 import pl.hellopoland.annotation.DateFormat;
 import pl.hellopoland.service.AnalyticsService;
-import pl.hellopoland.service.api.helpdesk.ServiceHelpdeskAPI;
 
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.RequestScoped;
@@ -25,9 +24,6 @@ public class HelpdeskAnalyticsRestService {
     @Inject
     AnalyticsService analyticsService;
 
-    @Inject
-    ServiceHelpdeskAPI helpdeskService;
-
     @GET
     @Path("/orders")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
@@ -35,7 +31,7 @@ public class HelpdeskAnalyticsRestService {
         "helpdesk_content_manager", "helpdesk_support"})
     public Response downloadOrdersCsv(@QueryParam("fromDate") @DateFormat Date fromDate,
                                       @QueryParam("toDate") @DateFormat Date toDate) {
-        File report = helpdeskService.getOrdersCsvFile(fromDate, toDate);
+        File report = analyticsService.getOrdersCsvFile(fromDate, toDate);
         ResponseBuilder response = Response.ok(report);
         response.header("Content-Disposition", "attachment;filename=" + report.getName());
         return response.build();
