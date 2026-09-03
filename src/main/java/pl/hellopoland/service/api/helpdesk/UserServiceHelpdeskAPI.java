@@ -18,20 +18,20 @@ public class UserServiceHelpdeskAPI {
     UserService service;
 
     @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager",
-        "helpdesk_content_manager", "helpdesk_support"})
+        "helpdesk_content_manager", "helpdesk_support", "helpdesk_technical"})
     public UserORO me() {
         User bo = service.me();
         return new UserORO(bo);
     }
 
     @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager",
-        "helpdesk_content_manager", "helpdesk_support"})
+        "helpdesk_content_manager", "helpdesk_support", "helpdesk_technical"})
     public void changeOwnPassword(UserAuthDTO dto) {
         service.changePasswordForLoggedUser(dto);
     }
 
     @RolesAllowed({"root", "admin", "salesman", "helpdesk_partner_manager",
-        "helpdesk_content_manager", "helpdesk_support"})
+        "helpdesk_content_manager", "helpdesk_support", "helpdesk_technical"})
     public UserORO updateOwnAvatar(byte[] bytes, String extension) {
         User bo = service.updateAvatarForLoggedUser(bytes, extension);
         return new UserORO(bo);

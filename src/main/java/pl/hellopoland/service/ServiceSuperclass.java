@@ -49,10 +49,21 @@ public abstract class ServiceSuperclass {
         }
       }
       staticLogger.log(Logger.Level.DEBUG,
-          properties.entrySet().stream().map(Object::toString).collect(Collectors.joining("\n")));
+          properties.entrySet().stream().map(ServiceSuperclass::propertyForLog)
+              .collect(Collectors.joining("\n")));
     } catch (IOException e) {
       staticLogger.log(Logger.Level.WARNING, "Failed to load properties", e);
     }
+  }
+
+  private static String propertyForLog(Map.Entry<Object, Object> entry) {
+    String key = String.valueOf(entry.getKey());
+    String normalizedKey = key.toLowerCase(Locale.ROOT);
+    boolean sensitive = normalizedKey.contains("password")
+        || normalizedKey.contains("secret")
+        || normalizedKey.contains("token")
+        || normalizedKey.contains("credential");
+    return key + "=" + (sensitive ? "[REDACTED]" : String.valueOf(entry.getValue()));
   }
 
 

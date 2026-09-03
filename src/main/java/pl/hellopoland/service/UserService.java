@@ -48,7 +48,8 @@ public class UserService extends ServiceSuperclass {
       Role.SALESMAN,
       Role.HELPDESK_PARTNER_MANAGER,
       Role.HELPDESK_CONTENT_MANAGER,
-      Role.HELPDESK_SUPPORT
+      Role.HELPDESK_SUPPORT,
+      Role.HELPDESK_TECHNICAL
   );
 
   @Inject
@@ -408,7 +409,7 @@ public class UserService extends ServiceSuperclass {
   private boolean isPartnerOrHelpdeskLogin(User user) {
     return hasAnyRole(user, Role.PARTNER, Role.PARTNER_ADMIN, Role.PARTNER_SALESMAN,
         Role.ADMIN, Role.ROOT, Role.SALESMAN, Role.HELPDESK_PARTNER_MANAGER,
-        Role.HELPDESK_CONTENT_MANAGER, Role.HELPDESK_SUPPORT);
+        Role.HELPDESK_CONTENT_MANAGER, Role.HELPDESK_SUPPORT, Role.HELPDESK_TECHNICAL);
   }
 
   private boolean hasAnyRole(User user, Role... roles) {
@@ -694,7 +695,7 @@ public class UserService extends ServiceSuperclass {
     return hasAnyRole(user, Role.PARTNER, Role.PARTNER_ADMIN, Role.PARTNER_SALESMAN)
         && !hasAnyRole(user, Role.ADMIN, Role.ROOT, Role.SALESMAN,
             Role.HELPDESK_PARTNER_MANAGER, Role.HELPDESK_CONTENT_MANAGER,
-            Role.HELPDESK_SUPPORT);
+            Role.HELPDESK_SUPPORT, Role.HELPDESK_TECHNICAL);
   }
 
   private User createPartnerPanelUser(UserDTO dto, Partner partner, Role accessRole) {
@@ -880,6 +881,10 @@ public class UserService extends ServiceSuperclass {
       throw new ConflictingException("Password is required.");
     }
     getHelpdeskRoles(dto);
+    if (existing != null && existing.hasRole(Role.HELPDESK_TECHNICAL)
+        && !getLoggedUser().hasRole(Role.ROOT)) {
+      throw new AccessDeniedException();
+    }
     String email = StringUtils.trim(dto.email).toLowerCase();
     findByEmail(email)
         .filter(user -> existing == null || !user.getId().equals(existing.getId()))
@@ -898,7 +903,8 @@ public class UserService extends ServiceSuperclass {
     if (roles.isEmpty()) {
       throw new ConflictingException("At least one helpdesk role is required.");
     }
-    if (roles.stream().anyMatch(role -> role == Role.ADMIN || role == Role.ROOT)
+    if (roles.stream().anyMatch(role -> role == Role.ADMIN || role == Role.ROOT
+            || role == Role.HELPDESK_TECHNICAL)
         && !getLoggedUser().hasRole(Role.ROOT)) {
       throw new AccessDeniedException();
     }

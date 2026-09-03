@@ -27,7 +27,7 @@ import static pl.hellopoland.security.UserAuthDTO.ofCurrentUser;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @DeclareRoles({"root", "admin", "helpdesk_partner_manager", "helpdesk_content_manager",
-    "helpdesk_support", "salesman"})
+    "helpdesk_support", "helpdesk_technical", "salesman"})
 public class HelpdeskAuthenticationRestService {
 
   @Inject
